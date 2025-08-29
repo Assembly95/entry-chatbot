@@ -1,4 +1,4 @@
-/* Entry Block Helper - 새로운 단일 레이아웃 스타일 */
+/* Entry Block Helper - 채팅 전용 레이아웃 스타일 */
 
 /* ===== 사이드바 메인 컨테이너 ===== */
 .entry-helper-sidebar {
@@ -23,11 +23,7 @@
   right: 0;
 }
 
-/* 고정된 상태 */
-.entry-helper-sidebar.sidebar-pinned {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  box-shadow: -5px 0 30px rgba(0, 0, 0, 0.4);
-}
+/* 고정된 상태 - 제거됨 */
 
 /* ===== 헤더 섹션 ===== */
 .sidebar-header {
@@ -91,6 +87,29 @@
 .sidebar-controls {
   display: flex;
   gap: 6px;
+  align-items: center;
+}
+
+.mode-select {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  color: white;
+  padding: 6px 10px;
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-right: 4px;
+}
+
+.mode-select:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mode-select option {
+  background: #1f2937;
+  color: white;
 }
 
 .control-btn {
@@ -111,144 +130,6 @@
 .control-btn:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: scale(1.05);
-}
-
-/* ===== CoT 로그 섹션 ===== */
-.cot-log-section {
-  flex-shrink: 0;
-  padding: 16px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.section-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.section-title .title-icon {
-  margin-right: 6px;
-}
-
-.refresh-btn {
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.7);
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  font-size: 12px;
-  transition: all 0.2s;
-}
-
-.refresh-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  transform: rotate(180deg);
-}
-
-.cot-log {
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.cot-placeholder {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 16px;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.8);
-  font-style: italic;
-  font-size: 13px;
-}
-
-.cot-error {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 13px;
-}
-
-.cot-step {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  margin-bottom: 8px;
-  overflow: hidden;
-  transition: all 0.2s;
-  opacity: 0;
-  animation: slideInUp 0.4s ease-out forwards;
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.cot-step:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: translateX(2px);
-}
-
-.step-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.step-number {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-.step-title {
-  font-weight: 500;
-  font-size: 13px;
-  flex: 1;
-}
-
-.step-content {
-  padding: 10px 12px;
-  font-size: 12px;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.step-progress {
-  height: 2px;
-  background: rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-}
-
-.progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #10b981, #3b82f6);
-  transition: width 0.8s ease-out;
 }
 
 /* ===== 채팅 섹션 ===== */
@@ -273,7 +154,6 @@
   overflow-y: auto;
   scroll-behavior: smooth;
   min-height: 0; /* flexbox 오버플로우 방지 */
-  max-height: calc(100vh - 400px); /* 화면 높이에서 헤더+CoT+입력창 공간 빼기 */
 }
 
 .message {
@@ -372,25 +252,12 @@
 
 .input-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-bottom: 12px;
 }
 
-.chat-mode-select {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  color: white;
-  padding: 6px 10px;
-  font-size: 12px;
-  outline: none;
-}
-
-.chat-mode-select option {
-  background: #1f2937;
-  color: white;
-}
+/* 채팅 모드 선택 - 헤더로 이동됨 */
 
 .typing-indicator {
   font-size: 11px;
@@ -552,10 +419,6 @@
     padding: 16px;
   }
 
-  .cot-log-section {
-    padding: 12px 16px;
-  }
-
   .chat-messages {
     padding: 12px 16px;
   }
@@ -566,10 +429,6 @@
 }
 
 @media (max-width: 480px) {
-  .cot-log-section {
-    max-height: 200px;
-  }
-
   .message {
     margin-bottom: 12px;
   }
