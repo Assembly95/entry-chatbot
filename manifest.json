@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Entry Block Helper",
+  "version": "1.0",
+  "permissions": ["activeTab", "tabs", "storage"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_title": "Entry Block Helper" },
+  "content_scripts": [
+    {
+      "matches": ["*://playentry.org/*", "*://*.playentry.org/*"],
+      "js": ["content.js"],
+      "css": ["style.css"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["entryProbe.js"],
+      "matches": ["*://playentry.org/*", "*://*.playentry.org/*"]
+    }
+  ]
+}
