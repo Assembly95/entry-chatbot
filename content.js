@@ -29,7 +29,7 @@
         <div class="header-title">
           <h3><img src="${chrome.runtime.getURL(
             "icon.png"
-          )}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 8px;">AI 블록 도우미</h3>
+          )}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 8px;">엔트리 챗봇</h3>
           <div class="status-indicator" id="entry-status">
             <span class="status-dot"></span>
             <span class="status-text">준비 중...</span>
