@@ -27,7 +27,9 @@
       <!-- 헤더 -->
       <div class="sidebar-header">
         <div class="header-title">
-          <h3>🤖 AI 블록 도우미</h3>
+          <h3><img src="${chrome.runtime.getURL(
+            "icon.png"
+          )}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 8px;">AI 블록 도우미</h3>
           <div class="status-indicator" id="entry-status">
             <span class="status-dot"></span>
             <span class="status-text">준비 중...</span>
@@ -50,7 +52,9 @@
         <div class="chat-container">
           <div id="chat-messages" class="chat-messages">
             <div class="message bot-message">
-              <div class="message-avatar">🤖</div>
+              <div class="message-avatar">
+                <img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">
+              </div>
               <div class="message-content">
                 <div class="message-text">
                   안녕! 무엇을 만들고 싶니? 정답을 바로 알려주지 않고, 
@@ -81,7 +85,7 @@
 
     <!-- 사이드바 토글 트리거 버튼 -->
     <div id="sidebar-trigger" class="sidebar-trigger" title="AI 도우미 열기">
-      <span class="trigger-icon">🤖</span>
+      <img src="${chrome.runtime.getURL("icon.png")}" class="trigger-icon" style="width: 28px; height: 28px;">
       <span class="trigger-badge" id="notification-badge" style="display: none;">!</span>
     </div>
     `;
@@ -101,7 +105,9 @@
 
     if (type === "analysis") {
       messageDiv.innerHTML = `
-        <div class="message-avatar">${isBot ? "🤖" : "👤"}</div>
+        <div class="message-avatar">${
+          isBot ? `<img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">` : "👤"
+        }</div>
         <div class="message-content analysis-message">
           ${content}
           <div class="message-time">${timeStr}</div>
@@ -109,7 +115,9 @@
       `;
     } else {
       messageDiv.innerHTML = `
-        <div class="message-avatar">${isBot ? "🤖" : "👤"}</div>
+        <div class="message-avatar">${
+          isBot ? `<img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">` : "👤"
+        }</div>
         <div class="message-content">
           <div class="message-text">${content}</div>
           <div class="message-time">${timeStr}</div>

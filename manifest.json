@@ -16,7 +16,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["entryProbe.js"],
+      "resources": ["entryProbe.js", "icon.png", "icon.jpg", "icon.jpeg", "icon.gif", "icon.svg"],
       "matches": ["*://playentry.org/*", "*://*.playentry.org/*"]
     }
   ]
