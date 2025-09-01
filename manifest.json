@@ -2,9 +2,15 @@
   "manifest_version": 3,
   "name": "Entry Block Helper",
   "version": "1.0",
+  "description": "Entry 블록코딩을 도와주는 AI 튜터",
   "permissions": ["activeTab", "tabs", "storage"],
-  "background": { "service_worker": "background.js" },
-  "action": { "default_title": "Entry Block Helper" },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Entry Block Helper",
+    "default_popup": "popup.html"
+  },
   "content_scripts": [
     {
       "matches": ["*://playentry.org/*", "*://*.playentry.org/*"],

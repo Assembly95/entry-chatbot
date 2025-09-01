@@ -188,16 +188,24 @@
   }
 
   // ===== 이벤트 설정 =====
+  // content.js에서 수정할 부분
+
   function setupEventListeners() {
     const chatInput = document.getElementById("chat-input");
     const chatSend = document.getElementById("chat-send");
+
+    // 한국어 입력 상태 추적
+    let isComposing = false;
 
     // 사이드바 컨트롤
     document.getElementById("sidebar-trigger").addEventListener("click", () => toggleSidebarOpen());
     document.getElementById("sidebar-close").addEventListener("click", () => toggleSidebarOpen(false));
 
-    // 채팅 입력
+    // 메시지 전송 함수
     function sendMessage() {
+      // 조합 중일 때는 전송하지 않음
+      if (isComposing) return;
+
       const message = chatInput.value.trim();
       if (!message) return;
 
@@ -249,11 +257,27 @@
       );
     }
 
+    // 한국어 입력 조합 이벤트 처리
+    chatInput.addEventListener("compositionstart", () => {
+      isComposing = true;
+    });
+
+    chatInput.addEventListener("compositionend", () => {
+      isComposing = false;
+    });
+
+    // 버튼 클릭
     chatSend.addEventListener("click", sendMessage);
+
+    // 키보드 이벤트 (수정된 부분)
     chatInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        sendMessage();
+
+        // 조합 중이 아닐 때만 전송
+        if (!isComposing) {
+          sendMessage();
+        }
       }
     });
 
@@ -268,9 +292,9 @@
       if (e?.data && e.data.__ENTRY_HELPER__ && e.data.type === "ENTRY_READY") {
         isEntryReady = true;
         document.getElementById("entry-status").innerHTML = `
-          <span class="status-dot ready"></span>
-          <span class="status-text">준비 완료</span>
-        `;
+        <span class="status-dot ready"></span>
+        <span class="status-text">준비 완료</span>
+      `;
       }
     });
   }
