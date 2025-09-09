@@ -1,0 +1,248 @@
+{
+  "id": "when_some_key_pressed",
+  "category": "start",
+  "name": "[q] 키를 눌렀을 때",
+  "description": "지정된 키보드 키를 눌렀을 때 실행되는 이벤트 블록입니다. 키보드 입력을 통해 프로그램을 제어할 수 있게 해주는 상호작용 블록입니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "키보드 이벤트와 사용자 입력 처리 이해",
+      "실시간 상호작용 프로그래밍 학습",
+      "이벤트 기반 제어 시스템 구현"
+    ],
+    "key_concepts": [
+      {
+        "concept": "키보드 이벤트",
+        "explanation": "사용자가 키보드의 특정 키를 누를 때 발생하는 신호"
+      },
+      {
+        "concept": "실시간 상호작용",
+        "explanation": "프로그램이 실행 중에 사용자의 입력에 즉시 반응하는 것"
+      },
+      {
+        "concept": "이벤트 리스너",
+        "explanation": "특정 키 입력을 감지하고 대응하는 프로그램 구조"
+      },
+      {
+        "concept": "게임 컨트롤",
+        "explanation": "키보드를 이용한 캐릭터나 오브젝트 조작 방식"
+      }
+    ],
+    "difficulty_level": "초급-중급",
+    "prerequisites": ["기본 이벤트 블록 이해", "블록 연결 방법 숙지", "키보드 레이아웃 기본 지식"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "기본 키 입력 반응",
+      "description": "스페이스바를 누르면 캐릭터가 점프",
+      "blocks": ["when_some_key_pressed(space)", "change_y_by(50)"],
+      "explanation": "스페이스 키를 누를 때마다 캐릭터가 위로 50픽셀 이동합니다."
+    },
+    {
+      "title": "방향키 이동 제어",
+      "description": "화살표 키로 캐릭터 이동",
+      "blocks": [
+        "when_some_key_pressed(up_arrow)",
+        "change_y_by(10)",
+        "when_some_key_pressed(down_arrow)",
+        "change_y_by(-10)",
+        "when_some_key_pressed(left_arrow)",
+        "change_x_by(-10)",
+        "when_some_key_pressed(right_arrow)",
+        "change_x_by(10)"
+      ],
+      "explanation": "각 방향키를 누르면 해당 방향으로 캐릭터가 10픽셀씩 이동합니다."
+    },
+    {
+      "title": "게임 기능 제어",
+      "description": "다양한 키로 게임 기능 조작",
+      "blocks": ["when_some_key_pressed(a)", "sound_something_with_block", "when_some_key_pressed(s)", "change_costume_by(1)"],
+      "explanation": "A키를 누르면 소리가 나고, S키를 누르면 모양이 바뀝니다."
+    }
+  ],
+
+  "socratic_questions": [
+    {
+      "level": "이해",
+      "question": "같은 키에 대해 여러 개의 '키를 눌렀을 때' 블록이 있으면 어떻게 될까요?",
+      "purpose": "동시 실행과 이벤트 처리 이해",
+      "follow_up": "이런 상황을 활용할 수 있는 게임이나 프로그램을 생각해볼 수 있나요?"
+    },
+    {
+      "level": "분석",
+      "question": "왜 어떤 키는 게임에서 자주 사용되고, 어떤 키는 잘 사용되지 않을까요?",
+      "purpose": "사용자 경험과 접근성 고려",
+      "follow_up": "게임을 만들 때 키 배치를 어떻게 정하는 것이 좋을까요?"
+    },
+    {
+      "level": "적용",
+      "question": "키보드 대신 마우스 클릭으로도 같은 기능을 만들 수 있을까요? 각각의 장단점은 무엇인가요?",
+      "purpose": "다양한 입력 방식 비교 분석",
+      "follow_up": "어떤 상황에서는 키보드가 더 좋고, 어떤 상황에서는 마우스가 더 좋을까요?"
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "너무 많은 키에 기능 할당",
+      "why_it_happens": "모든 기능을 키보드로 제어하려는 욕심",
+      "consequence": "사용자가 키 조합을 기억하기 어려움",
+      "solution": "핵심 기능만 자주 사용하는 키에 할당",
+      "teaching_moment": "피아노도 모든 건반을 동시에 누르지 않죠? 필요한 키만 선택해서 사용해요."
+    },
+    {
+      "mistake": "키 중복 할당",
+      "why_it_happens": "각 기능을 독립적으로 생각하여 키 할당",
+      "consequence": "한 키에 여러 기능이 동시 실행되어 혼란",
+      "solution": "키 할당 계획을 미리 세우고 중복 확인",
+      "teaching_moment": "한 사람이 동시에 두 곳에 있을 수 없듯이, 한 키도 명확한 역할을 가져야 해요."
+    },
+    {
+      "mistake": "접근하기 어려운 키 사용",
+      "why_it_happens": "키보드 레이아웃에 대한 고려 부족",
+      "consequence": "사용자가 게임을 편하게 즐기기 어려움",
+      "solution": "WASD, 방향키 등 일반적인 게임 키 사용",
+      "teaching_moment": "리모컨의 중요한 버튼들이 손가락이 닿기 쉬운 곳에 있는 것처럼, 자주 쓰는 키는 누르기 쉬운 곳에 배치해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "시작 카테고리 선택",
+      "instruction": "블록 팔레트에서 '시작' 카테고리를 클릭하세요.",
+      "visual_hint": "초록색 깃발 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "키 입력 블록 찾기",
+      "instruction": "'[q] 키를 눌렀을 때' 블록을 찾아 클릭하세요.",
+      "visual_hint": "블록에 키보드 키가 표시되어 있어요."
+    },
+    {
+      "step": 3,
+      "title": "작업 영역에 배치",
+      "instruction": "블록을 드래그해서 작업 영역으로 가져오세요.",
+      "visual_hint": "다른 시작 블록들과 비슷한 모양이에요."
+    },
+    {
+      "step": 4,
+      "title": "키 선택하기",
+      "instruction": "블록의 드롭다운을 클릭해서 원하는 키를 선택하세요.",
+      "visual_hint": "알파벳, 숫자, 방향키 등 다양한 옵션이 있어요."
+    },
+    {
+      "step": 5,
+      "title": "동작 블록 연결",
+      "instruction": "키를 눌렀을 때 실행할 블록들을 아래에 연결하세요.",
+      "visual_hint": "이동, 회전, 소리 등 다양한 블록을 연결할 수 있어요."
+    },
+    {
+      "step": 6,
+      "title": "테스트하기",
+      "instruction": "프로그램을 실행한 후 설정한 키를 눌러서 동작을 확인하세요.",
+      "visual_hint": "키를 누르면 즉시 반응해야 해요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "when_run_button_click",
+      "relationship": "대안적 시작 방법",
+      "explanation": "마우스 클릭으로 프로그램을 시작하는 방식"
+    },
+    {
+      "block_id": "mouse_clicked",
+      "relationship": "다른 입력 방식",
+      "explanation": "마우스 입력을 감지하는 이벤트 블록"
+    },
+    {
+      "block_id": "when_object_click",
+      "relationship": "오브젝트 기반 입력",
+      "explanation": "특정 오브젝트 클릭으로 이벤트 발생"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "키를 눌러도 반응하지 않아요",
+      "possible_causes": [
+        "프로그램이 실행되지 않은 상태",
+        "키 블록 아래에 실행할 블록이 없음",
+        "잘못된 키가 선택됨",
+        "다른 프로그램이 키 입력을 차단"
+      ],
+      "solutions": [
+        "먼저 시작 버튼을 눌러 프로그램을 실행하세요",
+        "키 블록 아래에 동작할 블록들을 연결하세요",
+        "블록에서 올바른 키가 선택되었는지 확인하세요",
+        "Entry 창이 활성화된 상태에서 키를 누르세요"
+      ]
+    },
+    {
+      "problem": "키를 한 번 눌렀는데 여러 번 실행돼요",
+      "possible_causes": ["같은 키에 여러 개의 이벤트 블록이 있음", "키를 너무 오래 누르고 있음", "반복 블록과 함께 사용"],
+      "solutions": ["중복된 키 이벤트 블록이 있는지 확인하세요", "키를 짧게 눌러보세요", "반복 블록 사용 시 조건을 추가하세요"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "게임 컨트롤러",
+      "explanation": "게임기 컨트롤러의 버튼을 누르면 캐릭터가 움직이는 것처럼, 키보드 키도 같은 역할을 합니다."
+    },
+    {
+      "analogy": "전자레인지 버튼",
+      "explanation": "전자레인지의 숫자 버튼을 누르면 시간이 설정되듯이, 키보드 키도 특정 기능을 실행합니다."
+    },
+    {
+      "analogy": "악기 연주",
+      "explanation": "피아노 건반을 누르면 음이 나오는 것처럼, 키보드 키를 누르면 정해진 동작이 실행됩니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "키 조합 활용",
+      "description": "여러 키를 동시에 누르는 조합으로 특별한 기능 실행",
+      "use_case": "Shift + 방향키로 빠른 이동, Ctrl + S로 저장 기능"
+    },
+    {
+      "concept": "키 상태 관리",
+      "description": "키를 누르고 있는 동안 지속적으로 실행되는 기능",
+      "use_case": "방향키를 누르고 있는 동안 계속 이동하는 자동차 게임"
+    },
+    {
+      "concept": "키 매핑 시스템",
+      "description": "사용자가 원하는 키로 기능을 변경할 수 있는 설정",
+      "use_case": "게임 설정에서 조작키를 자유롭게 변경"
+    }
+  ],
+
+  "accessibility_considerations": [
+    {
+      "issue": "손가락 사용에 제한이 있는 사용자",
+      "solution": "마우스 클릭이나 음성 명령 등 대안적 입력 방식 제공",
+      "explanation": "모든 사용자가 키보드를 편하게 사용할 수 있는 것은 아니에요"
+    },
+    {
+      "issue": "키보드 레이아웃 차이",
+      "solution": "QWERTY, DVORAK 등 다양한 키보드 배열 고려",
+      "explanation": "나라마다, 사람마다 사용하는 키보드가 다를 수 있어요"
+    }
+  ],
+
+  "performance_considerations": [
+    {
+      "aspect": "반응 속도",
+      "description": "키 입력에 대한 즉각적인 반응이 중요",
+      "tip": "무거운 계산이나 복잡한 동작은 키 이벤트에서 피하기"
+    },
+    {
+      "aspect": "메모리 효율성",
+      "description": "많은 키 이벤트를 등록할 때 메모리 사용량 고려",
+      "tip": "실제로 사용하는 키만 이벤트로 등록하기"
+    }
+  ]
+}

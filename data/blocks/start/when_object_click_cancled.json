@@ -1,0 +1,267 @@
+{
+  "id": "when_object_click_canceled",
+  "category": "start",
+  "name": "오브젝트 클릭을 해제했을 때",
+  "description": "특정 오브젝트에서 마우스 버튼을 누르고 있다가 뗐을 때 실행되는 이벤트 블록입니다. 오브젝트별로 드래그 동작이나 누르고 있기 상호작용의 완료 시점을 감지합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "오브젝트별 상태 기반 상호작용 이해",
+      "드래그 앤 드롭 시스템 구현 학습",
+      "정밀한 사용자 인터페이스 제어"
+    ],
+    "key_concepts": [
+      {
+        "concept": "오브젝트별 상태 관리",
+        "explanation": "각 오브젝트마다 독립적인 클릭 상태를 추적하고 관리하는 것"
+      },
+      {
+        "concept": "지역적 드래그 이벤트",
+        "explanation": "특정 오브젝트에서 시작된 드래그 동작의 완료를 감지하는 것"
+      },
+      {
+        "concept": "선택적 상호작용 완료",
+        "explanation": "여러 오브젝트 중 특정 오브젝트에서만 발생하는 상호작용 종료"
+      },
+      {
+        "concept": "오브젝트 중심 이벤트",
+        "explanation": "화면 전체가 아닌 특정 오브젝트에 국한된 이벤트 처리"
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": ["오브젝트 클릭 이벤트 이해", "마우스 상태 변화 개념", "드래그 동작의 기본 원리"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "오브젝트별 드래그 완료",
+      "description": "캐릭터를 드래그한 후 놓으면 제자리로 복귀",
+      "blocks": ["when_object_click_canceled", "glide_to_xy(0, 0, 1)"],
+      "explanation": "해당 오브젝트를 드래그하다가 마우스를 놓으면 부드럽게 원점으로 돌아갑니다."
+    },
+    {
+      "title": "버튼 누름 효과 해제",
+      "description": "버튼을 누르고 있다가 놓으면 원래 모습으로 복구",
+      "blocks": ["when_object_click_canceled", "change_effect_by('brightness', 20)", "change_size_by(-10)"],
+      "explanation": "버튼 오브젝트에서 마우스를 놓으면 밝기가 원래대로 돌아오고 크기도 복구됩니다."
+    },
+    {
+      "title": "아이템 배치 완료",
+      "description": "인벤토리 아이템을 드래그해서 놓으면 배치 확정",
+      "blocks": ["when_object_click_canceled", "set_variable('item_placed', true)", "speak_something('배치 완료!')"],
+      "explanation": "아이템 오브젝트를 원하는 위치에 드래그한 후 놓으면 배치가 확정됩니다."
+    }
+  ],
+
+  "socratic_questions": [
+    {
+      "level": "이해",
+      "question": "오브젝트 클릭 해제와 전체 화면 클릭 해제의 차이점은 무엇인가요?",
+      "purpose": "지역적 이벤트와 전역적 이벤트의 구분 이해",
+      "follow_up": "각각을 언제 사용하는 것이 더 적절할까요?"
+    },
+    {
+      "level": "분석",
+      "question": "여러 오브젝트가 겹쳐있을 때 어느 오브젝트에서 클릭 해제 이벤트가 발생할까요?",
+      "purpose": "이벤트 우선순위와 레이어 시스템 이해",
+      "follow_up": "이런 상황에서 원하는 오브젝트만 반응하게 하려면 어떻게 해야 할까요?"
+    },
+    {
+      "level": "적용",
+      "question": "카드 게임에서 카드를 드래그해서 놓는 기능을 만든다면 이 블록을 어떻게 활용할까요?",
+      "purpose": "실제 게임 개발에서의 응용 사고",
+      "follow_up": "유효한 위치에 놓았을 때와 무효한 위치에 놓았을 때를 어떻게 구분할 수 있을까요?"
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "오브젝트 밖에서 마우스를 놓으며 이벤트 기대",
+      "why_it_happens": "드래그 중에 오브젝트 영역을 벗어난 후 마우스를 놓음",
+      "consequence": "예상한 이벤트가 발생하지 않음",
+      "solution": "드래그 동작의 시작과 끝 위치를 모두 고려한 설계",
+      "teaching_moment": "공을 잡고 던질 때 손을 놓는 위치가 중요한 것처럼, 마우스를 놓는 위치도 중요해요."
+    },
+    {
+      "mistake": "클릭과 해제를 같은 목적으로 중복 사용",
+      "why_it_happens": "클릭 시작과 완료의 역할 구분 없이 설계",
+      "consequence": "같은 동작이 두 번 실행되거나 혼란스러운 동작",
+      "solution": "클릭은 시작/활성화, 해제는 완료/비활성화로 명확히 구분",
+      "teaching_moment": "문을 열 때와 닫을 때가 다르듯이, 클릭할 때와 놓을 때도 다른 역할을 해야 해요."
+    },
+    {
+      "mistake": "빠른 클릭에서 해제 이벤트 놓침",
+      "why_it_happens": "매우 짧은 클릭으로 해제 이벤트가 제대로 감지되지 않음",
+      "consequence": "일관성 없는 사용자 경험",
+      "solution": "최소 클릭 시간을 고려하거나 다른 이벤트와 조합 사용",
+      "teaching_moment": "악수할 때 너무 빨리 손을 떼면 예의가 아닌 것처럼, 적당한 시간이 필요해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "대상 오브젝트 선택",
+      "instruction": "클릭 해제 이벤트를 설정할 오브젝트를 선택하세요.",
+      "visual_hint": "드래그하거나 누르기 상호작용이 있을 오브젝트를 선택합니다."
+    },
+    {
+      "step": 2,
+      "title": "시작 카테고리 선택",
+      "instruction": "블록 팔레트에서 '시작' 카테고리를 클릭하세요.",
+      "visual_hint": "초록색 깃발 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 3,
+      "title": "오브젝트 해제 블록 찾기",
+      "instruction": "'오브젝트 클릭을 해제했을 때' 블록을 찾아 클릭하세요.",
+      "visual_hint": "오브젝트 아이콘과 '해제' 표시가 있는 블록입니다."
+    },
+    {
+      "step": 4,
+      "title": "작업 영역에 배치",
+      "instruction": "블록을 드래그해서 선택한 오브젝트의 작업 영역으로 가져오세요.",
+      "visual_hint": "해당 오브젝트의 스크립트 영역에만 배치됩니다."
+    },
+    {
+      "step": 5,
+      "title": "완료 동작 연결",
+      "instruction": "마우스를 놓았을 때 실행할 블록들을 아래에 연결하세요.",
+      "visual_hint": "주로 복구, 완료, 확정 같은 마무리 동작을 연결합니다."
+    },
+    {
+      "step": 6,
+      "title": "드래그 테스트",
+      "instruction": "프로그램을 실행한 후 해당 오브젝트를 드래그하고 마우스를 놓아보세요.",
+      "visual_hint": "오브젝트에서 시작해서 마우스를 놓는 순간에 동작이 실행되어야 합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "when_object_click",
+      "relationship": "대응 시작 이벤트",
+      "explanation": "같은 오브젝트에서 마우스를 누르는 순간을 감지하는 블록"
+    },
+    {
+      "block_id": "mouse_click_canceled",
+      "relationship": "전역 해제 이벤트",
+      "explanation": "화면 전체에서 마우스 클릭 해제를 감지하는 더 넓은 범위의 이벤트"
+    },
+    {
+      "block_id": "touching_mouse",
+      "relationship": "마우스 접촉 확인",
+      "explanation": "마우스 포인터가 해당 오브젝트에 닿아있는지 실시간으로 확인"
+    },
+    {
+      "block_id": "mouse_pointer_x",
+      "relationship": "마우스 위치",
+      "explanation": "마우스를 놓은 위치의 x좌표 정보"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "오브젝트에서 마우스를 놓아도 이벤트가 발생하지 않아요",
+      "possible_causes": [
+        "오브젝트 밖으로 드래그한 후 마우스를 놓음",
+        "해당 오브젝트가 아닌 다른 오브젝트를 선택한 상태에서 블록 작성",
+        "매우 빠른 클릭으로 해제 이벤트가 감지되지 않음",
+        "다른 오브젝트가 이벤트를 차단"
+      ],
+      "solutions": [
+        "오브젝트 영역 안에서 마우스를 놓아보세요",
+        "올바른 오브젝트를 선택했는지 확인하세요",
+        "조금 더 천천히 클릭하고 놓아보세요",
+        "다른 오브젝트들의 레이어 순서를 확인하세요"
+      ]
+    },
+    {
+      "problem": "클릭할 때와 놓을 때 모두 같은 동작이 실행돼요",
+      "possible_causes": ["클릭 이벤트와 해제 이벤트에 같은 블록이 연결됨", "이벤트의 역할을 구분하지 않고 설계"],
+      "solutions": ["클릭은 시작 동작, 해제는 완료 동작으로 구분하세요", "각 이벤트의 고유한 목적을 명확히 정의하세요"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "컴퓨터 마우스 드래그",
+      "explanation": "파일을 드래그해서 다른 폴더로 옮길 때 마우스를 놓는 순간 이동이 완료되는 것과 같습니다."
+    },
+    {
+      "analogy": "모바일 터치 제스처",
+      "explanation": "스마트폰에서 앱을 길게 누르다가 손가락을 떼면 메뉴가 나타나는 것과 비슷합니다."
+    },
+    {
+      "analogy": "물리적 버튼",
+      "explanation": "엘리베이터 버튼을 누르고 손을 떼면 호출이 완료되는 것처럼, 디지털 버튼도 같은 원리입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "드래그 거리 기반 동작",
+      "description": "오브젝트를 얼마나 멀리 드래그했는지에 따라 다른 완료 동작",
+      "use_case": "새총에서 당긴 거리에 따라 발사 세기가 달라지는 게임"
+    },
+    {
+      "concept": "드래그 방향 인식",
+      "description": "어느 방향으로 드래그했는지에 따라 다른 완료 처리",
+      "use_case": "카드를 왼쪽으로 드래그하면 거부, 오른쪽으로 드래그하면 승인"
+    },
+    {
+      "concept": "타겟 영역 감지",
+      "description": "특정 영역에서 마우스를 놓았을 때만 특별한 동작",
+      "use_case": "퍼즐 조각을 정확한 위치에 놓았을 때만 맞춤 완료"
+    }
+  ],
+
+  "interaction_design_patterns": [
+    {
+      "pattern": "Drag and Drop",
+      "description": "오브젝트를 선택해서 다른 위치로 이동시키는 기본 패턴",
+      "implementation": "클릭으로 선택, 드래그로 이동, 해제로 배치 확정"
+    },
+    {
+      "pattern": "Press and Release",
+      "description": "누르고 있는 동안과 놓는 순간에 다른 동작을 하는 패턴",
+      "implementation": "클릭으로 충전 시작, 해제로 발사나 실행"
+    },
+    {
+      "pattern": "Hover and Drop",
+      "description": "특정 영역 위에서 놓을 때만 특별한 반응을 하는 패턴",
+      "implementation": "대상 영역 감지와 함께 해제 이벤트 조합 사용"
+    }
+  ],
+
+  "accessibility_considerations": [
+    {
+      "issue": "정밀한 드래그 조작의 어려움",
+      "solution": "클릭만으로도 같은 기능을 수행할 수 있는 대안 제공",
+      "explanation": "모든 사용자가 정확한 드래그 동작을 할 수 있는 것은 아니에요"
+    },
+    {
+      "issue": "터치 디바이스 호환성",
+      "solution": "터치 시작과 터치 끝 이벤트도 함께 지원",
+      "explanation": "태블릿이나 스마트폰에서도 같은 경험을 제공해야 해요"
+    },
+    {
+      "issue": "시각적 피드백 부족",
+      "solution": "드래그 중과 완료 후에 명확한 시각적 표시 제공",
+      "explanation": "사용자가 현재 상태를 쉽게 알 수 있어야 해요"
+    }
+  ],
+
+  "performance_considerations": [
+    {
+      "aspect": "이벤트 최적화",
+      "description": "해제 이벤트에서 복잡한 계산 수행 시 주의사항",
+      "tip": "사용자가 놓는 순간의 반응 속도가 중요하므로 가벼운 동작 위주로 설계"
+    },
+    {
+      "aspect": "메모리 관리",
+      "description": "드래그 상태 정보를 적절히 정리하여 메모리 누수 방지",
+      "tip": "해제 이벤트에서 임시 변수나 상태 정보를 정리하기"
+    }
+  ]
+}

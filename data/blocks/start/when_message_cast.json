@@ -1,0 +1,264 @@
+{
+  "id": "when_message_cast",
+  "category": "start",
+  "name": "신호를 받았을 때",
+  "description": "다른 오브젝트에서 보낸 신호(메시지)를 받았을 때 실행되는 이벤트 블록입니다. 오브젝트 간 통신과 협력을 가능하게 하는 핵심적인 블록입니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "오브젝트 간 통신 시스템 이해",
+      "이벤트 기반 프로그래밍 심화 학습",
+      "모듈화와 협력 프로그래밍 개념 습득"
+    ],
+    "key_concepts": [
+      {
+        "concept": "메시지 패싱",
+        "explanation": "한 오브젝트에서 다른 오브젝트로 정보나 명령을 전달하는 프로그래밍 패턴"
+      },
+      {
+        "concept": "신호(Signal)",
+        "explanation": "특정 이름을 가진 메시지로, 여러 오브젝트가 동시에 받을 수 있는 브로드캐스트 방식"
+      },
+      {
+        "concept": "이벤트 드리븐",
+        "explanation": "특정 사건(메시지 수신)이 발생했을 때 반응하는 프로그래밍 방식"
+      },
+      {
+        "concept": "비동기 통신",
+        "explanation": "메시지를 보내는 쪽과 받는 쪽이 동시에 실행되지 않아도 되는 통신 방식"
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": ["기본 이벤트 블록 이해", "여러 오브젝트 관리 경험", "프로그램 흐름 제어 개념"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "게임 시작 신호",
+      "description": "게임 매니저가 '게임시작' 신호를 보내면 모든 캐릭터가 동작 시작",
+      "blocks": ["when_message_cast('게임시작')", "set_variable('hp', 100)", "show()"],
+      "explanation": "'게임시작' 신호를 받으면 체력을 100으로 설정하고 화면에 나타납니다."
+    },
+    {
+      "title": "순차적 애니메이션",
+      "description": "첫 번째 캐릭터가 동작을 마치면 다음 캐릭터에게 신호 전달",
+      "blocks": ["when_message_cast('내차례')", "move_direction('right', 100)", "message_cast('다음차례')"],
+      "explanation": "'내차례' 신호를 받으면 오른쪽으로 이동한 후 '다음차례' 신호를 보냅니다."
+    },
+    {
+      "title": "상태 동기화",
+      "description": "점수가 변경되면 모든 UI 요소가 업데이트",
+      "blocks": ["when_message_cast('점수변경')", "change_costume_to('점수표시')", "speak_something(get_variable('score'))"],
+      "explanation": "'점수변경' 신호를 받으면 점수 표시 모양으로 바뀌고 현재 점수를 말합니다."
+    }
+  ],
+
+  "socratic_questions": [
+    {
+      "level": "이해",
+      "question": "신호를 받는 것과 키보드나 마우스 이벤트를 받는 것의 차이점은 무엇인가요?",
+      "purpose": "외부 입력과 내부 통신의 구분 이해",
+      "follow_up": "신호는 누가 보내는 건가요? 언제 사용하면 좋을까요?"
+    },
+    {
+      "level": "분석",
+      "question": "하나의 신호를 여러 오브젝트가 받으면 어떤 일이 일어날까요?",
+      "purpose": "브로드캐스트 통신의 특성 이해",
+      "follow_up": "이런 특성을 활용할 수 있는 상황을 생각해볼 수 있나요?"
+    },
+    {
+      "level": "적용",
+      "question": "멀티플레이어 게임에서 플레이어들이 협력해야 하는 상황을 만든다면 신호를 어떻게 활용할까요?",
+      "purpose": "복잡한 상호작용 시스템 설계 사고",
+      "follow_up": "각 플레이어의 행동이 다른 플레이어에게 어떤 영향을 줄 수 있을까요?"
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "신호 이름을 일관성 없게 사용",
+      "why_it_happens": "여러 곳에서 비슷한 신호를 다른 이름으로 만들어 사용",
+      "consequence": "신호가 전달되지 않거나 예상과 다른 동작",
+      "solution": "신호 이름을 미리 계획하고 일관성 있게 사용",
+      "teaching_moment": "친구들과 약속한 암호를 정확히 말해야 알아듣는 것처럼, 신호 이름도 정확해야 해요."
+    },
+    {
+      "mistake": "무한 신호 루프 생성",
+      "why_it_happens": "신호를 받아서 처리한 후 다시 같은 신호를 보내는 구조",
+      "consequence": "프로그램이 멈추거나 느려짐",
+      "solution": "신호의 흐름을 미리 설계하고 종료 조건 설정",
+      "teaching_moment": "메아리가 계속 울려퍼지는 것처럼, 신호도 끝없이 반복될 수 있어요. 멈출 때를 정해야 해요."
+    },
+    {
+      "mistake": "신호를 보내지 않고 받기만 설정",
+      "why_it_happens": "신호를 받는 블록만 만들고 보내는 블록을 만들지 않음",
+      "consequence": "이벤트가 발생하지 않아 기능이 작동하지 않음",
+      "solution": "신호를 보내는 부분과 받는 부분을 쌍으로 설계",
+      "teaching_moment": "편지를 받으려면 누군가 보내야 하는 것처럼, 신호도 보내는 사람과 받는 사람이 있어야 해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "신호 계획 세우기",
+      "instruction": "어떤 신호를 언제 보내고 받을지 미리 계획하세요.",
+      "visual_hint": "종이에 오브젝트들 간의 신호 흐름을 그려보세요."
+    },
+    {
+      "step": 2,
+      "title": "수신 오브젝트 선택",
+      "instruction": "신호를 받을 오브젝트를 선택하세요.",
+      "visual_hint": "신호에 반응해야 하는 캐릭터나 오브젝트를 선택합니다."
+    },
+    {
+      "step": 3,
+      "title": "시작 카테고리 선택",
+      "instruction": "블록 팔레트에서 '시작' 카테고리를 클릭하세요.",
+      "visual_hint": "초록색 깃발 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 4,
+      "title": "신호 수신 블록 찾기",
+      "instruction": "'신호를 받았을 때' 블록을 찾아 클릭하세요.",
+      "visual_hint": "신호나 메시지 아이콘이 있는 블록입니다."
+    },
+    {
+      "step": 5,
+      "title": "신호 이름 설정",
+      "instruction": "블록의 드롭다운에서 받을 신호 이름을 선택하거나 새로 만드세요.",
+      "visual_hint": "의미가 명확한 이름을 사용하세요."
+    },
+    {
+      "step": 6,
+      "title": "반응 블록 연결",
+      "instruction": "신호를 받았을 때 실행할 블록들을 아래에 연결하세요.",
+      "visual_hint": "해당 신호에 맞는 적절한 반응을 만들어보세요."
+    },
+    {
+      "step": 7,
+      "title": "신호 발송 설정",
+      "instruction": "다른 오브젝트에서 '신호 보내기' 블록으로 해당 신호를 보내도록 설정하세요.",
+      "visual_hint": "'신호' 카테고리에서 신호 보내기 블록을 찾을 수 있습니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "message_cast",
+      "relationship": "신호 송신",
+      "explanation": "이 블록과 쌍을 이루는 신호를 보내는 블록"
+    },
+    {
+      "block_id": "message_cast_wait",
+      "relationship": "신호 송신 및 대기",
+      "explanation": "신호를 보내고 받는 쪽의 처리가 끝날 때까지 기다리는 블록"
+    },
+    {
+      "block_id": "when_scene_start",
+      "relationship": "장면 기반 시작",
+      "explanation": "장면 변경으로 자동 시작되는 다른 방식의 이벤트"
+    },
+    {
+      "block_id": "when_run_button_click",
+      "relationship": "프로그램 시작",
+      "explanation": "전체 프로그램을 시작하는 최초 이벤트"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "신호를 보내도 받는 쪽에서 반응하지 않아요",
+      "possible_causes": [
+        "신호 이름이 정확히 일치하지 않음",
+        "받는 쪽 오브젝트가 활성화되지 않음",
+        "받는 쪽 블록이 올바르게 연결되지 않음",
+        "신호를 보내는 블록이 실제로 실행되지 않음"
+      ],
+      "solutions": [
+        "보내는 신호 이름과 받는 신호 이름이 정확히 같은지 확인하세요",
+        "받는 오브젝트가 화면에 보이고 활성 상태인지 확인하세요",
+        "신호 받기 블록 아래에 실행할 블록들이 연결되어 있는지 확인하세요",
+        "신호 보내기 블록이 실제로 실행되는 경로에 있는지 확인하세요"
+      ]
+    },
+    {
+      "problem": "신호가 예상보다 많이 실행돼요",
+      "possible_causes": ["같은 신호를 여러 번 보내는 구조", "여러 오브젝트가 동시에 신호를 받아 처리", "신호 루프가 발생"],
+      "solutions": [
+        "신호를 보내는 조건을 다시 확인하세요",
+        "어떤 오브젝트들이 해당 신호를 받는지 확인하세요",
+        "신호의 흐름도를 그려서 루프가 없는지 확인하세요"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "무전기 통신",
+      "explanation": "무전기로 '출동하세요'라고 방송하면 모든 팀원이 동시에 듣는 것처럼, 신호도 여러 오브젝트가 동시에 받을 수 있습니다."
+    },
+    {
+      "analogy": "학교 종소리",
+      "explanation": "수업 시간을 알리는 종소리가 울리면 모든 학생이 동시에 반응하는 것처럼, 신호도 모든 수신자에게 동시에 전달됩니다."
+    },
+    {
+      "analogy": "스마트폰 알림",
+      "explanation": "앱에서 알림을 보내면 관련된 모든 기능이 업데이트되는 것처럼, 신호도 관련된 모든 오브젝트가 반응합니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "조건부 신호 처리",
+      "description": "특정 조건에서만 신호에 반응하도록 설정",
+      "use_case": "플레이어의 레벨이 5 이상일 때만 '특별이벤트' 신호에 반응"
+    },
+    {
+      "concept": "신호 체인",
+      "description": "하나의 신호가 다른 신호를 연쇄적으로 발생시키는 시스템",
+      "use_case": "도미노 효과처럼 순차적으로 실행되는 애니메이션"
+    },
+    {
+      "concept": "우선순위 신호",
+      "description": "중요도에 따라 신호 처리 순서를 조절",
+      "use_case": "긴급 상황 신호가 일반 신호보다 먼저 처리"
+    }
+  ],
+
+  "communication_patterns": [
+    {
+      "pattern": "Broadcast",
+      "description": "하나의 송신자가 여러 수신자에게 동시에 메시지 전달",
+      "example": "게임 시작 신호를 모든 캐릭터가 동시에 받아 초기화"
+    },
+    {
+      "pattern": "Chain of Responsibility",
+      "description": "신호를 받은 오브젝트가 처리 후 다음 오브젝트에게 전달",
+      "example": "순서대로 말하기 게임에서 차례를 넘기는 신호"
+    },
+    {
+      "pattern": "Event Notification",
+      "description": "상태 변화나 중요 사건을 다른 오브젝트들에게 알림",
+      "example": "점수 변경, 레벨업, 게임 종료 등의 상황 알림"
+    }
+  ],
+
+  "design_principles": [
+    {
+      "principle": "명확한 신호 이름",
+      "description": "신호의 목적과 의미를 쉽게 알 수 있는 이름 사용",
+      "example": "'start_game', 'player_died', 'level_complete' 등"
+    },
+    {
+      "principle": "최소한의 결합",
+      "description": "오브젝트들이 서로 직접 의존하지 않고 신호를 통해서만 통신",
+      "example": "A 오브젝트가 B 오브젝트를 직접 제어하지 않고 신호로 요청"
+    },
+    {
+      "principle": "단일 책임",
+      "description": "하나의 신호는 하나의 명확한 목적만 가지도록 설계",
+      "example": "게임 시작과 점수 업데이트를 별도 신호로 분리"
+    }
+  ]
+}

@@ -1,0 +1,252 @@
+{
+  "id": "mouse_click_canceled",
+  "category": "start",
+  "name": "마우스 클릭을 해제했을 때",
+  "description": "마우스 버튼을 누르고 있다가 뗐을 때 실행되는 이벤트 블록입니다. 드래그 동작이나 길게 누르는 상호작용에서 마우스를 놓는 순간을 감지합니다.",
+
+  "educational_context": {
+    "learning_objectives": ["마우스 버튼 상태 변화 이해", "드래그 앤 드롭 상호작용 학습", "상태 기반 이벤트 처리 개념 습득"],
+    "key_concepts": [
+      {
+        "concept": "마우스 버튼 상태",
+        "explanation": "마우스 버튼이 눌린 상태(pressed)와 떼어진 상태(released)의 구분"
+      },
+      {
+        "concept": "드래그 동작",
+        "explanation": "마우스를 누른 채로 이동한 후 버튼을 떼는 일련의 동작"
+      },
+      {
+        "concept": "상태 변화 이벤트",
+        "explanation": "특정 상태에서 다른 상태로 바뀌는 순간에 발생하는 이벤트"
+      },
+      {
+        "concept": "상호작용 완료",
+        "explanation": "사용자의 입력 동작이 끝나는 시점을 감지하는 것"
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": ["기본 마우스 클릭 이벤트 이해", "상태와 변화의 개념", "드래그 동작의 기본 이해"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "드래그 완료 감지",
+      "description": "마우스를 놓으면 오브젝트가 제자리로 돌아감",
+      "blocks": ["mouse_click_canceled", "go_to_xy(0, 0)"],
+      "explanation": "마우스 버튼을 놓는 순간 캐릭터가 원점으로 이동합니다."
+    },
+    {
+      "title": "그리기 도구 구현",
+      "description": "마우스를 놓으면 그리기 모드 종료",
+      "blocks": ["mouse_click_canceled", "set_variable('drawing_mode', false)", "speak_something('그리기 완료!')"],
+      "explanation": "마우스를 놓으면 그리기 모드가 꺼지고 완료 메시지가 나타납니다."
+    },
+    {
+      "title": "상호작용 피드백",
+      "description": "버튼을 놓으면 시각적 피드백 제거",
+      "blocks": ["mouse_click_canceled", "change_effect_by('brightness', -20)", "sound_something_with_block('click_release')"],
+      "explanation": "마우스를 놓으면 버튼이 원래 모습으로 돌아가고 효과음이 재생됩니다."
+    }
+  ],
+
+  "socratic_questions": [
+    {
+      "level": "이해",
+      "question": "마우스 클릭과 마우스 클릭 해제는 언제 각각 사용해야 할까요?",
+      "purpose": "상호작용의 시작과 끝을 구분하는 이해",
+      "follow_up": "버튼을 누르는 순간과 떼는 순간 중 어느 것이 더 중요한 상황들을 생각해볼 수 있나요?"
+    },
+    {
+      "level": "분석",
+      "question": "실제 컴퓨터 프로그램에서 마우스를 놓는 순간을 감지하는 경우는 언제일까요?",
+      "purpose": "실생활 응용 사례를 통한 개념 심화",
+      "follow_up": "드래그 앤 드롭 기능에서 이 이벤트가 왜 중요한지 설명할 수 있나요?"
+    },
+    {
+      "level": "적용",
+      "question": "게임에서 활과 화살을 구현한다면 이 블록을 어떻게 활용할 수 있을까요?",
+      "purpose": "창의적 활용 방안 모색",
+      "follow_up": "마우스를 누르고 있는 시간에 따라 다른 효과를 만들려면 어떤 블록들이 더 필요할까요?"
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "클릭과 클릭 해제를 같은 용도로 사용",
+      "why_it_happens": "두 이벤트의 차이점을 명확히 구분하지 못함",
+      "consequence": "중복된 동작이 실행되거나 의도하지 않은 결과",
+      "solution": "클릭은 시작, 클릭 해제는 완료의 의미로 구분해서 사용",
+      "teaching_moment": "문을 열 때 손잡이를 누르는 것과 손을 떼는 것이 다른 의미를 갖는 것처럼, 마우스도 누르기와 떼기가 달라요."
+    },
+    {
+      "mistake": "드래그 없이 클릭 해제만 사용",
+      "why_it_happens": "마우스를 누르는 동작 없이 해제 이벤트만 설정",
+      "consequence": "이벤트가 예상대로 발생하지 않음",
+      "solution": "클릭 해제는 반드시 클릭 후에 발생한다는 순서 이해",
+      "teaching_moment": "손을 떼려면 먼저 잡아야 하는 것처럼, 클릭을 해제하려면 먼저 클릭이 있어야 해요."
+    },
+    {
+      "mistake": "빠른 클릭에서 해제 이벤트 놓침",
+      "why_it_happens": "매우 빠른 클릭 동작에서 해제 이벤트가 인식되지 않을 수 있음",
+      "consequence": "일관되지 않은 사용자 경험",
+      "solution": "충분한 클릭 시간을 두거나 다른 이벤트와 조합 사용",
+      "teaching_moment": "너무 빨리 손뼉을 치면 소리가 제대로 나지 않는 것처럼, 마우스도 적당한 속도로 조작해야 해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "시작 카테고리 선택",
+      "instruction": "블록 팔레트에서 '시작' 카테고리를 클릭하세요.",
+      "visual_hint": "초록색 깃발 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "마우스 해제 블록 찾기",
+      "instruction": "'마우스 클릭을 해제했을 때' 블록을 찾아 클릭하세요.",
+      "visual_hint": "마우스 아이콘과 함께 '해제' 표시가 있는 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "작업 영역에 배치",
+      "instruction": "블록을 드래그해서 작업 영역으로 가져오세요.",
+      "visual_hint": "다른 시작 블록들과 비슷한 모양이지만 기능이 다릅니다."
+    },
+    {
+      "step": 4,
+      "title": "완료 동작 연결",
+      "instruction": "마우스를 놓았을 때 실행할 블록들을 아래에 연결하세요.",
+      "visual_hint": "주로 상태 변경이나 완료 알림 같은 블록들을 연결합니다."
+    },
+    {
+      "step": 5,
+      "title": "드래그 테스트",
+      "instruction": "프로그램을 실행한 후 마우스를 누르고 드래그한 다음 놓아보세요.",
+      "visual_hint": "마우스를 놓는 순간에 설정한 동작이 실행되어야 합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "mouse_clicked",
+      "relationship": "대응 이벤트",
+      "explanation": "마우스를 누르는 순간을 감지하는 반대 개념의 블록"
+    },
+    {
+      "block_id": "when_object_click_canceled",
+      "relationship": "특정 대상 해제",
+      "explanation": "특정 오브젝트에서 마우스 클릭을 해제했을 때"
+    },
+    {
+      "block_id": "mouse_pointer_x",
+      "relationship": "위치 정보",
+      "explanation": "마우스 해제 위치의 x좌표를 알아내는 블록"
+    },
+    {
+      "block_id": "mouse_pointer_y",
+      "relationship": "위치 정보",
+      "explanation": "마우스 해제 위치의 y좌표를 알아내는 블록"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "마우스를 놓아도 이벤트가 발생하지 않아요",
+      "possible_causes": [
+        "먼저 마우스를 누르지 않은 상태에서 놓기만 시도",
+        "프로그램이 실행되지 않은 상태",
+        "매우 빠른 클릭으로 해제 이벤트가 감지되지 않음",
+        "다른 요소가 마우스 이벤트를 차단"
+      ],
+      "solutions": [
+        "마우스를 먼저 누른 후에 떼는 동작을 해보세요",
+        "프로그램이 실행 중인지 확인하세요",
+        "조금 더 천천히 마우스를 조작해보세요",
+        "무대 영역에서 테스트해보세요"
+      ]
+    },
+    {
+      "problem": "클릭할 때와 놓을 때 둘 다 같은 동작이 실행돼요",
+      "possible_causes": ["클릭 이벤트와 해제 이벤트에 같은 블록이 연결됨", "두 이벤트가 동시에 활성화됨"],
+      "solutions": ["각 이벤트의 목적을 다르게 설정하세요", "클릭은 시작 동작, 해제는 완료 동작으로 구분하세요"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "엘리베이터 버튼",
+      "explanation": "엘리베이터 버튼을 누르고 손을 떼면 호출이 완료되는 것처럼, 마우스도 놓는 순간에 동작이 완료됩니다."
+    },
+    {
+      "analogy": "활과 화살",
+      "explanation": "활시위를 당겼다가 놓는 순간 화살이 날아가는 것처럼, 마우스를 놓는 순간에 저장된 동작이 실행됩니다."
+    },
+    {
+      "analogy": "드래그 앤 드롭",
+      "explanation": "파일을 드래그해서 다른 폴더에 놓는 것처럼, 마우스를 놓는 순간에 이동이나 복사가 완료됩니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "드래그 거리 측정",
+      "description": "마우스를 누른 지점부터 놓은 지점까지의 거리를 계산",
+      "use_case": "새총 게임에서 당긴 거리에 따라 발사 세기 조절"
+    },
+    {
+      "concept": "시간 기반 상호작용",
+      "description": "마우스를 누르고 있던 시간에 따라 다른 동작 실행",
+      "use_case": "길게 누를수록 더 강한 공격이 나가는 게임"
+    },
+    {
+      "concept": "궤적 추적",
+      "description": "마우스를 누르고 움직인 경로를 기록하고 활용",
+      "use_case": "사용자가 그린 모양을 인식하는 제스처 시스템"
+    }
+  ],
+
+  "interaction_patterns": [
+    {
+      "pattern": "Press and Hold",
+      "description": "누르고 있는 동안 지속되는 동작, 놓으면 중단",
+      "example": "버튼을 누르고 있는 동안 캐릭터가 달리기, 놓으면 정지"
+    },
+    {
+      "pattern": "Drag and Drop",
+      "description": "누른 상태로 이동 후 원하는 위치에서 놓기",
+      "example": "오브젝트를 다른 위치로 이동시키기"
+    },
+    {
+      "pattern": "Charge and Release",
+      "description": "누르고 있는 시간만큼 에너지를 충전하고 놓으면 발사",
+      "example": "활쏘기나 새총 게임의 파워 조절"
+    }
+  ],
+
+  "performance_considerations": [
+    {
+      "aspect": "이벤트 빈도",
+      "description": "마우스 해제 이벤트는 클릭보다 상대적으로 적게 발생",
+      "tip": "해제 이벤트에서 복잡한 계산을 수행해도 성능 영향이 적음"
+    },
+    {
+      "aspect": "상태 관리",
+      "description": "누르기와 놓기 사이의 상태를 적절히 관리해야 함",
+      "tip": "변수를 활용해 마우스가 눌린 상태인지 추적하기"
+    }
+  ],
+
+  "accessibility_considerations": [
+    {
+      "issue": "정확한 마우스 조작의 어려움",
+      "solution": "드래그 없이도 같은 기능을 수행할 수 있는 대안 제공",
+      "explanation": "모든 사용자가 정밀한 드래그 동작을 할 수 있는 것은 아니에요"
+    },
+    {
+      "issue": "터치 디바이스 호환성",
+      "solution": "터치 시작과 터치 끝 이벤트도 함께 고려",
+      "explanation": "태블릿이나 스마트폰에서도 같은 경험을 제공해야 해요"
+    }
+  ]
+}

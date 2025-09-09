@@ -1,0 +1,254 @@
+{
+  "id": "when_object_click",
+  "category": "start",
+  "name": "오브젝트를 클릭했을 때",
+  "description": "특정 오브젝트(캐릭터)를 마우스로 클릭했을 때 실행되는 이벤트 블록입니다. 해당 오브젝트 영역만 클릭했을 때 반응하며, 오브젝트별로 다른 동작을 설정할 수 있습니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "오브젝트 기반 이벤트 처리 이해",
+      "선택적 상호작용 시스템 학습",
+      "사용자 인터페이스 요소별 기능 분리"
+    ],
+    "key_concepts": [
+      {
+        "concept": "오브젝트 선택성",
+        "explanation": "특정 오브젝트만 클릭 이벤트에 반응하고 다른 영역은 반응하지 않는 것"
+      },
+      {
+        "concept": "히트 박스",
+        "explanation": "오브젝트에서 클릭을 인식하는 영역으로, 보통 오브젝트의 모양과 일치"
+      },
+      {
+        "concept": "개별적 상호작용",
+        "explanation": "각 오브젝트마다 서로 다른 클릭 반응을 설정할 수 있는 것"
+      },
+      {
+        "concept": "이벤트 대상",
+        "explanation": "이벤트가 발생한 특정 오브젝트를 구분하고 식별하는 것"
+      }
+    ],
+    "difficulty_level": "초급-중급",
+    "prerequisites": ["오브젝트와 배경의 구분", "마우스 클릭 기본 개념", "이벤트 블록의 이해"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "캐릭터별 다른 반응",
+      "description": "고양이를 클릭하면 야옹, 강아지를 클릭하면 멍멍",
+      "blocks": ["when_object_click", "speak_something('야옹!')"],
+      "explanation": "고양이 오브젝트를 클릭했을 때만 '야옹!' 소리가 나고, 다른 곳을 클릭해도 반응하지 않습니다."
+    },
+    {
+      "title": "버튼 역할 오브젝트",
+      "description": "버튼 모양 오브젝트를 클릭하면 다음 장면으로 이동",
+      "blocks": ["when_object_click", "start_scene('다음장면')"],
+      "explanation": "버튼 오브젝트만 클릭했을 때 장면이 바뀝니다."
+    },
+    {
+      "title": "상호작용 피드백",
+      "description": "클릭한 오브젝트가 반응하며 크기 변경",
+      "blocks": ["when_object_click", "change_size_by(20)", "wait_second(1)", "change_size_by(-20)"],
+      "explanation": "오브젝트를 클릭하면 잠시 커졌다가 원래 크기로 돌아옵니다."
+    }
+  ],
+
+  "socratic_questions": [
+    {
+      "level": "이해",
+      "question": "화면 전체 클릭과 오브젝트 클릭의 차이점은 무엇인가요?",
+      "purpose": "전역 이벤트와 지역 이벤트의 구분 이해",
+      "follow_up": "언제 오브젝트 클릭이 더 유용하고, 언제 전체 화면 클릭이 더 유용할까요?"
+    },
+    {
+      "level": "분석",
+      "question": "여러 오브젝트가 겹쳐져 있을 때 클릭하면 어떻게 될까요?",
+      "purpose": "이벤트 우선순위와 레이어 개념 도입",
+      "follow_up": "이런 상황을 어떻게 해결할 수 있을까요?"
+    },
+    {
+      "level": "적용",
+      "question": "퍼즐 게임을 만든다면 오브젝트 클릭을 어떻게 활용할 수 있을까요?",
+      "purpose": "실제 게임 개발에서의 활용 방안 탐색",
+      "follow_up": "각 퍼즐 조각마다 다른 동작을 만들려면 어떻게 설계해야 할까요?"
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "오브젝트 영역 밖을 클릭하며 반응 기대",
+      "why_it_happens": "오브젝트 클릭의 정확한 범위를 인지하지 못함",
+      "consequence": "클릭해도 아무 반응이 없어서 혼란",
+      "solution": "오브젝트의 실제 모양 영역 안을 정확히 클릭해야 함을 이해",
+      "teaching_moment": "문의 손잡이를 잡아야 문이 열리는 것처럼, 오브젝트의 정확한 부분을 클릭해야 반응해요."
+    },
+    {
+      "mistake": "투명한 부분도 클릭 영역으로 착각",
+      "why_it_happens": "이미지의 투명 영역도 클릭 가능할 것으로 오해",
+      "consequence": "예상과 다른 클릭 반응 영역",
+      "solution": "실제 보이는 부분만 클릭 가능하다는 점 인지",
+      "teaching_moment": "유리창의 투명한 부분도 만질 수 있지만, 컴퓨터에서는 보이는 부분만 클릭할 수 있어요."
+    },
+    {
+      "mistake": "모든 오브젝트에 같은 클릭 이벤트 적용",
+      "why_it_happens": "각 오브젝트의 고유한 역할과 기능을 고려하지 않음",
+      "consequence": "혼란스러운 사용자 경험",
+      "solution": "각 오브젝트의 역할에 맞는 적절한 클릭 반응 설계",
+      "teaching_moment": "피아노 건반마다 다른 음이 나는 것처럼, 각 오브젝트마다 다른 기능을 가질 수 있어요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "대상 오브젝트 선택",
+      "instruction": "클릭 이벤트를 설정할 오브젝트를 먼저 선택하세요.",
+      "visual_hint": "오브젝트 목록에서 원하는 캐릭터나 사물을 클릭하세요."
+    },
+    {
+      "step": 2,
+      "title": "시작 카테고리 선택",
+      "instruction": "블록 팔레트에서 '시작' 카테고리를 클릭하세요.",
+      "visual_hint": "초록색 깃발 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 3,
+      "title": "오브젝트 클릭 블록 찾기",
+      "instruction": "'오브젝트를 클릭했을 때' 블록을 찾아 클릭하세요.",
+      "visual_hint": "오브젝트 모양 아이콘이 있는 블록입니다."
+    },
+    {
+      "step": 4,
+      "title": "작업 영역에 배치",
+      "instruction": "블록을 드래그해서 작업 영역으로 가져오세요.",
+      "visual_hint": "선택한 오브젝트의 스크립트 영역에 배치됩니다."
+    },
+    {
+      "step": 5,
+      "title": "반응 블록 연결",
+      "instruction": "클릭했을 때 실행할 블록들을 아래에 연결하세요.",
+      "visual_hint": "해당 오브젝트만의 특별한 반응을 만들어보세요."
+    },
+    {
+      "step": 6,
+      "title": "클릭 테스트",
+      "instruction": "프로그램을 실행한 후 해당 오브젝트를 직접 클릭해보세요.",
+      "visual_hint": "오브젝트의 보이는 부분을 정확히 클릭해야 합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "mouse_clicked",
+      "relationship": "전역 클릭 이벤트",
+      "explanation": "화면 전체에서 클릭을 감지하는 더 넓은 범위의 이벤트"
+    },
+    {
+      "block_id": "when_object_click_canceled",
+      "relationship": "대응 해제 이벤트",
+      "explanation": "오브젝트에서 마우스 클릭을 해제했을 때의 이벤트"
+    },
+    {
+      "block_id": "touching_mouse",
+      "relationship": "마우스 접촉 확인",
+      "explanation": "마우스 포인터가 오브젝트에 닿아있는지 확인하는 조건 블록"
+    },
+    {
+      "block_id": "ask_and_wait",
+      "relationship": "사용자 입력",
+      "explanation": "클릭 외에 텍스트로 사용자 입력을 받는 다른 방법"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "오브젝트를 클릭해도 반응하지 않아요",
+      "possible_causes": [
+        "다른 오브젝트나 요소가 앞에 있어서 클릭을 차단",
+        "오브젝트의 투명한 부분이나 여백을 클릭",
+        "해당 오브젝트가 선택되지 않은 상태에서 블록 작성",
+        "프로그램이 실행되지 않은 상태"
+      ],
+      "solutions": [
+        "다른 오브젝트들의 레이어 순서를 확인하세요",
+        "오브젝트의 실제 보이는 부분을 클릭하세요",
+        "올바른 오브젝트를 선택한 상태에서 블록을 작성했는지 확인하세요",
+        "프로그램을 실행한 후 테스트하세요"
+      ]
+    },
+    {
+      "problem": "다른 오브젝트를 클릭해도 반응해요",
+      "possible_causes": ["전역 마우스 클릭 이벤트와 혼동", "여러 오브젝트에 같은 이벤트가 설정됨"],
+      "solutions": ["오브젝트 클릭과 전체 화면 클릭을 구분해서 사용하세요", "각 오브젝트별로 개별적인 클릭 이벤트를 설정하세요"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "TV 리모컨 버튼",
+      "explanation": "리모컨의 각 버튼마다 다른 기능이 있는 것처럼, 각 오브젝트마다 다른 클릭 기능을 가질 수 있습니다."
+    },
+    {
+      "analogy": "자판기 상품 버튼",
+      "explanation": "자판기에서 원하는 상품 버튼을 눌러야 그 상품이 나오는 것처럼, 특정 오브젝트를 클릭해야 해당 기능이 실행됩니다."
+    },
+    {
+      "analogy": "게임 캐릭터 선택",
+      "explanation": "게임에서 다른 캐릭터를 클릭하면 각각 다른 정보나 능력이 나타나는 것과 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "조건부 클릭 반응",
+      "description": "특정 조건에서만 클릭에 반응하도록 설정",
+      "use_case": "게임에서 특정 아이템을 가지고 있을 때만 NPC와 대화 가능"
+    },
+    {
+      "concept": "클릭 횟수 카운팅",
+      "description": "같은 오브젝트를 몇 번 클릭했는지 세어서 다른 반응",
+      "use_case": "캐릭터를 3번 클릭하면 특별한 애니메이션 실행"
+    },
+    {
+      "concept": "순서대로 클릭하기",
+      "description": "여러 오브젝트를 정해진 순서대로 클릭해야 하는 퍼즐",
+      "use_case": "암호를 입력하듯 특정 순서로 버튼들을 클릭하는 게임"
+    }
+  ],
+
+  "user_interface_design": [
+    {
+      "principle": "명확한 클릭 가능 표시",
+      "description": "클릭할 수 있는 오브젝트임을 시각적으로 표현",
+      "implementation": "마우스 올렸을 때 색상 변화나 커서 모양 변경"
+    },
+    {
+      "principle": "적절한 크기",
+      "description": "클릭하기 편한 충분한 크기로 오브젝트 설계",
+      "implementation": "너무 작은 버튼이나 오브젝트는 클릭하기 어려움"
+    },
+    {
+      "principle": "즉각적인 피드백",
+      "description": "클릭했을 때 바로 반응이 보이도록 설계",
+      "implementation": "소리, 시각 효과, 움직임 등으로 클릭 확인"
+    }
+  ],
+
+  "game_design_patterns": [
+    {
+      "pattern": "클릭 수집 게임",
+      "description": "화면의 여러 오브젝트를 클릭해서 점수나 아이템 획득",
+      "example": "과일 오브젝트들을 클릭해서 수확하는 게임"
+    },
+    {
+      "pattern": "퍼즐 조작",
+      "description": "퍼즐 조각들을 클릭해서 회전하거나 위치 변경",
+      "example": "직소 퍼즐에서 각 조각을 클릭해서 맞춰나가기"
+    },
+    {
+      "pattern": "메뉴 네비게이션",
+      "description": "메뉴 항목들을 클릭해서 다른 화면이나 기능으로 이동",
+      "example": "시작 화면에서 '게임 시작', '설정', '종료' 버튼들"
+    }
+  ]
+}
