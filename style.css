@@ -464,3 +464,35 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+.control-btn:hover {
+  background: rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+}
+
+/* RAG 토글 버튼 특별 스타일 */
+.rag-btn {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.rag-btn:hover {
+  transform: scale(1.1);
+}
+
+/* 시스템 메시지 스타일 */
+.system-message {
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.system-message-content {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  text-align: center;
+  color: #1e40af;
+  max-width: 80%;
+}

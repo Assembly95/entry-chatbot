@@ -35,6 +35,11 @@
             <span class="status-dot"></span>
             <span class="status-text">준비 중...</span>
           </div>
+          <!-- RAG 상태 표시 추가 -->
+          <div class="rag-status" id="rag-status">
+            <span class="status-dot" id="rag-status-dot"></span>
+            <span class="status-text" id="rag-status-text">RAG 로딩 중...</span>
+          </div>
         </div>
         <div class="sidebar-controls">
           <select id="chat-mode-header" class="mode-select" title="채팅 모드 선택">
@@ -43,6 +48,8 @@
             <option value="general">💬 일반 질문</option>
             <option value="debug">🔍 디버깅</option>
           </select>
+          <!-- RAG 토글 버튼 추가 -->
+          <button id="rag-toggle" class="control-btn rag-btn" title="RAG 모드 전환">🧠</button>
           <button id="sidebar-settings" class="control-btn" title="설정">⚙️</button>
           <button id="sidebar-close" class="control-btn" title="닫기">✕</button>
         </div>
@@ -60,6 +67,8 @@
                 <div class="message-text">
                   안녕! 무엇을 만들고 싶니? 정답을 바로 알려주지 않고, 
                   네가 스스로 생각할 수 있도록 한 단계씩 질문할게! 🙂
+                  
+                  <br><br><small>💡 상단의 🧠 버튼으로 RAG 모드를 전환할 수 있어요!</small>
                 </div>
                 <div class="message-time">방금 전</div>
               </div>
@@ -99,31 +108,42 @@
   function addChatMessage(content, isBot = false, type = "text") {
     const messagesContainer = document.getElementById("chat-messages");
     const messageDiv = document.createElement("div");
-    messageDiv.className = `message ${isBot ? "bot-message" : "user-message"}`;
 
     const now = new Date();
     const timeStr = now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
 
-    if (type === "analysis") {
+    // 시스템 메시지 타입 추가
+    if (type === "system") {
+      messageDiv.className = "message system-message";
       messageDiv.innerHTML = `
-        <div class="message-avatar">${
-          isBot ? `<img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">` : "👤"
-        }</div>
-        <div class="message-content analysis-message">
-          ${content}
-          <div class="message-time">${timeStr}</div>
+        <div class="message-content system-message-content">
+          <div class="message-text">${content}</div>
         </div>
       `;
     } else {
-      messageDiv.innerHTML = `
-        <div class="message-avatar">${
-          isBot ? `<img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">` : "👤"
-        }</div>
-        <div class="message-content">
-          <div class="message-text">${content}</div>
-          <div class="message-time">${timeStr}</div>
-        </div>
-      `;
+      messageDiv.className = `message ${isBot ? "bot-message" : "user-message"}`;
+
+      if (type === "analysis") {
+        messageDiv.innerHTML = `
+          <div class="message-avatar">${
+            isBot ? `<img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">` : "👤"
+          }</div>
+          <div class="message-content analysis-message">
+            ${content}
+            <div class="message-time">${timeStr}</div>
+          </div>
+        `;
+      } else {
+        messageDiv.innerHTML = `
+          <div class="message-avatar">${
+            isBot ? `<img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">` : "👤"
+          }</div>
+          <div class="message-content">
+            <div class="message-text">${content}</div>
+            <div class="message-time">${timeStr}</div>
+          </div>
+        `;
+      }
     }
 
     messagesContainer.appendChild(messageDiv);
@@ -187,92 +207,210 @@
     }
   }
 
-  // ===== 이벤트 설정 =====
-  // content.js에서 수정할 부분
+  async function toggleRAGMode() {
+    try {
+      console.log("RAG 모드 토글 시작");
 
+      chrome.runtime.sendMessage({ action: "toggleRAG" }, (response) => {
+        // Chrome runtime 에러 체크
+        if (chrome.runtime.lastError) {
+          console.error("RAG 토글 Chrome runtime 에러:", chrome.runtime.lastError);
+          addChatMessage("RAG 모드 변경 중 오류가 발생했어요.", true, "system");
+          return;
+        }
+
+        console.log("RAG 토글 응답:", response);
+
+        if (response && response.success) {
+          updateRAGStatus(response.ragEnabled);
+
+          // 사용자에게 알림 메시지 추가
+          const modeText = response.ragEnabled ? "Entry 전문 지식" : "일반 AI 지식";
+          addChatMessage(`🔄 모드가 변경되었습니다: ${modeText}`, true, "system");
+        } else {
+          console.error("RAG 토글 실패:", response);
+          addChatMessage("RAG 모드 변경에 실패했어요.", true, "system");
+        }
+      });
+    } catch (error) {
+      console.error("RAG 토글 오류:", error);
+      addChatMessage("RAG 모드 변경 중 예상치 못한 오류가 발생했어요.", true, "system");
+    }
+  }
+
+  function updateRAGStatus(isEnabled) {
+    const toggleBtn = document.getElementById("rag-toggle");
+    const statusText = document.getElementById("rag-status-text");
+    const statusDot = document.getElementById("rag-status-dot");
+
+    if (isEnabled) {
+      toggleBtn.style.background = "rgba(16, 185, 129, 0.2)";
+      toggleBtn.style.color = "#065f46";
+      toggleBtn.title = "RAG 끄기 (현재: Entry 전문 지식)";
+      statusText.textContent = "Entry 전문 지식";
+      statusDot.className = "status-dot valid";
+    } else {
+      toggleBtn.style.background = "rgba(239, 68, 68, 0.2)";
+      toggleBtn.style.color = "#991b1b";
+      toggleBtn.title = "RAG 켜기 (현재: 일반 AI 지식)";
+      statusText.textContent = "일반 AI 지식";
+      statusDot.className = "status-dot";
+    }
+  }
+
+  function loadRAGStatus() {
+    chrome.runtime.sendMessage({ action: "getSettings" }, (response) => {
+      if (response) {
+        updateRAGStatus(response.ragEnabled);
+      }
+    });
+  }
+
+  // ===== 이벤트 설정 =====
   function setupEventListeners() {
     const chatInput = document.getElementById("chat-input");
     const chatSend = document.getElementById("chat-send");
 
-    // 한국어 입력 상태 추적
+    // 한국어 입력 상태 추적 - 함수 스코프 밖으로 이동
     let isComposing = false;
+
+    // RAG 토글 버튼 이벤트 추가 - 에러 처리 강화
+    const ragToggleBtn = document.getElementById("rag-toggle");
+    if (ragToggleBtn) {
+      ragToggleBtn.addEventListener("click", () => {
+        console.log("RAG 토글 이벤트 발생!");
+        toggleRAGMode();
+      });
+      console.log("RAG 이벤트 리스너 연결 완료");
+    } else {
+      console.error("RAG 버튼을 찾을 수 없음");
+    }
 
     // 사이드바 컨트롤
     document.getElementById("sidebar-trigger").addEventListener("click", () => toggleSidebarOpen());
     document.getElementById("sidebar-close").addEventListener("click", () => toggleSidebarOpen(false));
 
-    // 메시지 전송 함수
+    // 메시지 전송 함수 - 에러 처리 강화
     function sendMessage() {
-      // 조합 중일 때는 전송하지 않음
-      if (isComposing) return;
-
-      const message = chatInput.value.trim();
-      if (!message) return;
-
-      addChatMessage(message, false);
-
-      // 사용자 메시지를 대화 기록에 추가
-      conversationHistory.push({ role: "user", content: message });
-
-      chatInput.value = "";
-      chatInput.style.height = "auto";
-
-      // 타이핑 인디케이터 표시
-      document.getElementById("typing-indicator").classList.remove("hidden");
-
-      // 현재 선택된 모드 가져오기
-      const mode = document.getElementById("chat-mode-header").value;
-
-      // Entry 프로젝트 컨텍스트 수집
-      const projectContext =
-        typeof gatherProjectContext === "function" ? gatherProjectContext() : "컨텍스트 함수를 찾을 수 없습니다.";
-
-      // 실제 AI API 호출 (대화 기록 포함)
-      chrome.runtime.sendMessage(
-        {
-          action: "generateAIResponse",
-          message: message,
-          mode: mode,
-          projectContext: projectContext,
-          conversationHistory: conversationHistory.slice(), // 복사본 전송
-        },
-        (response) => {
-          document.getElementById("typing-indicator").classList.add("hidden");
-
-          if (response && response.success) {
-            addChatMessage(response.response, true);
-
-            // AI 응답을 대화 기록에 추가
-            conversationHistory.push({ role: "assistant", content: response.response });
-
-            // 대화 기록이 너무 길면 오래된 것 삭제 (최근 10개만 유지)
-            if (conversationHistory.length > 10) {
-              conversationHistory = conversationHistory.slice(-10);
-            }
-          } else {
-            const errorMessage = response?.error || "연결에 문제가 있어요. 다시 시도해주세요!";
-            addChatMessage(`죄송해요, ${errorMessage}`, true);
-          }
+      try {
+        // 조합 중일 때는 전송하지 않음
+        if (isComposing) {
+          console.log("한국어 입력 조합 중이므로 전송 중지");
+          return;
         }
-      );
+
+        const message = chatInput.value.trim();
+        if (!message) {
+          console.log("빈 메시지는 전송하지 않음");
+          return;
+        }
+
+        console.log("메시지 전송 시작:", message);
+        addChatMessage(message, false);
+
+        // 사용자 메시지를 대화 기록에 추가
+        conversationHistory.push({ role: "user", content: message });
+
+        chatInput.value = "";
+        chatInput.style.height = "auto";
+
+        // 타이핑 인디케이터 표시
+        const typingIndicator = document.getElementById("typing-indicator");
+        if (typingIndicator) {
+          typingIndicator.classList.remove("hidden");
+        }
+
+        // 현재 선택된 모드 가져오기
+        const modeSelect = document.getElementById("chat-mode-header");
+        const mode = modeSelect ? modeSelect.value : "auto";
+
+        // Entry 프로젝트 컨텍스트 수집
+        const projectContext =
+          typeof gatherProjectContext === "function" ? gatherProjectContext() : "컨텍스트 함수를 찾을 수 없습니다.";
+
+        console.log("Chrome runtime에 메시지 전송 중...");
+
+        // 실제 AI API 호출 (대화 기록 포함) - 에러 처리 강화
+        chrome.runtime.sendMessage(
+          {
+            action: "generateAIResponse",
+            message: message,
+            mode: mode,
+            projectContext: projectContext,
+            conversationHistory: conversationHistory.slice(), // 복사본 전송
+          },
+          (response) => {
+            console.log("AI 응답 수신:", response);
+
+            // 타이핑 인디케이터 숨기기
+            if (typingIndicator) {
+              typingIndicator.classList.add("hidden");
+            }
+
+            // Chrome runtime 에러 체크
+            if (chrome.runtime.lastError) {
+              console.error("Chrome runtime 에러:", chrome.runtime.lastError);
+              addChatMessage("연결 오류가 발생했어요. 확장 프로그램을 다시 로드해주세요!", true);
+              return;
+            }
+
+            if (response && response.success) {
+              addChatMessage(response.response, true);
+
+              // AI 응답을 대화 기록에 추가
+              conversationHistory.push({ role: "assistant", content: response.response });
+
+              // 대화 기록이 너무 길면 오래된 것 삭제 (최근 10개만 유지)
+              if (conversationHistory.length > 10) {
+                conversationHistory = conversationHistory.slice(-10);
+              }
+            } else {
+              const errorMessage = response?.error || "연결에 문제가 있어요. 다시 시도해주세요!";
+              console.error("AI 응답 에러:", errorMessage);
+              addChatMessage(`죄송해요, ${errorMessage}`, true);
+            }
+          }
+        );
+      } catch (error) {
+        console.error("sendMessage 함수 에러:", error);
+
+        // addChatMessage가 정의되어 있는지 확인 후 호출
+        if (typeof addChatMessage === "function") {
+          addChatMessage("메시지 전송 중 오류가 발생했어요.", true);
+        } else {
+          console.error("addChatMessage 함수를 찾을 수 없습니다.");
+        }
+
+        // 타이핑 인디케이터 숨기기 - 안전하게 처리
+        const typingIndicator = document.getElementById("typing-indicator");
+        if (typingIndicator) {
+          typingIndicator.classList.add("hidden");
+        }
+      }
     }
 
-    // 한국어 입력 조합 이벤트 처리
+    // 한국어 입력 조합 이벤트 처리 - 에러 처리 추가
     chatInput.addEventListener("compositionstart", () => {
+      console.log("한국어 입력 조합 시작");
       isComposing = true;
     });
 
     chatInput.addEventListener("compositionend", () => {
+      console.log("한국어 입력 조합 종료");
       isComposing = false;
     });
 
     // 버튼 클릭
-    chatSend.addEventListener("click", sendMessage);
+    chatSend.addEventListener("click", () => {
+      console.log("전송 버튼 클릭됨");
+      sendMessage();
+    });
 
-    // 키보드 이벤트 (수정된 부분)
+    // 키보드 이벤트 (수정된 부분) - 에러 처리 강화
     chatInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
+        console.log("Enter 키 눌림, isComposing:", isComposing);
 
         // 조합 중이 아닐 때만 전송
         if (!isComposing) {
@@ -291,10 +429,13 @@
     window.addEventListener("message", (e) => {
       if (e?.data && e.data.__ENTRY_HELPER__ && e.data.type === "ENTRY_READY") {
         isEntryReady = true;
-        document.getElementById("entry-status").innerHTML = `
-        <span class="status-dot ready"></span>
-        <span class="status-text">준비 완료</span>
-      `;
+        const entryStatus = document.getElementById("entry-status");
+        if (entryStatus) {
+          entryStatus.innerHTML = `
+          <span class="status-dot ready"></span>
+          <span class="status-text">준비 완료</span>
+        `;
+        }
       }
     });
   }
@@ -307,6 +448,19 @@
     sidebar = createSidebar();
     setupEventListeners();
     injectEntryProbe();
+
+    // RAG 상태 로드 후 자동으로 활성화
+    loadRAGStatus();
+
+    // 1초 후에 RAG가 비활성화되어 있으면 자동으로 켜기
+    setTimeout(() => {
+      chrome.runtime.sendMessage({ action: "getSettings" }, (response) => {
+        if (response && !response.ragEnabled) {
+          console.log("RAG가 비활성화 상태 - 자동으로 활성화합니다");
+          toggleRAGMode(); // 자동으로 RAG 켜기
+        }
+      });
+    }, 1000);
 
     isInitialized = true;
     console.log("🚀 Entry Block Helper 초기화 완료");
