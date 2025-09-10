@@ -1,4 +1,7 @@
-// Entry Block Helper - Background Service Worker with OpenAI API
+// Entry Block Helper - Background Service Worker (RAG 비교 테스트용)
+
+// ===== RAG 테스트 설정 =====
+const USE_RAG = true; // 이것을 true/false로 바꿔가며 테스트
 
 // ===== API 키 설정 (사용자가 설정할 수 있도록 비워둠) =====
 const OPENAI_API_KEY = ""; // 사용자가 직접 설정하도록 비워둠
@@ -56,8 +59,8 @@ async function callOpenAI(messages, apiKey = null) {
   }
 }
 
-// ===== 교육적 시스템 프롬프트 =====
-const EDUCATIONAL_SYSTEM_PROMPT = `당신은 Entry(엔트리) 블록코딩을 가르치는 소크라테스식 튜터입니다.
+// ===== RAG 적용 시스템 프롬프트 =====
+const RAG_SYSTEM_PROMPT = `당신은 Entry(엔트리) 블록코딩을 가르치는 소크라테스식 튜터입니다.
 
 교육 철학:
 1. 학생이 스스로 생각하도록 단계적 질문으로 유도
@@ -83,8 +86,10 @@ Entry 핵심 개념:
 - 블록 조립소: 코드를 만드는 공간
 - 실행 화면: 결과를 보는 공간
 
-자주 사용하는 블록들 (추정):
-- "~키를 눌렀을 때" (시작 블록)
+자주 사용하는 블록들:
+- "시작하기 버튼을 클릭했을 때" (시작 블록)
+- "[q] 키를 눌렀을 때" (시작 블록)
+- "마우스를 클릭했을 때" (시작 블록)
 - "~만큼 움직이기" (움직임 블록)  
 - "복제하기" (모양 블록)
 - "~번 반복하기" (반복 블록)
@@ -95,22 +100,40 @@ Entry 핵심 개념:
 2단계 (힌트): "○○ 블록에서 ○○과 관련된 블록을 찾아보세요"
 3단계 (구체적): 정확한 블록 이름과 연결 방법 제시
 
-주의사항:
-- Entry의 정확한 블록 이름을 모르는 경우, "○○ 블록에서 ○○ 기능을 하는 블록"으로 안내
-- 블록 모양 정보 활용: 둥근 블록(값), 육각형 블록(조건), 일반 블록(명령)
-- Entry만의 특징 반영: 오브젝트 개념, 이벤트 기반 프로그래밍
-
 현재 Entry 프로젝트 상황: {context}
+선택된 모드: {mode}
+대화 횟수: {conversationCount}`;
+
+// ===== RAG 없는 일반 시스템 프롬프트 =====
+const GENERAL_SYSTEM_PROMPT = `당신은 프로그래밍을 가르치는 AI 튜터입니다.
+
+교육 철학:
+1. 학생이 스스로 생각하도록 단계적 질문으로 유도
+2. 답을 바로 주지 말고, 다음 단계를 생각해보도록 안내
+3. 막혔을 때 구체적인 도움 제시
+4. 성취감을 느낄 수 있도록 점진적 발견 과정 중시
+
+일반적인 프로그래밍 개념:
+- 이벤트: 프로그램이 시작되는 조건 (클릭, 키보드 입력 등)
+- 움직임: 객체의 위치나 방향 변경
+- 조건문: if-else 문을 통한 분기 처리
+- 반복문: for, while 등을 통한 반복 실행
+- 변수: 데이터를 저장하는 공간
+- 함수: 재사용 가능한 코드 블록
+
+블록 코딩 일반 원칙:
+- 시작 조건을 설정하는 블록이 필요
+- 동작을 정의하는 블록들을 연결
+- 조건에 따라 다른 동작을 하도록 분기
+- 반복이 필요한 경우 루프 블록 사용
+
+현재 프로젝트 상황: {context}
 선택된 모드: {mode}
 대화 횟수: {conversationCount}
 
-※ 중요: Entry의 정확한 블록 이름을 모르는 경우, 추측하지 말고 카테고리와 기능으로 안내하세요.
+참고: Entry 특화 정보가 부족하므로 일반적인 프로그래밍 원칙으로 안내드립니다.`;
 
-예시:
-❌ 잘못된 응답: "키보드 블록에서 '스페이스바 블록'을 사용하세요"  
-✅ 개선된 응답: "시작 블록에서 키보드 입력과 관련된 블록을 찾아보세요. 스페이스바를 눌렀을 때 실행되는 블록이 있을 거예요"`;
-
-// ===== 교육적 AI 응답 생성 ===== (누락된 함수)
+// ===== 교육적 AI 응답 생성 =====
 async function generateEducationalResponse(userMessage, mode, projectContext, conversationHistory = []) {
   try {
     // 사용자 API 키 가져오기
@@ -137,20 +160,39 @@ async function generateEducationalResponse(userMessage, mode, projectContext, co
       userMessage.includes("안 됩니다") ||
       conversationCount >= 3; // 3번째 시도 후
 
-    // 시스템 프롬프트에 대화 횟수 정보 포함
-    let systemPrompt = EDUCATIONAL_SYSTEM_PROMPT.replace("{context}", projectContext || "프로젝트 정보 없음")
+    // RAG 사용 여부에 따른 시스템 프롬프트 선택
+    let systemPrompt;
+    if (USE_RAG) {
+      systemPrompt = RAG_SYSTEM_PROMPT;
+      console.log("🔍 RAG 적용된 Entry 전문 지식 사용");
+    } else {
+      systemPrompt = GENERAL_SYSTEM_PROMPT;
+      console.log("📝 일반 프로그래밍 지식 사용 (RAG 비활성화)");
+    }
+
+    // 컨텍스트 정보 삽입
+    systemPrompt = systemPrompt
+      .replace("{context}", projectContext || "프로젝트 정보 없음")
       .replace("{mode}", getModeDescription(mode))
       .replace("{conversationCount}", conversationCount.toString());
 
     // 교육 단계별 지시사항 추가
     if (needsImmediateHelp) {
-      systemPrompt += `\n\n[중요] 학생이 도움을 요청했거나 여러 번 시도했습니다. 이제 구체적인 Entry 블록 이름과 단계별 방법을 직접 알려주세요.`;
+      if (USE_RAG) {
+        systemPrompt += `\n\n[중요] 학생이 도움을 요청했거나 여러 번 시도했습니다. 이제 구체적인 Entry 블록 이름과 단계별 방법을 직접 알려주세요.`;
+      } else {
+        systemPrompt += `\n\n[중요] 학생이 도움을 요청했거나 여러 번 시도했습니다. 이제 일반적인 블록코딩 원칙을 구체적으로 알려주세요.`;
+      }
     } else if (conversationCount === 0) {
       systemPrompt += `\n\n[중요] 첫 번째 질문입니다. 답을 바로 주지 말고 학생이 생각해볼 수 있는 유도 질문을 해주세요.`;
     } else if (conversationCount === 1) {
       systemPrompt += `\n\n[중요] 두 번째 시도입니다. 힌트를 주되 아직 완전한 답은 주지 마세요.`;
     } else {
-      systemPrompt += `\n\n[중요] 여러 번 시도했습니다. 구체적인 블록 이름을 알려주세요.`;
+      if (USE_RAG) {
+        systemPrompt += `\n\n[중요] 여러 번 시도했습니다. 구체적인 Entry 블록 이름을 알려주세요.`;
+      } else {
+        systemPrompt += `\n\n[중요] 여러 번 시도했습니다. 구체적인 블록코딩 방법을 알려주세요.`;
+      }
     }
 
     const messages = [
@@ -161,88 +203,13 @@ async function generateEducationalResponse(userMessage, mode, projectContext, co
 
     const response = await callOpenAI(messages, apiKey);
 
-    // 사용량 로깅
-    await logUsageStats(userMessage.length, response.length, mode);
+    // 사용량 로깅 (RAG 사용 여부 포함)
+    await logUsageStats(userMessage.length, response.length, mode, USE_RAG);
 
-    console.log(`교육적 응답 생성 - 대화횟수: ${conversationCount}, 즉시도움: ${needsImmediateHelp}`);
     return response;
   } catch (error) {
     console.error("AI 응답 생성 실패:", error);
     return getFallbackResponse(error.message);
-  }
-}
-
-// Entry 프로젝트 컨텍스트 수집 함수
-function gatherProjectContext() {
-  try {
-    // content.js에서는 isEntryReady를 사용하지만 background.js에서는 안전하게 처리
-    if (typeof Entry === "undefined") {
-      return "Entry가 아직 준비되지 않았습니다.";
-    }
-
-    const context = [];
-
-    // 현재 오브젝트 정보
-    const currentObject = Entry.playground?.object;
-    if (currentObject) {
-      context.push(`현재 오브젝트: ${currentObject.name || "이름없음"}`);
-
-      // 블록 정보 (더 안전한 방식)
-      try {
-        const script = currentObject.script;
-        if (script && script.getBlockList) {
-          const blockList = script.getBlockList();
-          if (Array.isArray(blockList)) {
-            context.push(`사용된 블록 수: ${blockList.length}개`);
-
-            // 블록 카테고리 분석 (Entry 특화)
-            const blockCategories = new Set();
-            blockList.forEach((block) => {
-              if (block && block.type) {
-                // Entry 블록 타입에서 카테고리 추출
-                const type = block.type.toString();
-                if (type.includes("event")) blockCategories.add("시작");
-                if (type.includes("move") || type.includes("locate")) blockCategories.add("움직임");
-                if (type.includes("looks") || type.includes("shape")) blockCategories.add("모양");
-                if (type.includes("sound")) blockCategories.add("소리");
-                if (type.includes("repeat") || type.includes("while")) blockCategories.add("반복");
-                if (type.includes("if") || type.includes("compare")) blockCategories.add("판단");
-              }
-            });
-
-            if (blockCategories.size > 0) {
-              context.push(`사용된 블록 카테고리: ${Array.from(blockCategories).join(", ")}`);
-            }
-          }
-        }
-      } catch (blockError) {
-        context.push("블록 정보 수집 중 오류 발생");
-      }
-    }
-
-    // 전체 오브젝트 수
-    try {
-      const objects = Entry.container?.getAllObjects?.();
-      if (Array.isArray(objects)) {
-        context.push(`총 오브젝트 수: ${objects.length}개`);
-
-        // 오브젝트 이름들
-        const objectNames = objects
-          .map((obj) => obj && obj.name)
-          .filter((name) => name)
-          .slice(0, 3); // 처음 3개만
-
-        if (objectNames.length > 0) {
-          context.push(`오브젝트들: ${objectNames.join(", ")}`);
-        }
-      }
-    } catch (objectError) {
-      context.push("오브젝트 정보 수집 중 오류 발생");
-    }
-
-    return context.length > 0 ? context.join(" | ") : "Entry 프로젝트 정보 수집 완료";
-  } catch (error) {
-    return `컨텍스트 수집 오류: ${error.message}`;
   }
 }
 
@@ -285,6 +252,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({
           ...data,
           hasApiKey: !!data.openai_api_key,
+          ragEnabled: USE_RAG, // RAG 사용 여부 추가
           openai_api_key: undefined, // 실제 키는 전달하지 않음
         });
       });
@@ -318,8 +286,8 @@ async function handleAIRequest(request) {
   return await generateEducationalResponse(message, mode, projectContext, conversationHistory);
 }
 
-// ===== 사용량 통계 =====
-async function logUsageStats(messageLength, responseLength, mode) {
+// ===== 사용량 통계 (RAG 사용 여부 포함) =====
+async function logUsageStats(messageLength, responseLength, mode, ragUsed) {
   const today = new Date().toISOString().split("T")[0];
   const stats = await new Promise((resolve) => {
     chrome.storage.local.get([`stats_${today}`], resolve);
@@ -329,18 +297,28 @@ async function logUsageStats(messageLength, responseLength, mode) {
     totalRequests: 0,
     totalTokens: 0,
     modeUsage: {},
+    ragUsage: { withRAG: 0, withoutRAG: 0 }, // RAG 사용 통계 추가
   };
 
   todayStats.totalRequests++;
   todayStats.totalTokens += Math.ceil((messageLength + responseLength) / 4);
   todayStats.modeUsage[mode] = (todayStats.modeUsage[mode] || 0) + 1;
 
+  // RAG 사용 통계
+  if (ragUsed) {
+    todayStats.ragUsage.withRAG++;
+  } else {
+    todayStats.ragUsage.withoutRAG++;
+  }
+
   chrome.storage.local.set({
     [`stats_${today}`]: todayStats,
   });
+
+  console.log(`📊 사용량 기록: RAG ${ragUsed ? "ON" : "OFF"}, 모드: ${mode}`);
 }
 
-// ===== 엔트리 탭 열기/포커스 & 사이드바 토글 유틸 =====
+// 나머지 코드는 기존과 동일...
 const ENTRY_URL = "https://playentry.org/";
 const ENTRY_MATCH = /^https?:\/\/([a-z0-9-]+\.)?playentry\.org/i;
 
@@ -399,9 +377,3 @@ async function openOrFocusEntryAndToggle(fromTab) {
   const loaded = await waitTabComplete(created.id);
   setTimeout(() => sendToggle((loaded || created).id), 300);
 }
-
-// ===== 아이콘 클릭 핸들러 =====
-// 팝업이 설정되어 있으므로 이 핸들러는 비활성화
-// chrome.action.onClicked.addListener((tab) => {
-//   openOrFocusEntryAndToggle(tab);
-// });
