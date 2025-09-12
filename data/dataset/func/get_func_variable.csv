@@ -1,0 +1,6 @@
+﻿id,task_type,block_id,question,cot_steps,answer
+get_func_variable_001,explain,get_func_variable,,,
+get_func_variable_002,explain,get_func_variable,,,
+get_func_variable_003,explain,get_func_variable,,,
+get_func_variable_004,explain,get_func_variable,,,
+get_func_variable_005,explain,get_func_variable,,,

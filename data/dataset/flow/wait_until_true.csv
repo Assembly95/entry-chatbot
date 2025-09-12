@@ -1,0 +1,6 @@
+﻿id,task_type,block_id,question,cot_steps,answer
+wait_until_true_001,explain,wait_until_true,,,
+wait_until_true_002,explain,wait_until_true,,,
+wait_until_true_003,explain,wait_until_true,,,
+wait_until_true_004,explain,wait_until_true,,,
+wait_until_true_005,explain,wait_until_true,,,

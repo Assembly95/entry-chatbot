@@ -1,0 +1,296 @@
+{
+  "id": "direction_absolute",
+  "category": "move",
+  "name": "이동 방향을 [각도]로 정하기",
+  "description": "오브젝트의 이동 방향을 입력한 각도로 직접 설정합니다. 현재 방향과 상관없이 지정한 절대 각도로 방향을 변경하며, 0도는 오른쪽, 90도는 위쪽, 180도는 왼쪽, 270도는 아래쪽을 향합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "절대 좌표계와 각도 개념의 이해 및 블록코딩 적용",
+      "상대적 방향 변경과 절대적 방향 설정의 차이점 학습",
+      "각도를 이용한 정밀한 방향 제어 방법 습득",
+      "나침반과 같은 절대 방향 개념을 프로그래밍으로 구현",
+      "게임과 애니메이션에서 정확한 방향 제어의 중요성 이해"
+    ],
+    "key_concepts": [
+      {
+        "concept": "절대 방향 (Absolute Direction)",
+        "explanation": "현재 상태와 관계없이 고정된 기준점(0도=오른쪽)에서 측정한 방향으로, 항상 동일한 각도는 동일한 방향을 의미"
+      },
+      {
+        "concept": "각도 좌표계 (Angular Coordinate System)",
+        "explanation": "Entry에서 사용하는 각도 체계로 0도(오른쪽)에서 시계방향으로 증가하여 90도(위), 180도(왼쪽), 270도(아래)를 나타냄"
+      },
+      {
+        "concept": "방향 초기화 (Direction Reset)",
+        "explanation": "이전 방향 변화를 무시하고 새로운 절대 방향으로 완전히 재설정하는 방식"
+      },
+      {
+        "concept": "정밀 제어 (Precision Control)",
+        "explanation": "특정 각도로 정확히 설정할 수 있어 세밀한 방향 제어와 예측 가능한 움직임 구현 가능"
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": [
+      "Entry 기본 인터페이스 사용법",
+      "각도와 방향의 기본 개념 이해",
+      "상대적 방향 변경 블록 사용 경험",
+      "좌표계와 기본 방향(상하좌우) 개념 숙지"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "기본 방향 설정",
+      "description": "특정 방향으로 정확히 설정하기",
+      "blocks": [
+        "when_run_button_click",
+        "direction_absolute(0)",
+        "move_direction(100)",
+        "wait_second(1)",
+        "direction_absolute(90)",
+        "move_direction(100)",
+        "wait_second(1)",
+        "direction_absolute(180)",
+        "move_direction(100)"
+      ],
+      "explanation": "오른쪽(0도), 위쪽(90도), 왼쪽(180도) 순서로 정확한 방향을 설정하고 각 방향으로 이동합니다."
+    },
+    {
+      "title": "시계 바늘 움직임",
+      "description": "시계처럼 정확한 각도로 움직이는 애니메이션",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('시간', 0)",
+        "repeat_basic(12)",
+        "  direction_absolute(get_variable('시간') * 30)",
+        "  move_direction(80)",
+        "  wait_second(0.5)",
+        "  move_direction(-80)",
+        "  set_variable('시간', get_variable('시간') + 1)"
+      ],
+      "explanation": "0도부터 30도씩 증가하여 시계 바늘처럼 12방향으로 정확히 움직이는 애니메이션을 만듭니다."
+    },
+    {
+      "title": "마우스 방향으로 정렬",
+      "description": "계산을 통해 마우스를 향하는 정확한 각도 설정",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_inf",
+        "  set_variable('x거리', coordinate_mouse('x') - coordinate_object('이 오브젝트', 'x'))",
+        "  set_variable('y거리', coordinate_mouse('y') - coordinate_object('이 오브젝트', 'y'))",
+        "  set_variable('각도', calc_operation('atan2', get_variable('y거리'), get_variable('x거리')))",
+        "  direction_absolute(get_variable('각도'))",
+        "  move_direction(3)",
+        "  wait_second(0.1)"
+      ],
+      "explanation": "마우스 위치를 계산하여 정확한 각도를 구하고, 그 방향으로 오브젝트가 따라가도록 합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "원하는 방향으로 정확히 가지 않아요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "Entry에서 0도는 오른쪽, 90도는 위쪽, 180도는 왼쪽, 270도는 아래쪽이에요."
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "각도가 정확한지 확인해보세요. 45도는 오른쪽 위 대각선, 135도는 왼쪽 위 대각선이에요."
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "'계산' 카테고리의 '[오브젝트]의 방향 값' 블록으로 현재 방향을 확인할 수 있어요."
+        }
+      ]
+    },
+    {
+      "situation": "각도를 어떻게 계산해야 할지 모르겠어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "원 위의 시계방향으로 0도부터 360도까지 생각해보세요. 시계의 3시가 0도에요."
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "기본 방향부터 익혀보세요: 오른쪽(0도), 위(90도), 왼쪽(180도), 아래(270도)"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "대각선은 45도씩 더해요: 오른쪽 위(45도), 왼쪽 위(135도), 왼쪽 아래(225도), 오른쪽 아래(315도)"
+        }
+      ]
+    },
+    {
+      "situation": "방향이 자꾸 바뀌어서 헷갈려요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "이 블록은 절대 방향으로 설정하므로, 이전 방향과 상관없이 항상 같은 각도면 같은 방향이에요."
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "헷갈릴 때는 90도(위쪽)로 먼저 설정해서 확인해보세요."
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "상대적 방향 변경 블록과 섞어 쓰면 헷갈릴 수 있어요. 절대 방향 블록만 사용해보세요."
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "일반적인 각도 개념과 Entry 각도 체계를 혼동",
+      "why_it_happens": "수학에서는 0도가 오른쪽이고 반시계방향이지만, Entry에서는 시계방향으로 증가함을 놓침",
+      "consequence": "예상한 방향과 다른 방향으로 이동하거나 각도 계산이 틀림",
+      "solution": "Entry의 각도 체계(0도=오른쪽, 시계방향 증가)를 명확히 이해하고 기본 방향부터 테스트",
+      "teaching_moment": "시계를 보면서 3시 방향이 0도, 12시 방향이 90도라는 걸 기억하세요."
+    },
+    {
+      "mistake": "상대 방향 변경과 절대 방향 설정을 혼용하여 사용",
+      "why_it_happens": "두 블록의 차이점을 명확히 구분하지 못하고 섞어서 사용",
+      "consequence": "예측하기 어려운 복잡한 방향 변화로 인한 혼란",
+      "solution": "한 가지 방식을 선택하여 일관성 있게 사용하거나, 각각의 특성을 이해하고 적절히 조합",
+      "teaching_moment": "나침반으로 정확한 방향을 찾는 것(절대)과 현재 보는 방향에서 오른쪽으로 도는 것(상대)은 다른 방법이에요."
+    },
+    {
+      "mistake": "360도를 초과하는 각도나 음수 각도 사용으로 인한 혼란",
+      "why_it_happens": "각도의 순환 특성을 이해하지 못하고 큰 수나 음수를 사용",
+      "consequence": "예상치 못한 방향으로 이동하거나 의도와 다른 결과",
+      "solution": "0도~359도 범위 내에서 사용하거나, 360도 순환 특성을 이해하여 계산",
+      "teaching_moment": "시계가 12시를 지나면 다시 1시가 되듯이, 360도를 지나면 다시 0도가 되는 원리예요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "절대 방향 블록 찾기",
+      "instruction": "블록 팔레트에서 '움직임' 카테고리를 클릭하세요.",
+      "visual_hint": "파란색 화살표 아이콘이 있는 카테고리를 찾아보세요."
+    },
+    {
+      "step": 2,
+      "title": "방향 정하기 블록 선택",
+      "instruction": "'이동 방향을 [ ]로 정하기' 블록을 작업 영역으로 드래그하세요.",
+      "visual_hint": "각도 입력칸과 직선 화살표가 있는 블록을 찾아보세요."
+    },
+    {
+      "step": 3,
+      "title": "목표 각도 설정",
+      "instruction": "각도 입력칸에 원하는 방향의 각도를 입력하세요.",
+      "visual_hint": "0도(오른쪽), 90도(위쪽), 180도(왼쪽), 270도(아래쪽)를 기준으로 하세요."
+    },
+    {
+      "step": 4,
+      "title": "시작 블록과 연결",
+      "instruction": "시작 블록이나 다른 실행 블록과 연결하세요.",
+      "visual_hint": "방향 설정 후 '움직이기' 블록과 함께 사용하면 효과를 확인할 수 있어요."
+    },
+    {
+      "step": 5,
+      "title": "실행 및 확인",
+      "instruction": "방향 설정 후 '움직이기' 블록으로 새로운 방향으로의 이동을 확인하세요.",
+      "visual_hint": "여러 각도를 테스트해서 Entry의 각도 체계를 익혀보세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_name": "[값]도 만큼 방향 바꾸기",
+      "relationship": "절대 방향 vs 상대 방향",
+      "explanation": "절대적 방향 설정과 상대적 방향 변경의 차이점을 비교하여 각각의 활용법 이해"
+    },
+    {
+      "block_name": "[값]만큼 움직이기",
+      "relationship": "방향 기반 이동",
+      "explanation": "방향 설정 후 이 블록으로 설정한 방향으로 이동하여 방향 설정 효과 확인"
+    },
+    {
+      "block_name": "[오브젝트/마우스] 쪽으로 회전하기",
+      "relationship": "자동 방향 설정",
+      "explanation": "각도 계산 없이 특정 대상을 향하는 방향으로 자동 설정하는 편리한 방법"
+    },
+    {
+      "block_name": "[오브젝트]의 방향 값",
+      "relationship": "현재 방향 확인",
+      "explanation": "현재 설정된 방향을 확인하여 방향 변경 계획을 세울 때 활용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "설정한 각도와 다른 방향으로 이동해요",
+      "possible_causes": [
+        "Entry 각도 체계와 일반 수학 각도 체계 혼동",
+        "360도를 초과하거나 음수 각도 사용",
+        "각도 입력값 오타나 계산 실수"
+      ],
+      "solutions": [
+        "Entry 각도 체계 재확인: 0도(오른쪽), 90도(위쪽) 기준으로 테스트",
+        "0~359도 범위 내의 각도 사용하여 테스트",
+        "간단한 각도(0, 90, 180, 270도)부터 시작하여 점진적으로 복잡한 각도 시도"
+      ]
+    },
+    {
+      "problem": "방향 설정이 제대로 안 되는 것 같아요",
+      "possible_causes": [
+        "방향 설정 후 움직임이 없어서 변화 확인 불가",
+        "다른 블록에서 방향을 다시 변경",
+        "시각적으로 방향을 확인할 수 없는 대칭적인 모양"
+      ],
+      "solutions": [
+        "방향 설정 후 '~만큼 움직이기' 블록으로 이동 테스트",
+        "방향을 변경하는 다른 블록들과의 실행 순서 확인",
+        "화살표나 삼각형 등 방향성이 있는 모양 사용"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "나침반 사용법",
+      "explanation": "나침반으로 정확한 방향(동서남북)을 찾아 그 방향으로 가는 것처럼 절대 방향을 설정합니다."
+    },
+    {
+      "analogy": "GPS 내비게이션",
+      "explanation": "GPS에서 '북쪽으로 가세요'라고 할 때처럼 절대적인 방향 지시를 하는 것과 같습니다."
+    },
+    {
+      "analogy": "시계 바늘 위치",
+      "explanation": "시계에서 바늘이 정확히 3시, 6시, 9시, 12시 방향을 가리키는 것처럼 정확한 방향 설정입니다."
+    },
+    {
+      "analogy": "건물 설계도의 방향",
+      "explanation": "건축 설계도에서 정북, 정동, 정서, 정남 방향을 표시하는 것처럼 고정된 기준 방향을 사용합니다."
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "절대 방향 설정 블록을 사용하여 오브젝트를 원하는 방향(상하좌우)으로 정확히 설정할 수 있다"
+    },
+    {
+      "level": "중급",
+      "criteria": "Entry의 각도 체계를 이해하여 대각선 방향이나 특정 각도로 정확히 설정하고, 절대 방향과 상대 방향의 차이를 구분하여 적절히 사용할 수 있다"
+    },
+    {
+      "level": "고급",
+      "criteria": "삼각함수나 계산 블록을 활용하여 동적으로 각도를 계산하고, 복잡한 움직임 패턴에서 절대 방향과 상대 방향을 전략적으로 조합하여 사용할 수 있다"
+    }
+  ]
+}

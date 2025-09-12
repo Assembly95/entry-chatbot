@@ -1,0 +1,6 @@
+﻿id,task_type,block_id,question,cot_steps,answer
+boolean_basic_operator_001,explain,boolean_basic_operator,,,
+boolean_basic_operator_002,explain,boolean_basic_operator,,,
+boolean_basic_operator_003,explain,boolean_basic_operator,,,
+boolean_basic_operator_004,explain,boolean_basic_operator,,,
+boolean_basic_operator_005,explain,boolean_basic_operator,,,

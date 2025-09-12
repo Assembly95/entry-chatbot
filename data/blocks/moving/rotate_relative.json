@@ -1,0 +1,281 @@
+{
+  "id": "rotate_relative",
+  "category": "move",
+  "name": "[값]도 만큼 회전하기",
+  "description": "오브젝트의 현재 회전 각도에서 입력한 각도만큼 더하거나 빼서 오브젝트의 모양을 시각적으로 회전시킵니다. 양수는 시계방향으로, 음수는 반시계방향으로 회전하며, 이동 방향과는 별개로 오브젝트의 외관만 변화시킵니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "시각적 회전과 이동 방향의 차이점 이해",
+      "상대적 각도 변화를 통한 회전 제어 학습",
+      "시계방향과 반시계방향 회전의 방향성 개념 습득",
+      "애니메이션에서 회전 효과를 활용한 시각적 표현 구현",
+      "각도 누적을 통한 연속 회전 애니메이션 제작"
+    ],
+    "key_concepts": [
+      {
+        "concept": "오브젝트 회전 (Object Rotation)",
+        "explanation": "오브젝트의 외관이나 모양을 중심점을 기준으로 돌리는 것으로, 움직임의 방향과는 독립적으로 시각적 효과를 만드는 방법"
+      },
+      {
+        "concept": "상대적 회전 (Relative Rotation)",
+        "explanation": "현재 회전 상태를 기준으로 추가적인 각도만큼 더 회전시키는 방식으로, 절대적인 각도 설정과 구분됨"
+      },
+      {
+        "concept": "회전과 이동의 분리",
+        "explanation": "오브젝트의 시각적 회전(모양 변화)과 이동 방향(움직임 방향)은 서로 독립적으로 제어할 수 있는 별개의 속성"
+      },
+      {
+        "concept": "각도 누적 효과 (Angle Accumulation)",
+        "explanation": "회전 블록이 반복 실행될 때마다 이전 회전 각도에 새로운 변화량이 더해져서 연속적인 회전 효과 생성"
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": [
+      "Entry 기본 인터페이스 사용법",
+      "각도와 회전의 기본 개념 이해",
+      "방향 관련 블록 사용 경험",
+      "시각적 효과와 움직임 제어의 차이 구분"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "기본 회전 애니메이션",
+      "description": "오브젝트를 계속 회전시키는 간단한 애니메이션",
+      "blocks": ["when_run_button_click", "repeat_inf", "  rotate_relative(10)", "  wait_second(0.1)"],
+      "explanation": "시작 버튼을 누르면 오브젝트가 0.1초마다 10도씩 시계방향으로 계속 회전합니다."
+    },
+    {
+      "title": "속도 변화하는 회전",
+      "description": "점점 빨라지거나 느려지는 회전 효과",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('회전속도', 1)",
+        "repeat_basic(50)",
+        "  rotate_relative(get_variable('회전속도'))",
+        "  set_variable('회전속도', get_variable('회전속도') + 2)",
+        "  wait_second(0.05)"
+      ],
+      "explanation": "1도부터 시작해서 2도씩 회전 속도가 증가하면서 점점 빠르게 회전하는 효과를 만듭니다."
+    },
+    {
+      "title": "좌우 흔들리는 효과",
+      "description": "일정 범위에서 좌우로 흔들리는 진동 효과",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('방향', 1)",
+        "repeat_inf",
+        "  rotate_relative(get_variable('방향') * 5)",
+        "  if_condition(coordinate_object('이 오브젝트', '회전방향') > 30)",
+        "    set_variable('방향', -1)",
+        "  if_condition(coordinate_object('이 오브젝트', '회전방향') < -30)",
+        "    set_variable('방향', 1)",
+        "  wait_second(0.1)"
+      ],
+      "explanation": "오브젝트가 -30도에서 30도 사이에서 좌우로 흔들리는 진동 효과를 만듭니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "오브젝트가 회전하지 않는 것 같아요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "회전 각도가 너무 작으면 변화를 보기 어려워요. 45도나 90도로 먼저 테스트해보세요."
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "원형이나 대칭적인 모양은 회전해도 변화가 잘 안 보여요. 화살표나 삼각형 모양을 사용해보세요."
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "한 번만 실행하면 변화를 놓칠 수 있어요. 반복 블록과 함께 사용해보세요."
+        }
+      ]
+    },
+    {
+      "situation": "회전이 너무 빨라요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "회전 각도를 더 작게 만들어보세요. 1-10도 정도가 부드러운 회전에 적당해요."
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'흐름' 카테고리의 '~초 기다리기' 블록을 사용해서 회전 속도를 조절하세요."
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "반복 블록 안에서 사용할 때는 대기 시간을 늘려서 속도를 조절할 수 있어요."
+        }
+      ]
+    },
+    {
+      "situation": "반대 방향으로 회전시키고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "양수는 시계방향, 음수는 반시계방향으로 회전해요."
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "현재 양수를 사용하고 있다면 음수로, 음수를 사용하고 있다면 양수로 바꿔보세요."
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "'계산' 카테고리의 마이너스 연산을 사용해서 방향을 바꿀 수도 있어요."
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "회전과 방향 변경을 혼동",
+      "why_it_happens": "오브젝트의 시각적 회전과 이동 방향을 같은 개념으로 이해",
+      "consequence": "회전시켜도 움직임 방향은 바뀌지 않아서 예상과 다른 결과",
+      "solution": "'회전하기'는 모양만 바뀌고, '방향 바꾸기'는 움직임 방향이 바뀐다는 점을 구분",
+      "teaching_moment": "시계 바늘이 돌아도 시계 자체는 그 자리에 있는 것처럼, 회전과 이동은 별개예요."
+    },
+    {
+      "mistake": "대칭적인 모양으로 회전 효과를 테스트",
+      "why_it_happens": "원형이나 정사각형 등 대칭적인 모양을 사용하여 회전 변화를 확인하기 어려움",
+      "consequence": "실제로는 회전하고 있지만 시각적으로 변화가 보이지 않음",
+      "solution": "화살표, 삼각형, 또는 비대칭적인 모양을 사용하여 회전 효과 확인",
+      "teaching_moment": "동전을 돌려도 앞뒤가 같으면 돌고 있는지 모르는 것처럼, 모양의 특징이 중요해요."
+    },
+    {
+      "mistake": "너무 큰 각도로 회전시켜서 어지러운 효과",
+      "why_it_happens": "큰 각도가 더 인상적일 것이라는 생각으로 180도, 360도 등을 사용",
+      "consequence": "부자연스럽고 어지러운 회전으로 인한 시각적 혼란",
+      "solution": "10-45도 정도의 작은 각도를 반복해서 부드러운 회전 효과 만들기",
+      "teaching_moment": "춤을 출 때도 한 번에 여러 바퀴 도는 것보다 조금씩 돌면서 리듬을 타는 게 아름다워요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "회전 블록 찾기",
+      "instruction": "블록 팔레트에서 '움직임' 카테고리를 클릭하세요.",
+      "visual_hint": "파란색 화살표 아이콘이 있는 카테고리를 찾아보세요."
+    },
+    {
+      "step": 2,
+      "title": "회전하기 블록 선택",
+      "instruction": "'[ ]도 만큼 회전하기' 블록을 작업 영역으로 드래그하세요.",
+      "visual_hint": "각도 입력칸과 원형 화살표 모양이 있는 블록을 찾아보세요."
+    },
+    {
+      "step": 3,
+      "title": "회전 각도 설정",
+      "instruction": "각도 입력칸에 회전하고 싶은 각도를 입력하세요.",
+      "visual_hint": "양수는 시계방향, 음수는 반시계방향으로 회전해요."
+    },
+    {
+      "step": 4,
+      "title": "시작 블록과 연결",
+      "instruction": "시작 블록이나 다른 실행 블록과 연결하세요.",
+      "visual_hint": "반복 블록과 함께 사용하면 연속 회전 효과를 만들 수 있어요."
+    },
+    {
+      "step": 5,
+      "title": "실행 및 확인",
+      "instruction": "프로그램을 실행해서 오브젝트가 회전하는지 확인하세요.",
+      "visual_hint": "회전을 잘 보려면 비대칭적인 모양의 오브젝트를 사용하세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_name": "[값]도 만큼 방향 바꾸기",
+      "relationship": "회전 vs 방향 변경",
+      "explanation": "시각적 회전과 이동 방향 변경의 차이점을 비교하여 각각의 역할 이해"
+    },
+    {
+      "block_name": "회전 방향을 [각도]로 정하기",
+      "relationship": "상대 회전 vs 절대 회전",
+      "explanation": "상대적 회전 변화와 절대적 회전 설정의 차이점 비교"
+    },
+    {
+      "block_name": "[시간]초 동안 [값]도 만큼 회전하기",
+      "relationship": "즉시 회전 vs 시간 기반 회전",
+      "explanation": "즉시 회전과 시간에 걸친 부드러운 회전의 차이점 학습"
+    },
+    {
+      "block_name": "[오브젝트]의 회전방향 값",
+      "relationship": "현재 회전 상태 확인",
+      "explanation": "현재 회전 각도를 확인하여 조건부 회전이나 회전 제한에 활용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "오브젝트가 너무 빠르게 회전해요",
+      "possible_causes": [
+        "회전 각도가 너무 크게 설정",
+        "대기 시간 없이 연속으로 회전 블록 실행",
+        "반복 블록에서 과도한 회전 속도"
+      ],
+      "solutions": [
+        "회전 각도를 5-15도 정도로 줄이기",
+        "'~초 기다리기' 블록으로 회전 간격 조절",
+        "반복 횟수를 줄이거나 대기 시간 늘리기"
+      ]
+    },
+    {
+      "problem": "회전하는 것이 잘 보이지 않아요",
+      "possible_causes": ["원형이나 대칭적인 모양 사용", "회전 각도가 너무 작음", "배경색과 오브젝트 색이 비슷"],
+      "solutions": [
+        "화살표, 삼각형 등 방향성이 있는 모양 사용",
+        "회전 각도를 30-90도로 크게 설정하여 테스트",
+        "배경과 대비되는 색상의 오브젝트 사용"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "바람개비 회전",
+      "explanation": "바람을 받아 돌아가는 바람개비처럼 오브젝트가 그 자리에서 빙빙 돌아가는 모습입니다."
+    },
+    {
+      "analogy": "시계 바늘의 움직임",
+      "explanation": "시계 바늘이 시간에 따라 조금씩 돌아가는 것처럼 일정한 각도로 계속 회전합니다."
+    },
+    {
+      "analogy": "팽이 돌기",
+      "explanation": "팽이가 한 자리에서 빠르게 회전하는 것처럼 오브젝트가 중심을 기준으로 돌아갑니다."
+    },
+    {
+      "analogy": "문짝 열고 닫기",
+      "explanation": "문이 경첩을 중심으로 열리고 닫히는 것처럼 특정 지점을 중심으로 회전합니다."
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "회전하기 블록을 사용하여 오브젝트를 시계방향이나 반시계방향으로 회전시킬 수 있다"
+    },
+    {
+      "level": "중급",
+      "criteria": "양수와 음수를 구분하여 원하는 방향으로 회전시키고, 반복 블록과 조합하여 연속 회전 애니메이션을 만들 수 있다"
+    },
+    {
+      "level": "고급",
+      "criteria": "변수와 조건 블록을 활용하여 회전 속도나 방향이 동적으로 변화하는 복합적인 회전 효과를 구현하고, 회전과 이동을 적절히 조합할 수 있다"
+    }
+  ]
+}

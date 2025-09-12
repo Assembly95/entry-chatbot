@@ -1,0 +1,281 @@
+{
+  "id": "move_xy_time",
+  "category": "move",
+  "name": "[시간]초 동안 x: [x값], y: [y값] 만큼 움직이기",
+  "description": "지정한 시간 동안 현재 위치에서 x값과 y값만큼 부드럽게 이동합니다. 시간에 따라 일정한 속도로 대각선이나 곡선 형태의 자연스러운 움직임을 만들 수 있습니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "시간 기반 애니메이션의 개념과 구현 방법 이해",
+      "x축과 y축을 동시에 제어하는 2차원 이동 학습",
+      "부드러운 움직임과 급작스러운 움직임의 차이점 체험",
+      "시간, 거리, 속도의 관계를 프로그래밍으로 표현",
+      "게임이나 애니메이션에서 사용하는 트윈(Tween) 개념 습득"
+    ],
+    "key_concepts": [
+      {
+        "concept": "트윈 애니메이션 (Tween Animation)",
+        "explanation": "시작점과 끝점을 정하고 그 사이를 자동으로 보간하여 부드러운 움직임을 만드는 애니메이션 기법"
+      },
+      {
+        "concept": "벡터 이동 (Vector Movement)",
+        "explanation": "x값과 y값을 조합하여 방향과 크기를 가진 벡터로 이동하는 방식, 대각선 이동의 핵심"
+      },
+      {
+        "concept": "시간 기반 제어 (Time-based Control)",
+        "explanation": "프레임 단위가 아닌 실제 시간을 기준으로 애니메이션을 제어하여 일정한 속도 보장"
+      },
+      {
+        "concept": "선형 보간 (Linear Interpolation)",
+        "explanation": "시작 위치에서 목표 위치까지 시간에 비례하여 일정하게 분할된 위치를 계산하는 수학적 방법"
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": [
+      "x좌표와 y좌표 개별 이동 블록 사용 경험",
+      "좌표계와 벡터의 기본 개념 이해",
+      "시간과 속도의 관계 이해",
+      "반복 블록과 대기 블록 사용 경험"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "부드러운 대각선 이동",
+      "description": "오브젝트를 대각선으로 자연스럽게 이동시키기",
+      "blocks": ["when_run_button_click", "move_xy_time(3, 100, 100)", "move_xy_time(2, -50, 50)", "move_xy_time(1, -50, -150)"],
+      "explanation": "3초 동안 오른쪽 위로, 2초 동안 왼쪽 위로, 1초 동안 왼쪽 아래로 순차적으로 부드럽게 이동합니다."
+    },
+    {
+      "title": "원형 궤도 시뮬레이션",
+      "description": "삼각함수를 활용한 원형 이동",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('각도', 0)",
+        "repeat_inf",
+        "  set_variable('x이동', calc_operation('cos', get_variable('각도')) * 50)",
+        "  set_variable('y이동', calc_operation('sin', get_variable('각도')) * 50)",
+        "  move_xy_time(0.1, get_variable('x이동'), get_variable('y이동'))",
+        "  set_variable('각도', get_variable('각도') + 10)"
+      ],
+      "explanation": "삼각함수를 사용하여 원형 궤도를 따라 부드럽게 회전하는 움직임을 구현합니다."
+    },
+    {
+      "title": "키보드 제어 부드러운 이동",
+      "description": "사용자 입력에 반응하는 자연스러운 이동",
+      "blocks": [
+        "when_some_key_pressed('오른쪽 화살표')",
+        "move_xy_time(0.3, 30, 0)",
+        "when_some_key_pressed('위쪽 화살표')",
+        "move_xy_time(0.3, 0, 30)",
+        "when_some_key_pressed('아래쪽 화살표')",
+        "move_xy_time(0.3, 0, -30)",
+        "when_some_key_pressed('왼쪽 화살표')",
+        "move_xy_time(0.3, -30, 0)"
+      ],
+      "explanation": "화살표 키 입력 시 각 방향으로 0.3초에 걸쳐 부드럽게 이동하여 자연스러운 조작감을 제공합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "오브젝트가 움직이지 않아요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "시간, x값, y값이 모두 0이 아닌 숫자인지 확인해보세요."
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "이 블록은 실행 중에는 다른 블록들이 기다리게 됩니다. 블록이 끝날 때까지 기다려보세요."
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "시간이 너무 짧으면 움직임이 보이지 않을 수 있어요. 1초 이상으로 시도해보세요."
+        }
+      ]
+    },
+    {
+      "situation": "움직임이 부자연스러워요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "이동 거리에 비해 시간이 너무 짧거나 길 수 있어요. 적절한 비율로 조정해보세요."
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "여러 개의 이동 블록을 연속으로 사용하면 더 자연스러운 경로를 만들 수 있어요."
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "곡선 움직임을 원한다면 작은 이동을 여러 번 반복하는 방법도 있어요."
+        }
+      ]
+    },
+    {
+      "situation": "대각선으로 움직이게 하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "x값과 y값을 동시에 0이 아닌 숫자로 설정하면 대각선으로 이동해요."
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "오른쪽 위로 가려면 x값과 y값을 모두 양수로, 왼쪽 아래로 가려면 모두 음수로 설정하세요."
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "x값과 y값의 크기 비율이 대각선의 기울기를 결정해요."
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "시간 값을 0으로 설정",
+      "why_it_happens": "즉시 이동시키려고 시간을 0으로 설정",
+      "consequence": "이동이 일어나지 않거나 예기치 않은 동작 발생",
+      "solution": "최소 0.1초 이상의 시간 값을 사용하여 부드러운 애니메이션 구현",
+      "teaching_moment": "애니메이션은 시간의 흐름이 있어야 보기 좋아요. 너무 빠르면 티가 안 나요."
+    },
+    {
+      "mistake": "이동 중에 다른 이동 블록 실행",
+      "why_it_happens": "이 블록이 실행되는 동안 다른 스크립트에서 즉시 이동 블록 사용",
+      "consequence": "부드러운 애니메이션이 중단되고 급작스럽게 위치가 변경됨",
+      "solution": "이동이 완전히 끝난 후에 다음 이동을 실행하거나, 변수로 이동 상태를 관리",
+      "teaching_moment": "댄스를 추는 중에 다른 동작을 섞으면 어색해지는 것처럼, 애니메이션도 하나씩 차례대로 해야 자연스러워요."
+    },
+    {
+      "mistake": "너무 큰 이동값으로 화면 밖으로 이동",
+      "why_it_happens": "현재 위치를 고려하지 않고 큰 이동값 설정",
+      "consequence": "오브젝트가 화면 경계를 벗어나 보이지 않게 됨",
+      "solution": "현재 위치와 목표 위치를 계산하여 적절한 이동값 설정",
+      "teaching_moment": "지도 없이 너무 멀리 가면 길을 잃는 것처럼, 현재 위치를 확인하고 이동해야 해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "시간 기반 이동 블록 찾기",
+      "instruction": "블록 팔레트에서 '움직임' 카테고리를 클릭하세요.",
+      "visual_hint": "파란색 화살표 아이콘이 있는 카테고리를 찾아보세요."
+    },
+    {
+      "step": 2,
+      "title": "시간 기반 xy 이동 블록 선택",
+      "instruction": "'[ ]초 동안 x: [ ], y: [ ] 만큼 움직이기' 블록을 작업 영역으로 드래그하세요.",
+      "visual_hint": "시간, x값, y값을 입력할 수 있는 세 개의 칸이 있는 블록이에요."
+    },
+    {
+      "step": 3,
+      "title": "시간 설정",
+      "instruction": "첫 번째 칸에 애니메이션에 걸릴 시간(초)을 입력하세요.",
+      "visual_hint": "1~5초 정도가 움직임을 관찰하기에 적당해요."
+    },
+    {
+      "step": 4,
+      "title": "이동 거리 설정",
+      "instruction": "x값과 y값에 이동하고 싶은 거리를 입력하세요.",
+      "visual_hint": "양수는 오른쪽/위쪽, 음수는 왼쪽/아래쪽으로 이동해요."
+    },
+    {
+      "step": 5,
+      "title": "실행 및 관찰",
+      "instruction": "프로그램을 실행하여 오브젝트가 부드럽게 이동하는지 확인하세요.",
+      "visual_hint": "일정한 속도로 부드럽게 이동하는 모습을 관찰해보세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_name": "x좌표를 [값]만큼 바꾸기",
+      "relationship": "즉시 이동 vs 부드러운 이동",
+      "explanation": "즉시 이동하는 블록과 달리 시간에 걸쳐 부드럽게 이동하는 차이점 학습"
+    },
+    {
+      "block_name": "y좌표를 [값]만큼 바꾸기",
+      "relationship": "개별 축 제어",
+      "explanation": "x와 y를 따로 제어하는 방법과 동시에 제어하는 방법의 차이점 이해"
+    },
+    {
+      "block_name": "[시간]초 동안 x: [x값], y: [y값] 위치로 이동하기",
+      "relationship": "상대이동 vs 절대이동",
+      "explanation": "현재 위치 기준 이동과 특정 위치로의 이동 차이점 비교"
+    },
+    {
+      "block_name": "[시간]초 기다리기",
+      "relationship": "시간 제어",
+      "explanation": "애니메이션 사이의 대기 시간을 조절하여 더 복잡한 움직임 패턴 구성"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "오브젝트가 중간에 멈춰요",
+      "possible_causes": ["다른 스크립트에서 동시에 위치를 변경", "이동 중에 다른 이동 블록이 실행됨", "조건 블록으로 인한 중단"],
+      "solutions": [
+        "동시에 실행되는 다른 이동 관련 스크립트 확인",
+        "메시지나 변수를 사용하여 이동 순서 제어",
+        "이동 상태를 나타내는 변수로 충돌 방지"
+      ]
+    },
+    {
+      "problem": "움직임이 너무 빠르거나 느려요",
+      "possible_causes": [
+        "시간과 이동 거리의 비율이 부적절",
+        "시간 값이 너무 작거나 큰 값",
+        "이동 거리가 화면 크기에 비해 부적절"
+      ],
+      "solutions": [
+        "시간 대비 이동 거리의 비율을 조정",
+        "여러 값을 테스트하여 적절한 속도 찾기",
+        "화면 크기를 고려한 적절한 이동 거리 설정"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "자동차의 내비게이션",
+      "explanation": "목적지까지 일정한 속도로 부드럽게 이동하는 것처럼 지정된 시간 동안 일정하게 움직입니다."
+    },
+    {
+      "analogy": "영화의 카메라 이동",
+      "explanation": "영화에서 카메라가 부드럽게 패닝하거나 줌하는 것처럼 자연스러운 움직임을 만듭니다."
+    },
+    {
+      "analogy": "기차의 역간 이동",
+      "explanation": "출발역에서 도착역까지 정해진 시간에 맞춰 일정한 속도로 이동하는 것과 같습니다."
+    },
+    {
+      "analogy": "댄서의 안무 동작",
+      "explanation": "음악에 맞춰 정해진 시간 동안 부드럽고 우아한 움직임을 보여주는 것과 같습니다."
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "시간과 이동값을 설정하여 오브젝트를 부드럽게 이동시킬 수 있다"
+    },
+    {
+      "level": "중급",
+      "criteria": "x값과 y값을 조합하여 대각선이나 복합적인 방향으로 자연스럽게 이동시키고, 여러 이동을 연결하여 복잡한 경로를 만들 수 있다"
+    },
+    {
+      "level": "고급",
+      "criteria": "변수와 계산 블록을 활용하여 곡선 이동이나 물리적 효과가 있는 자연스러운 애니메이션을 구현하고, 사용자 상호작용과 연계할 수 있다"
+    }
+  ]
+}

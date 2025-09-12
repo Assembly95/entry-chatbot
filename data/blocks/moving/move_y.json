@@ -1,0 +1,284 @@
+{
+  "id": "move_y",
+  "category": "move",
+  "name": "y좌표를 [값]만큼 바꾸기",
+  "description": "오브젝트의 현재 y좌표에서 입력한 값만큼 더하거나 빼서 세로 방향으로 이동시킵니다. 양수는 위쪽으로, 음수는 아래쪽으로 이동합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "좌표계의 개념과 y축의 역할 이해",
+      "상대적 위치 변화를 통한 수직 이동 구현",
+      "음수와 양수를 활용한 상하 방향 제어 습득",
+      "중력 효과나 점프 동작 등 자연스러운 움직임 구현",
+      "수학적 좌표 개념을 블록코딩으로 적용하는 능력 개발"
+    ],
+    "key_concepts": [
+      {
+        "concept": "수직 이동 (Vertical Movement)",
+        "explanation": "y축을 따라 위아래로 움직이는 방식으로, 점프, 낙하, 승강 등의 동작을 표현하는 기본 요소"
+      },
+      {
+        "concept": "좌표계 방향성 (Coordinate Direction)",
+        "explanation": "Entry에서 y축은 아래쪽이 음수, 위쪽이 양수로 설정되어 수학적 좌표계와 동일한 방향성을 가짐"
+      },
+      {
+        "concept": "누적 변화량 (Cumulative Displacement)",
+        "explanation": "반복 실행 시 이전 y좌표에 새로운 이동값이 계속 더해져서 연속적인 움직임을 만드는 특성"
+      },
+      {
+        "concept": "물리적 움직임 시뮬레이션",
+        "explanation": "실제 물리 법칙처럼 중력, 탄성, 가속도 등을 y축 이동으로 표현하여 자연스러운 움직임 구현"
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": [
+      "Entry 기본 인터페이스 사용법",
+      "좌표계의 기본 개념 이해",
+      "양수와 음수의 방향성 이해",
+      "x좌표 이동 블록 사용 경험"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "기본 점프 동작",
+      "description": "오브젝트를 위로 점프시키기",
+      "blocks": ["when_some_key_pressed('스페이스')", "move_y(50)", "wait_second(0.2)", "move_y(-50)"],
+      "explanation": "스페이스 키를 누르면 오브젝트가 위로 50픽셀 점프했다가 다시 원래 위치로 돌아옵니다."
+    },
+    {
+      "title": "중력 효과 시뮬레이션",
+      "description": "점진적으로 빨라지는 낙하 효과",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('낙하속도', 0)",
+        "repeat_inf",
+        "  move_y(get_variable('낙하속도'))",
+        "  set_variable('낙하속도', get_variable('낙하속도') - 1)",
+        "  if_condition(coordinate_object('이 오브젝트', 'y') < -150)",
+        "    set_variable('낙하속도', 0)",
+        "    locate_y(100)",
+        "  wait_second(0.05)"
+      ],
+      "explanation": "오브젝트가 점점 빠르게 아래로 떨어지는 중력 효과를 구현하고, 바닥에 닿으면 다시 위로 리셋됩니다."
+    },
+    {
+      "title": "엘리베이터 움직임",
+      "description": "일정한 속도로 상하 이동",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('방향', 1)",
+        "repeat_inf",
+        "  move_y(get_variable('방향') * 3)",
+        "  if_condition(coordinate_object('이 오브젝트', 'y') > 100)",
+        "    set_variable('방향', -1)",
+        "  if_condition(coordinate_object('이 오브젝트', 'y') < -100)",
+        "    set_variable('방향', 1)",
+        "  wait_second(0.1)"
+      ],
+      "explanation": "오브젝트가 위아래 경계(-100, 100)를 오가며 엘리베이터처럼 일정하게 상하 이동합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "오브젝트가 위아래로 움직이지 않아요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "y좌표 블록이 실행되고 있는지 확인하세요. 시작 블록과 연결되어 있나요?"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "이동 값이 0이 아닌 숫자인지 확인해보세요. 0이면 움직이지 않아요."
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "같은 위치에서 반대 방향으로 이동하는 다른 y좌표 블록이 있는지 확인해보세요."
+        }
+      ]
+    },
+    {
+      "situation": "오브젝트가 화면 밖으로 사라져요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "y좌표 값이 너무 크면 화면 밖으로 나갈 수 있어요. 이동 값을 작게 조정해보세요."
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'계산' 카테고리의 '[오브젝트]의 y좌표 값' 블록으로 현재 위치를 확인해보세요."
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "조건 블록을 사용해서 경계를 벗어나지 않도록 제한을 걸어보세요."
+        }
+      ]
+    },
+    {
+      "situation": "위로 움직이게 하고 싶은데 아래로 가요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "y좌표에서 양수(+)는 위쪽, 음수(-)는 아래쪽 방향이에요."
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "위로 가려면 양수 값을, 아래로 가려면 음수 값을 입력하세요."
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "혹시 음수를 입력하셨나요? 위로 가려면 양수를 입력해주세요."
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "y축 방향을 반대로 이해",
+      "why_it_happens": "일반적인 화면 좌표계와 달리 Entry는 수학적 좌표계를 사용하여 위쪽이 양수",
+      "consequence": "의도한 방향과 반대로 오브젝트가 이동",
+      "solution": "양수는 위쪽, 음수는 아래쪽이라는 규칙을 명확히 기억하고 테스트로 확인",
+      "teaching_moment": "수학 시간에 배운 y축 방향과 같아요. 위로 갈수록 값이 커져요."
+    },
+    {
+      "mistake": "무한 반복에서 경계 조건 없이 사용",
+      "why_it_happens": "계속 한 방향으로만 이동시키면서 멈춤 조건을 설정하지 않음",
+      "consequence": "오브젝트가 화면 밖으로 계속 이동하여 보이지 않게 됨",
+      "solution": "y좌표 값을 확인하여 경계에서 방향을 바꾸거나 멈추는 조건 추가",
+      "teaching_moment": "엘리베이터에도 최고층과 최저층이 있듯이, 움직임에도 경계가 필요해요."
+    },
+    {
+      "mistake": "물리적 효과 구현 시 비현실적인 값 사용",
+      "why_it_happens": "실제 물리 법칙을 고려하지 않고 임의의 큰 값이나 불규칙한 값 사용",
+      "consequence": "부자연스러운 움직임이나 너무 빠른/느린 동작으로 인한 몰입감 저하",
+      "solution": "실제 중력이나 점프처럼 점진적으로 변하는 작은 값들을 사용",
+      "teaching_moment": "진짜 공이 떨어질 때처럼 점점 빨라지도록 만들면 더 자연스러워요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "이동 블록 찾기",
+      "instruction": "블록 팔레트에서 '움직임' 카테고리를 클릭하세요.",
+      "visual_hint": "파란색 화살표 아이콘이 있는 카테고리를 찾아보세요."
+    },
+    {
+      "step": 2,
+      "title": "y좌표 이동 블록 선택",
+      "instruction": "'y좌표를 [ ]만큼 바꾸기' 블록을 작업 영역으로 드래그하세요.",
+      "visual_hint": "y와 숫자 입력칸이 있는 블록을 찾아보세요."
+    },
+    {
+      "step": 3,
+      "title": "이동값 설정",
+      "instruction": "숫자 입력칸에 원하는 이동 거리를 입력하세요.",
+      "visual_hint": "양수면 위쪽, 음수면 아래쪽으로 이동해요."
+    },
+    {
+      "step": 4,
+      "title": "시작 블록과 연결",
+      "instruction": "시작 블록이나 다른 실행 블록과 연결하세요.",
+      "visual_hint": "블록들이 퍼즐처럼 연결되어야 실행돼요."
+    },
+    {
+      "step": 5,
+      "title": "실행 및 확인",
+      "instruction": "프로그램을 실행해서 오브젝트가 예상한 방향으로 이동하는지 확인하세요.",
+      "visual_hint": "오브젝트의 상하 움직임을 관찰하고 필요하면 이동값을 조정하세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_name": "x좌표를 [값]만큼 바꾸기",
+      "relationship": "수평 이동과 조합",
+      "explanation": "x축과 y축 이동을 함께 사용하여 대각선이나 곡선 움직임 구현 가능"
+    },
+    {
+      "block_name": "y좌표를 [값]로 정하기",
+      "relationship": "절대 위치 설정",
+      "explanation": "상대 이동이 아닌 특정 y위치로 직접 이동하는 대안적 방법"
+    },
+    {
+      "block_name": "[오브젝트]의 y좌표 값",
+      "relationship": "현재 위치 확인",
+      "explanation": "현재 y좌표를 확인하여 조건부 이동이나 경계 설정에 활용"
+    },
+    {
+      "block_name": "벽에 닿으면 튕기기",
+      "relationship": "경계 처리",
+      "explanation": "화면 경계에서 자동으로 방향을 바꾸는 기능과 조합하여 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "오브젝트가 계속 아래로 떨어져서 보이지 않아요",
+      "possible_causes": ["음수 값으로 계속 아래로 이동", "중력 효과 구현 시 멈춤 조건 부족", "반복문에서 y좌표 초기화 없음"],
+      "solutions": [
+        "y좌표 값을 확인하여 화면 하단 경계에서 멈추는 조건 추가",
+        "바닥 충돌 시 y좌표를 특정 값으로 리셋",
+        "'y좌표를 ~로 정하기' 블록으로 초기 위치 재설정"
+      ]
+    },
+    {
+      "problem": "점프나 중력 효과가 부자연스러워요",
+      "possible_causes": [
+        "이동값이 너무 크거나 갑작스러운 변화",
+        "적절한 대기 시간 없이 연속 실행",
+        "물리 법칙을 고려하지 않은 값 사용"
+      ],
+      "solutions": [
+        "작은 값으로 점진적 변화를 만들어 부드러운 움직임 구현",
+        "'~초 기다리기' 블록으로 적절한 프레임 간격 설정",
+        "변수를 사용하여 가속도나 감속도 효과 추가"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "엘리베이터의 층간 이동",
+      "explanation": "현재 층에서 몇 층 올라가거나 내려가는 것처럼 y축 방향으로 일정 거리 이동합니다."
+    },
+    {
+      "analogy": "농구공의 바운스",
+      "explanation": "공이 떨어졌다가 다시 튀어오르는 것처럼 y좌표가 음수에서 양수로 변화합니다."
+    },
+    {
+      "analogy": "새의 날개짓",
+      "explanation": "새가 날개를 펼쳐 위아래로 움직이며 고도를 조절하는 것과 같은 수직 움직임입니다."
+    },
+    {
+      "analogy": "요요의 상하 운동",
+      "explanation": "요요가 아래로 떨어졌다가 다시 위로 올라오는 반복적인 y축 이동과 같습니다."
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "y좌표 이동 블록을 사용해서 오브젝트를 위쪽이나 아래쪽으로 이동시킬 수 있다"
+    },
+    {
+      "level": "중급",
+      "criteria": "양수와 음수를 구분하여 원하는 방향으로 정확히 이동시키고, 반복 블록과 조합하여 연속적인 상하 움직임을 만들 수 있다"
+    },
+    {
+      "level": "고급",
+      "criteria": "조건 블록과 변수를 활용하여 물리적으로 자연스러운 움직임(중력, 점프, 탄성 등)을 구현하고, 경계 조건을 설정할 수 있다"
+    }
+  ]
+}

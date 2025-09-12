@@ -1,0 +1,6 @@
+﻿id,task_type,block_id,question,cot_steps,answer
+get_block_count_001,explain,get_block_count,,,
+get_block_count_002,explain,get_block_count,,,
+get_block_count_003,explain,get_block_count,,,
+get_block_count_004,explain,get_block_count,,,
+get_block_count_005,explain,get_block_count,,,

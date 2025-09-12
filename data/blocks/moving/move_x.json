@@ -1,0 +1,282 @@
+{
+  "id": "move_x",
+  "category": "move",
+  "name": "x좌표를 [값]만큼 바꾸기",
+  "description": "오브젝트의 현재 x좌표에서 입력한 값만큼 더하거나 빼서 가로 방향으로 이동시킵니다. 양수는 오른쪽으로, 음수는 왼쪽으로 이동합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "좌표계의 개념과 x축의 역할 이해",
+      "상대적 위치 변화와 절대적 위치의 차이점 학습",
+      "음수와 양수를 활용한 방향성 제어 습득",
+      "오브젝트의 점진적 이동을 통한 애니메이션 구현",
+      "수학적 좌표 개념을 프로그래밍으로 적용하는 능력 개발"
+    ],
+    "key_concepts": [
+      {
+        "concept": "상대적 이동 (Relative Movement)",
+        "explanation": "현재 위치를 기준으로 일정한 거리만큼 이동하는 방식으로, 절대 위치가 아닌 변화량을 지정하여 움직임을 제어"
+      },
+      {
+        "concept": "좌표계 (Coordinate System)",
+        "explanation": "화면상의 위치를 x축(가로)과 y축(세로)으로 표현하는 수학적 체계, Entry에서는 화면 중앙이 (0, 0)점"
+      },
+      {
+        "concept": "벡터 이동 (Vector Movement)",
+        "explanation": "방향과 크기를 가진 벡터의 개념으로, x축 방향으로의 단위 이동을 의미"
+      },
+      {
+        "concept": "누적 변화 (Cumulative Change)",
+        "explanation": "반복 실행 시 이전 이동 결과에 새로운 이동값이 더해져서 누적되는 특성"
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": [
+      "Entry 기본 인터페이스 사용법",
+      "오브젝트의 위치 개념 이해",
+      "양수와 음수의 기본 개념",
+      "블록 연결 및 실행 방법 숙지"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "기본 오른쪽 이동",
+      "description": "오브젝트를 오른쪽으로 계속 이동시키기",
+      "blocks": ["when_run_button_click", "repeat_inf", "  move_x(10)", "  wait_second(0.1)"],
+      "explanation": "시작 버튼을 누르면 오브젝트가 0.1초마다 오른쪽으로 10픽셀씩 계속 이동합니다."
+    },
+    {
+      "title": "좌우 왕복 운동",
+      "description": "조건 블록과 함께 사용하여 경계에서 방향 전환",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('방향', 1)",
+        "repeat_inf",
+        "  move_x(get_variable('방향') * 5)",
+        "  if_condition(coordinate_object('이 오브젝트', 'x') > 200)",
+        "    set_variable('방향', -1)",
+        "  if_condition(coordinate_object('이 오브젝트', 'x') < -200)",
+        "    set_variable('방향', 1)",
+        "  wait_second(0.05)"
+      ],
+      "explanation": "오브젝트가 화면 양끝(-200, 200)에서 방향을 바꿔가며 좌우로 왕복 이동합니다."
+    },
+    {
+      "title": "키보드 조작 이동",
+      "description": "사용자 입력에 따른 실시간 이동 제어",
+      "blocks": ["when_some_key_pressed('오른쪽 화살표')", "move_x(20)", "when_some_key_pressed('왼쪽 화살표')", "move_x(-20)"],
+      "explanation": "오른쪽 화살표 키를 누르면 오른쪽으로, 왼쪽 화살표 키를 누르면 왼쪽으로 20픽셀씩 이동합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "오브젝트가 이동하지 않아요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "블록이 실행되고 있는지 먼저 확인해보세요. 시작 블록과 연결되어 있나요?"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "이동 값이 0이 아닌 숫자인지 확인해보세요. 0이면 움직이지 않아요."
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "같은 자리에서 반대 방향으로 이동하는 다른 블록이 있는지 확인해보세요."
+        }
+      ]
+    },
+    {
+      "situation": "오브젝트가 너무 빨리 움직여요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "이동하는 값을 더 작게 만들어보세요. 큰 숫자일수록 빠르게 움직여요."
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'흐름' 카테고리의 '~초 기다리기' 블록을 사용해서 이동 속도를 조절해보세요."
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "반복 블록 안에서 사용한다면 반복 속도를 조절하면 움직임이 부드러워져요."
+        }
+      ]
+    },
+    {
+      "situation": "오브젝트를 왼쪽으로 이동시키고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "x좌표에서 음수(-)는 왼쪽 방향을 의미해요."
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "이동 값 앞에 마이너스(-)를 붙이거나, 음수를 입력해보세요."
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "'계산' 카테고리의 연산 블록을 사용해서 음수를 만들 수도 있어요."
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "절대 위치와 상대 이동을 혼동",
+      "why_it_happens": "'x좌표를 ~만큼 바꾸기'와 'x좌표를 ~로 정하기' 블록의 차이를 이해하지 못함",
+      "consequence": "예상한 위치가 아닌 곳으로 이동하거나 누적 이동이 일어남",
+      "solution": "'~만큼 바꾸기'는 현재 위치에서 더하기, '~로 정하기'는 특정 위치로 이동하는 것임을 구분",
+      "teaching_moment": "엘리베이터에서 '3층 올라가기'(상대)와 '5층으로 가기'(절대)의 차이와 같아요."
+    },
+    {
+      "mistake": "음수와 양수 방향을 반대로 이해",
+      "why_it_happens": "일상 감각과 좌표계의 방향성이 다를 수 있음",
+      "consequence": "의도한 방향의 반대로 오브젝트가 이동",
+      "solution": "양수는 오른쪽, 음수는 왼쪽이라는 규칙을 명확히 기억하고 테스트해보기",
+      "teaching_moment": "수직선에서 양수와 음수의 위치처럼, 화면에서도 동일한 규칙이 적용돼요."
+    },
+    {
+      "mistake": "반복문에서 과도한 이동값 사용",
+      "why_it_happens": "한 번에 큰 값으로 이동시키려고 하여 부자연스러운 움직임 발생",
+      "consequence": "오브젝트가 순간이동하거나 화면 밖으로 사라짐",
+      "solution": "작은 값으로 자주 이동시켜서 부드러운 애니메이션 효과 만들기",
+      "teaching_moment": "영화의 프레임처럼 작은 변화를 연속으로 보여줘야 자연스러운 움직임이 돼요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "이동 블록 찾기",
+      "instruction": "블록 팔레트에서 '움직임' 카테고리를 클릭하세요.",
+      "visual_hint": "파란색 화살표 아이콘이 있는 카테고리를 찾아보세요."
+    },
+    {
+      "step": 2,
+      "title": "x좌표 이동 블록 선택",
+      "instruction": "'x좌표를 [ ]만큼 바꾸기' 블록을 작업 영역으로 드래그하세요.",
+      "visual_hint": "x와 숫자 입력칸이 있는 블록을 찾아보세요."
+    },
+    {
+      "step": 3,
+      "title": "이동값 설정",
+      "instruction": "숫자 입력칸에 원하는 이동 거리를 입력하세요.",
+      "visual_hint": "양수면 오른쪽, 음수면 왼쪽으로 이동해요."
+    },
+    {
+      "step": 4,
+      "title": "시작 블록과 연결",
+      "instruction": "시작 블록이나 다른 실행 블록과 연결하세요.",
+      "visual_hint": "블록들이 퍼즐처럼 연결되어야 실행돼요."
+    },
+    {
+      "step": 5,
+      "title": "실행 및 확인",
+      "instruction": "프로그램을 실행해서 오브젝트가 예상한 방향으로 이동하는지 확인하세요.",
+      "visual_hint": "오브젝트의 움직임을 관찰하고 필요하면 이동값을 조정하세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_name": "y좌표를 [값]만큼 바꾸기",
+      "relationship": "수직 이동과 조합",
+      "explanation": "x축과 y축 이동을 함께 사용하여 대각선이나 복합적인 움직임 구현 가능"
+    },
+    {
+      "block_name": "x좌표를 [값]로 정하기",
+      "relationship": "절대 위치 설정",
+      "explanation": "상대 이동이 아닌 특정 위치로 직접 이동하는 대안적 방법"
+    },
+    {
+      "block_name": "[값]만큼 움직이기",
+      "relationship": "방향 기반 이동",
+      "explanation": "오브젝트의 현재 방향을 기준으로 이동하는 방식과 비교하여 학습"
+    },
+    {
+      "block_name": "[오브젝트]의 x좌표 값",
+      "relationship": "현재 위치 확인",
+      "explanation": "현재 x좌표를 확인하여 조건부 이동이나 경계 설정에 활용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "오브젝트가 화면 밖으로 사라져요",
+      "possible_causes": ["이동값이 너무 크거나 경계 조건이 없음", "반복 실행으로 인한 누적 이동", "음수/양수 방향을 잘못 설정"],
+      "solutions": [
+        "이동값을 작게 조정하고 경계 조건 추가",
+        "'[오브젝트]의 x좌표 값'으로 현재 위치 확인 후 조건부 이동",
+        "초기 위치로 되돌리는 리셋 기능 추가"
+      ]
+    },
+    {
+      "problem": "움직임이 부자연스러워요",
+      "possible_causes": ["이동값이 너무 크거나 불규칙함", "대기 시간 없이 연속 이동", "프레임 간격이 일정하지 않음"],
+      "solutions": [
+        "작은 이동값과 적절한 대기시간을 조합",
+        "'~초 기다리기' 블록으로 이동 간격 조절",
+        "일정한 패턴으로 이동 시퀀스 구성"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "자동차의 차선 변경",
+      "explanation": "현재 위치에서 일정 거리만큼 옆으로 이동하는 것과 같습니다."
+    },
+    {
+      "analogy": "체스말의 이동",
+      "explanation": "체스에서 룩이 가로로 몇 칸 이동하는 것처럼 x축 방향으로만 움직입니다."
+    },
+    {
+      "analogy": "슬라이드 퍼즐",
+      "explanation": "퍼즐 조각을 좌우로 밀어서 이동시키는 것과 동일한 원리입니다."
+    },
+    {
+      "analogy": "책장에서 책 이동",
+      "explanation": "책을 현재 위치에서 몇 권만큼 왼쪽이나 오른쪽으로 옮기는 것과 같습니다."
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "반복문에서 오브젝트가 진동해요",
+      "possible_causes": [
+        "서로 반대 방향의 이동 블록이 같이 실행",
+        "조건문에서 경계값 설정 오류",
+        "타이밍 문제로 인한 중복 실행"
+      ],
+      "solutions": ["실행 순서와 조건을 명확히 구분", "경계값에 여유를 두어 중복 실행 방지", "상태 변수를 사용한 움직임 제어"]
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "x좌표 이동 블록을 사용해서 오브젝트를 오른쪽이나 왼쪽으로 이동시킬 수 있다"
+    },
+    {
+      "level": "중급",
+      "criteria": "양수와 음수를 구분하여 원하는 방향으로 정확히 이동시키고, 반복문과 조합하여 연속적인 움직임을 만들 수 있다"
+    },
+    {
+      "level": "고급",
+      "criteria": "조건문과 변수를 활용하여 경계 조건을 설정하고, 복잡한 이동 패턴이나 상호작용이 있는 움직임을 구현할 수 있다"
+    }
+  ]
+}
