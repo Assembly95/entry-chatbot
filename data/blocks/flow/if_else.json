@@ -1,0 +1,316 @@
+{
+  "id": "if_else",
+  "category": "flow",
+  "name": "만약 ~라면, 아니면",
+  "description": "조건이 참일 때와 거짓일 때 각각 다른 블록들을 실행합니다. 모든 상황에 대응할 수 있는 완전한 조건문 블록입니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "이분법적 사고와 조건 분기의 완전한 이해",
+      "참/거짓 양쪽 경우 모두를 고려하는 논리적 설계 능력",
+      "효율적인 조건문 구조 학습",
+      "일상생활의 양자택일 상황을 프로그래밍으로 구현",
+      "단순 조건문에서 완전 조건문으로의 발전적 사고"
+    ],
+    "key_concepts": [
+      {
+        "concept": "완전한 조건 분기(Complete Conditional Branching)",
+        "explanation": "조건이 참일 때와 거짓일 때 모두에 대해 명확한 행동을 정의하여 모든 경우를 빠짐없이 처리하는 구조"
+      },
+      {
+        "concept": "이분법적 사고(Binary Thinking)",
+        "explanation": "하나의 조건에 대해 참/거짓 두 가지 경우로 나누어 각각에 맞는 대응을 설계하는 사고방식"
+      },
+      {
+        "concept": "배타적 실행(Mutually Exclusive Execution)",
+        "explanation": "두 블록 그룹 중 조건에 따라 반드시 하나만 실행되고, 둘 다 실행되거나 둘 다 실행되지 않는 경우는 없는 특성"
+      },
+      {
+        "concept": "기본값 처리(Default Case Handling)",
+        "explanation": "조건이 맞지 않을 때의 기본 동작을 미리 정의하여 예상치 못한 상황에도 적절히 대응하는 방법"
+      }
+    ],
+    "difficulty_level": "초급-중급",
+    "prerequisites": [
+      "Entry 기본 인터페이스 사용법",
+      "단순 '만약 ~라면' 블록의 이해와 활용",
+      "판단 블록의 다양한 활용법",
+      "블록 조립과 들여쓰기 개념"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "숫자 홀짝 판별",
+      "description": "사용자 입력에 따른 양분기 처리",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('숫자를 입력하세요')",
+        "set_variable('입력값', <답변>)",
+        "if_else_condition(((입력값) % (2)) = (0))",
+        "  speak_something('짝수입니다')",
+        "  speak_something('홀수입니다')"
+      ],
+      "explanation": "입력받은 숫자가 짝수면 '짝수입니다'를, 홀수면 '홀수입니다'를 말합니다. 모든 경우가 처리됩니다."
+    },
+    {
+      "title": "게임 승부 결정",
+      "description": "점수에 따른 결과 메시지 출력",
+      "blocks": [
+        "when_run_button_click",
+        "if_else_condition((점수) ≥ (60))",
+        "  say_for_sec('합격! 축하합니다!', 2)",
+        "  change_shape_to('happy_face')",
+        "  say_for_sec('불합격... 다시 도전하세요!', 2)",
+        "  change_shape_to('sad_face')"
+      ],
+      "explanation": "점수가 60점 이상이면 합격 메시지와 기쁜 표정을, 아니면 불합격 메시지와 슬픈 표정을 보여줍니다."
+    },
+    {
+      "title": "캐릭터 방향 전환",
+      "description": "화면 경계 감지에 따른 행동 분기",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_while_true",
+        "  move_to_direction('오른쪽', 5)",
+        "  if_else_condition(<[오른쪽 벽]에 닿았는가?>)",
+        "    set_direction('왼쪽')",
+        "    move_to_direction('오른쪽', 5)"
+      ],
+      "explanation": "캐릭터가 오른쪽 벽에 닿으면 왼쪽으로 방향을 바꾸고, 아니면 계속 오른쪽으로 이동합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "'만약 ~라면' 블록과 차이점을 모르겠어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "'만약 ~라면'은 조건이 참일 때만 동작하고, '만약 ~라면, 아니면'은 거짓일 때도 다른 동작을 해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "둘 중 하나는 반드시 실행되므로 모든 상황에 대응할 수 있어요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "위쪽은 조건이 참일 때, 아래쪽은 조건이 거짓일 때 실행되는 블록들이 들어가요"
+        }
+      ]
+    },
+    {
+      "situation": "어느 쪽에 어떤 블록을 넣어야 할지 헷갈려요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "조건을 우리가 평상 시 말하는 방법대로 읽어보세요. '만약 A라면 B를 하고, 아니면 C를 한다'"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "위쪽(첫 번째) 영역에는 조건이 맞을 때 할 일, 아래쪽(두 번째) 영역에는 조건이 틀릴 때 할 일을 넣어요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "두 영역 중 어느 것도 비워두지 말고, 각각에 의미 있는 동작을 넣어보세요"
+        }
+      ]
+    },
+    {
+      "situation": "조건이 복잡해서 어떻게 만들어야 할지 모르겠어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "복잡한 조건은 간단한 부분들로 나누어서 생각해보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'판단' 카테고리의 '그리고', '또는' 블록으로 여러 조건을 연결할 수 있어요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "먼저 간단한 조건으로 테스트한 후, 점차 복잡하게 만들어가세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "두 영역 중 한쪽을 비워두거나 같은 내용을 넣음",
+      "why_it_happens": "조건문의 목적을 이해하지 못하고 형식만 따라하는 경우",
+      "consequence": "조건문의 장점을 살리지 못하고 비효율적인 코드가 됨",
+      "solution": "각 영역에는 서로 다르고 의미 있는 동작을 넣기",
+      "teaching_moment": "갈림길에서 양쪽 길 모두에 이정표가 있어야 길을 잃지 않듯이, 조건문도 양쪽 모두 의미가 있어야 해요."
+    },
+    {
+      "mistake": "조건을 반대로 이해해서 위/아래 영역을 바꿔서 넣음",
+      "why_it_happens": "조건의 참/거짓과 실행 영역의 대응 관계를 헷갈림",
+      "consequence": "예상과 반대로 동작해서 원하지 않는 결과가 나옴",
+      "solution": "조건을 말로 표현해보고 '만약 A라면 B, 아니면 C'의 형태로 확인하기",
+      "teaching_moment": "신호등처럼 초록불이면 가고, 빨간불이면 멈추는 것을 명확히 구분하는 것이 중요해요."
+    },
+    {
+      "mistake": "불필요하게 복잡한 중첩 조건문을 만들려고 시도",
+      "why_it_happens": "단순한 문제를 복잡하게 생각하거나 모든 경우를 조건문으로 처리하려 함",
+      "consequence": "코드가 복잡해지고 이해하기 어려워짐",
+      "solution": "먼저 간단한 두 가지 경우로 나누어 생각하고, 필요시 단계적으로 확장",
+      "teaching_moment": "요리할 때도 복잡한 요리보다 간단하고 맛있는 요리가 더 좋듯이, 프로그램도 단순하고 명확한 것이 최고예요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "조건문 블록 찾기",
+      "instruction": "블록 팔레트에서 '흐름' 카테고리를 클릭하세요.",
+      "visual_hint": "하늘색 아래로 갈라지는 나뭇가지 모양의 아이콘을 찾아보세요."
+    },
+    {
+      "step": 2,
+      "title": "만약 ~라면, 아니면 블록 선택",
+      "instruction": "'만약 ~라면, 아니면' 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "위아래 두 개의 공간이 있는 디귿자 모양의 블록이에요."
+    },
+    {
+      "step": 3,
+      "title": "조건 설정하기",
+      "instruction": "다이아몬드 모양의 조건 자리에 판단 블록을 넣으세요.",
+      "visual_hint": "'판단' 카테고리의 블록들을 사용해서 참/거짓을 구분할 조건을 만드세요."
+    },
+    {
+      "step": 4,
+      "title": "참일 때 동작 배치",
+      "instruction": "위쪽 영역에 조건이 참일 때 실행할 블록들을 배치하세요.",
+      "visual_hint": "조건이 맞을 때 하고 싶은 동작들을 넣어주세요."
+    },
+    {
+      "step": 5,
+      "title": "거짓일 때 동작 배치",
+      "instruction": "아래쪽 영역에 조건이 거짓일 때 실행할 블록들을 배치하세요.",
+      "visual_hint": "조건이 맞지 않을 때 하고 싶은 동작들을 넣어주세요."
+    },
+    {
+      "step": 6,
+      "title": "테스트 및 확인",
+      "instruction": "프로그램을 실행해서 양쪽 경우 모두 제대로 동작하는지 확인하세요.",
+      "visual_hint": "조건을 만족하는 상황과 그렇지 않은 상황 둘 다 테스트해보세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "_if",
+      "relationship": "조건의 기본 버전",
+      "explanation": "단순 '만약 ~라면' 블록은 조건이 거짓일 때 아무것도 하지 않는 경우"
+    },
+    {
+      "block_id": "comparison_blocks",
+      "relationship": "조건으로 사용",
+      "explanation": "=, >, <, ≥, ≤ 등의 비교 블록들이 조건 자리에 들어가서 판단 기준 제공"
+    },
+    {
+      "block_id": "logical_operators",
+      "relationship": "복합 조건 생성",
+      "explanation": "'그리고', '또는', '~이 아니다' 블록으로 복잡한 조건 생성"
+    },
+    {
+      "block_id": "variable_blocks",
+      "relationship": "조건 판단 재료",
+      "explanation": "변수 값을 조건으로 사용하여 프로그램 상태에 따른 분기 처리"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "예상과 반대로 동작해요",
+      "possible_causes": [
+        "조건의 참/거짓을 반대로 이해함",
+        "위/아래 영역에 블록을 바꿔서 배치함",
+        "조건 자체가 의도와 다르게 작성됨"
+      ],
+      "solutions": [
+        "조건을 말로 표현해보고 논리적으로 맞는지 확인하기",
+        "간단한 테스트 조건으로 위/아래 영역이 언제 실행되는지 확인하기",
+        "조건 블록을 따로 테스트해서 원하는 대로 참/거짓이 나오는지 검증하기"
+      ]
+    },
+    {
+      "problem": "한쪽 영역만 실행되고 다른 쪽은 전혀 실행되지 않아요",
+      "possible_causes": [
+        "조건이 항상 참이거나 항상 거짓인 상태",
+        "조건에 사용된 변수나 값이 변하지 않음",
+        "테스트 상황이 한 쪽 경우만 발생함"
+      ],
+      "solutions": [
+        "조건에 사용된 값들이 실행 중에 실제로 변하는지 확인하기",
+        "의도적으로 양쪽 경우를 모두 테스트할 수 있는 상황 만들기",
+        "변수나 입력값을 다양하게 바꿔가며 테스트하기"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "갈림길의 이정표",
+      "explanation": "길에서 갈림길을 만나면 조건(목적지)에 따라 왼쪽 또는 오른쪽 길을 선택하는 것과 같습니다."
+    },
+    {
+      "analogy": "시험 합격/불합격 판정",
+      "explanation": "시험 점수에 따라 합격이면 축하 메시지를, 불합격이면 격려 메시지를 보내는 것과 같습니다."
+    },
+    {
+      "analogy": "날씨에 따른 옷차림",
+      "explanation": "날씨가 추우면 두꺼운 옷을, 따뜻하면 얇은 옷을 입는 선택과 같습니다."
+    },
+    {
+      "analogy": "ATM 기계의 잔액 확인",
+      "explanation": "잔액이 충분하면 출금하고, 부족하면 오류 메시지를 보여주는 시스템과 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "다중 조건 분기",
+      "description": "'만약 ~라면, 아니면' 블록을 중첩해서 여러 조건을 순차적으로 확인하기",
+      "use_case": "성적에 따른 등급 분류 (A, B, C, D, F), 나이대별 다른 메시지 출력"
+    },
+    {
+      "concept": "조건문과 반복문 조합",
+      "description": "반복 중에 조건에 따라 다른 동작을 수행하는 패턴",
+      "use_case": "게임에서 적의 종류에 따라 다른 공격 방법 사용, 데이터 처리 시 조건별 다른 처리"
+    },
+    {
+      "concept": "상태 기반 조건 분기",
+      "description": "변수나 오브젝트의 현재 상태에 따라 완전히 다른 모드로 동작하기",
+      "use_case": "게임의 일시정지/실행 모드, 편집/보기 모드 전환"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "간단한 조건으로 양분기 구조를 만들고, 양쪽 경우 모두 적절한 동작을 구현할 수 있다",
+      "example": "홀짝 판별기, 합격/불합격 판정 프로그램"
+    },
+    {
+      "level": "중급",
+      "criteria": "복합 조건과 중첩된 조건문을 활용해서 다양한 상황을 체계적으로 처리할 수 있다",
+      "example": "점수대별 등급 분류, 복합 조건을 가진 게임 룰 구현"
+    },
+    {
+      "level": "고급",
+      "criteria": "조건문을 활용해서 완전하고 견고한 분기 로직을 설계하여 모든 예외 상황까지 처리할 수 있다",
+      "example": "다양한 사용자 입력을 처리하는 인터랙티브 프로그램, 상태 기반의 복잡한 시스템"
+    }
+  ]
+}

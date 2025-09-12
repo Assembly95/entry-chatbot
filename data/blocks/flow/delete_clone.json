@@ -1,0 +1,333 @@
+{
+  "id": "delete_clone",
+  "category": "flow",
+  "name": "이 복제본 삭제하기",
+  "description": "현재 실행 중인 복제본을 메모리에서 제거합니다. 복제본의 생명주기를 관리하고 성능을 최적화하는 데 필수적인 블록으로, 역할을 마친 복제본을 깔끔하게 정리할 수 있습니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "메모리 관리와 성능 최적화의 중요성 이해",
+      "복제본 생명주기 관리 개념 학습",
+      "자원의 효율적 사용과 정리 의식 개발",
+      "프로그램 안정성을 위한 예방적 사고 배양",
+      "게임과 시뮬레이션에서의 오브젝트 정리 패턴 이해"
+    ],
+    "key_concepts": [
+      {
+        "concept": "메모리 관리(Memory Management)",
+        "explanation": "프로그램이 사용하는 메모리를 효율적으로 할당하고 해제하여 시스템 자원을 최적화하는 과정"
+      },
+      {
+        "concept": "가비지 컬렉션(Garbage Collection)",
+        "explanation": "더 이상 필요 없는 오브젝트를 자동으로 찾아서 메모리에서 제거하는 시스템 기능"
+      },
+      {
+        "concept": "오브젝트 생명주기(Object Lifecycle)",
+        "explanation": "오브젝트가 생성되어 사용되다가 소멸되기까지의 전체 과정을 관리하는 개념"
+      },
+      {
+        "concept": "자원 정리(Resource Cleanup)",
+        "explanation": "사용이 끝난 자원을 적절히 해제하여 다른 용도로 재사용할 수 있게 만드는 과정"
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": [
+      "복제본 만들기 블록의 이해와 활용 경험",
+      "복제본이 처음 생성되었을 때 블록 사용 경험",
+      "기본적인 조건문과 반복문 활용 능력",
+      "Entry의 오브젝트와 이벤트 시스템 이해"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "화면 밖 총알 정리",
+      "description": "화면을 벗어난 총알 복제본 자동 삭제",
+      "blocks": [
+        "// 총알 생성 (다른 오브젝트에서)",
+        "when_run_button_click",
+        "repeat_inf",
+        "  if_condition(<스페이스 키가 눌러져 있는가?>)",
+        "    create_clone('총알')",
+        "    wait_second(0.3)",
+        "",
+        "// 총알 오브젝트에서:",
+        "when_clone_start",
+        "repeat_inf",
+        "  move_forward(20)",
+        "  if_condition(((<x좌표>) > (240)) 또는 ((<x좌표>) < (-240)) 또는 ((<y좌표>) > (180)) 또는 ((<y좌표>) < (-180)))",
+        "    delete_this_clone"
+      ],
+      "explanation": "총알이 화면 경계를 벗어나면 자동으로 삭제되어 메모리 낭비를 방지합니다."
+    },
+    {
+      "title": "클릭으로 사라지는 풍선",
+      "description": "상호작용으로 인한 복제본 제거",
+      "blocks": [
+        "// 풍선 오브젝트에서:",
+        "when_clone_created",
+        "go_to_xy(<-200부터 200까지의 수 중 하나>, -150)",
+        "repeat_infinity",
+        "  move_to_direction('위', 3)",
+        "  if_condition((<y좌표>) > (180))",
+        "    delete_clone",
+        "",
+        "when_object_clicked",
+        "change_variable('점수', 1)",
+        "play_sound('팡')",
+        "delete_clone"
+      ],
+      "explanation": "풍선을 클릭하면 점수를 올리고 사라지며, 화면 위로 벗어나도 자동으로 정리됩니다."
+    },
+    {
+      "title": "수명이 있는 파티클",
+      "description": "시간 기반 복제본 생명주기 관리",
+      "blocks": [
+        "// 파티클 오브젝트에서:",
+        "when_clone_start",
+        "set_variable('수명', <50부터 100까지의 수 중 하나>)",
+        "set_direction(<1부터 360까지의 수 중 하나>)",
+        "repeat_until((수명) ≤ (0))",
+        "  move_forward(<3부터 8까지의 수 중 하나>)",
+        "  turn_clockwise(<-5부터 5까지의 수 중 하나>)",
+        "  change_variable('수명', -1)",
+        "  change_transparency_by(1)",
+        "delete_clone"
+      ],
+      "explanation": "파티클마다 랜덤한 수명을 가지고 시간이 지나면서 투명해지다가 자연스럽게 사라집니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "복제본을 삭제해도 계속 보여요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "이 블록은 복제본에서만 작동해요. 원본 오브젝트에서는 효과가 없습니다"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'이 복제본 삭제하기' 블록이 실제로 실행되고 있는지 확인하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "삭제 조건문이 제대로 작동하는지 테스트해보고, 블록이 실제로 도달하는지 확인하세요"
+        }
+      ]
+    },
+    {
+      "situation": "언제 복제본을 삭제해야 할지 모르겠어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "복제본이 더 이상 필요 없을 때 삭제하면 돼요. 화면을 벗어나거나, 역할을 마쳤거나, 클릭당했을 때 등이 좋은 시점이에요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "조건문을 사용해서 '만약 ~라면 이 복제본 삭제하기' 패턴으로 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "복제본의 목적에 따라 다양한 삭제 조건을 만들어보세요"
+        }
+      ]
+    },
+    {
+      "situation": "복제본이 너무 많아서 프로그램이 느려져요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "복제본을 만들기만 하고 삭제하지 않아서 메모리에 계속 쌓이고 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "모든 복제본에 적절한 삭제 조건을 추가해야 해요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "복제본 생성 코드를 확인하고, 각각에 맞는 삭제 시점을 정해서 '이 복제본 삭제하기'를 추가하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "복제본 삭제 조건을 설정하지 않아서 메모리에 계속 누적",
+      "why_it_happens": "복제본 생명주기 관리에 대한 인식 부족",
+      "consequence": "시간이 지날수록 프로그램이 느려지고 결국 작동 중단",
+      "solution": "모든 복제본 생성 시 반드시 삭제 조건을 함께 고려하고 구현하기",
+      "teaching_moment": "음식을 먹은 후 설거지를 하듯이, 복제본을 만든 후에는 언제 정리할지 미리 생각해야 해요."
+    },
+    {
+      "mistake": "원본 오브젝트에서 '이 복제본 삭제하기' 블록을 사용",
+      "why_it_happens": "복제본과 원본의 차이점을 명확히 구분하지 못함",
+      "consequence": "삭제 블록이 작동하지 않아서 예상한 결과가 나오지 않음",
+      "solution": "이 블록은 복제본에서만 작동한다는 점을 명확히 인지하고 적절한 위치에 배치",
+      "teaching_moment": "자기 자신만이 자신을 정리할 수 있듯이, 복제본도 스스로 자신을 삭제해야 해요."
+    },
+    {
+      "mistake": "삭제 블록 이후에 다른 블록들을 계속 배치",
+      "why_it_happens": "삭제 블록의 기능과 효과를 정확히 이해하지 못함",
+      "consequence": "삭제 이후의 블록들이 실행되지 않아서 예상과 다른 동작",
+      "solution": "삭제 블록은 복제본의 마지막 동작으로 배치하고, 이후 블록은 배치하지 않기",
+      "teaching_moment": "집을 나가면서 동시에 집 안에서 다른 일을 할 수 없듯이, 삭제된 복제본은 더 이상 아무것도 할 수 없어요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "삭제할 복제본 확인",
+      "instruction": "어떤 복제본을 언제 삭제할지 계획을 세우세요.",
+      "visual_hint": "복제본의 역할이 끝나는 시점을 미리 생각해보세요."
+    },
+    {
+      "step": 2,
+      "title": "삭제 블록 찾기",
+      "instruction": "블록 팔레트에서 '흐름' 카테고리의 '이 복제본 삭제하기' 블록을 찾으세요.",
+      "visual_hint": "하늘색 카테고리에서 '이 복제본 삭제하기' 블록을 찾아보세요."
+    },
+    {
+      "step": 3,
+      "title": "삭제 조건 설정",
+      "instruction": "복제본이 삭제되어야 할 조건을 조건 블록으로 만드세요.",
+      "visual_hint": "화면 밖으로 나가거나, 클릭되거나, 시간이 지나거나 하는 조건들을 사용할 수 있어요."
+    },
+    {
+      "step": 4,
+      "title": "조건문과 연결",
+      "instruction": "'만약 ~라면' 블록의 조건이 참일 때 '이 복제본 삭제하기'가 실행되도록 연결하세요.",
+      "visual_hint": "조건문 안쪽에 삭제 블록을 배치하면 조건을 만족할 때만 삭제됩니다."
+    },
+    {
+      "step": 5,
+      "title": "삭제 전 마무리 작업",
+      "instruction": "복제본이 삭제되기 전에 해야 할 일이 있다면 삭제 블록 앞에 배치하세요.",
+      "visual_hint": "점수 증가, 소리 재생, 효과 표시 등을 삭제 직전에 할 수 있어요."
+    },
+    {
+      "step": 6,
+      "title": "테스트 및 확인",
+      "instruction": "프로그램을 실행해서 복제본이 예상한 시점에 제대로 삭제되는지 확인하세요.",
+      "visual_hint": "복제본 개수가 무한정 늘어나지 않고 적절히 정리되는지 관찰해보세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "create_clone",
+      "relationship": "생성과 삭제 쌍",
+      "explanation": "복제본을 생성하는 블록과 함께 사용되어 완전한 생명주기를 관리"
+    },
+    {
+      "block_id": "when_clone_start",
+      "relationship": "생명주기 시작점",
+      "explanation": "복제본 생성 시점에서 삭제 조건을 설정하는 시작점 역할"
+    },
+    {
+      "block_id": "delete_all_clones",
+      "relationship": "전체 정리 블록",
+      "explanation": "개별 삭제가 아닌 모든 복제본을 한 번에 정리할 때 사용"
+    },
+    {
+      "block_id": "if_condition",
+      "relationship": "조건부 실행",
+      "explanation": "특정 조건을 만족할 때만 복제본을 삭제하도록 제어"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "복제본을 삭제했는데도 계속 보여요",
+      "possible_causes": [
+        "삭제 블록이 실제로 실행되지 않는 위치에 있음",
+        "삭제 조건이 제대로 작동하지 않음",
+        "원본 오브젝트와 복제본을 혼동함"
+      ],
+      "solutions": [
+        "삭제 블록 바로 앞에 디버깅용 말하기 블록을 넣어서 실행 여부 확인하기",
+        "삭제 조건을 단순화해서 테스트해보기",
+        "복제본에서 작업하고 있는지 확인하기"
+      ]
+    },
+    {
+      "problem": "복제본이 너무 빨리 사라져요",
+      "possible_causes": [
+        "삭제 조건이 너무 자주 만족됨",
+        "예상하지 못한 조건에서 삭제가 발생함",
+        "여러 개의 삭제 조건이 동시에 작동함"
+      ],
+      "solutions": [
+        "삭제 조건을 더 구체적으로 만들어서 원하는 시점에만 삭제되도록 조정하기",
+        "삭제 조건 각각을 개별적으로 테스트해보기",
+        "복제본의 상태나 위치를 확인하는 블록을 추가해서 삭제 시점 분석하기"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "종이컵 사용 후 버리기",
+      "explanation": "일회용 종이컵을 사용한 후 쓰레기통에 버리는 것처럼, 역할을 마친 복제본을 정리하는 것입니다."
+    },
+    {
+      "analogy": "도서관 책 반납",
+      "explanation": "책을 다 읽은 후 도서관에 반납해서 다른 사람이 사용할 수 있게 하는 것과 같습니다."
+    },
+    {
+      "analogy": "극장 퇴장",
+      "explanation": "영화가 끝나면 관객들이 극장을 나가서 다음 관객들을 위해 자리를 비우는 것과 같습니다."
+    },
+    {
+      "analogy": "임시 직원 계약 종료",
+      "explanation": "특정 프로젝트를 위해 고용된 임시 직원이 일이 끝나면 계약이 종료되는 것과 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "조건부 삭제 시스템",
+      "description": "복잡한 조건을 조합해서 정교한 삭제 타이밍을 제어하는 고급 패턴",
+      "use_case": "게임에서 적의 체력, 위치, 시간을 모두 고려한 정교한 생명주기 관리"
+    },
+    {
+      "concept": "삭제 전 정리 작업",
+      "description": "복제본이 삭제되기 전에 점수 증가, 효과 재생 등의 마무리 작업을 수행",
+      "use_case": "폭발 효과와 함께 사라지는 적, 아이템 획득 효과 후 사라지는 보상"
+    },
+    {
+      "concept": "메모리 풀링 시뮬레이션",
+      "description": "삭제 대신 재사용을 위해 복제본을 숨기고 재활용하는 고급 최적화 기법",
+      "use_case": "대량의 총알이나 파티클을 효율적으로 관리하는 고성능 게임 시스템"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "기본적인 삭제 조건을 설정하고 복제본을 적절히 정리할 수 있다",
+      "example": "화면을 벗어나거나 클릭했을 때 복제본이 삭제되는 간단한 프로그램"
+    },
+    {
+      "level": "중급",
+      "criteria": "다양한 조건을 조합하여 효율적인 복제본 생명주기를 관리할 수 있다",
+      "example": "시간, 위치, 상호작용을 모두 고려한 복잡한 삭제 조건을 가진 게임"
+    },
+    {
+      "level": "고급",
+      "criteria": "성능을 고려한 최적화된 복제본 관리 시스템을 설계할 수 있다",
+      "example": "대량의 오브젝트를 안정적으로 관리하고 메모리 효율성을 극대화하는 시스템"
+    }
+  ]
+}

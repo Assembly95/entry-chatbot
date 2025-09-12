@@ -1,0 +1,288 @@
+{
+  "id": "wait_second",
+  "category": "flow",
+  "name": "~초 기다리기",
+  "description": "입력한 시간만큼 기다린 후에 다음 블록이 동작합니다. 시간이 0 이하이면 동작을 건너뛰는 대신에 아주 짧은 시간을 기다립니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "프로그램 실행 흐름에서 시간 제어의 중요성 이해",
+      "애니메이션과 순차적 동작을 위한 타이밍 조절 학습",
+      "사용자가 프로그램 진행 과정을 관찰할 수 있는 속도 조절",
+      "실시간 상호작용과 동기화 개념 이해"
+    ],
+    "key_concepts": [
+      {
+        "concept": "대기(Wait/Delay)",
+        "explanation": "프로그램 실행을 잠시 멈추고 지정된 시간 후에 다음 동작을 수행하는 것"
+      },
+      {
+        "concept": "타이밍 제어",
+        "explanation": "프로그램의 각 동작 사이의 시간 간격을 조절하여 자연스러운 흐름 만들기"
+      },
+      {
+        "concept": "순차 실행",
+        "explanation": "명령들이 차례대로 실행되는 과정에서 시간 간격을 두는 것"
+      },
+      {
+        "concept": "애니메이션 프레임",
+        "explanation": "연속적인 동작을 부드럽게 보이게 하기 위한 시간 단위"
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": ["Entry 기본 인터페이스 이해", "블록 연결 방법 숙지", "시작 블록과 기본 동작 블록 사용법"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "기본 사용법",
+      "description": "캐릭터가 인사하고 잠시 후 작별 인사",
+      "blocks": [
+        "when_run_button_click",
+        "speak_something('안녕하세요!')",
+        "wait_second(2)",
+        "speak_something('안녕히 가세요!')"
+      ],
+      "explanation": "첫 번째 인사 후 2초 기다린 다음 작별 인사를 합니다."
+    },
+    {
+      "title": "애니메이션 효과",
+      "description": "깜빡이는 캐릭터 만들기",
+      "blocks": ["when_run_button_click", "repeat_basic(5)", "hide", "wait_second(0.5)", "show", "wait_second(0.5)"],
+      "explanation": "0.5초마다 캐릭터가 나타났다 사라졌다를 반복해서 깜빡이는 효과를 만듭니다."
+    },
+    {
+      "title": "순차적 동작",
+      "description": "신호등 시뮬레이션",
+      "blocks": [
+        "when_run_button_click",
+        "change_shape('빨간불')",
+        "wait_second(3)",
+        "change_shape('노란불')",
+        "wait_second(1)",
+        "change_shape('초록불')",
+        "wait_second(3)"
+      ],
+      "explanation": "빨간불 3초, 노란불 1초, 초록불 3초 순서로 신호등이 바뀝니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "캐릭터가 말한 후 바로 다음 동작을 하는데, 너무 빨라서 읽을 수가 없어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "프로그램의 속도를 조절하려면 '흐름' 카테고리를 확인하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "concept",
+          "content": "동작 사이에 시간 간격을 두면 천천히 진행할 수 있어요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "'~초 기다리기' 블록을 동작들 사이에 넣어보세요"
+        }
+      ]
+    },
+    {
+      "situation": "깜빡이는 효과를 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "나타나기와 사라지기 사이에 시간 간격이 필요해요. '흐름' 카테고리를 살펴보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "concept",
+          "content": "보이기 → 기다리기 → 숨기기 → 기다리기를 반복하면 됩니다"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "각 동작 후에 '0.5초 기다리기' 블록을 넣어보세요"
+        }
+      ]
+    },
+    {
+      "situation": "순서대로 여러 동작을 하는데, 각각 다른 시간 동안 보여주고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "각 동작마다 다른 시간을 주려면 '흐름' 카테고리의 시간 제어 블록이 필요해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "concept",
+          "content": "중요한 동작은 오래, 빠른 동작은 짧게 시간을 조절할 수 있어요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "각 동작 후에 원하는 시간만큼 '~초 기다리기' 블록을 설정하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "기다리는 시간을 너무 길게 설정",
+      "why_it_happens": "시간 감각이 부족하여 실제보다 긴 시간을 입력",
+      "consequence": "프로그램이 너무 느려져서 지루해짐",
+      "solution": "0.5초, 1초 등 짧은 시간부터 시작해서 점차 조정",
+      "teaching_moment": "요리할 때 타이머를 맞추는 것처럼, 프로그래밍도 적절한 시간을 찾아가는 과정이에요."
+    },
+    {
+      "mistake": "기다리기 블록을 사용하지 않아서 모든 동작이 동시에 일어남",
+      "why_it_happens": "시간 제어의 필요성을 인식하지 못함",
+      "consequence": "동작이 너무 빨라서 과정을 관찰할 수 없음",
+      "solution": "각 동작 사이사이에 적절한 기다리기 시간 추가",
+      "teaching_moment": "대화할 때 상대방이 말할 시간을 주는 것처럼, 프로그램도 각 동작을 볼 시간이 필요해요."
+    },
+    {
+      "mistake": "음수나 0을 입력해서 기다리기 효과를 얻지 못함",
+      "why_it_happens": "시간 값의 의미를 정확히 이해하지 못함",
+      "consequence": "기다리기 효과가 나타나지 않음",
+      "solution": "양수 값 사용의 중요성 설명 및 적절한 시간 값 안내",
+      "teaching_moment": "시간은 항상 양수로 표현해요. 0.1초도 의미 있는 기다림이 될 수 있어요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "블록 찾기",
+      "instruction": "블록 팔레트에서 '흐름' 카테고리를 클릭하세요.",
+      "visual_hint": "주황색 화살표 모양의 아이콘을 찾아보세요."
+    },
+    {
+      "step": 2,
+      "title": "기다리기 블록 선택",
+      "instruction": "'~초 기다리기' 블록을 찾아 클릭하세요.",
+      "visual_hint": "시계 모양 아이콘과 숫자 입력칸이 있는 블록이에요."
+    },
+    {
+      "step": 3,
+      "title": "적절한 위치에 배치",
+      "instruction": "시간 간격이 필요한 두 동작 사이에 기다리기 블록을 배치하세요.",
+      "visual_hint": "기다리기 블록은 다른 블록들 사이에 끼워 넣는 형태예요."
+    },
+    {
+      "step": 4,
+      "title": "시간 설정",
+      "instruction": "숫자 입력칸에 원하는 대기 시간을 초 단위로 입력하세요.",
+      "visual_hint": "1은 1초, 0.5는 0.5초를 의미해요."
+    },
+    {
+      "step": 5,
+      "title": "실행 및 시간 조정",
+      "instruction": "프로그램을 실행해보고 시간이 적절한지 확인한 후 필요하면 조정하세요.",
+      "visual_hint": "너무 빠르면 시간을 늘리고, 너무 느리면 시간을 줄여보세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "repeat_basic",
+      "relationship": "반복과 함께 사용",
+      "explanation": "반복 안에서 각 동작 사이의 시간 간격 조절"
+    },
+    {
+      "block_id": "speak_something",
+      "relationship": "순차 실행",
+      "explanation": "말하기 후 충분한 시간을 주어 읽을 수 있게 함"
+    },
+    {
+      "block_id": "show_hide",
+      "relationship": "시각 효과",
+      "explanation": "나타나고 사라지는 효과의 타이밍 조절"
+    },
+    {
+      "block_id": "move_direction",
+      "relationship": "부드러운 움직임",
+      "explanation": "이동 동작 사이에 기다림을 두어 자연스러운 움직임 구현"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "기다리기 블록을 넣었는데 효과가 없어요",
+      "possible_causes": ["시간 값이 너무 작게 설정됨 (0.1초 미만)", "음수나 0을 입력함", "블록이 잘못된 위치에 배치됨"],
+      "solutions": [
+        "1초 정도의 확실히 느낄 수 있는 시간으로 테스트해보세요",
+        "양수 값을 입력했는지 확인하세요",
+        "기다림이 필요한 정확한 위치에 블록이 있는지 확인하세요"
+      ]
+    },
+    {
+      "problem": "프로그램이 너무 느려요",
+      "possible_causes": ["기다리는 시간이 너무 길게 설정됨", "불필요한 곳에 기다리기 블록이 있음"],
+      "solutions": [
+        "기다리는 시간을 0.5초나 1초로 줄여보세요",
+        "꼭 필요한 곳에만 기다리기 블록을 사용하세요",
+        "반복문 안에서는 더 짧은 시간(0.1-0.3초)을 사용해보세요"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "신호등 시스템",
+      "explanation": "빨간불, 노란불, 초록불이 정해진 시간 동안 켜져 있는 것처럼 각 상태마다 적절한 시간을 줍니다."
+    },
+    {
+      "analogy": "요리 타이머",
+      "explanation": "라면을 끓일 때 3분을 기다리는 것처럼, 프로그램도 적절한 시간을 기다려야 할 때가 있습니다."
+    },
+    {
+      "analogy": "무대 연출",
+      "explanation": "연극에서 배우들이 대사 사이에 적절한 간격을 두는 것처럼, 프로그램도 동작 사이에 시간을 줍니다."
+    },
+    {
+      "analogy": "음악의 쉼표",
+      "explanation": "음악에서 쉼표가 리듬을 만드는 것처럼, 기다리기는 프로그램에 리듬감을 줍니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "가변 시간 대기",
+      "description": "변수나 계산 블록을 사용해서 상황에 따라 다른 시간 기다리기",
+      "use_case": "게임에서 난이도에 따라 다른 반응 시간, 사용자 입력에 따른 대기 시간 조절"
+    },
+    {
+      "concept": "리듬감 있는 애니메이션",
+      "description": "다양한 길이의 기다리기를 조합해서 자연스러운 움직임 만들기",
+      "use_case": "춤추는 캐릭터, 파도 움직임, 나뭇잎 흔들림"
+    },
+    {
+      "concept": "동기화된 다중 객체",
+      "description": "여러 오브젝트가 같은 타이밍에 맞춰 동작하도록 조절",
+      "use_case": "합창단, 군무, 교통 신호 시스템"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "기다리기 블록을 사용해서 동작 사이에 시간 간격을 만들 수 있다",
+      "example": "캐릭터가 말한 후 2초 기다렸다가 다음 동작하기"
+    },
+    {
+      "level": "중급",
+      "criteria": "상황에 맞는 적절한 시간을 설정하고 여러 기다리기를 조합할 수 있다",
+      "example": "신호등이나 깜빡이는 효과처럼 다양한 시간 간격 활용하기"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 타이밍 조절과 동기화를 통해 자연스러운 애니메이션을 만들 수 있다",
+      "example": "여러 오브젝트가 리듬감 있게 움직이는 복합 애니메이션"
+    }
+  ]
+}

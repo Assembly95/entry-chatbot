@@ -1,0 +1,293 @@
+{
+  "id": "repeat_inf",
+  "category": "flow",
+  "name": "계속 반복하기",
+  "description": "감싸인 블록이 계속해서 반복 동작합니다. '반복 중단하기' 블록으로 멈출 수 있습니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "무한 반복의 개념과 활용 상황 이해",
+      "지속적인 동작이 필요한 프로그램 패턴 학습",
+      "반복 중단 조건의 중요성 인식",
+      "게임이나 시뮬레이션에서의 메인 루프 개념 이해"
+    ],
+    "key_concepts": [
+      {
+        "concept": "무한 반복(Infinite Loop)",
+        "explanation": "끝나는 조건이 없어서 계속해서 반복되는 프로그래밍 구조"
+      },
+      {
+        "concept": "메인 루프",
+        "explanation": "프로그램이 실행되는 동안 계속 돌아가는 핵심 반복 구조"
+      },
+      {
+        "concept": "지속적 동작",
+        "explanation": "한 번 시작하면 멈추기 전까지 계속해서 수행되는 동작"
+      },
+      {
+        "concept": "반복 제어",
+        "explanation": "무한 반복을 적절한 때에 멈추거나 조건을 확인하는 방법"
+      }
+    ],
+    "difficulty_level": "초중급",
+    "prerequisites": ["Entry 기본 인터페이스 이해", "n번 반복하기 블록 사용법", "기다리기 블록 사용법"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "기본 사용법",
+      "description": "계속 움직이는 캐릭터",
+      "blocks": ["when_run_button_click", "repeat_inf", "move_direction(10)", "if_on_edge_bounce", "wait_second(0.1)"],
+      "explanation": "캐릭터가 계속 앞으로 이동하면서 벽에 닿으면 튕겨 나오는 동작을 무한히 반복합니다."
+    },
+    {
+      "title": "애니메이션 효과",
+      "description": "계속 회전하는 바람개비",
+      "blocks": ["when_run_button_click", "repeat_inf", "rotate_by_angle(10)", "wait_second(0.05)"],
+      "explanation": "10도씩 회전하는 동작을 계속 반복해서 바람개비가 돌아가는 효과를 만듭니다."
+    },
+    {
+      "title": "게임 루프",
+      "description": "계속 떨어지는 운석 피하기 게임",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_inf",
+        "create_clone('운석')",
+        "wait_second(1)",
+        "if_touching('운석')",
+        "say('게임 오버!')",
+        "stop_all"
+      ],
+      "explanation": "1초마다 운석을 만들고, 플레이어가 운석에 닿으면 게임이 끝나는 무한 루프 게임입니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "캐릭터가 화면에서 계속 움직이도록 하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "지속적인 움직임을 만들려면 '흐름' 카테고리를 확인하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "concept",
+          "content": "한 번이 아니라 계속해서 반복되는 동작이 필요해요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "'계속 반복하기' 블록 안에 이동 블록을 넣어보세요"
+        }
+      ]
+    },
+    {
+      "situation": "시계처럼 계속 돌아가는 바늘을 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "끝없이 회전하는 동작을 위해서는 '흐름' 카테고리가 필요해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "concept",
+          "content": "조금씩 회전하는 동작을 멈추지 않고 계속 반복해야 해요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "'계속 반복하기' 안에 '회전하기'와 '기다리기' 블록을 넣어보세요"
+        }
+      ]
+    },
+    {
+      "situation": "게임에서 적이 계속 나타나도록 하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "게임이 진행되는 동안 계속되는 동작을 위해 '흐름' 카테고리를 사용하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "concept",
+          "content": "일정 시간마다 적을 만드는 동작을 게임이 끝날 때까지 반복해야 해요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "'계속 반복하기' 안에 '복제본 만들기'와 '기다리기' 블록을 넣어보세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "계속 반복하기 안에 기다리기 블록을 넣지 않음",
+      "why_it_happens": "반복 속도 조절의 필요성을 인식하지 못함",
+      "consequence": "동작이 너무 빨라서 화면이 깜빡거리거나 프로그램이 멈춘 것처럼 보임",
+      "solution": "반복 안에 짧은 기다리기 시간(0.05~0.1초)을 추가",
+      "teaching_moment": "자동차도 속도 조절이 필요한 것처럼, 무한 반복도 적절한 속도가 필요해요."
+    },
+    {
+      "mistake": "멈추는 방법을 모르고 무한 반복만 사용",
+      "why_it_happens": "반복 제어에 대한 이해 부족",
+      "consequence": "프로그램을 멈추기 어렵거나 원하지 않는 상황에서도 계속 실행됨",
+      "solution": "조건문과 반복 중단하기 블록의 활용법 학습",
+      "teaching_moment": "시작이 있으면 끝도 있어야 해요. 언제 멈출지도 미리 생각해보세요."
+    },
+    {
+      "mistake": "무한 반복 안에서 값이 변하지 않는 동작만 반복",
+      "why_it_happens": "반복할 때마다 변화가 일어나야 한다는 것을 이해하지 못함",
+      "consequence": "겉보기에는 아무것도 일어나지 않는 것처럼 보임",
+      "solution": "위치, 크기, 색깔 등이 조금씩 변하는 동작 포함",
+      "teaching_moment": "같은 자리에서 제자리걸음을 하면 움직이는 게 보이지 않죠. 조금씩이라도 변화가 있어야 해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "블록 찾기",
+      "instruction": "블록 팔레트에서 '흐름' 카테고리를 클릭하세요.",
+      "visual_hint": "주황색 화살표 모양의 아이콘을 찾아보세요."
+    },
+    {
+      "step": 2,
+      "title": "무한 반복 블록 선택",
+      "instruction": "'계속 반복하기' 블록을 찾아 클릭하세요.",
+      "visual_hint": "∞(무한대) 기호가 있는 블록이에요."
+    },
+    {
+      "step": 3,
+      "title": "시작 블록에 연결",
+      "instruction": "계속 반복하기 블록을 시작 블록 아래에 연결하세요.",
+      "visual_hint": "시작하자마자 무한 반복이 시작되도록 배치하세요."
+    },
+    {
+      "step": 4,
+      "title": "반복할 동작 추가",
+      "instruction": "계속 반복하고 싶은 블록들을 무한 반복 블록 안에 넣으세요.",
+      "visual_hint": "이동, 회전, 색깔 변경 등 변화가 보이는 블록들을 사용하세요."
+    },
+    {
+      "step": 5,
+      "title": "속도 조절",
+      "instruction": "반복 안에 짧은 '기다리기' 블록을 추가해서 적절한 속도로 조절하세요.",
+      "visual_hint": "0.05초~0.1초 정도의 짧은 시간이 적당해요."
+    },
+    {
+      "step": 6,
+      "title": "중단 조건 고려",
+      "instruction": "필요하다면 특정 조건에서 반복을 멈출 수 있는 방법을 추가하세요.",
+      "visual_hint": "조건문과 '반복 중단하기' 블록을 활용할 수 있어요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "repeat_basic",
+      "relationship": "제한된 반복과 비교",
+      "explanation": "정해진 횟수 vs 무한 반복의 차이점 이해"
+    },
+    {
+      "block_id": "wait_second",
+      "relationship": "속도 제어",
+      "explanation": "무한 반복의 속도를 적절히 조절하기 위해 필수적으로 사용"
+    },
+    {
+      "block_id": "stop_repeat",
+      "relationship": "반복 종료",
+      "explanation": "무한 반복을 적절한 때에 멈추기 위해 사용"
+    },
+    {
+      "block_id": "if_then",
+      "relationship": "조건부 제어",
+      "explanation": "특정 조건에서만 반복을 계속하거나 멈추도록 제어"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "무한 반복을 시작했는데 화면에 변화가 없어요",
+      "possible_causes": [
+        "반복 안의 동작이 변화를 만들지 않음",
+        "기다리기 시간이 없어서 너무 빨라 보이지 않음",
+        "반복 안에 블록이 제대로 연결되지 않음"
+      ],
+      "solutions": [
+        "위치나 각도가 변하는 블록을 추가하세요",
+        "0.1초 정도의 기다리기 블록을 넣어보세요",
+        "블록들이 반복문 안에 제대로 들어가 있는지 확인하세요"
+      ]
+    },
+    {
+      "problem": "프로그램이 멈춘 것 같아요 (무한 반복이 너무 빨라서)",
+      "possible_causes": ["기다리기 블록 없이 무한 반복 실행", "반복 안에서 처리할 동작이 너무 많음"],
+      "solutions": [
+        "반복문 안에 0.05~0.1초 기다리기 블록을 추가하세요",
+        "복잡한 동작은 간단하게 나누어서 처리하세요",
+        "정말 멈춘 것 같으면 정지 버튼을 누르고 다시 시작하세요"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "시계의 초침",
+      "explanation": "시계 초침이 1초마다 계속 움직이는 것처럼, 프로그램도 계속해서 같은 동작을 반복할 수 있습니다."
+    },
+    {
+      "analogy": "심장 박동",
+      "explanation": "심장이 일정한 리듬으로 계속 뛰는 것처럼, 프로그램도 일정한 간격으로 동작을 반복합니다."
+    },
+    {
+      "analogy": "바람개비",
+      "explanation": "바람에 돌아가는 바람개비처럼, 외부 조건이 맞으면 계속해서 돌아가는 모습을 만들 수 있습니다."
+    },
+    {
+      "analogy": "공장 컨베이어벨트",
+      "explanation": "공장에서 제품이 계속 만들어지는 것처럼, 일정한 작업을 지속적으로 수행합니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "조건부 무한 반복",
+      "description": "특정 조건이 만족되는 동안만 계속 반복하도록 조건문과 결합",
+      "use_case": "게임에서 생명이 남아있는 동안만 계속 진행, 배터리가 있는 동안만 작동"
+    },
+    {
+      "concept": "다중 객체 동기화",
+      "description": "여러 오브젝트가 각각 무한 반복으로 서로 다른 동작을 지속적으로 수행",
+      "use_case": "배경음악 + 캐릭터 움직임 + 배경 효과가 동시에 계속 실행"
+    },
+    {
+      "concept": "상태 변화가 있는 무한 반복",
+      "description": "반복할 때마다 변수나 상태가 변해서 점진적으로 다른 결과를 만드는 반복",
+      "use_case": "점점 빨라지는 게임, 색깔이 서서히 변하는 효과, 크기가 조금씩 커지는 애니메이션"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "계속 반복하기 블록을 사용해서 지속적인 동작을 만들 수 있다",
+      "example": "캐릭터가 계속 움직이거나 회전하는 간단한 애니메이션"
+    },
+    {
+      "level": "중급",
+      "criteria": "적절한 속도 조절과 함께 무한 반복을 활용하고, 필요시 중단할 수 있다",
+      "example": "게임 루프나 시뮬레이션에서 조건에 따라 계속 진행하거나 멈추는 프로그램"
+    },
+    {
+      "level": "고급",
+      "criteria": "여러 무한 반복을 조합하고 상태 변화를 포함한 복잡한 지속적 시스템을 만들 수 있다",
+      "example": "다양한 요소가 동시에 작동하는 복합 시뮬레이션이나 게임"
+    }
+  ]
+}

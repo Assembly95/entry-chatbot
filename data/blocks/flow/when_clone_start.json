@@ -1,0 +1,338 @@
+{
+  "id": "when_clone_start",
+  "category": "flow",
+  "name": "복제본이 처음 생성되었을 때",
+  "description": "오브젝트의 복제본이 새로 생성되었을 때, 해당 복제본에서만 실행되는 시작 블록입니다. 동적으로 생성되는 오브젝트들을 개별적으로 제어할 수 있게 해줍니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "복제본과 원본의 독립성 이해",
+      "동적 오브젝트 생성과 개별 제어 개념 학습",
+      "이벤트 기반 프로그래밍의 기초 이해",
+      "복제본 생명주기 관리 능력 개발",
+      "게임에서 다수 오브젝트 관리 패턴 학습"
+    ],
+    "key_concepts": [
+      {
+        "concept": "복제본(Clone)",
+        "explanation": "원본 오브젝트를 바탕으로 새로 생성되는 독립적인 오브젝트로, 원본과 같은 모양과 코드를 가지지만 별개의 개체로 동작"
+      },
+      {
+        "concept": "복제본 생성 이벤트(Clone Creation Event)",
+        "explanation": "복제본이 새로 만들어지는 순간에 자동으로 발생하는 이벤트로, 해당 복제본에서만 특별한 초기화 작업을 수행할 수 있게 함"
+      },
+      {
+        "concept": "인스턴스별 독립 실행",
+        "explanation": "같은 코드를 가진 여러 복제본이 각각 독립적으로 동작하며, 서로 영향을 주지 않고 개별적인 상태를 유지"
+      },
+      {
+        "concept": "동적 오브젝트 관리",
+        "explanation": "실행 중에 필요에 따라 오브젝트를 생성하고 각각을 개별적으로 제어하는 프로그래밍 패턴"
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": [
+      "Entry 기본 인터페이스와 오브젝트 개념 이해",
+      "복제본 만들기 블록 사용 경험",
+      "시작 블록들의 기본적인 활용법",
+      "변수와 기본적인 제어 구조 이해"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "총알 발사 시스템",
+      "description": "총알 복제본마다 개별 방향과 속도 설정",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_inf",
+        "  if_condition(<스페이스 키가 눌러져 있는가?>)",
+        "    create_clone_of('총알')",
+        "    wait_second(0.3)",
+        "",
+        "// 총알 오브젝트에서:",
+        "when_clone_created",
+        "set_direction_to_mouse",
+        "repeat_inf",
+        "  move_forward(20)",
+        "  if_condition(<[벽]에 닿았는가?>)",
+        "    delete_this_clone"
+      ],
+      "explanation": "스페이스 키를 누를 때마다 총알 복제본을 만들고, 각 총알은 생성될 때 마우스 방향으로 설정되어 독립적으로 이동합니다."
+    },
+    {
+      "title": "적 캐릭터 생성기",
+      "description": "적 복제본마다 랜덤 속성 부여",
+      "blocks": [
+        "when_run_button_click",
+        "repeat(10)",
+        "  create_clone_of('적')",
+        "  wait_second(2)",
+        "",
+        "// 적 오브젝트에서:",
+        "when_clone_created",
+        "set_variable('내_체력', <1부터 5까지의 수 중 하나>)",
+        "set_variable('내_속도', <2부터 8까지의 수 중 하나>)",
+        "go_to_xy(<-240부터 240까지의 수 중 하나>, 180)",
+        "repeat_inf",
+        "  move_to_direction('아래', (내_속도))",
+        "  if_condition((<y좌표>) < (-180))",
+        "    delete_this_clone"
+      ],
+      "explanation": "적 복제본이 생성될 때마다 랜덤한 체력과 속도를 가지고, 화면 위쪽 랜덤 위치에서 시작해서 아래로 이동합니다."
+    },
+    {
+      "title": "파티클 효과",
+      "description": "폭발 효과를 위한 다수 파티클 생성",
+      "blocks": [
+        "when_run_button_click",
+        "repeat(20)",
+        "  create_clone_of('파티클')",
+        "",
+        "// 파티클 오브젝트에서:",
+        "when_clone_created",
+        "set_direction(<1부터 360까지의 수 중 하나>)",
+        "set_variable('수명', 30)",
+        "repeat_until((수명) < (1))",
+        "  move_forward(<5부터 15까지의 수 중 하나>)",
+        "  change_variable('수명', -1)",
+        "  change_transparency_by(3)",
+        "delete_this_clone"
+      ],
+      "explanation": "폭발 효과를 만들기 위해 20개의 파티클을 생성하고, 각각은 랜덤 방향으로 이동하면서 점차 투명해진 후 사라집니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "복제본이 생성되어도 블록이 실행되지 않아요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "이 블록은 복제본을 만드는 블록과 함께 사용해야 해요. 먼저 '복제본 만들기' 블록이 실행되어야 합니다"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "이 블록은 복제본이 될 오브젝트에서 작성해야 해요. 복제본을 만드는 오브젝트가 아니라요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "다른 시작 블록과 마찬가지로 이 블록 다음에 실행하고 싶은 블록들을 연결하세요"
+        }
+      ]
+    },
+    {
+      "situation": "모든 복제본이 같은 동작을 해서 구분이 안 돼요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "각 복제본이 다르게 동작하려면 복제본마다 다른 값을 가져야 해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'계산' 카테고리의 랜덤 블록을 사용하여 각 복제본에 다른 값을 주세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "복제본 생성 시점에 방향, 위치, 속도 등을 랜덤하게 설정해보세요"
+        }
+      ]
+    },
+    {
+      "situation": "복제본이 너무 많이 생성되어서 프로그램이 느려져요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "복제본 개수를 제한하거나 불필요한 복제본을 삭제해야 해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "복제본이 화면을 벗어나거나 역할이 끝나면 '이 복제본 삭제하기' 블록을 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "복제본 생성에 시간 간격을 두거나 최대 개수를 제한하는 조건을 만들어보세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "원본 오브젝트와 복제본이 구분되지 않아서 혼란스러움",
+      "why_it_happens": "복제본의 독립성과 원본과의 관계를 정확히 이해하지 못함",
+      "consequence": "예상과 다르게 동작하거나 원하지 않는 오브젝트들이 실행됨",
+      "solution": "원본은 복제본을 만드는 역할만 하고, 복제본은 실제 동작을 담당하도록 역할 분리",
+      "teaching_moment": "공장에서 제품을 찍어내듯이, 원본은 템플릿이고 복제본은 실제 제품이에요."
+    },
+    {
+      "mistake": "복제본이 무한히 생성되어서 컴퓨터가 멈춤",
+      "why_it_happens": "복제본 생성에 제한 조건이나 삭제 로직을 넣지 않음",
+      "consequence": "메모리 부족으로 프로그램이 느려지거나 멈춤",
+      "solution": "복제본 생성에 시간 간격을 두고, 역할이 끝난 복제본은 반드시 삭제하기",
+      "teaching_moment": "방에 물건이 계속 쌓이면 정리를 해야 하듯이, 복제본도 정리가 필요해요."
+    },
+    {
+      "mistake": "복제본 안에서 또 다른 복제본을 무분별하게 생성",
+      "why_it_happens": "복제본의 생성 패턴을 체계적으로 설계하지 않음",
+      "consequence": "예상치 못한 많은 수의 복제본이 생성되어 혼란 발생",
+      "solution": "복제본 생성 구조를 단순하게 유지하고, 생성 조건을 명확히 설정",
+      "teaching_moment": "조직에서도 체계가 있어야 하듯이, 복제본 생성에도 명확한 규칙이 필요해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "복제본이 될 오브젝트 선택",
+      "instruction": "복제본으로 만들고 싶은 오브젝트를 선택하세요.",
+      "visual_hint": "오브젝트 목록에서 해당 오브젝트를 클릭하여 선택상태로 만드세요."
+    },
+    {
+      "step": 2,
+      "title": "시작 블록 찾기",
+      "instruction": "블록 팔레트에서 '시작' 카테고리를 클릭하세요.",
+      "visual_hint": "초록색 깃발 모양의 아이콘을 찾아보세요."
+    },
+    {
+      "step": 3,
+      "title": "복제본 생성 시작 블록 배치",
+      "instruction": "'복제본이 처음 생성되었을 때' 블록을 작업 영역으로 드래그하세요.",
+      "visual_hint": "모자 모양의 시작 블록으로, 다른 블록 위에 연결할 수 없어요."
+    },
+    {
+      "step": 4,
+      "title": "초기화 코드 작성",
+      "instruction": "복제본이 생성될 때 실행하고 싶은 초기화 블록들을 연결하세요.",
+      "visual_hint": "위치 설정, 방향 설정, 변수 초기화 등의 블록들을 연결하세요."
+    },
+    {
+      "step": 5,
+      "title": "복제본 만들기 블록 설정",
+      "instruction": "다른 오브젝트에서 이 오브젝트의 '복제본 만들기' 블록을 사용하세요.",
+      "visual_hint": "'흐름' 카테고리의 '복제본 만들기' 블록을 사용해야 이 시작 블록이 작동해요."
+    },
+    {
+      "step": 6,
+      "title": "테스트 및 최적화",
+      "instruction": "복제본이 예상대로 생성되고 동작하는지 테스트하고, 필요하면 삭제 조건을 추가하세요.",
+      "visual_hint": "복제본이 너무 많이 생성되지 않도록 '이 복제본 삭제하기' 블록을 적절히 사용하세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "create_clone",
+      "relationship": "필수 연동 블록",
+      "explanation": "복제본을 실제로 생성하는 블록으로, 이 블록이 실행되어야 '복제본이 처음 생성되었을 때'가 작동함"
+    },
+    {
+      "block_id": "delete_clone",
+      "relationship": "생명주기 관리",
+      "explanation": "복제본의 역할이 끝났을 때 메모리에서 제거하여 성능 최적화"
+    },
+    {
+      "block_id": "delete_all_clones",
+      "relationship": "일괄 정리",
+      "explanation": "모든 복제본을 한 번에 삭제하여 화면을 깔끔하게 정리"
+    },
+    {
+      "block_id": "random_blocks",
+      "relationship": "개별성 부여",
+      "explanation": "각 복제본이 다른 특성을 가지도록 랜덤 값을 설정"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "복제본이 생성되지 않아요",
+      "possible_causes": [
+        "'복제본 만들기' 블록이 실행되지 않음",
+        "잘못된 오브젝트에서 복제본 생성 시작 블록을 만듦",
+        "복제본이 생성되지만 보이지 않는 위치에 있음"
+      ],
+      "solutions": [
+        "복제본을 만드는 블록이 실제로 실행되는지 확인하기",
+        "복제본이 될 오브젝트에서 이 시작 블록을 작성했는지 확인하기",
+        "복제본 생성 시 위치와 크기를 명시적으로 설정해보기"
+      ]
+    },
+    {
+      "problem": "복제본들이 모두 똑같이 동작해요",
+      "possible_causes": [
+        "복제본마다 구분되는 값을 설정하지 않음",
+        "모든 복제본이 같은 변수를 공유함",
+        "개별성을 부여하는 로직이 없음"
+      ],
+      "solutions": [
+        "복제본 생성 시점에 랜덤 값이나 다른 속성 부여하기",
+        "오브젝트별 변수를 사용하여 각 복제본의 독립적인 상태 관리",
+        "생성 순서나 위치에 따라 다른 초기값 설정하기"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "공장의 생산 라인",
+      "explanation": "공장에서 제품을 만들 때마다 각 제품에 고유번호를 부여하고 품질검사를 하는 것과 같습니다."
+    },
+    {
+      "analogy": "학교의 신입생 오리엔테이션",
+      "explanation": "새로운 학생이 입학할 때마다 개별적으로 학번을 부여하고 필요한 안내를 해주는 것과 같습니다."
+    },
+    {
+      "analogy": "게임의 적 캐릭터 스폰",
+      "explanation": "게임에서 적이 나타날 때마다 개별적인 능력치와 행동패턴을 가지고 등장하는 것과 같습니다."
+    },
+    {
+      "analogy": "요리의 개별 서빙",
+      "explanation": "같은 요리를 여러 접시에 담을 때, 각 접시마다 개별적인 장식이나 양념을 추가하는 것과 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "스마트 복제본 관리",
+      "description": "복제본 개수를 추적하고 최대 개수를 제한하는 시스템 구축",
+      "use_case": "성능 최적화가 중요한 게임, 제한된 자원으로 동작하는 시뮬레이션"
+    },
+    {
+      "concept": "복제본 간 통신",
+      "description": "신호나 변수를 통해 복제본들이 서로 상호작용하는 패턴",
+      "use_case": "무리 행동 시뮬레이션, 협력하는 에이전트 시스템"
+    },
+    {
+      "concept": "계층적 복제본 구조",
+      "description": "복제본이 또 다른 복제본을 생성하는 다단계 구조",
+      "use_case": "프랙탈 패턴 생성, 복잡한 파티클 시스템, 생명체 번식 시뮬레이션"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "기본적인 복제본 생성과 개별 초기화를 구현할 수 있다",
+      "example": "총알 발사, 간단한 파티클 효과, 동일한 오브젝트 여러 개 생성"
+    },
+    {
+      "level": "중급",
+      "criteria": "복제본마다 다른 속성을 부여하고 생명주기를 관리할 수 있다",
+      "example": "다양한 속성의 적 캐릭터 생성, 성능을 고려한 복제본 삭제, 복합적인 시각 효과"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 복제본 시스템을 설계하고 최적화할 수 있다",
+      "example": "복제본 풀링 시스템, 복제본 간 상호작용, 대규모 시뮬레이션 시스템"
+    }
+  ]
+}
