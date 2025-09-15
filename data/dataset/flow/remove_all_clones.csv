@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-remove_all_clones_001,explain,remove_all_clones,,,
-remove_all_clones_002,explain,remove_all_clones,,,
-remove_all_clones_003,explain,remove_all_clones,,,
-remove_all_clones_004,explain,remove_all_clones,,,
-remove_all_clones_005,explain,remove_all_clones,,,
+remove_all_clones_001,explain,remove_all_clones,‘모든 복제본 삭제하기’ 블록은 어떤 역할을 하나요?,현재 존재하는 모든 복제본 탐색 → 전부 삭제,잘 물어봤어요! 😀 이 블록은 지금까지 만들어진 모든 복제본을 한꺼번에 없애요. 게임 리셋할 때 화면을 깔끔하게 정리할 수 있어요.
+remove_all_clones_002,explain,remove_all_clones,이 블록이 없으면 어떤 문제가 생길까요?,복제본이 계속 남음 → 화면 복잡 → 속도 저하,좋은 질문이에요! 👀 이 블록이 없으면 게임 도중 만든 복제본들이 계속 쌓여서 화면이 지저분해지고 성능이 느려질 수 있어요.
+remove_all_clones_003,explain,remove_all_clones,실생활에서 이 블록은 무엇과 비슷할까요?,"한꺼번에 치우기 → 청소, 리셋 버튼",멋진 생각이에요 🙌 이 블록은 청소처럼 필요 없는 걸 한 번에 치우는 것과 같아요 🧹.
+remove_all_clones_004,explain,remove_all_clones,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"게임 리셋, 장면 전환, 아이템 초기화",좋아요! 👍 이 블록을 쓰면 게임이 끝날 때 총알이나 적 복제본을 전부 지우고 새로 시작할 수 있어요 🎮.
+remove_all_clones_005,explain,remove_all_clones,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,조건 + 전체 복제본 삭제,대단해요! 👏 예를 들어 “만약 스페이스 키를 누르면 모든 복제본 삭제하기”처럼 한 번에 정리할 수 있어요. 프로그램이 훨씬 깔끔해지죠 ✨

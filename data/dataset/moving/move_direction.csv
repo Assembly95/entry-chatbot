@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-move_direction_001,explain,move_direction,,,
-move_direction_002,explain,move_direction,,,
-move_direction_003,explain,move_direction,,,
-move_direction_004,explain,move_direction,,,
-move_direction_005,explain,move_direction,,,
+move_direction_001,explain,move_direction,‘방향으로 ~ 만큼 움직이기’ 블록은 어떤 역할을 하나요?,방향 값 지정 → 거리 지정 → 캐릭터 이동,잘 물어봤어요! 😀 이 블록은 캐릭터를 원하는 방향으로 정해진 거리만큼 움직이게 해요. 예를 들어 90도로 10만큼 움직이면 오른쪽으로 이동해요.
+move_direction_002,explain,move_direction,이 블록이 없으면 어떤 문제가 생길까요?,원하는 방향 이동 불가 → 정해진 움직임만 가능,좋은 질문이에요! 👀 이 블록이 없으면 캐릭터를 특정 방향으로 자유롭게 움직이기 힘들어요. 상하좌우로만 한정되죠.
+move_direction_003,explain,move_direction,실생활에서 이 블록은 무엇과 비슷할까요?,"나침반, 방향 지시","멋진 생각이에요 🙌 이 블록은 나침반과 같아요 🧭. 동쪽, 서쪽, 원하는 방향을 정해두면 그쪽으로 캐릭터가 움직여요."
+move_direction_004,explain,move_direction,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"자유 이동, 총알 발사, 로봇 움직임","좋아요! 👍 이 블록을 이용하면 마우스로 방향을 정해 총알을 발사하는 게임이나, 로봇이 특정 각도로 움직이는 프로젝트를 만들 수 있어요 🤖."
+move_direction_005,explain,move_direction,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,방향 이동 + 조건/변수 → 다양한 상호작용,대단해요! 👏 조건 블록과 합치면 “만약 스페이스 키를 누르면 오른쪽으로 10만큼 움직이기” 같은 규칙을 만들 수 있어요. 변수와 합치면 “속도”에 따라 이동 거리를 바꿀 수도 있죠 ✨

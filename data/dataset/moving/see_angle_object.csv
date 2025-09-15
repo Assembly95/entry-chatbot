@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-see_angle_object_001,explain,see_angle_object,,,
-see_angle_object_002,explain,see_angle_object,,,
-see_angle_object_003,explain,see_angle_object,,,
-see_angle_object_004,explain,see_angle_object,,,
-see_angle_object_005,explain,see_angle_object,,,
+see_angle_object_001,explain,see_angle_object,‘오브젝트를 향하도록 하기’ 블록은 어떤 역할을 하나요?,목표 오브젝트 좌표 확인 → 각도 계산 → 캐릭터 방향 변경,잘 물어봤어요! 😀 이 블록은 캐릭터가 선택한 오브젝트를 바라보게 해요. 예를 들어 “적 캐릭터를 향하도록 하기”를 쓰면 주인공이 자동으로 적을 바라봐요.
+see_angle_object_002,explain,see_angle_object,이 블록이 없으면 어떤 문제가 생길까요?,오브젝트 따라보기 불가 → 수동 회전만 가능,좋은 질문이에요! 👀 이 블록이 없으면 캐릭터가 다른 오브젝트를 자동으로 쳐다볼 수 없어요. 항상 각도를 직접 정해줘야 해요.
+see_angle_object_003,explain,see_angle_object,실생활에서 이 블록은 무엇과 비슷할까요?,"사람이 시선을 맞추기, 카메라 자동 추적",멋진 생각이에요 🙌 이 블록은 사람이 친구를 바라보는 것과 같아요 👀. CCTV 카메라가 움직이는 사람을 따라가는 모습과도 비슷해요 🎥.
+see_angle_object_004,explain,see_angle_object,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"추격 게임, 적 자동 조준","좋아요! 👍 이 블록을 쓰면 적을 자동으로 따라보는 추격 게임이나, 총알 발사 전에 자동으로 목표를 조준하는 게임을 만들 수 있어요 🎮."
+see_angle_object_005,explain,see_angle_object,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,자동 시선 + 이동/발사 → 자연스러운 행동,"대단해요! 👏 이동 블록과 합치면 “적을 바라보며 앞으로 가기” 같은 추격 장면을 만들 수 있고, 발사 블록과 합치면 자동 조준 후 공격하는 게임을 만들 수 있어요 ✨."

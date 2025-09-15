@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-restart_project_001,explain,restart_project,,,
-restart_project_002,explain,restart_project,,,
-restart_project_003,explain,restart_project,,,
-restart_project_004,explain,restart_project,,,
-restart_project_005,explain,restart_project,,,
+restart_project_001,explain,restart_project,‘처음부터 다시 실행하기’ 블록은 어떤 역할을 하나요?,실행 중 코드 모두 종료 → 처음 상태로 되돌림 → 다시 시작,"잘 물어봤어요! 😀 이 블록은 지금 실행 중인 프로그램을 멈추고, 맨 처음부터 다시 실행해요. 게임 리셋 버튼과 비슷해요."
+restart_project_002,explain,restart_project,이 블록이 없으면 어떤 문제가 생길까요?,프로그램 도중 리셋 불가 → 처음으로 돌아가기 힘듦,좋은 질문이에요! 👀 이 블록이 없으면 사용자가 중간에 다시 시작하고 싶어도 프로그램이 처음부터 자동으로 실행되지 않아요.
+restart_project_003,explain,restart_project,실생활에서 이 블록은 무엇과 비슷할까요?,"게임기의 리셋 버튼, 컴퓨터 재시작",멋진 생각이에요 🙌 이 블록은 게임기의 리셋 버튼과 같아요 🎮. 게임 도중 리셋을 누르면 처음 화면으로 돌아가죠.
+restart_project_004,explain,restart_project,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"게임 다시 시작, 퀴즈 재도전",좋아요! 👍 이 블록을 이용하면 “다시 시작” 버튼을 만들어서 게임을 처음부터 재도전할 수 있는 기능을 만들 수 있어요.
+restart_project_005,explain,restart_project,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,조건 + 리셋 → 자동 재시작,대단해요! 👏 예를 들어 “만약 캐릭터가 목숨을 다 잃으면 처음부터 다시 실행하기” 같은 자동 리셋 게임을 만들 수 있어요.

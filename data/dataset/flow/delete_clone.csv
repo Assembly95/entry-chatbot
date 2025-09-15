@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-delete_clone_001,explain,delete_clone,,,
-delete_clone_002,explain,delete_clone,,,
-delete_clone_003,explain,delete_clone,,,
-delete_clone_004,explain,delete_clone,,,
-delete_clone_005,explain,delete_clone,,,
+delete_clone_001,explain,delete_clone,‘이 복제본 삭제하기’ 블록은 어떤 역할을 하나요?,현재 실행 중인 복제본 → 즉시 제거,잘 물어봤어요! 😀 이 블록은 복제된 캐릭터를 화면에서 지우는 역할을 해요. 예를 들어 총알이 벽에 닿으면 사라지게 만들 수 있어요.
+delete_clone_002,explain,delete_clone,이 블록이 없으면 어떤 문제가 생길까요?,복제본이 계속 남음 → 화면에 쌓임 → 성능 저하,"좋은 질문이에요! 👀 이 블록이 없으면 복제된 캐릭터가 계속 남아 있어서 화면이 지저분해지고, 컴퓨터가 느려질 수 있어요."
+delete_clone_003,explain,delete_clone,실생활에서 이 블록은 무엇과 비슷할까요?,"다 쓰고 난 종이 버리기, 게임 오브젝트 제거",멋진 생각이에요 🙌 이 블록은 쓰고 난 종이를 버리는 것과 같아요. 필요 없는 클론을 정리해줘야 새로운 동작이 원활해져요 🗑️
+delete_clone_004,explain,delete_clone,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"총알 소멸, 아이템 먹기, 효과 종료","좋아요! 👍 게임에서 총알이 적에게 맞으면 바로 사라지게 하거나, 캐릭터가 아이템을 먹으면 아이템 복제본을 지우는 데 쓸 수 있어요 🎮"
+delete_clone_005,explain,delete_clone,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,삭제 + 조건/이벤트 → 깔끔한 게임 흐름,대단해요! 👏 이 블록을 조건 블록과 합치면 “만약 벽에 닿으면 이 복제본 삭제하기” 같은 규칙을 만들 수 있어요. 게임 진행이 훨씬 매끄러워져요 ✨

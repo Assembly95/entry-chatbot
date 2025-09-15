@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-when_clone_start_001,explain,when_clone_start,,,
-when_clone_start_002,explain,when_clone_start,,,
-when_clone_start_003,explain,when_clone_start,,,
-when_clone_start_004,explain,when_clone_start,,,
-when_clone_start_005,explain,when_clone_start,,,
+when_clone_start_001,explain,when_clone_start,‘복제본이 처음 생성되었을 때’ 블록은 어떤 역할을 하나요?,새 복제본 생성 → 해당 블록 실행 시작,잘 물어봤어요! 😀 이 블록은 복제본이 만들어질 때마다 어떤 동작을 할지 정해주는 블록이에요. 예를 들어 총알이 복제되면 앞으로 나가도록 만들 수 있어요.
+when_clone_start_002,explain,when_clone_start,이 블록이 없으면 어떤 문제가 생길까요?,복제는 가능 → 행동 정의 없음 → 아무 일도 안 함,좋은 질문이에요! 👀 이 블록이 없으면 복제된 캐릭터가 가만히 있어요. 복제만 되고 움직이지 않으니 게임이 어색해져요 👍
+when_clone_start_003,explain,when_clone_start,실생활에서 이 블록은 무엇과 비슷할까요?,"태어난 순간 해야 할 일 → 신입 사원 첫 업무, 로봇 초기화",멋진 생각이에요 🙌 이 블록은 새로 입사한 직원에게 첫 업무를 주는 것과 같아요. 혹은 로봇이 처음 켜졌을 때 바로 동작을 시작하는 모습과 비슷해요 🤖
+when_clone_start_004,explain,when_clone_start,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"총알 발사, 눈송이 떨어뜨리기, 반복 효과","좋아요! 👍 게임에서 캐릭터가 공격할 때 총알 복제본이 생성되고, 이 블록을 통해 자동으로 앞으로 나가게 만들 수 있어요. 또는 눈송이가 계속 복제되어 내리는 효과도 만들 수 있어요 ❄️"
+when_clone_start_005,explain,when_clone_start,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,클론 생성 시 → 움직임/소리/효과 실행,"대단해요! 👏 이 블록을 움직임 블록과 합치면 복제본이 생성되자마자 움직이게 할 수 있고, 소리 블록과 합치면 클론이 나올 때 효과음을 낼 수도 있어요 🔊"

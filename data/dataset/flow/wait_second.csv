@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-wait_second_001,explain,wait_second,,,
-wait_second_002,explain,wait_second,,,
-wait_second_003,explain,wait_second,,,
-wait_second_004,explain,wait_second,,,
-wait_second_005,explain,wait_second,,,
+wait_second_001,explain,wait_second,‘~초 기다리기’ 블록은 어떤 역할을 하나요?,프로그램 실행 → 일정 시간 멈춤 → 다음 블록 실행,잘 물어봤어요! 😀 이 블록은 프로그램을 잠시 멈추게 해요. 예를 들어 “2초 기다리기”라고 하면 캐릭터가 2초 동안 쉬었다가 다음 블록을 실행해요.
+wait_second_002,explain,wait_second,이 블록이 없으면 어떤 문제가 생길까요?,모든 동작이 쉬지 않고 연속 실행 → 사용자가 변화를 못 느낌,좋은 질문이에요! 👀 이 블록이 없으면 캐릭터가 너무 빠르게 움직여서 변화를 못 느낄 수 있어요. 기다리기를 넣으면 움직임이 차례대로 보여서 더 자연스러워요 👍
+wait_second_003,explain,wait_second,실생활에서 이 블록은 무엇과 비슷할까요?,"행동 중 잠시 멈춤 → 신호등 빨간불, 휴식 시간","멋진 생각이에요 🙌 이 블록은 신호등의 빨간불 같아요. 🚦 차가 잠시 멈췄다가 초록불이 켜지면 다시 출발하듯, 캐릭터도 정해진 시간만큼 멈췄다가 다시 움직여요."
+wait_second_004,explain,wait_second,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"대화 애니메이션, 동작 사이 간격 표현",좋아요! 👍 이 블록을 이용하면 캐릭터가 대사를 하고 1초 쉬었다가 다음 대사를 이어가도록 만들 수 있어요. 만화책처럼 자연스러운 대화 장면이 돼요 💬
+wait_second_005,explain,wait_second,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,기다림 + 움직임/소리 → 애니메이션 풍성,"대단해요! 👏 이 블록을 움직임 블록과 합치면 캐릭터가 한 걸음 걷고 1초 기다리고, 또 한 걸음 걷는 식으로 천천히 움직여요. 소리 블록과 합치면 음악 템포에 맞춰 동작할 수도 있죠 🎵"

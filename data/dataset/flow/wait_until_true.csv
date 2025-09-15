@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-wait_until_true_001,explain,wait_until_true,,,
-wait_until_true_002,explain,wait_until_true,,,
-wait_until_true_003,explain,wait_until_true,,,
-wait_until_true_004,explain,wait_until_true,,,
-wait_until_true_005,explain,wait_until_true,,,
+wait_until_001,explain,wait_until,‘~가 될 때까지 기다리기’ 블록은 어떤 역할을 하나요?,조건 확인 → 거짓이면 멈춤 → 참이 되면 실행 재개,잘 물어봤어요! 😀 이 블록은 어떤 조건이 참이 될 때까지 프로그램이 기다리도록 해요. 예를 들어 “스페이스 키가 눌릴 때까지 기다리기”를 만들 수 있어요.
+wait_until_002,explain,wait_until,이 블록이 없으면 어떤 문제가 생길까요?,조건 충족 전에도 실행 계속됨 → 원치 않는 동작 발생,좋은 질문이에요! 👀 이 블록이 없으면 캐릭터가 조건이 충족되지 않았는데도 계속 움직일 수 있어요. 기다리기를 넣으면 원하는 시점까지 멈출 수 있어요 👍
+wait_until_003,explain,wait_until,실생활에서 이 블록은 무엇과 비슷할까요?,"조건 만족 전까지 대기 → 엘리베이터 기다리기, 신호등","멋진 생각이에요 🙌 이 블록은 신호등 앞에서 기다리는 것과 같아요 🚦. 초록불이 켜질 때까지 멈춰 있다가, 조건이 충족되면 움직여요."
+wait_until_004,explain,wait_until,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"특정 입력/상황 기다리기 → 게임 시작, 이벤트 발생",좋아요! 👍 이 블록을 이용하면 “플레이어가 버튼을 누를 때까지 기다리기” 같은 게임을 만들 수 있어요. 준비가 끝나야 다음 장면으로 넘어가는 식으로 활용할 수 있죠 🎮
+wait_until_005,explain,wait_until,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,기다림 + 움직임/소리 → 상호작용 강화,"대단해요! 👏 이 블록을 소리 블록과 합치면 “소리가 들릴 때까지 기다리기”를 만들 수 있고, 움직임 블록과 합치면 “적이 나타날 때까지 기다리기” 같은 게임 상황을 만들 수 있어요 ✨"

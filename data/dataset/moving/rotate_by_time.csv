@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-rotate_by_time_001,explain,rotate_by_time,,,
-rotate_by_time_002,explain,rotate_by_time,,,
-rotate_by_time_003,explain,rotate_by_time,,,
-rotate_by_time_004,explain,rotate_by_time,,,
-rotate_by_time_005,explain,rotate_by_time,,,
+rotate_by_time_001,explain,rotate_by_time,‘~초 동안 회전하기’ 블록은 어떤 역할을 하나요?,회전 각도 입력 → 걸리는 시간 설정 → 일정 속도로 회전,잘 물어봤어요! 😀 이 블록은 캐릭터가 정해진 시간 동안 지정된 각도만큼 회전해요. 예를 들어 2초 동안 180도 회전하면 천천히 한 바퀴 돌게 돼요.
+rotate_by_time_002,explain,rotate_by_time,이 블록이 없으면 어떤 문제가 생길까요?,순간 회전만 가능 → 애니메이션 자연스러움 부족,"좋은 질문이에요! 👀 이 블록이 없으면 캐릭터가 한 번에 뿅 하고 회전해버려서, 부드러운 회전 연출이 어려워요."
+rotate_by_time_003,explain,rotate_by_time,실생활에서 이 블록은 무엇과 비슷할까요?,"의자 회전, 풍차 날개 돌기",멋진 생각이에요 🙌 이 블록은 의자가 천천히 돌아가는 것이나 🌬️ 풍차 날개가 일정 속도로 회전하는 것과 비슷해요.
+rotate_by_time_004,explain,rotate_by_time,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"춤추는 캐릭터, 천체 회전 애니메이션","좋아요! 👍 이 블록을 쓰면 캐릭터가 음악에 맞춰 회전하는 댄스 연출이나, 행성이 천천히 도는 우주 애니메이션을 만들 수 있어요 🌍."
+rotate_by_time_005,explain,rotate_by_time,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,시간 회전 + 이동/효과 → 리얼리티 강화,대단해요! 👏 이동 블록과 합치면 “앞으로 가면서 3초 동안 360도 회전하기” 같은 동작을 만들 수 있어요. 색 변화 효과와 합치면 회전 중에 색이 변하는 연출도 가능해요 ✨.

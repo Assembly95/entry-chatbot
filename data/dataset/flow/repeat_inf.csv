@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-repeat_inf_001,explain,repeat_inf,,,
-repeat_inf_002,explain,repeat_inf,,,
-repeat_inf_003,explain,repeat_inf,,,
-repeat_inf_004,explain,repeat_inf,,,
-repeat_inf_005,explain,repeat_inf,,,
+repeat_inf_001,explain,repeat_inf,‘무한 반복하기’ 블록은 어떤 역할을 하나요?,조건 없이 → 프로그램이 끝날 때까지 → 안의 블록을 계속 실행,"잘 물어봤어요! 😀 이 블록은 프로그램이 멈출 때까지 안에 있는 동작을 계속 반복해요. 예를 들어, 캐릭터가 게임이 끝날 때까지 계속 춤추게 할 수 있어요."
+repeat_inf_002,explain,repeat_inf,이 블록이 없으면 어떤 불편함이 생길까요?,반복을 무제한으로 줄 수 없음 → 직접 수백 번 지정해야 함,좋은 질문이에요! 👀 이 블록이 없으면 캐릭터가 계속 움직이도록 만들기가 힘들어요. 몇 백 번 반복을 따로 적어야 하니까요. 이 블록은 그런 수고를 줄여줘요 👍
+repeat_inf_003,explain,repeat_inf,실생활에서 이 블록은 무엇과 비슷할까요?,"멈출 때까지 반복되는 일상 → 시계 초침, 심장 박동",멋진 생각이에요 🙌 이 블록은 시계의 초침과 같아요. ⏰ 초침은 멈추지 않고 계속 움직이죠. 캐릭터도 이 블록을 쓰면 계속 움직여요.
+repeat_inf_004,explain,repeat_inf,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"게임 캐릭터 움직임, 배경 애니메이션","좋아요! 👍 이 블록을 이용하면 배경 별이 반짝이거나, 캐릭터가 계속 걸어 다니는 애니메이션을 만들 수 있어요. 게임 분위기를 살릴 수 있죠 🌟"
+repeat_inf_005,explain,repeat_inf,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,"무한 반복 + 조건/변수 → 게임 루프, 상호작용","대단해요! 👏 이 블록을 조건 블록과 합치면 캐릭터가 계속 움직이다가, 특정 조건이 되면 멈추게 만들 수 있어요. 게임 루프를 만드는 데 꼭 필요한 블록이에요 🎮"

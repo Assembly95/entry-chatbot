@@ -1,0 +1,492 @@
+{
+  "id": "boolean_basic_operator",
+  "category": "judge",
+  "name": "[~] [연산자] [~]",
+  "description": "입력한 두 내용을 비교해서 연산자 종류에 따라 참 또는 거짓으로 판단하는 블록입니다. 프로그래밍에서 가장 기본적이고 중요한 비교 연산 블록으로, 조건 블록과 함께 사용하여 프로그램의 흐름을 제어합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "비교 연산자의 개념과 종류 이해",
+      "숫자와 문자열 비교의 차이점 학습",
+      "논리적 판단을 통한 조건부 프로그래밍 구현",
+      "데이터 타입에 따른 비교 규칙 습득",
+      "수학적 부등식을 프로그래밍으로 표현하는 능력 개발"
+    ],
+    "key_concepts": [
+      {
+        "concept": "비교 연산자(Comparison Operator)",
+        "explanation": "두 값의 크기나 동등성을 비교하여 참 또는 거짓을 반환하는 연산자로, 조건문의 핵심 요소"
+      },
+      {
+        "concept": "동등성과 순서",
+        "explanation": "같음(=), 다름(!=)을 판단하는 동등성 비교와 크기 관계(>, <, ≥, ≤)를 판단하는 순서 비교"
+      },
+      {
+        "concept": "데이터 타입별 비교",
+        "explanation": "숫자는 수치로, 문자열은 사전 순서로, 혼합 타입은 특별한 규칙으로 비교하는 방식"
+      },
+      {
+        "concept": "불린 반환값",
+        "explanation": "비교 결과는 항상 참(True) 또는 거짓(False)의 불린 값으로 반환되어 조건문에서 활용"
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": [
+      "Entry 기본 인터페이스 사용법",
+      "값 블록과 판단 블록의 차이 이해",
+      "조건 블록(만약 ~라면) 사용 경험",
+      "숫자와 문자의 기본 개념"
+    ]
+  },
+
+  "comparison_operators": {
+    "equality": {
+      "equal": {
+        "symbol": "=",
+        "operator_code": "EQUAL",
+        "name": "같다",
+        "description": "두 값이 같으면 참, 다르면 거짓",
+        "examples": {
+          "numbers": "5 = 5 → 참, 5 = 3 → 거짓",
+          "strings": "'안녕' = '안녕' → 참, '안녕' = '반가워' → 거짓",
+          "mixed": "'5' = 5 → 거짓 (타입이 다름)"
+        }
+      },
+      "not_equal": {
+        "symbol": "!=",
+        "operator_code": "NOT_EQUAL",
+        "name": "같지 않다",
+        "description": "두 값이 다르면 참, 같으면 거짓",
+        "examples": {
+          "numbers": "5 != 3 → 참, 5 != 5 → 거짓",
+          "strings": "'안녕' != '반가워' → 참, '안녕' != '안녕' → 거짓"
+        }
+      }
+    },
+    "relational": {
+      "greater": {
+        "symbol": ">",
+        "operator_code": "GREATER",
+        "name": "크다",
+        "description": "왼쪽 값이 오른쪽 값보다 크면 참",
+        "rules": {
+          "numbers": "숫자의 크기 비교",
+          "strings": "사전 순서상 뒤에 있으면 크다고 판단",
+          "mixed": "숫자와 문자를 비교하면 항상 거짓"
+        }
+      },
+      "less": {
+        "symbol": "<",
+        "operator_code": "LESS",
+        "name": "작다",
+        "description": "왼쪽 값이 오른쪽 값보다 작으면 참",
+        "rules": {
+          "numbers": "숫자의 크기 비교",
+          "strings": "사전 순서상 앞에 있으면 작다고 판단",
+          "mixed": "숫자와 문자를 비교하면 항상 거짓"
+        }
+      },
+      "greater_or_equal": {
+        "symbol": "≥",
+        "operator_code": "GREATER_OR_EQUAL",
+        "name": "크거나 같다",
+        "description": "왼쪽 값이 오른쪽 값보다 크거나 같으면 참"
+      },
+      "less_or_equal": {
+        "symbol": "≤",
+        "operator_code": "LESS_OR_EQUAL",
+        "name": "작거나 같다",
+        "description": "왼쪽 값이 오른쪽 값보다 작거나 같으면 참"
+      }
+    }
+  },
+
+  "comparison_rules": {
+    "number_comparison": {
+      "description": "두 값이 모두 숫자일 때",
+      "rule": "수치의 크기를 직접 비교",
+      "examples": ["10 > 5 → 참", "3.5 < 7 → 참", "100 = 100 → 참"]
+    },
+    "string_comparison": {
+      "description": "두 값이 모두 문자일 때",
+      "rule": "사전(알파벳) 순서로 비교, 길이도 고려",
+      "examples": [
+        "'apple' < 'banana' → 참 (사전 순서)",
+        "'cat' > 'car' → 참 ('t'가 'r'보다 뒤)",
+        "'안녕하세요' > '안녕' → 참 (더 길거나 같을 때)"
+      ],
+      "note": "한글도 유니코드 순서에 따라 비교됨"
+    },
+    "mixed_type_comparison": {
+      "description": "숫자와 문자를 섞어서 비교할 때",
+      "rule": ">, <, ≥, ≤ 연산자는 항상 거짓 반환",
+      "examples": ["5 > 'hello' → 거짓", "'100' < 200 → 거짓", "10 = '10' → 거짓 (타입이 다름)"],
+      "exception": "= 과 != 연산자는 타입까지 고려하여 비교"
+    }
+  },
+
+  "usage_examples": [
+    {
+      "title": "숫자 비교로 점수 판정",
+      "description": "게임 점수에 따른 등급 판정 시스템",
+      "scenario": "100점 이상이면 'A등급', 80점 이상이면 'B등급'",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('점수를 입력하세요')",
+        "set_variable('점수', <답변>)",
+        "if_condition((<점수> ≥ (100)))",
+        "  speak_something('A등급입니다!')",
+        "if_condition((<점수> ≥ (80)) 그리고 (<점수> < (100)))",
+        "  speak_something('B등급입니다!')"
+      ],
+      "explanation": "사용자가 입력한 점수를 기준으로 등급을 판정하는 시스템입니다."
+    },
+    {
+      "title": "문자열 비교로 암호 확인",
+      "description": "올바른 암호를 입력했는지 확인하기",
+      "scenario": "정확한 암호를 입력해야만 통과",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('암호를 입력하세요')",
+        "if_condition((<답변> = '엔트리123'))",
+        "  speak_something('암호가 맞습니다!')",
+        "  show('문열림 모양')",
+        "if_condition((<답변> != '엔트리123'))",
+        "  speak_something('암호가 틀렸습니다!')"
+      ],
+      "explanation": "입력한 문자열이 정확히 일치하는지 확인하는 보안 시스템입니다."
+    },
+    {
+      "title": "변수 비교로 게임 승패 판정",
+      "description": "플레이어와 컴퓨터의 수치 비교",
+      "scenario": "가위바위보 게임에서 숫자로 승부 결정",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('플레이어', <1부터 3까지의 무작위 수>)",
+        "set_variable('컴퓨터', <1부터 3까지의 무작위 수>)",
+        "if_condition((<플레이어> = <컴퓨터>))",
+        "  speak_something('무승부!')",
+        "if_condition((<플레이어> > <컴퓨터>))",
+        "  speak_something('플레이어 승리!')",
+        "if_condition((<플레이어> < <컴퓨터>))",
+        "  speak_something('컴퓨터 승리!')"
+      ],
+      "explanation": "무작위로 생성된 숫자를 비교하여 게임 결과를 판정합니다."
+    },
+    {
+      "title": "복합 조건 만들기",
+      "description": "여러 비교 연산자를 조합한 복잡한 조건",
+      "scenario": "나이가 10세 이상 20세 이하인 경우만 참가 가능",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('나이를 입력하세요')",
+        "set_variable('나이', <답변>)",
+        "if_condition(((<나이> ≥ (10)) 그리고 (<나이> ≤ (20))))",
+        "  speak_something('참가 가능합니다!')",
+        "  change_variable('참가자수', 1)"
+      ],
+      "explanation": "범위 조건을 만들어서 특정 조건을 만족하는 경우만 허용합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "비교 연산자를 언제 사용하는지 모르겠어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "일상에서 '~보다 크다', '~와 같다'처럼 두 가지를 비교할 때 사용해요. 시험 점수, 키, 나이 등을 비교하는 상황을 생각해보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'판단' 카테고리에서 '[~] [연산자] [~]' 블록을 찾아보세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "가운데 드롭다운을 클릭하면 =, !=, >, <, ≥, ≤ 중에서 원하는 비교 방법을 선택할 수 있어요"
+        }
+      ]
+    },
+    {
+      "situation": "문자와 숫자를 비교했는데 결과가 이상해요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "숫자와 문자를 >, < 연산자로 비교하면 항상 거짓이 나와요. 이는 비교할 수 없는 서로 다른 종류이기 때문이에요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "숫자는 숫자끼리, 문자는 문자끼리 비교하거나, = 과 != 연산자만 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "필요하다면 '계산' 카테고리의 문자→숫자 변환 블록을 먼저 사용해보세요"
+        }
+      ]
+    },
+    {
+      "situation": "문자열을 비교했는데 예상과 다른 결과가 나와요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "문자열은 사전 순서로 비교돼요. 'apple'이 'banana'보다 작은 이유는 알파벳 순서 때문이에요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "문자열 길이도 영향을 줘요. 같은 시작 부분이면 더 긴 문자열이 큰 것으로 판단돼요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "정확히 같은지만 확인하고 싶다면 = 연산자를 사용하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "= 과 == 혼동하기",
+      "why_it_happens": "다른 프로그래밍 언어의 경험이나 수학 기호와의 차이",
+      "consequence": "엔트리에서는 =이 맞지만 ==를 찾으려고 함",
+      "solution": "엔트리에서는 단일 등호(=)를 사용한다는 점 기억하기",
+      "teaching_moment": "각 프로그래밍 언어마다 기호가 조금씩 다를 수 있어서 그 언어의 규칙을 정확히 알아야 해요."
+    },
+    {
+      "mistake": "숫자와 문자 혼합 비교",
+      "why_it_happens": "'10'과 10이 같다고 생각하거나, 크기 비교가 가능할 것으로 착각",
+      "consequence": "예상과 다른 비교 결과로 인한 프로그램 오작동",
+      "solution": "데이터 타입을 명확히 구분하고, 필요시 변환 블록 사용",
+      "teaching_moment": "컴퓨터는 '10'이라는 글자와 10이라는 숫자를 완전히 다른 것으로 인식해요."
+    },
+    {
+      "mistake": "부등호 방향 헷갈리기",
+      "why_it_happens": ">, < 기호의 방향과 의미를 혼동",
+      "consequence": "반대 조건으로 동작하여 원하지 않는 결과 발생",
+      "solution": "큰 입이 큰 수를 먹는다고 기억하기 (5 > 3에서 >가 5쪽을 향함)",
+      "teaching_moment": "수학에서 배운 부등호와 같은 의미니까, 천천히 생각해보면 헷갈리지 않아요."
+    },
+    {
+      "mistake": "복합 조건에서 연산자 우선순위 무시",
+      "why_it_happens": "여러 비교를 조합할 때 실행 순서를 고려하지 않음",
+      "consequence": "의도하지 않은 조건문 동작",
+      "solution": "'그리고', '또는' 블록으로 명확하게 조건을 구분하여 조합",
+      "teaching_moment": "복잡한 조건은 작은 부분으로 나누어서 하나씩 확인해보는 것이 좋아요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "판단 블록 찾기",
+      "instruction": "블록 팔레트에서 '판단' 카테고리를 클릭하세요.",
+      "visual_hint": "육각형 모양의 보라색 아이콘을 찾아보세요."
+    },
+    {
+      "step": 2,
+      "title": "비교 연산자 블록 선택",
+      "instruction": "'[~] [연산자] [~]' 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "양쪽에 값을 넣는 자리와 가운데 연산자 드롭다운이 있는 육각형 블록이에요."
+    },
+    {
+      "step": 3,
+      "title": "연산자 종류 선택",
+      "instruction": "가운데 드롭다운을 클릭해서 원하는 비교 연산자를 선택하세요.",
+      "visual_hint": "=, !=, >, <, ≥, ≤ 중에서 목적에 맞는 것을 선택하세요."
+    },
+    {
+      "step": 4,
+      "title": "비교할 값 입력",
+      "instruction": "양쪽 입력 자리에 비교하고 싶은 값이나 변수를 넣으세요.",
+      "visual_hint": "숫자, 문자, 변수, 다른 값 블록 등을 넣을 수 있어요."
+    },
+    {
+      "step": 5,
+      "title": "조건 블록에 연결",
+      "instruction": "완성된 비교 블록을 '만약 ~라면' 블록의 조건 자리에 넣으세요.",
+      "visual_hint": "육각형 모양이 딱 맞게 들어가는 자리에 배치하세요."
+    },
+    {
+      "step": 6,
+      "title": "테스트 및 확인",
+      "instruction": "다양한 값으로 테스트해보며 비교 결과가 올바른지 확인하세요.",
+      "visual_hint": "예상한 결과와 실제 결과를 비교해보세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "_if",
+      "block_name": "만약 ~라면",
+      "relationship": "조건 판단",
+      "explanation": "비교 연산자의 결과를 조건으로 사용하여 프로그램 흐름 제어"
+    },
+    {
+      "block_id": "boolean_and_or",
+      "block_name": "그리고/또는",
+      "relationship": "복합 조건",
+      "explanation": "여러 비교 연산자를 조합하여 더 복잡한 조건 생성"
+    },
+    {
+      "block_id": "boolean_not",
+      "block_name": "~이 아니다",
+      "relationship": "조건 반전",
+      "explanation": "비교 결과를 반대로 뒤집어서 사용"
+    },
+    {
+      "block_id": "calc_basic",
+      "block_name": "산술 연산자",
+      "relationship": "값 계산",
+      "explanation": "비교하기 전에 값을 계산하여 비교 대상 준비"
+    },
+    {
+      "block_id": "get_variable",
+      "block_name": "변수",
+      "relationship": "동적 비교",
+      "explanation": "저장된 변수 값을 비교 대상으로 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "비교 결과가 항상 거짓으로 나와요",
+      "possible_causes": [
+        "숫자와 문자를 크기 비교 연산자(>, <)로 비교",
+        "데이터 타입이 다른 값들을 = 연산자로 비교",
+        "변수에 예상과 다른 값이 저장됨",
+        "연산자 방향을 반대로 선택"
+      ],
+      "solutions": [
+        "비교하는 두 값의 데이터 타입이 같은지 확인",
+        "변수 값을 별도로 확인해보기",
+        "간단한 예시로 연산자 동작 테스트해보기",
+        "연산자 기호와 의미 다시 확인하기"
+      ]
+    },
+    {
+      "problem": "문자열 비교 결과가 예상과 달라요",
+      "possible_causes": [
+        "대소문자 차이를 고려하지 않음",
+        "띄어쓰기나 특수문자 포함",
+        "사전 순서 규칙을 잘못 이해",
+        "한글과 영어의 비교 순서 차이"
+      ],
+      "solutions": [
+        "정확한 문자열 입력 확인하기",
+        "대소문자 변환 블록 사용 고려",
+        "간단한 문자부터 비교 규칙 테스트하기",
+        "= 연산자로 정확한 일치만 확인하기"
+      ]
+    },
+    {
+      "problem": "복합 조건이 예상대로 동작하지 않아요",
+      "possible_causes": [
+        "그리고/또는 연산자를 잘못 사용",
+        "괄호(우선순위) 개념 미적용",
+        "각 개별 조건이 잘못됨",
+        "논리 연산의 결과 오해"
+      ],
+      "solutions": [
+        "각 비교 조건을 개별적으로 먼저 테스트",
+        "그리고/또는 블록으로 명확하게 구분",
+        "복잡한 조건을 단순한 조건들로 분해",
+        "진리표를 그려서 논리 확인하기"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "시험 성적 평가",
+      "explanation": "90점 이상이면 A, 80점 이상이면 B처럼 성적을 등급으로 나누는 것과 같아요."
+    },
+    {
+      "analogy": "키 제한이 있는 놀이기구",
+      "explanation": "키가 120cm 이상이어야 탈 수 있는 놀이기구처럼 조건을 만족해야 허용되는 시스템이에요."
+    },
+    {
+      "analogy": "비밀번호 확인",
+      "explanation": "입력한 비밀번호가 정확히 일치해야만 로그인되는 것처럼 정확한 일치를 확인해요."
+    },
+    {
+      "analogy": "스포츠 경기 승부 판정",
+      "explanation": "축구에서 골 수를 비교해서 승부를 결정하는 것처럼 수치 비교로 결과를 판단해요."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "범위 조건 만들기",
+      "description": "두 개의 비교 연산자를 '그리고'로 연결하여 특정 범위 내의 값인지 확인",
+      "use_case": "나이가 10세 이상 18세 이하인 청소년 확인, 점수가 80점 이상 90점 미만인 B등급 판정"
+    },
+    {
+      "concept": "다중 선택 조건",
+      "description": "여러 개의 비교를 '또는'으로 연결하여 여러 가능성 중 하나라도 만족하는지 확인",
+      "use_case": "VIP 회원이거나 특별 쿠폰을 가진 경우 할인 적용, 관리자이거나 특별 권한자인 경우 접근 허용"
+    },
+    {
+      "concept": "동적 기준값 비교",
+      "description": "고정된 숫자가 아닌 변수나 계산 결과를 기준으로 비교",
+      "use_case": "평균 점수보다 높은 학생 찾기, 최고 기록과 현재 기록 비교하여 신기록 여부 판단"
+    },
+    {
+      "concept": "문자열 패턴 검사",
+      "description": "문자열의 특정 부분이나 길이를 비교하여 패턴 확인",
+      "use_case": "이메일 주소에 @가 포함되어 있는지 확인, 비밀번호 길이가 8자 이상인지 검사"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "기본적인 비교 연산자를 사용해서 단순한 조건을 만들 수 있다",
+      "example": "점수가 60점 이상이면 합격 메시지 출력, 나이가 20세와 같으면 성인 인증"
+    },
+    {
+      "level": "중급",
+      "criteria": "다양한 데이터 타입의 비교와 복합 조건을 활용할 수 있다",
+      "example": "문자열 비교로 암호 확인 시스템, 범위 조건으로 등급 분류 시스템 구현"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 논리 구조와 동적 비교를 통해 정교한 판단 시스템을 설계할 수 있다",
+      "example": "다단계 조건문으로 게임 AI 구현, 실시간 데이터 비교를 통한 알림 시스템 제작"
+    }
+  ],
+
+  "technical_notes": {
+    "operator_mapping": {
+      "EQUAL": "===",
+      "NOT_EQUAL": "!=",
+      "GREATER": ">",
+      "LESS": "<",
+      "GREATER_OR_EQUAL": ">=",
+      "LESS_OR_EQUAL": "<="
+    },
+    "type_conversion": {
+      "string_to_number": "문자열이 숫자로 변환 가능하면 자동 변환 후 비교",
+      "mixed_type_behavior": "숫자와 문자 혼합 시 크기 비교는 항상 거짓 반환",
+      "string_comparison_rule": "유니코드 값 기준 사전식 순서로 비교"
+    },
+    "performance_considerations": [
+      "문자열 비교는 길이가 길수록 처리 시간 증가",
+      "복잡한 조건문보다는 단순한 비교를 여러 번 사용하는 것이 이해하기 쉬움",
+      "자주 사용되는 비교값은 변수에 저장하여 재사용 권장"
+    ],
+    "common_use_patterns": [
+      "점수/등급 시스템: 범위별 조건 분기",
+      "접근 권한 제어: 사용자 레벨이나 상태 확인",
+      "게임 로직: 승패 판정, 아이템 획득 조건",
+      "사용자 입력 검증: 올바른 형식이나 범위 확인"
+    ]
+  }
+}

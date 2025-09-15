@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-repeat_while_true_001,explain,repeat_while_true,,,
-repeat_while_true_002,explain,repeat_while_true,,,
-repeat_while_true_003,explain,repeat_while_true,,,
-repeat_while_true_004,explain,repeat_while_true,,,
-repeat_while_true_005,explain,repeat_while_true,,,
+repeat_while_true_001,explain,repeat_while_true,‘~동안 반복하기’ 블록은 어떤 역할을 하나요?,조건 확인 → 참이면 실행 반복 → 거짓이 되면 종료,잘 물어봤어요! 😀 이 블록은 어떤 조건이 참인 동안 안의 동작을 계속 반복해요. 예를 들어 “키보드 ↑ 키가 눌려 있는 동안” 캐릭터가 계속 앞으로 가도록 만들 수 있어요.
+repeat_while_true_002,explain,repeat_while_true,이 블록이 없으면 프로그램에서 어떤 문제가 생길까요?,조건이 참일 때만 반복 제어 불가 → 복잡한 코드 필요,"좋은 질문이에요! 👀 이 블록이 없으면 조건이 참인 동안만 반복하기가 어려워요. 여러 블록을 조합해야 하는데, 이 블록은 그걸 간단하게 해줘요 👍"
+repeat_while_true_003,explain,repeat_while_true,실생활에서 이 블록은 무엇과 비슷할까요?,"조건이 유지되는 동안 반복 → 버튼 누르고 있는 동안, 수도꼭지 틀린 동안","멋진 생각이에요 🙌 이 블록은 수도꼭지와 비슷해요. 🚰 수도꼭지를 트는 동안은 물이 계속 나오다가, 잠그면 멈추죠. 조건이 참인 동안만 반복되는 거예요."
+repeat_while_true_004,explain,repeat_while_true,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"특정 상태 유지 → 키 입력, 충돌 감지",좋아요! 👍 이 블록을 이용하면 “스페이스 키를 누르고 있는 동안 점프 유지” 같은 동작을 만들 수 있어요. 조건이 풀리면 자동으로 멈춰서 자연스러운 게임을 만들 수 있죠 🎮
+repeat_while_true_005,explain,repeat_while_true,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,조건 반복 + 움직임/소리 → 상호작용 풍부,"대단해요! 👏 이 블록을 움직임 블록과 합치면 캐릭터가 조건이 참일 때만 움직이고, 소리 블록과 합치면 조건이 유지되는 동안 배경음악이 계속 나오게 할 수 있어요 🎵"

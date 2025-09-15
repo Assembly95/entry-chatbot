@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-create_clone_001,explain,create_clone,,,
-create_clone_002,explain,create_clone,,,
-create_clone_003,explain,create_clone,,,
-create_clone_004,explain,create_clone,,,
-create_clone_005,explain,create_clone,,,
+create_clone_001,explain,create_clone,‘이 오브젝트 복제하기’ 블록은 어떤 역할을 하나요?,원본 오브젝트 → 복제본 생성 → 새 인스턴스 실행,잘 물어봤어요! 😀 이 블록은 오브젝트의 복제본을 새로 만들 때 사용해요. 예를 들어 총알 캐릭터를 계속 복제해서 발사할 수 있어요.
+create_clone_002,explain,create_clone,이 블록이 없으면 어떤 문제가 생길까요?,새로운 복제본 생성 불가 → 오브젝트 수 제한,좋은 질문이에요! 👀 이 블록이 없으면 캐릭터를 여러 개 동시에 등장시킬 수 없어요. 한 오브젝트만 계속 쓰게 되죠.
+create_clone_003,explain,create_clone,실생활에서 이 블록은 무엇과 비슷할까요?,"복사/생산 과정 → 프린터, 공장 생산 라인","멋진 생각이에요 🙌 이 블록은 프린터에서 종이를 여러 장 뽑는 것과 같아요. 🖨️ 원본은 그대로 있고, 필요한 만큼 복사본이 생겨나요."
+create_clone_004,explain,create_clone,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"총알, 적 캐릭터, 반복되는 오브젝트 생성","좋아요! 👍 게임에서 캐릭터가 총을 쏠 때마다 총알 복제본을 만들 수 있고, 적 캐릭터를 여러 명 등장시킬 수도 있어요."
+create_clone_005,explain,create_clone,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,복제 + 움직임/소리/효과 → 풍성한 연출,"대단해요! 👏 이 블록을 움직임 블록과 합치면 복제된 캐릭터가 자동으로 움직이게 하고, 소리 블록과 합치면 복제될 때마다 효과음을 낼 수도 있어요 🔊"

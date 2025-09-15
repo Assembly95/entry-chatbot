@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-direction_relative_001,explain,direction_relative,,,
-direction_relative_002,explain,direction_relative,,,
-direction_relative_003,explain,direction_relative,,,
-direction_relative_004,explain,direction_relative,,,
-direction_relative_005,explain,direction_relative,,,
+direction_relative_001,explain,direction_relative,‘방향을 ~만큼 바꾸기’ 블록은 어떤 역할을 하나요?,현재 방향 확인 → 입력한 값 더하기/빼기 → 새로운 방향 설정,잘 물어봤어요! 😀 이 블록은 캐릭터가 바라보는 방향에서 입력한 값만큼 방향을 바꿔요. 예를 들어 15도를 더하면 살짝 오른쪽으로 기울어요.
+direction_relative_002,explain,direction_relative,이 블록이 없으면 어떤 문제가 생길까요?,방향 제어가 고정됨 → 자유로운 회전 불가,좋은 질문이에요! 👀 이 블록이 없으면 캐릭터가 항상 같은 방향만 바라보게 돼서 자유롭게 회전시킬 수 없어요.
+direction_relative_003,explain,direction_relative,실생활에서 이 블록은 무엇과 비슷할까요?,"나침반 각도 조절, 자동차 핸들 조금 돌리기",멋진 생각이에요 🙌 이 블록은 나침반을 조금 돌려 방향을 바꾸는 것과 같아요 🧭. 자동차 핸들을 살짝 꺾는 것도 비슷해요.
+direction_relative_004,explain,direction_relative,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"미사일 궤적, 캐릭터 회전 효과","좋아요! 👍 이 블록을 쓰면 미사일이 점점 방향을 바꿔서 날아가는 게임이나, 캐릭터가 회전하며 춤추는 애니메이션을 만들 수 있어요 🎮."
+direction_relative_005,explain,direction_relative,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,방향 변경 + 이동/조건 → 자연스러운 동작,대단해요! 👏 이동 블록과 합치면 “10만큼 움직이고 방향을 15도 바꾸기” 같은 동작을 만들 수 있어요. 조건과 합치면 상황별 회전 로직을 만들 수도 있죠 ✨.
