@@ -166,29 +166,182 @@ function getCategoryKorean(category) {
 }
 function getKnownBlockFiles(category) {
   const fileMap = {
+    brush: [
+      "brush_erase_all.json",
+      "brush_stamp.json",
+      "change_brush_transparency.json",
+      "change_thickness.json",
+      "set_brush_transparency.json",
+      "set_color.json",
+      "set_fill_color.json",
+      "set_random_color.json",
+      "set_thickness.json",
+      "start_drawing.json",
+      "start_fill.json",
+      "stop_drawing.json",
+      "stop_fill.json",
+    ],
+    calc: [
+      "calc_basic.json",
+      "calc_operation.json",
+      "calc_rand.json",
+      "change_hex_to_rgb.json",
+      "change_rgb_to_hex.json",
+      "change_string_case.json",
+      "char_at.json",
+      "choose_project_timer_action.json",
+      "combine_something.json",
+      "coordinate_mouse.json",
+      "coordinate_object.json",
+      "count_match_string.json",
+      "distance_something.json",
+      "get_block_count.json",
+      "get_boolean_value.json",
+      "get_date.json",
+      "get_nickname.json",
+      "get_project_timer_value.json",
+      "get_user_name.json",
+      "index_of_string.json",
+      "length_of_string.json",
+      "quotient_and_mod.json", // 나머지 블록!
+      "replace_string.json",
+      "reverse_of_string.json",
+      "set_visible_project_timer.json",
+      "substring.json",
+    ],
+    flow: [
+      "_if.json", // 조건문 블록!
+      "continue_repeat.json",
+      "create_clone.json",
+      "delete_clone.json",
+      "if_else.json",
+      "remove_all_clones.json",
+      "repeat_basic.json",
+      "repeat_inf.json",
+      "repeat_while_true.json",
+      "restart_project.json",
+      "stop_object.json",
+      "stop_repeat.json",
+      "wait_second.json",
+      "wait_until_true.json",
+      "when_clone_start.json",
+    ],
+    func: [
+      "function_create.json",
+      "function_field_boolean.json",
+      "function_field_label.json",
+      "function_field_string.json",
+      "function_general.json",
+      "function_param_boolean.json",
+      "function_param_string.json",
+      "function_value.json",
+      "get_func_variable.json",
+      "set_func_variable.json",
+      "showFunctionPropsButton.json",
+    ],
+    judgement: [
+      "boolean_and_or.json",
+      "boolean_basic_operator.json",
+      "boolean_not.json",
+      "is_clicked.json",
+      "is_object_clicked.json",
+      "is_press_some_key.json",
+      "is_type.json",
+      "reach_something.json",
+    ],
+    looks: [
+      "add_effect_amount.json",
+      "change_effect_amount.json",
+      "change_object_index.json",
+      "change_scale_size.json",
+      "change_to_next_shape.json",
+      "change_to_some_shape.json",
+      "dialog.json",
+      "dialog_time.json",
+      "erase_all_effects.json",
+      "flip_x.json",
+      "flip_y.json",
+      "hide.json",
+      "remove_dialog.json",
+      "reset_scale_size.json",
+      "set_scale_size.json",
+      "show.json",
+      "stretch_scale_size.json",
+    ],
+    moving: [
+      "bounce_wall.json",
+      "direction_absolute.json",
+      "direction_relative.json",
+      "direction_relative_duration.json",
+      "locate.json",
+      "locate_object_time.json",
+      "locate_x.json",
+      "locate_xy.json",
+      "locate_xy_time.json",
+      "locate_y.json",
+      "move_direction.json",
+      "move_to_angle.json",
+      "move_x.json",
+      "move_xy_time.json",
+      "move_y.json",
+      "rotate_absolute.json",
+      "rotate_by_time.json",
+      "rotate_relative.json",
+      "see_angle_object.json",
+    ],
+    sound: [
+      "get_sound_duration.json",
+      "get_sound_speed.json",
+      "get_sound_volume.json",
+      "play_bgm.json",
+      "sound_from_to.json",
+      "sound_from_to_and_wait.json",
+      "sound_silent_all.json",
+      "sound_something_second_wait_with_block.json",
+      "sound_something_second_with_block.json",
+      "sound_something_wait_with_block.json",
+      "sound_something_with_block.json",
+      "sound_speed_change.json",
+      "sound_speed_set.json",
+      "sound_volume_change.json",
+      "sound_volume_set.json",
+      "stop_bgm.json",
+    ],
     start: [
-      "when_object_click.json",
+      "message_cast.json",
+      "message_cast_wait.json", // 신호 보내고 기다리기!
+      "mouse_click_cancled.json",
+      "mouse_clicked.json",
+      "start_neighbor_scene.json",
+      "start_scene.json",
       "when_message_cast.json",
+      "when_object_click.json",
+      "when_object_click_canceled.json",
+      "when_run_button_click.json",
       "when_scene_start.json",
       "when_some_key_pressed.json",
-      "start_neighbor_scene.json",
-      "mouse_clicked.json",
-      "mouse_click_cancled.json",
-      "when_run_button_click.json",
-      "message_cast_with.json",
-      "message_cast.json",
     ],
-    // 실제 존재하는 파일들만 추가 (나머지는 주석 처리)
-    // moving: ['move_steps.json', 'rotate_relative.json', 'move_to_position.json'],
-    // looks: ['show.json', 'hide.json', 'change_size.json', 'set_size.json'],
-    // sound: ['play_sound.json', 'stop_sound.json'],
-    // judgement: ['if.json', 'if_else.json'],
-    // repeat: ['repeat_basic.json', 'repeat_inf.json'],
-    // variable: ['set_variable.json', 'change_variable.json'],
-    // func: ['function_create.json', 'function_call.json'],
-    // calc: ['calc_basic.json', 'number.json'],
-    // brush: ['brush_stamp.json'],
-    // flow: ['wait_second.json', 'stop_run.json']
+    variable: [
+      "add_value_to_list.json",
+      "ask_and_wait.json",
+      "change_variable.json",
+      "change_value_list_index.json",
+      "get_canvas_input_value.json",
+      "get_variable.json",
+      "hide_list.json",
+      "hide_variable.json",
+      "insert_value_to_list.json",
+      "is_included_in_list.json",
+      "length_of_list.json",
+      "listAddButton.json",
+      "remove_value_from_list.json",
+      "set_variable.json",
+      "set_visible_answer.json",
+      "show_list.json",
+      "show_variable.json",
+      "value_of_index_from_list.json",
+      "variableAddButton.json",
+    ],
   };
 
   return fileMap[category] || [];
@@ -203,67 +356,92 @@ async function searchEntryBlocks(userMessage, topK = 3) {
     return [];
   }
 
+  // 1. 직접 매칭 우선 (정확한 블록명)
+  const directMatches = blockData.filter((block) => {
+    const blockName = block.name || "";
+    return blockName.includes("만약") && blockName.includes("라면") && userMessage.includes("만약");
+  });
+
+  // 2. 특별 키워드 매칭
+  const specialKeywordMatches = [];
+
+  // 나머지 관련
+  if (
+    (userMessage.includes("나머지") && userMessage.includes("블록")) ||
+    userMessage.includes("나눗셈") ||
+    userMessage.includes("몫")
+  ) {
+    const mathBlocks = blockData.filter(
+      (block) =>
+        block.fileName === "quotient_and_mod" || (block.name && (block.name.includes("나머지") || block.name.includes("몫")))
+    );
+    specialKeywordMatches.push(...mathBlocks);
+  }
+
+  // 조건 관련
+  if (userMessage.includes("조건") || (userMessage.includes("만약") && userMessage.includes("라면"))) {
+    const conditionBlocks = blockData.filter(
+      (block) => block.fileName === "_if" || block.fileName === "if_else" || (block.name && block.name.includes("만약"))
+    );
+    specialKeywordMatches.push(...conditionBlocks);
+  }
+
+  // 반복 관련
+  if (userMessage.includes("반복") || userMessage.includes("루프")) {
+    const repeatBlocks = blockData.filter(
+      (block) => block.category === "repeat" || (block.category === "flow" && block.name && block.name.includes("반복"))
+    );
+    specialKeywordMatches.push(...repeatBlocks);
+  }
+
+  // 직접 매칭이나 특별 키워드 매칭이 있으면 우선 반환
+  if (directMatches.length > 0) {
+    console.log(`🎯 직접 매칭: ${directMatches.length}개 블록`);
+    return directMatches.slice(0, topK);
+  }
+
+  if (specialKeywordMatches.length > 0) {
+    console.log(`🎯 특별 키워드 매칭: ${specialKeywordMatches.length}개 블록`);
+    return [...new Set(specialKeywordMatches)].slice(0, topK); // 중복 제거
+  }
+
+  // 3. 기존 일반 검색 로직
   const messageWords = userMessage
     .toLowerCase()
     .replace(/[^\w\s가-힣]/g, " ")
     .split(/\s+/)
-    .filter((word) => word.length > 1);
+    .filter((word) => word.length > 0); // 길이 제한 완화
 
   console.log("🔍 검색 키워드:", messageWords);
 
   const scored = blockData.map((block) => {
     let score = 0;
 
-    // 한국어 name 필드를 최우선으로 검색
     const searchableText = [
-      block.name || "", // 한국어 블록명 (최우선)
-      block.description || "", // 한국어 설명
-      getCategoryKorean(block.category), // 한국어 카테고리명
-      block.fileName || "", // 영어 파일명 (참고용)
+      block.name || "",
+      block.description || "",
+      getCategoryKorean(block.category),
+      block.fileName || "",
       JSON.stringify(block.usage_examples || []),
       JSON.stringify(block.common_mistakes || []),
     ]
       .join(" ")
       .toLowerCase();
 
-    // 키워드 매칭 (name 필드에 높은 가중치)
+    // 키워드 매칭
     for (const word of messageWords) {
-      // 한국어 블록명 매칭 (가장 높은 점수)
       if (block.name && block.name.toLowerCase().includes(word)) {
         score += 10;
         console.log(`높은 매칭: ${block.name} <- ${word}`);
       }
 
-      // 일반 텍스트 매칭
       if (searchableText.includes(word)) {
         score += 2;
       }
 
-      // 카테고리 매칭
       const koreanCategory = getCategoryKorean(block.category);
       if (koreanCategory.includes(word)) {
         score += 5;
-      }
-    }
-
-    // 특별 키워드 부스팅 (한국어 중심)
-    const specialKeywords = {
-      클릭: ["클릭", "click", "마우스", "누르"],
-      시작: ["시작", "start"],
-      소리: ["소리", "sound", "야옹", "멍멍", "재생"],
-      움직: ["움직", "이동", "move"],
-      반복: ["반복", "repeat", "무한"],
-      조건: ["조건", "만약", "if"],
-      변수: ["변수", "variable", "저장"],
-    };
-
-    for (const [korean, terms] of Object.entries(specialKeywords)) {
-      if (userMessage.includes(korean)) {
-        for (const term of terms) {
-          if (searchableText.includes(term)) {
-            score += 3;
-          }
-        }
       }
     }
 
@@ -304,6 +482,7 @@ async function callOpenAI(messages, apiKey = null) {
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
+        //model: "ft:gpt-3.5-turbo-0125:personal:entry-tutor:CGOtgkL1",
         messages: messages,
         max_tokens: 200, // 300 -> 200으로 단축
         temperature: 0.5, // 0.7 -> 0.5로 일관성 향상
@@ -517,7 +696,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     case "generateAIResponse":
       handleAIRequest(request)
-        .then((response) => sendResponse({ success: true, response }))
+        .then(async (response) => {
+          // 🧩 관련 블록 JSON 검색 (최대 1개)
+          const relevantBlocks = await searchEntryBlocks(request.message, 1);
+          const blockJson = relevantBlocks[0] || null;
+
+          // content.js 사이드바로 전달
+          if (sender.tab?.id) {
+            chrome.tabs.sendMessage(sender.tab.id, {
+              type: "AI_RESPONSE",
+              response,
+              blockJson,
+            });
+          }
+
+          // 기존 sendResponse도 blockJson 포함
+          sendResponse({ success: true, response, blockJson });
+        })
         .catch((error) => sendResponse({ success: false, error: error.message }));
       return true;
 

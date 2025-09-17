@@ -1,0 +1,363 @@
+{
+  "id": "start_drawing",
+  "category": "brush",
+  "name": "붓 들기",
+  "description": "오브젝트가 이동할 때 선을 그리기 시작하는 블록입니다. 실제 붓을 종이에 대는 것처럼, 이 블록을 실행한 후 오브젝트가 이동하면 그 경로를 따라 선이 그어집니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "그리기의 시작과 끝 개념 이해",
+      "상태 변화와 모드 전환의 프로그래밍 개념 학습",
+      "연속적인 그리기와 점 찍기의 차이점 파악",
+      "도구의 활성화/비활성화 제어 방법 습득",
+      "그리기 과정의 체계적 관리법 익히기"
+    ],
+    "key_concepts": [
+      {
+        "concept": "그리기 모드 활성화",
+        "explanation": "붓을 종이에 대어서 그리기 준비 상태로 만드는 기능으로, 이후 이동할 때마다 선이 그어집니다."
+      },
+      {
+        "concept": "상태 변화 (State Change)",
+        "explanation": "오브젝트의 상태를 '그리지 않음'에서 '그리기 중'으로 변경하는 프로그래밍 개념입니다."
+      },
+      {
+        "concept": "연속적 그리기",
+        "explanation": "한 번 활성화하면 '붓 내리기'를 실행할 때까지 계속해서 선이 그어지는 연속적 동작입니다."
+      },
+      {
+        "concept": "경로 추적 (Path Tracing)",
+        "explanation": "오브젝트가 이동하는 경로를 시각적으로 표시하여 움직임의 궤적을 보여주는 기능입니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": [
+      "Entry 기본 인터페이스 사용법",
+      "오브젝트 이동 블록 사용 경험",
+      "기본 붓 블록들에 대한 이해",
+      "블록 조립과 실행 방법 숙지"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "기본 선 그리기",
+      "description": "오브젝트가 이동하면서 선을 그리는 기본 예제",
+      "blocks": [
+        "when_run_button_click",
+        "start_drawing",
+        "repeat_basic(4)",
+        "  move_direction(100)",
+        "  direction_relative(90)",
+        "stop_drawing"
+      ],
+      "explanation": "붓을 들고 사각형을 그린 후 붓을 내려서 그리기를 마무리합니다."
+    },
+    {
+      "title": "색깔 무지개 그리기",
+      "description": "색상을 바꿔가며 연속적인 선 그리기",
+      "blocks": [
+        "when_run_button_click",
+        "start_drawing",
+        "repeat_basic(7)",
+        "  set_random_color",
+        "  move_direction(50)",
+        "  direction_relative(10)",
+        "stop_drawing"
+      ],
+      "explanation": "붓을 들고 색상을 바꿔가며 나선형으로 그린 후 붓을 내립니다."
+    },
+    {
+      "title": "마우스 따라 그리기",
+      "description": "마우스를 따라 실시간으로 그리기",
+      "blocks": [
+        "when_run_button_click",
+        "start_drawing",
+        "repeat_while_true",
+        "  move_to_xy(<coordinate_mouse('x')>, <coordinate_mouse('y')>)",
+        "  if_condition(<is_clicked>)",
+        "    stop_drawing",
+        "    wait_second(0.1)",
+        "    start_drawing"
+      ],
+      "explanation": "마우스를 따라 그리다가 클릭하면 잠시 그리기를 멈춘 후 다시 시작합니다."
+    },
+    {
+      "title": "조건부 그리기",
+      "description": "특정 조건에서만 그리기 활성화",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_while_true",
+        "  if_condition(<is_press_some_key('스페이스')>)",
+        "    start_drawing",
+        "  else",
+        "    stop_drawing",
+        "  move_direction(5)",
+        "  direction_relative(5)"
+      ],
+      "explanation": "스페이스 키를 누르고 있을 때만 그리기가 활성화되어 나선형 궤적을 그립니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "오브젝트가 이동할 때 선을 그리고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'붓' 카테고리에서 그리기 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'붓 들기' 블록을 사용해서 그리기를 시작하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "이 블록을 실행한 후에 오브젝트가 이동하면 자동으로 선이 그어져요"
+        }
+      ]
+    },
+    {
+      "situation": "선이 그어지지 않아요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "'붓 들기' 블록을 실행한 후에 오브젝트가 이동해야 선이 그어져요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'동작' 카테고리의 이동 블록들을 '붓 들기' 다음에 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "붓 들기 → 이동 블록 순서로 배치해보세요"
+        }
+      ]
+    },
+    {
+      "situation": "그리기를 중간에 멈추고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "그리기를 멈추려면 '붓 내리기' 블록을 사용하면 돼요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'붓 내리기' 블록을 실행하면 이동해도 선이 그어지지 않아요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "필요할 때 다시 '붓 들기'로 그리기를 재시작할 수 있어요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "붓 들기 블록만 사용하고 이동을 하지 않음",
+      "why_it_happens": "그리기 활성화와 실제 그리기 동작을 구분하지 못함",
+      "consequence": "붓을 들었지만 이동하지 않아서 아무것도 그어지지 않음",
+      "solution": "붓 들기 후에 반드시 이동 블록들을 사용해서 오브젝트를 움직이기",
+      "teaching_moment": "실제 붓도 종이에 대기만 하면 그림이 그어지지 않고, 움직여야 선이 그어져요."
+    },
+    {
+      "mistake": "붓 들기를 반복문 안에서 계속 실행",
+      "why_it_happens": "그리기 상태가 유지된다는 것을 이해하지 못함",
+      "consequence": "불필요한 중복 실행으로 비효율적인 코드",
+      "solution": "붓 들기는 한 번만 실행하고, 이후에는 이동만 반복하기",
+      "teaching_moment": "한 번 붓을 들면 내릴 때까지 계속 그리기 상태가 유지돼요."
+    },
+    {
+      "mistake": "붓 내리기 없이 프로그램 종료",
+      "why_it_happens": "그리기 시작과 끝을 짝지어서 생각하지 못함",
+      "consequence": "코드가 정리되지 않고 예상치 못한 동작이 발생할 수 있음",
+      "solution": "붓 들기를 사용했으면 작업 완료 후 붓 내리기로 명확히 마무리",
+      "teaching_moment": "시작이 있으면 끝도 있어야 깔끔해요. 붓을 들었으면 다 그린 후에 내려놓는 것이 좋아요."
+    },
+    {
+      "mistake": "도장 찍기와 그리기를 혼동",
+      "why_it_happens": "연속적 그리기와 점 찍기의 차이를 이해하지 못함",
+      "consequence": "원하는 효과와 다른 결과가 나타남",
+      "solution": "선을 그을 때는 붓 들기+이동, 점을 찍을 때는 도장 찍기 사용",
+      "teaching_moment": "선을 그으려면 붓을 들고 이동하고, 점을 찍으려면 도장을 사용해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "붓 카테고리 찾기",
+      "instruction": "블록 팔레트에서 주황색 '붓' 카테고리를 클릭하세요.",
+      "visual_hint": "붓 모양의 아이콘이 있는 주황색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "붓 들기 블록 선택",
+      "instruction": "'붓 들기' 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "입력 자리가 없는 단순한 형태의 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "시작 블록과 연결",
+      "instruction": "붓 들기 블록을 시작 블록이나 다른 실행 블록과 연결하세요.",
+      "visual_hint": "블록의 위쪽 홈을 다른 블록의 아래쪽 돌기와 맞춰서 연결합니다."
+    },
+    {
+      "step": 4,
+      "title": "이동 블록 추가",
+      "instruction": "붓 들기 다음에 이동 관련 블록들을 배치하세요.",
+      "visual_hint": "'동작' 카테고리의 이동 블록들을 사용해서 원하는 경로로 이동시킵니다."
+    },
+    {
+      "step": 5,
+      "title": "그리기 완료",
+      "instruction": "그리기가 끝나면 '붓 내리기' 블록으로 마무리하세요.",
+      "visual_hint": "이후 이동에서는 선이 그어지지 않습니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "stop_drawing",
+      "relationship": "그리기 종료",
+      "explanation": "붓 들기와 짝을 이루는 블록으로, 그리기를 끝낼 때 사용하는 필수 블록"
+    },
+    {
+      "block_id": "move_direction",
+      "relationship": "그리기 실행",
+      "explanation": "붓을 들고 난 후 실제로 이동해서 선을 그을 때 사용하는 블록"
+    },
+    {
+      "block_id": "brush_stamp",
+      "relationship": "점 찍기 대안",
+      "explanation": "연속적인 선 대신 특정 위치에 점을 찍고 싶을 때 사용하는 대체 블록"
+    },
+    {
+      "block_id": "set_color",
+      "relationship": "그리기 속성",
+      "explanation": "붓을 들기 전에 색상을 설정하여 원하는 색의 선을 그을 때 함께 사용"
+    },
+    {
+      "block_id": "set_thickness",
+      "relationship": "선 굵기",
+      "explanation": "붓을 들기 전에 굵기를 설정하여 원하는 두께의 선을 그을 때 함께 사용"
+    },
+    {
+      "block_id": "repeat_basic",
+      "relationship": "연속 그리기",
+      "explanation": "붓을 들고 여러 번 이동을 반복해서 복잡한 도형을 그릴 때 함께 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "붓 들기를 실행했는데 선이 그어지지 않아요",
+      "possible_causes": [
+        "붓 들기 후에 이동을 하지 않음",
+        "오브젝트가 화면 밖에 위치함",
+        "이동 거리가 너무 작아서 눈에 보이지 않음"
+      ],
+      "solutions": [
+        "붓 들기 후에 반드시 이동 블록들을 추가하기",
+        "오브젝트를 화면 안의 적절한 위치로 이동시키기",
+        "이동 거리를 충분히 크게 설정하여 선이 보이도록 하기"
+      ]
+    },
+    {
+      "problem": "선이 예상과 다른 곳에서 시작돼요",
+      "possible_causes": [
+        "오브젝트의 현재 위치가 예상과 다름",
+        "붓 들기 전에 위치를 설정하지 않음",
+        "이전 동작으로 인해 오브젝트가 다른 곳에 있음"
+      ],
+      "solutions": [
+        "붓 들기 전에 오브젝트를 원하는 시작 위치로 이동시키기",
+        "좌표 블록을 사용해서 정확한 시작 위치 설정",
+        "프로그램 시작 시 오브젝트 위치 초기화하기"
+      ]
+    },
+    {
+      "problem": "그리기가 멈추지 않아요",
+      "possible_causes": [
+        "'붓 내리기' 블록을 사용하지 않음",
+        "조건문에서 붓 내리기가 실행되지 않음",
+        "반복문 안에서 계속 붓 들기만 실행함"
+      ],
+      "solutions": [
+        "그리기 완료 후 반드시 '붓 내리기' 블록 실행",
+        "조건문의 모든 경우에서 적절한 붓 내리기 배치",
+        "붓 들기는 한 번만, 붓 내리기로 명확히 종료"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "실제 붓과 종이",
+      "explanation": "붓을 종이에 대면 그리기 시작, 붓을 떼면 그리기 끝나는 것과 같습니다."
+    },
+    {
+      "analogy": "펜의 뚜껑",
+      "explanation": "펜 뚜껑을 열면 쓸 준비, 뚜껑을 닫으면 쓰기 끝나는 것처럼 상태를 전환합니다."
+    },
+    {
+      "analogy": "자동차 시동",
+      "explanation": "시동을 켜면 주행 준비, 시동을 끄면 주행 종료되는 것과 같은 모드 전환입니다."
+    },
+    {
+      "analogy": "녹음 버튼",
+      "explanation": "녹음 시작 버튼을 누르면 녹음 모드, 정지 버튼으로 녹음 종료하는 것과 비슷합니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "조건부 그리기 제어",
+      "description": "특정 조건에 따라 자동으로 그리기 시작/중단하는 시스템",
+      "use_case": "마우스 클릭 시에만 그리기, 특정 영역에서만 그리기"
+    },
+    {
+      "concept": "다중 붓 관리",
+      "description": "여러 오브젝트가 각각 다른 붓 상태를 가지는 복합 그리기 시스템",
+      "use_case": "협동 그리기, 팀별 색깔 구분, 동시 다중 그리기"
+    },
+    {
+      "concept": "그리기 기록 시스템",
+      "description": "그리기 시작/종료 시점을 기록하여 재생하거나 분석하는 기능",
+      "use_case": "그리기 과정 재생, 시간별 그리기 분석, 튜토리얼 제작"
+    },
+    {
+      "concept": "스마트 그리기 모드",
+      "description": "상황에 따라 자동으로 그리기 모드를 전환하는 지능형 시스템",
+      "use_case": "속도에 따른 그리기 전환, 거리 기반 자동 모드 변경"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "붓 들기 블록을 사용해서 기본적인 선을 그릴 수 있다",
+      "example": "붓 들기 → 이동 → 붓 내리기 순서로 간단한 선이나 도형 그리기"
+    },
+    {
+      "level": "중급",
+      "criteria": "붓 들기와 내리기를 적절히 조합해서 의도적인 그리기 패턴을 만들 수 있다",
+      "example": "연속된 선과 끊어진 선을 조합한 복잡한 그림이나 패턴 그리기"
+    },
+    {
+      "level": "고급",
+      "criteria": "조건문과 반복문을 활용해서 동적이고 인터랙티브한 그리기 시스템을 구현할 수 있다",
+      "example": "사용자 입력에 반응하는 그리기 도구, 조건부 그리기 제어 시스템"
+    }
+  ]
+}

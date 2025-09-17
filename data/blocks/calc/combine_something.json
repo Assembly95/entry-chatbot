@@ -1,0 +1,305 @@
+{
+  "id": "combine_something",
+  "category": "calc",
+  "name": "[문자]와(과) [문자] 합치기",
+  "description": "두 개의 문자열을 순서대로 연결하여 하나의 새로운 문자열을 만드는 블록입니다. 첫 번째 문자열 뒤에 두 번째 문자열이 바로 이어서 붙습니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "문자열 연결과 조합의 기본 개념 이해",
+      "텍스트 데이터를 동적으로 생성하는 방법 학습",
+      "문자열 연산의 기본 원리와 특성 파악",
+      "프로그래밍에서 문자 데이터 조작 기술 습득",
+      "순서와 구조를 고려한 텍스트 구성 능력 개발"
+    ],
+    "key_concepts": [
+      {
+        "concept": "문자열 연결(String Concatenation)",
+        "explanation": "두 개 이상의 문자열을 순서대로 이어 붙여서 하나의 긴 문자열을 만드는 기본적인 문자열 처리 작업"
+      },
+      {
+        "concept": "동적 텍스트 생성",
+        "explanation": "프로그램 실행 중에 변수나 계산 결과를 이용해서 실시간으로 새로운 텍스트를 만들어내는 기법"
+      },
+      {
+        "concept": "문자열 조합",
+        "explanation": "서로 다른 출처의 텍스트를 의미 있는 형태로 결합하여 완성된 메시지나 데이터를 구성하는 방법"
+      },
+      {
+        "concept": "순서 보존",
+        "explanation": "문자열을 합칠 때 입력한 순서가 그대로 유지되어 예측 가능한 결과를 얻는 특성"
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": ["기본적인 문자열 개념 이해", "변수와 값의 차이점 파악", "텍스트 입력과 출력 방법", "블록 연결 및 조립 방법"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "인사말 만들기",
+      "description": "이름과 인사말을 합쳐서 개인화된 메시지 생성",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('이름을 입력하세요')",
+        "set_variable('이름', (답변))",
+        "set_variable('인사말', combine_something('안녕하세요, ', (이름)))",
+        "set_variable('완성메시지', combine_something((인사말), '님!'))",
+        "dialog((완성메시지))"
+      ],
+      "explanation": "사용자가 입력한 이름을 이용해서 '안녕하세요, [이름]님!' 형태의 개인화된 인사말을 만듭니다."
+    },
+    {
+      "title": "점수 발표하기",
+      "description": "숫자와 텍스트를 조합해서 결과 메시지 생성",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('점수', calc_rand(70, 100))",
+        "set_variable('메시지앞', '당신의 점수는 ')",
+        "set_variable('메시지뒤', '점입니다!')",
+        "set_variable('완성메시지', combine_something((메시지앞), (점수)))",
+        "set_variable('최종메시지', combine_something((완성메시지), (메시지뒤)))",
+        "dialog((최종메시지))"
+      ],
+      "explanation": "무작위로 생성된 점수를 텍스트와 결합하여 '당신의 점수는 85점입니다!' 같은 메시지를 만듭니다."
+    },
+    {
+      "title": "파일명 생성기",
+      "description": "날짜와 시간을 조합해서 고유한 파일명 만들기",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('년도', get_date('년도'))",
+        "set_variable('월', get_date('월'))",
+        "set_variable('일', get_date('일'))",
+        "set_variable('시간', get_date('시'))",
+        "set_variable('분', get_date('분'))",
+        "set_variable('날짜부분', combine_something((년도), (월)))",
+        "set_variable('날짜부분', combine_something((날짜부분), (일)))",
+        "set_variable('시간부분', combine_something((시간), (분)))",
+        "set_variable('파일명', combine_something('파일_', (날짜부분)))",
+        "set_variable('파일명', combine_something((파일명), '_'))",
+        "set_variable('파일명', combine_something((파일명), (시간부분)))",
+        "set_variable('파일명', combine_something((파일명), '.txt'))",
+        "dialog('생성된 파일명: ' + (파일명))"
+      ],
+      "explanation": "현재 날짜와 시간을 조합하여 '파일_20241215_1430.txt' 같은 고유한 파일명을 생성합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "두 개의 문자열이 어떤 순서로 합쳐지는지 모르겠어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "첫 번째 칸의 문자가 앞에 오고, 두 번째 칸의 문자가 뒤에 와서 순서대로 이어져요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'안녕'과 '하세요'를 합치면 '안녕하세요'가 되어요. 사이에 공백은 자동으로 들어가지 않아요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "공백이나 특수문자를 넣고 싶다면 직접 입력해야 해요"
+        }
+      ]
+    },
+    {
+      "situation": "숫자와 문자를 합치고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "숫자는 자동으로 문자로 변환되어서 합쳐져요. 100과 '점'을 합치면 '100점'이 돼요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "변수에 저장된 숫자값도 문자와 자연스럽게 합쳐져요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "계산 결과나 타이머 값 같은 숫자도 모두 문자와 합칠 수 있어요"
+        }
+      ]
+    },
+    {
+      "situation": "여러 개의 문자열을 한 번에 합치고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "합치기 블록을 여러 번 사용해서 단계별로 합쳐야 해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "첫 번째와 두 번째를 합치고, 그 결과와 세 번째를 다시 합치는 방식이에요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "변수에 중간 결과를 저장해가면서 점진적으로 완성하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "공백이 자동으로 들어갈 것으로 예상",
+      "why_it_happens": "일반적인 글쓰기에서는 단어 사이에 공백이 있어야 한다고 생각",
+      "consequence": "단어들이 붙어서 읽기 어려운 문자열 생성",
+      "solution": "필요한 공백을 직접 입력하거나 공백이 포함된 문자열 사용",
+      "teaching_moment": "컴퓨터는 정확히 명시된 것만 실행해요. 공백도 명시적으로 넣어줘야 해요."
+    },
+    {
+      "mistake": "합친 결과를 저장하지 않고 사용",
+      "why_it_happens": "블록의 결과가 자동으로 어딘가에 저장된다고 생각",
+      "consequence": "합친 결과가 사라지거나 재사용할 수 없음",
+      "solution": "합친 결과를 변수에 저장하거나 바로 다른 블록에서 사용",
+      "teaching_moment": "요리한 음식을 그릇에 담아야 하는 것처럼, 결과도 변수에 담아야 계속 사용할 수 있어요."
+    },
+    {
+      "mistake": "합치는 순서를 잘못 이해",
+      "why_it_happens": "어떤 문자가 앞에 오고 뒤에 오는지 헷갈림",
+      "consequence": "의도한 것과 다른 순서의 문자열 생성",
+      "solution": "첫 번째 칸이 앞, 두 번째 칸이 뒤라는 순서를 명확히 기억",
+      "teaching_moment": "기차를 연결할 때처럼 앞차와 뒤차의 순서가 정해져 있어요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "계산 블록 카테고리 선택",
+      "instruction": "블록 팔레트에서 '계산' 카테고리를 클릭하세요.",
+      "visual_hint": "초록색 계산기 모양 아이콘을 찾아보세요."
+    },
+    {
+      "step": 2,
+      "title": "문자열 합치기 블록 찾기",
+      "instruction": "'[문자]와(과) [문자] 합치기' 블록을 찾아서 드래그하세요.",
+      "visual_hint": "문자열 관련 블록들이 모여있는 부분에서 찾을 수 있어요."
+    },
+    {
+      "step": 3,
+      "title": "첫 번째 문자열 입력",
+      "instruction": "첫 번째 칸에 앞에 올 문자열이나 변수를 입력하세요.",
+      "visual_hint": "직접 텍스트를 입력하거나 다른 블록을 연결할 수 있어요."
+    },
+    {
+      "step": 4,
+      "title": "두 번째 문자열 입력",
+      "instruction": "두 번째 칸에 뒤에 올 문자열이나 변수를 입력하세요.",
+      "visual_hint": "첫 번째 문자열 뒤에 바로 이어서 붙을 내용이에요."
+    },
+    {
+      "step": 5,
+      "title": "결과 활용",
+      "instruction": "합쳐진 결과를 변수에 저장하거나 다른 블록에서 바로 사용하세요.",
+      "visual_hint": "합친 결과는 하나의 긴 문자열이에요."
+    },
+    {
+      "step": 6,
+      "title": "테스트 및 확인",
+      "instruction": "프로그램을 실행해보고 원하는 대로 문자열이 합쳐지는지 확인하세요.",
+      "visual_hint": "순서와 공백을 확인해보세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "char_at",
+      "relationship": "문자 추출",
+      "explanation": "문자열에서 특정 위치의 글자를 뽑아내서 다른 문자와 합치는 조합 작업"
+    },
+    {
+      "block_id": "substring",
+      "relationship": "부분 문자열 결합",
+      "explanation": "문자열의 일부분을 추출해서 다른 문자열과 합쳐 새로운 텍스트 생성"
+    },
+    {
+      "block_id": "length_of_string",
+      "relationship": "문자열 길이 확인",
+      "explanation": "합친 결과의 길이를 확인하거나 합치기 전 길이 제한 검사"
+    },
+    {
+      "block_id": "dialog",
+      "relationship": "결과 출력",
+      "explanation": "합친 문자열을 화면에 표시하여 사용자에게 보여주는 용도"
+    },
+    {
+      "block_id": "get_date",
+      "relationship": "동적 값 조합",
+      "explanation": "현재 시간이나 날짜 정보를 텍스트와 합쳐서 타임스탬프 생성"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "합친 결과가 이상하게 보여요",
+      "possible_causes": [
+        "공백이 없어서 단어들이 붙어서 나옴",
+        "합치는 순서가 의도와 다름",
+        "특수문자나 숫자가 예상과 다르게 표시됨"
+      ],
+      "solutions": [
+        "필요한 곳에 공백(' ')을 직접 추가하기",
+        "첫 번째와 두 번째 칸의 순서 확인하기",
+        "간단한 예시로 먼저 테스트해보기"
+      ]
+    },
+    {
+      "problem": "변수가 제대로 합쳐지지 않아요",
+      "possible_causes": ["변수에 예상과 다른 값이 저장됨", "변수 이름을 잘못 사용", "변수가 초기화되지 않은 상태"],
+      "solutions": ["변수 값을 따로 출력해서 확인하기", "변수 이름이 정확한지 검사하기", "변수에 값을 먼저 저장한 후 합치기"]
+    },
+    {
+      "problem": "여러 개를 합칠 때 복잡해져요",
+      "possible_causes": ["한 번에 너무 많은 것을 합치려고 시도", "중간 결과를 저장하지 않아서 헷갈림", "블록 연결이 복잡해짐"],
+      "solutions": [
+        "단계별로 나누어서 차근차근 합치기",
+        "중간 결과를 변수에 저장해가며 진행",
+        "간단한 조합부터 시작해서 점진적으로 확장"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "레고 블록 조립",
+      "explanation": "서로 다른 레고 블록을 순서대로 연결해서 더 큰 구조물을 만드는 것처럼, 문자들을 이어 붙여서 완성된 문장을 만듭니다."
+    },
+    {
+      "analogy": "기차 연결",
+      "explanation": "기차 칸들을 순서대로 연결해서 긴 기차를 만드는 것처럼, 문자열들을 순서대로 연결해서 긴 텍스트를 만듭니다."
+    },
+    {
+      "analogy": "퍼즐 맞추기",
+      "explanation": "퍼즐 조각들을 올바른 순서로 맞춰서 완성된 그림을 만드는 것처럼, 텍스트 조각들을 맞춰서 완성된 메시지를 만듭니다."
+    },
+    {
+      "analogy": "요리 재료 섞기",
+      "explanation": "여러 재료를 순서대로 넣어서 요리를 완성하는 것처럼, 다양한 텍스트 요소를 합쳐서 완성된 문장을 만듭니다."
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "두 개의 간단한 문자열을 순서대로 합쳐서 새로운 문자열을 만들 수 있고, 결과의 순서를 이해할 수 있다"
+    },
+    {
+      "level": "중급",
+      "criteria": "변수와 고정 텍스트를 조합하고, 공백이나 특수문자를 적절히 활용하여 읽기 쉬운 문자열을 생성할 수 있다"
+    },
+    {
+      "level": "고급",
+      "criteria": "여러 단계의 문자열 결합을 통해 복잡한 텍스트 구조를 만들고, 동적 데이터를 활용한 개인화된 메시지 시스템을 구현할 수 있다"
+    }
+  ]
+}

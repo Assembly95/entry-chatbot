@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-stop_fill_001,explain,stop_fill,,,
-stop_fill_002,explain,stop_fill,,,
-stop_fill_003,explain,stop_fill,,,
-stop_fill_004,explain,stop_fill,,,
-stop_fill_005,explain,stop_fill,,,
+stop_fill_001,explain,stop_fill,‘채우기 멈추기’ 블록은 어떤 역할을 하나요?,명령 실행 → 채우기 기능 해제 → 이후 도형은 내부 비워둠,잘 물어봤어요! 😀 이 블록은 캐릭터가 그린 모양의 안쪽을 더 이상 색으로 채우지 않게 해요. 이후엔 테두리만 남게 되죠.
+stop_fill_002,explain,stop_fill,이 블록이 없으면 어떤 문제가 생길까요?,모든 도형 내부가 계속 채워짐,"좋은 질문이에요! 👀 이 블록이 없으면 이후에 그린 도형도 자동으로 채워져서, 원하지 않는 곳까지 색이 채워질 수 있어요."
+stop_fill_003,explain,stop_fill,실생활에서 이 블록은 무엇과 비슷할까요?,색칠하다가 붓 멈추기,"멋진 생각이에요 🙌 이 블록은 미술 시간에 도형 안을 칠하다가 붓질을 멈춰, 더 이상 안쪽에 색을 칠하지 않는 것과 같아요 🎨."
+stop_fill_004,explain,stop_fill,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"윤곽선만 있는 그림, 부분 채색","좋아요! 👍 이 블록을 쓰면 일부는 채우고 일부는 테두리만 남기는 그림을 만들 수 있어요. 예를 들어 별 모양은 색을 채우고, 달 모양은 선만 남길 수 있죠 🌙."
+stop_fill_005,explain,stop_fill,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,채우기 중단 + 반복/조건 → 다양한 표현,대단해요! 👏 반복 블록과 합치면 도형마다 채워진 것과 비워진 것을 번갈아 만들 수 있어요. 조건과 합치면 상황에 맞게 채우기를 멈추거나 이어가는 그림을 만들 수 있죠 ✨.

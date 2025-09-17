@@ -1,0 +1,363 @@
+{
+  "id": "set_thickness",
+  "category": "brush",
+  "name": "붓 굵기를 [값]으로 정하기",
+  "description": "붓의 굵기를 지정된 값으로 직접 설정하는 블록입니다. 현재 굵기에 관계없이 원하는 굵기로 즉시 변경되며, 다음 그리기부터 새로운 굵기가 적용됩니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "절대값 설정과 상대값 변화의 차이점 이해",
+      "선의 굵기를 통한 시각적 강조와 표현 기법 학습",
+      "정확한 값 제어를 통한 의도적 디자인 구현",
+      "도구 속성의 직접 제어 방법 습득",
+      "그래픽 디자인의 기본 요소 활용법 익히기"
+    ],
+    "key_concepts": [
+      {
+        "concept": "절대값 설정",
+        "explanation": "현재 값에 관계없이 특정 값으로 직접 설정하는 방식으로, 정확하고 예측 가능한 제어가 가능합니다."
+      },
+      {
+        "concept": "선의 굵기 (Line Weight)",
+        "explanation": "그리는 선이나 도형의 테두리 두께를 나타내는 속성으로, 시각적 위계와 강조 효과를 만드는 중요한 요소입니다."
+      },
+      {
+        "concept": "즉시 적용",
+        "explanation": "굵기를 설정하면 다음 그리기 작업부터 바로 새로운 굵기가 반영되는 시스템입니다."
+      },
+      {
+        "concept": "시각적 위계",
+        "explanation": "굵기의 차이를 통해 중요도나 계층 구조를 시각적으로 표현하는 디자인 원리입니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": [
+      "기본 붓 블록들의 사용법 이해",
+      "그리기와 도장 찍기 경험",
+      "숫자 입력과 값 설정 방법",
+      "Entry 기본 인터페이스 조작법"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "굵기별 선 그리기",
+      "description": "서로 다른 굵기의 선으로 구분된 그림",
+      "blocks": [
+        "when_run_button_click",
+        "start_drawing",
+        "set_thickness(1)",
+        "move_direction(100)",
+        "move_y(20)",
+        "set_thickness(5)",
+        "move_direction(100)",
+        "move_y(20)",
+        "set_thickness(10)",
+        "move_direction(100)"
+      ],
+      "explanation": "1, 5, 10 픽셀 굵기로 각각 다른 선을 그려서 굵기 차이를 명확히 보여줍니다."
+    },
+    {
+      "title": "제목과 본문 구분",
+      "description": "굵기로 텍스트의 중요도 표현",
+      "blocks": [
+        "when_run_button_click",
+        "set_thickness(8)",
+        "start_drawing",
+        "move_direction(150)",
+        "stop_drawing",
+        "move_y(-30)",
+        "locate_x(-75)",
+        "set_thickness(2)",
+        "start_drawing",
+        "repeat_basic(3)",
+        "  move_direction(120)",
+        "  move_y(-15)",
+        "  locate_x(-60)"
+      ],
+      "explanation": "제목은 굵은 선(8픽셀), 본문은 얇은 선(2픽셀)으로 그려서 시각적 위계를 만듭니다."
+    },
+    {
+      "title": "도형의 테두리 강조",
+      "description": "중요한 도형은 굵은 테두리로 표시",
+      "blocks": [
+        "when_run_button_click",
+        "set_thickness(1)",
+        "start_drawing",
+        "repeat_basic(4)",
+        "  move_direction(50)",
+        "  direction_relative(90)",
+        "stop_drawing",
+        "move_xy(100, 0)",
+        "set_thickness(5)",
+        "start_drawing",
+        "repeat_basic(4)",
+        "  move_direction(50)",
+        "  direction_relative(90)"
+      ],
+      "explanation": "일반 사각형은 얇은 테두리, 중요한 사각형은 굵은 테두리로 구분해서 강조합니다."
+    },
+    {
+      "title": "사용자 선택에 따른 굵기",
+      "description": "인터랙티브한 굵기 선택 시스템",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('굵기를 선택하세요 (1-20)')",
+        "set_thickness(<get_variable('답변')>)",
+        "start_drawing",
+        "repeat_while_true",
+        "  move_to_xy(<coordinate_mouse('x')>, <coordinate_mouse('y')>)",
+        "  if_condition(<is_clicked>)",
+        "    ask_and_wait('새로운 굵기를 선택하세요')",
+        "    set_thickness(<get_variable('답변')>)"
+      ],
+      "explanation": "사용자가 원하는 굵기를 입력하고, 클릭할 때마다 새로운 굵기로 변경할 수 있는 그리기 도구입니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "붓의 굵기를 정확한 값으로 설정하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'붓' 카테고리에서 굵기 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'붓 굵기를 [값]으로 정하기' 블록을 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "원하는 굵기 숫자를 직접 입력하면 현재 굵기와 관계없이 바로 그 굵기로 설정돼요"
+        }
+      ]
+    },
+    {
+      "situation": "다양한 굵기로 그림을 그리고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "중요한 부분은 굵게, 세부사항은 얇게 하면 보기 좋은 그림을 만들 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "그리기 전에 미리 굵기를 설정하고, 필요할 때마다 바꿔가며 그리세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "굵기 설정 → 그리기 → 굵기 변경 → 그리기 순서로 반복해보세요"
+        }
+      ]
+    },
+    {
+      "situation": "현재 굵기와 상관없이 새로 시작하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "이 블록은 현재 굵기에 관계없이 새로운 값으로 설정하므로 초기화에 적합해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "프로그램 시작 부분에 원하는 기본 굵기로 설정하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "확실한 시작을 위해 1이나 원하는 기본값으로 설정하고 시작하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "굵기를 설정했는데 변화가 없다고 생각",
+      "why_it_happens": "굵기 설정 후에 그리기를 하지 않거나 변화가 미미함",
+      "consequence": "굵기가 바뀌었지만 화면에 확인할 수 없음",
+      "solution": "굵기 설정 후에 그리기를 실행하고, 확실히 다른 굵기(1과 10)로 테스트",
+      "teaching_moment": "도구의 설정을 바꾸고 나서는 실제로 사용해야 효과를 볼 수 있어요."
+    },
+    {
+      "mistake": "너무 큰 굵기 값 사용",
+      "why_it_happens": "적절한 굵기 범위를 모르고 과도한 값 입력",
+      "consequence": "화면을 가득 채우는 굵은 선으로 다른 요소가 보이지 않음",
+      "solution": "1~20 정도의 적절한 범위에서 시작해서 필요에 따라 조정",
+      "teaching_moment": "무엇이든 적당한 크기가 가장 보기 좋아요."
+    },
+    {
+      "mistake": "굵기 설정과 그리기 순서 혼동",
+      "why_it_happens": "굵기를 그리기 도중이나 후에 설정함",
+      "consequence": "원하는 부분에 원하는 굵기가 적용되지 않음",
+      "solution": "그리기 전에 미리 굵기를 설정하는 습관 만들기",
+      "teaching_moment": "요리할 때 재료를 준비하고 요리하는 것처럼, 속성을 먼저 설정하고 그려야 해요."
+    },
+    {
+      "mistake": "모든 선을 같은 굵기로 그리기",
+      "why_it_happens": "굵기 변화의 효과를 이해하지 못함",
+      "consequence": "단조롭고 밋밋한 그림이 됨",
+      "solution": "중요도에 따라 다른 굵기를 사용해서 시각적 위계 만들기",
+      "teaching_moment": "신문에서 제목과 본문의 글자 크기가 다른 것처럼, 선의 굵기도 역할에 따라 달라야 해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "붓 카테고리 찾기",
+      "instruction": "블록 팔레트에서 주황색 '붓' 카테고리를 클릭하세요.",
+      "visual_hint": "붓 모양의 아이콘이 있는 주황색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "굵기 설정 블록 선택",
+      "instruction": "'붓 굵기를 [값]으로 정하기' 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "숫자 입력 자리가 하나 있는 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "굵기 값 입력",
+      "instruction": "블록의 숫자 자리에 원하는 굵기 값을 입력하세요.",
+      "visual_hint": "1~20 정도가 일반적이며, 1은 매우 얇고 20은 매우 굵습니다."
+    },
+    {
+      "step": 4,
+      "title": "그리기 블록과 조합",
+      "instruction": "굵기 설정 후에 그리기나 도장 찍기 블록을 사용하세요.",
+      "visual_hint": "굵기를 설정한 다음에 그려야 새로운 굵기가 적용됩니다."
+    },
+    {
+      "step": 5,
+      "title": "효과 확인 및 조정",
+      "instruction": "프로그램을 실행해서 굵기가 적절한지 확인하고 필요하면 값을 조정하세요.",
+      "visual_hint": "다른 굵기값들과 비교해서 적절한 굵기를 찾아보세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "change_thickness",
+      "relationship": "상대적 변화",
+      "explanation": "현재 굵기에서 일정량 증가/감소시킬 때 사용하는 블록과 구별됨"
+    },
+    {
+      "block_id": "start_drawing",
+      "relationship": "그리기 시작",
+      "explanation": "굵기를 설정한 후 실제로 그리기를 시작할 때 사용"
+    },
+    {
+      "block_id": "brush_stamp",
+      "relationship": "굵기 적용 도장",
+      "explanation": "설정된 굵기가 도장의 테두리에 적용될 때 함께 사용"
+    },
+    {
+      "block_id": "set_color",
+      "relationship": "색상과 굵기",
+      "explanation": "색상과 굵기를 함께 설정해서 원하는 시각적 효과 구현"
+    },
+    {
+      "block_id": "repeat_basic",
+      "relationship": "다양한 굵기",
+      "explanation": "여러 번 반복하면서 각각 다른 굵기를 설정할 때 사용"
+    },
+    {
+      "block_id": "ask_and_wait",
+      "relationship": "사용자 입력 굵기",
+      "explanation": "사용자가 원하는 굵기 값을 입력받을 때 함께 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "굵기를 설정했는데 변화가 없어요",
+      "possible_causes": ["굵기 설정 후에 그리기를 하지 않음", "이전과 같은 굵기로 설정함", "굵기 설정이 제대로 실행되지 않음"],
+      "solutions": [
+        "굵기 설정 후에 반드시 그리기나 도장 찍기 실행",
+        "확실히 다른 굵기 값(예: 1과 15)으로 테스트해보기",
+        "굵기 설정 블록이 실행 가능한 위치에 있는지 확인"
+      ]
+    },
+    {
+      "problem": "굵기가 너무 굵거나 얇아요",
+      "possible_causes": ["부적절한 굵기 값 사용", "화면 크기나 그리기 범위와 비례하지 않음", "다른 요소들과의 균형이 맞지 않음"],
+      "solutions": ["1~20 범위에서 적절한 값 찾기", "전체 그림의 크기에 맞는 굵기 선택", "중요도에 따라 상대적 굵기 비율 조정"]
+    },
+    {
+      "problem": "여러 굵기를 사용했는데 구분이 안 돼요",
+      "possible_causes": ["굵기 차이가 너무 작음", "적절한 대비를 주지 않음", "너무 많은 굵기를 사용함"],
+      "solutions": [
+        "굵기 차이를 더 크게 하여 명확한 구분 만들기",
+        "주요 굵기 2~3개만 사용해서 일관성 유지",
+        "굵기별 역할을 명확히 정의하고 일관되게 사용"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "펜의 종류",
+      "explanation": "볼펜, 사인펜, 매직 등 굵기가 다른 펜을 용도에 맞게 선택하는 것과 같습니다."
+    },
+    {
+      "analogy": "신문 디자인",
+      "explanation": "신문에서 헤드라인은 굵게, 본문은 얇게 하여 중요도를 구분하는 것과 비슷합니다."
+    },
+    {
+      "analogy": "도로의 종류",
+      "explanation": "고속도로는 넓고, 골목길은 좁은 것처럼 중요도에 따라 굵기를 달리하는 것과 같습니다."
+    },
+    {
+      "analogy": "건축 도면",
+      "explanation": "건축 도면에서 구조물은 굵은 선, 치수는 얇은 선으로 그려서 구분하는 방식과 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "굵기 프리셋 시스템",
+      "description": "자주 사용하는 굵기 값들을 미리 설정해놓고 빠르게 적용하는 시스템",
+      "use_case": "제목용(12), 본문용(3), 강조용(8) 등의 프리셋 버튼"
+    },
+    {
+      "concept": "동적 굵기 조절",
+      "description": "상황이나 조건에 따라 자동으로 적절한 굵기가 설정되는 스마트 시스템",
+      "use_case": "중요도별 자동 굵기, 거리별 굵기, 속도별 굵기 조절"
+    },
+    {
+      "concept": "굵기 기반 시각화",
+      "description": "데이터나 정보를 굵기로 표현하는 정보 시각화 기법",
+      "use_case": "인구 데이터 지도, 트래픽 flow 다이어그램, 중요도 네트워크"
+    },
+    {
+      "concept": "레이어별 굵기 관리",
+      "description": "여러 레이어에 각각 다른 굵기를 체계적으로 적용하는 관리 시스템",
+      "use_case": "배경(1), 중간(5), 전경(10) 등의 계층별 굵기 시스템"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "붓 굵기 정하기 블록을 사용해서 원하는 굵기로 설정할 수 있다",
+      "example": "1~20 범위의 값으로 굵기를 직접 설정하여 기본적인 굵기 조절하기"
+    },
+    {
+      "level": "중급",
+      "criteria": "다양한 굵기를 적절히 조합해서 시각적 위계와 강조 효과를 만들 수 있다",
+      "example": "제목과 본문, 중요 요소와 보조 요소를 굵기로 구분한 체계적인 디자인"
+    },
+    {
+      "level": "고급",
+      "criteria": "굵기를 창의적이고 체계적으로 활용해서 전문적인 시각적 표현이나 정보 시각화를 구현할 수 있다",
+      "example": "데이터 시각화, 인포그래픽, 조건부 굵기 시스템 등의 고급 활용"
+    }
+  ]
+}

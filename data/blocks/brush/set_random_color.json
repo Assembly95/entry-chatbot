@@ -1,0 +1,353 @@
+{
+  "id": "set_random_color",
+  "category": "brush",
+  "name": "붓 색을 무작위 색으로 정하기",
+  "description": "붓의 색상을 컴퓨터가 무작위로 선택한 색으로 설정하는 블록입니다. 실행할 때마다 다른 색상이 선택되므로 예측할 수 없는 다채로운 효과를 만들 수 있습니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "무작위성(Randomness)의 개념과 활용 방법 이해",
+      "예측 불가능한 요소를 통한 창의적 표현 학습",
+      "색상 다양성과 조합에 대한 감각 개발",
+      "알고리즘의 비결정적 특성 경험",
+      "우연성을 활용한 예술과 디자인 기법 습득"
+    ],
+    "key_concepts": [
+      {
+        "concept": "무작위성(Randomness)",
+        "explanation": "예측할 수 없는 방식으로 값이 선택되는 특성으로, 프로그래밍에서 다양성과 놀라움을 만드는 중요한 도구입니다."
+      },
+      {
+        "concept": "RGB 자동 생성",
+        "explanation": "빨강(R), 초록(G), 파랑(B) 각 값이 0~255 범위에서 무작위로 선택되어 무수히 많은 색상 조합을 만듭니다."
+      },
+      {
+        "concept": "비결정적 실행",
+        "explanation": "같은 블록을 실행해도 매번 다른 결과가 나오는 특성으로, 프로그램의 예측 불가능한 재미를 만듭니다."
+      },
+      {
+        "concept": "생성적 예술",
+        "explanation": "컴퓨터 알고리즘과 무작위성을 활용해서 사람이 예상하지 못한 아름다운 결과를 만드는 예술 방법입니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": [
+      "기본 붓 블록들의 사용법 이해",
+      "색상의 기본 개념 이해",
+      "반복문의 기본 사용법",
+      "무작위 개념에 대한 기초 지식"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "무지개 같은 다채로운 선",
+      "description": "이동하면서 색이 계속 바뀌는 선 그리기",
+      "blocks": [
+        "when_run_button_click",
+        "start_drawing",
+        "repeat_basic(50)",
+        "  set_random_color",
+        "  move_direction(10)",
+        "  direction_relative(7)"
+      ],
+      "explanation": "매번 무작위 색상으로 바뀌면서 나선형으로 그려지는 화려한 선을 만듭니다."
+    },
+    {
+      "title": "색깔 폭죽 효과",
+      "description": "무작위 색상의 도장으로 폭죽 표현",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_basic(20)",
+        "  set_random_color",
+        "  locate_xy(<calc_rand(-100, 100)>, <calc_rand(-100, 100)>)",
+        "  brush_stamp",
+        "  wait_second(0.1)"
+      ],
+      "explanation": "무작위 위치와 색상으로 도장을 찍어서 폭죽이 터지는 효과를 만듭니다."
+    },
+    {
+      "title": "클릭할 때마다 색 바뀌는 그리기",
+      "description": "마우스 클릭 시 무작위 색상으로 변경",
+      "blocks": [
+        "when_run_button_click",
+        "start_drawing",
+        "repeat_while_true",
+        "  if_condition(<is_clicked>)",
+        "    set_random_color",
+        "  move_to_xy(<coordinate_mouse('x')>, <coordinate_mouse('y')>)"
+      ],
+      "explanation": "마우스를 따라 그리면서 클릭할 때마다 무작위 색상으로 바뀌는 인터랙티브 그리기 도구입니다."
+    },
+    {
+      "title": "색상 만화경 패턴",
+      "description": "회전하면서 무작위 색상으로 대칭 패턴 생성",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_basic(36)",
+        "  set_random_color",
+        "  repeat_basic(4)",
+        "    move_direction(50)",
+        "    brush_stamp",
+        "    move_direction(-50)",
+        "    direction_relative(90)",
+        "  direction_relative(10)"
+      ],
+      "explanation": "10도씩 회전하면서 4방향으로 무작위 색상 도장을 찍어 만화경 같은 패턴을 만듭니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "매번 다른 색으로 그리고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'붓' 카테고리에서 무작위 색상 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'붓 색을 무작위 색으로 정하기' 블록을 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "이 블록을 실행할 때마다 컴퓨터가 랜덤하게 다른 색을 선택해줘요"
+        }
+      ]
+    },
+    {
+      "situation": "반복하면서 계속 색이 바뀌게 하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "반복문 안에서 무작위 색상 블록을 사용하면 매번 다른 색이 나와요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'흐름' 카테고리의 반복 블록과 함께 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "반복 → 무작위 색상 → 그리기 순서로 배치해보세요"
+        }
+      ]
+    },
+    {
+      "situation": "특별한 순간에만 색이 바뀌게 하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "조건문과 함께 사용하면 특정 상황에서만 색이 바뀌게 할 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'흐름' 카테고리의 조건 블록과 '감지' 카테고리의 센서 블록을 활용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "마우스 클릭이나 키 입력 같은 조건에서 무작위 색상을 실행해보세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "무작위 색상이 항상 같게 나온다고 생각",
+      "why_it_happens": "무작위의 개념을 이해하지 못하고 일관된 결과를 기대함",
+      "consequence": "매번 다른 색이 나오는 것을 오류로 인식",
+      "solution": "무작위는 예측할 수 없는 것이 정상이며, 이것이 이 블록의 특징임을 이해",
+      "teaching_moment": "주사위를 던질 때마다 다른 숫자가 나오는 것처럼, 무작위는 예측할 수 없는 것이 정상이에요."
+    },
+    {
+      "mistake": "무작위 색상 설정 후 그리기를 하지 않음",
+      "why_it_happens": "색상 설정과 그리기 동작을 연결하지 못함",
+      "consequence": "색상이 바뀌었지만 화면에 나타나지 않음",
+      "solution": "무작위 색상 설정 후에 반드시 그리기나 도장 찍기 실행",
+      "teaching_moment": "색상을 바꾸고 나서는 실제로 그려야 새로운 색을 볼 수 있어요."
+    },
+    {
+      "mistake": "너무 자주 색상을 바꿔서 어지러운 효과",
+      "why_it_happens": "무작위 색상의 빈도를 조절하지 않음",
+      "consequence": "지나치게 화려해서 보기 어려운 결과",
+      "solution": "적절한 간격으로 색상을 바꾸거나 기다리는 시간 추가",
+      "teaching_moment": "무엇이든 적당히 하는 것이 좋아요. 너무 자주 바뀌면 어지러울 수 있어요."
+    },
+    {
+      "mistake": "무작위 색상에 완전히 의존해서 의도적 디자인 포기",
+      "why_it_happens": "무작위의 편리함에만 의존하고 계획적 설계를 하지 않음",
+      "consequence": "체계적이지 못한 무질서한 결과물",
+      "solution": "무작위와 의도적 설계를 적절히 조합하여 균형 맞추기",
+      "teaching_moment": "우연도 좋지만, 계획과 함께 사용할 때 더 아름다운 결과를 만들 수 있어요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "붓 카테고리 찾기",
+      "instruction": "블록 팔레트에서 주황색 '붓' 카테고리를 클릭하세요.",
+      "visual_hint": "붓 모양의 아이콘이 있는 주황색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "무작위 색상 블록 선택",
+      "instruction": "'붓 색을 무작위 색으로 정하기' 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "색상 입력 자리가 없는 단순한 형태의 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "실행 조건 설정",
+      "instruction": "언제 색상을 바꿀지 결정하고 적절한 위치에 블록을 배치하세요.",
+      "visual_hint": "반복문 안에 넣으면 계속 바뀌고, 조건문 안에 넣으면 특정 상황에서만 바뀝니다."
+    },
+    {
+      "step": 4,
+      "title": "그리기 블록과 조합",
+      "instruction": "무작위 색상 설정 후에 그리기나 도장 찍기 블록을 사용하세요.",
+      "visual_hint": "색상을 바꾼 다음에 그려야 새로운 색이 적용됩니다."
+    },
+    {
+      "step": 5,
+      "title": "효과 확인 및 조정",
+      "instruction": "프로그램을 여러 번 실행해서 매번 다른 색상이 나오는지 확인하세요.",
+      "visual_hint": "실행할 때마다 다른 결과가 나오는 것이 정상입니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "set_color",
+      "relationship": "특정 색상 설정",
+      "explanation": "무작위 대신 원하는 특정 색상으로 설정할 때 사용하는 대안 블록"
+    },
+    {
+      "block_id": "calc_rand",
+      "relationship": "무작위 수 생성",
+      "explanation": "색상 외에 다른 무작위 값을 만들 때 사용하는 관련 블록"
+    },
+    {
+      "block_id": "start_drawing",
+      "relationship": "그리기 시작",
+      "explanation": "무작위 색상을 설정한 후 실제로 그리기를 시작할 때 사용"
+    },
+    {
+      "block_id": "brush_stamp",
+      "relationship": "무작위 색상 도장",
+      "explanation": "설정된 무작위 색상으로 도장을 찍을 때 함께 사용"
+    },
+    {
+      "block_id": "repeat_basic",
+      "relationship": "색상 변화 반복",
+      "explanation": "무작위 색상을 반복적으로 바꿔가며 그릴 때 함께 사용"
+    },
+    {
+      "block_id": "if_condition",
+      "relationship": "조건부 색상 변화",
+      "explanation": "특정 조건에서만 무작위 색상으로 바꿀 때 함께 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "무작위 색상을 설정했는데 색이 바뀌지 않아요",
+      "possible_causes": [
+        "무작위 색상 설정 후에 그리기를 하지 않음",
+        "색상 설정이 반복되지 않고 한 번만 실행됨",
+        "색상 변화가 너무 미묘해서 눈에 띄지 않음"
+      ],
+      "solutions": [
+        "무작위 색상 설정 후에 반드시 그리기나 도장 찍기 실행",
+        "반복문이나 조건문 안에서 무작위 색상 블록을 반복 실행",
+        "여러 번 실행해서 색상 변화 확인하기"
+      ]
+    },
+    {
+      "problem": "색이 너무 자주 바뀌어서 어지러워요",
+      "possible_causes": ["반복문에서 매번 색상을 바꿈", "색상 변화 속도가 너무 빠름", "색상 변화와 그리기의 균형이 맞지 않음"],
+      "solutions": [
+        "몇 번에 한 번씩만 색상을 바꾸도록 조건 추가",
+        "'기다리기' 블록을 추가해서 색상 변화 속도 조절",
+        "적절한 간격으로 색상을 바꾸는 패턴 만들기"
+      ]
+    },
+    {
+      "problem": "원하는 색상 범위에서만 무작위로 선택하고 싶어요",
+      "possible_causes": ["이 블록은 전체 색상 범위에서 무작위 선택함", "특정 색상 계열만 원하는 경우 부적합"],
+      "solutions": [
+        "대신 무작위 수 블록과 색상 계산 블록으로 원하는 범위 설정",
+        "조건문으로 원하지 않는 색상일 때 다시 선택하는 방법",
+        "여러 개의 원하는 색상 중에서 무작위로 선택하는 방법 사용"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "주사위 굴리기",
+      "explanation": "주사위를 굴릴 때마다 다른 숫자가 나오는 것처럼, 매번 다른 색상이 선택됩니다."
+    },
+    {
+      "analogy": "복권 추첨",
+      "explanation": "복권 번호가 무작위로 뽑히는 것처럼, 색상도 예측할 수 없게 선택됩니다."
+    },
+    {
+      "analogy": "팝콘 터지는 모습",
+      "explanation": "팝콘이 무작위로 터지면서 다양한 모양을 만드는 것처럼, 무작위 색상으로 예상치 못한 아름다움을 만듭니다."
+    },
+    {
+      "analogy": "만화경",
+      "explanation": "만화경을 돌릴 때마다 새로운 색상 패턴이 나타나는 것과 같은 놀라움을 줍니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "제한된 무작위 색상",
+      "description": "특정 색상 계열이나 팔레트 내에서만 무작위 선택하는 시스템",
+      "use_case": "브랜드 컬러 범위 내 무작위, 따뜻한 색조만, 파스텔톤만"
+    },
+    {
+      "concept": "가중치 무작위",
+      "description": "특정 색상이 더 자주 선택되도록 확률을 조절하는 고급 무작위 시스템",
+      "use_case": "주요 색상 70%, 보조 색상 30% 비율로 선택"
+    },
+    {
+      "concept": "시간 기반 무작위",
+      "description": "시간에 따라 무작위 색상의 성향이 바뀌는 동적 시스템",
+      "use_case": "낮에는 밝은 색, 밤에는 어두운 색 위주로 무작위 선택"
+    },
+    {
+      "concept": "사용자 반응 기반 무작위",
+      "description": "사용자의 행동이나 선택에 따라 무작위 색상의 경향이 학습되는 시스템",
+      "use_case": "좋아요 표시한 색상 계열이 더 자주 나타나는 시스템"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "무작위 색상 블록을 사용해서 매번 다른 색으로 그리기를 할 수 있다",
+      "example": "무작위 색상으로 간단한 도형이나 선 그리기"
+    },
+    {
+      "level": "중급",
+      "criteria": "무작위성을 적절히 조절해서 다채롭지만 조화로운 시각 효과를 만들 수 있다",
+      "example": "폭죽, 만화경, 색상 변화하는 패턴 등의 효과적인 활용"
+    },
+    {
+      "level": "고급",
+      "criteria": "무작위성과 의도적 설계를 조합해서 창의적이고 예술적인 작품을 만들 수 있다",
+      "example": "생성적 예술, 조건부 무작위 시스템, 인터랙티브 색상 변화 등의 고급 기법"
+    }
+  ]
+}

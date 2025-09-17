@@ -1,0 +1,349 @@
+{
+  "id": "change_thickness",
+  "category": "brush",
+  "name": "붓 굵기를 [값]만큼 바꾸기",
+  "description": "현재 붓의 굵기를 지정된 값만큼 증가 또는 감소시키는 블록입니다. 양수 값을 입력하면 붓이 더 굵어지고, 음수 값을 입력하면 더 얇아집니다. 붓 굵기는 최소 1 이상으로 유지됩니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "선의 굵기와 시각적 강조 효과 이해",
+      "상대적 변화와 절대적 변화의 차이점 학습",
+      "점진적 변화를 통한 동적 표현 기법 습득",
+      "그리기 도구의 속성 제어 방법 익히기",
+      "창작에서의 강약 조절과 표현력 향상"
+    ],
+    "key_concepts": [
+      {
+        "concept": "선의 굵기 (Line Thickness)",
+        "explanation": "그리는 선이나 도형의 테두리 두께를 나타내는 속성으로, 시각적 강조나 깊이감 표현에 중요한 역할을 합니다."
+      },
+      {
+        "concept": "상대적 조절",
+        "explanation": "현재 값을 기준으로 일정량만큼 증가나 감소시키는 방식으로, 점진적인 변화를 만들 때 유용합니다."
+      },
+      {
+        "concept": "최소값 제한",
+        "explanation": "붓 굵기는 1보다 작아질 수 없다는 제한이 있어서, 너무 얇아지지 않도록 보호됩니다."
+      },
+      {
+        "concept": "시각적 위계",
+        "explanation": "굵기의 차이를 통해 중요도나 계층 구조를 시각적으로 표현하는 디자인 기법입니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": [
+      "기본 붓 블록들의 사용법 이해",
+      "그리기와 도장 찍기 경험",
+      "숫자 입력과 계산 기본 개념",
+      "반복문의 기초 이해"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "점점 굵어지는 선 그리기",
+      "description": "이동하면서 붓 굵기를 점진적으로 증가",
+      "blocks": ["when_run_button_click", "start_drawing", "repeat_basic(20)", "  move_direction(10)", "  change_thickness(1)"],
+      "explanation": "선을 그리면서 붓 굵기를 1씩 증가시켜서 점점 굵어지는 동적인 선을 만듭니다."
+    },
+    {
+      "title": "맥박 효과 도장",
+      "description": "크기가 변하는 도장으로 맥박 표현",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_inf",
+        "  repeat_basic(5)",
+        "    change_thickness(2)",
+        "    brush_stamp",
+        "    wait_second(0.2)",
+        "  repeat_basic(5)",
+        "    change_thickness(-2)",
+        "    brush_stamp",
+        "    wait_second(0.2)"
+      ],
+      "explanation": "붓 굵기를 증가시켰다가 감소시키는 과정을 반복해서 맥박이 뛰는 효과를 만듭니다."
+    },
+    {
+      "title": "거리에 따른 굵기 조절",
+      "description": "마우스와의 거리에 따라 붓 굵기 변화",
+      "blocks": [
+        "when_run_button_click",
+        "start_drawing",
+        "repeat_while_true",
+        "  set_variable('거리', <distance_something('마우스')>)",
+        "  if_condition(<get_variable('거리') < 100>)",
+        "    change_thickness(1)",
+        "  else",
+        "    change_thickness(-1)",
+        "  move_direction(5)"
+      ],
+      "explanation": "마우스와 가까우면 굵게, 멀면 얇게 그어서 인터랙티브한 그리기 효과를 만듭니다."
+    },
+    {
+      "title": "무작위 굵기 패턴",
+      "description": "다양한 굵기로 역동적인 패턴 생성",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_basic(30)",
+        "  locate_xy(<calc_rand(-200, 200)>, <calc_rand(-150, 150)>)",
+        "  change_thickness(<calc_rand(-5, 10)>)",
+        "  brush_stamp"
+      ],
+      "explanation": "무작위 위치와 굵기 변화로 도장을 찍어서 다채로운 텍스처 효과를 만듭니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "붓의 굵기를 조절하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'붓' 카테고리에서 굵기 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'붓 굵기를 [값]만큼 바꾸기' 블록을 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "양수를 입력하면 더 굵어지고, 음수를 입력하면 더 얇아져요"
+        }
+      ]
+    },
+    {
+      "situation": "점점 굵어지는 선을 그리고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "반복하면서 이동과 굵기 변화를 함께 하면 동적인 선을 만들 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'동작' 카테고리의 이동 블록과 '붓' 카테고리의 굵기 블록을 함께 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "반복할 때마다 굵기를 1~2 정도씩 증가시켜보세요"
+        }
+      ]
+    },
+    {
+      "situation": "붓이 너무 굵어져서 조절이 안 돼요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "굵기를 음수 값으로 줄이거나, 새로 시작할 때 작은 값으로 설정하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'붓 굵기를 [값]으로 정하기' 블록으로 원하는 굵기로 직접 설정할 수 있어요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "변화량을 더 작게 하거나 조건문으로 최대 굵기를 제한하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "붓 굵기를 음수로 계속 줄여서 0 이하로 만들려고 함",
+      "why_it_happens": "붓 굵기의 최소값 제한을 모름",
+      "consequence": "굵기가 1에서 더 이상 줄어들지 않음",
+      "solution": "붓 굵기는 최소 1까지만 줄어든다는 것을 이해하고 적절한 범위 내에서 조절",
+      "teaching_moment": "현실에서도 연필이나 붓이 아무리 얇아도 어느 정도 두께는 있어야 그릴 수 있어요."
+    },
+    {
+      "mistake": "굵기 변화량이 너무 커서 급격한 변화가 일어남",
+      "why_it_happens": "한 번에 큰 값으로 굵기를 변화시킴",
+      "consequence": "자연스럽지 않은 급작스러운 굵기 변화",
+      "solution": "작은 값(1~3 정도)으로 점진적으로 변화시키기",
+      "teaching_moment": "자연스러운 변화는 작은 단계를 여러 번 거치는 것이 비밀이에요."
+    },
+    {
+      "mistake": "굵기 변화 후에 그리기를 시작하지 않음",
+      "why_it_happens": "굵기 설정과 그리기 동작의 연관성을 이해하지 못함",
+      "consequence": "굵기를 바꿔도 실제 그림에 반영되지 않음",
+      "solution": "굵기를 바꾼 후에 반드시 그리기나 도장 찍기 실행",
+      "teaching_moment": "도구의 설정을 바꾸고 나서 실제로 사용해야 효과를 볼 수 있어요."
+    },
+    {
+      "mistake": "너무 굵은 붓으로 세밀한 그림을 그리려고 함",
+      "why_it_happens": "굵기와 그리기 정밀도의 관계를 고려하지 않음",
+      "consequence": "원하는 세부 표현이 어려워짐",
+      "solution": "세밀한 작업에는 얇은 붓, 굵은 표현에는 굵은 붓 사용",
+      "teaching_moment": "큰 붓으로는 큰 그림을, 작은 붓으로는 섬세한 그림을 그리는 것이 좋아요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "붓 카테고리 찾기",
+      "instruction": "블록 팔레트에서 주황색 '붓' 카테고리를 클릭하세요.",
+      "visual_hint": "붓 모양의 아이콘이 있는 주황색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "굵기 변경 블록 선택",
+      "instruction": "'붓 굵기를 [값]만큼 바꾸기' 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "숫자 입력 자리가 하나 있는 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "변화량 설정",
+      "instruction": "블록의 숫자 자리에 원하는 변화량을 입력하세요.",
+      "visual_hint": "양수는 더 굵게, 음수는 더 얇게 만듭니다."
+    },
+    {
+      "step": 4,
+      "title": "그리기 블록과 조합",
+      "instruction": "굵기 변경 후에 그리기나 도장 찍기 블록을 사용하세요.",
+      "visual_hint": "굵기를 바꾼 다음에 그려야 변경된 굵기가 적용됩니다."
+    },
+    {
+      "step": 5,
+      "title": "효과 확인 및 조정",
+      "instruction": "프로그램을 실행해서 굵기 변화가 적절한지 확인하고 값을 조정하세요.",
+      "visual_hint": "변화가 너무 급하다면 더 작은 값을, 너무 느리다면 더 큰 값을 사용하세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "set_thickness",
+      "relationship": "절대값 설정",
+      "explanation": "특정 굵기로 직접 설정할 때 사용하는 블록으로, 상대적 변화와 구별됨"
+    },
+    {
+      "block_id": "start_drawing",
+      "relationship": "그리기 시작",
+      "explanation": "굵기를 설정한 후 실제로 그리기를 시작할 때 사용"
+    },
+    {
+      "block_id": "brush_stamp",
+      "relationship": "굵기 적용 도장",
+      "explanation": "설정된 굵기가 도장의 테두리에 적용될 때 함께 사용"
+    },
+    {
+      "block_id": "repeat_basic",
+      "relationship": "점진적 변화",
+      "explanation": "굵기를 반복적으로 조금씩 변화시켜 애니메이션 효과를 만들 때 사용"
+    },
+    {
+      "block_id": "move_direction",
+      "relationship": "동적 그리기",
+      "explanation": "이동하면서 굵기를 변화시켜 동적인 선을 그릴 때 함께 사용"
+    },
+    {
+      "block_id": "calc_rand",
+      "relationship": "무작위 굵기",
+      "explanation": "무작위 굵기 변화로 다양한 효과를 만들 때 함께 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "굵기가 변하지 않아요",
+      "possible_causes": [
+        "굵기가 이미 최소값(1)에 도달해서 더 줄어들지 않음",
+        "변화량이 0이거나 너무 작음",
+        "굵기 변경 후에 그리기를 하지 않음"
+      ],
+      "solutions": [
+        "현재 굵기가 1인지 확인하고 양수 값으로 증가시키기",
+        "변화량을 2~5 정도로 설정해서 눈에 보이는 변화 만들기",
+        "굵기 변경 후에 반드시 그리기나 도장 찍기 실행"
+      ]
+    },
+    {
+      "problem": "굵기가 너무 굵어져서 조절이 안 돼요",
+      "possible_causes": ["변화량이 너무 크거나 반복 횟수가 많음", "굵기 제한을 설정하지 않음", "음수 값으로 줄이는 것을 잊음"],
+      "solutions": [
+        "음수 값으로 굵기를 줄이거나 '붓 굵기를 [값]으로 정하기'로 리셋",
+        "조건문으로 최대 굵기를 제한하는 로직 추가",
+        "변화량을 더 작게 하거나 반복 횟수 줄이기"
+      ]
+    },
+    {
+      "problem": "굵기 변화가 자연스럽지 않아요",
+      "possible_causes": ["변화량이 너무 큼", "변화 속도가 너무 빠름", "일정하지 않은 변화량 사용"],
+      "solutions": [
+        "변화량을 1~2 정도로 줄이기",
+        "반복문에 '기다리기' 블록 추가하여 속도 조절",
+        "일관된 변화량으로 규칙적인 패턴 만들기"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "붓의 굵기 조절",
+      "explanation": "실제 그림 그리기에서 붓의 굵기를 바꿔가며 다양한 표현을 하는 것과 같습니다."
+    },
+    {
+      "analogy": "펜의 종류",
+      "explanation": "볼펜, 사인펜, 매직 등 굵기가 다른 펜을 골라 쓰는 것처럼 상황에 맞는 굵기 선택이 중요합니다."
+    },
+    {
+      "analogy": "음성의 강약",
+      "explanation": "말할 때 중요한 부분은 크게, 부차적인 부분은 작게 하는 것처럼 굵기로 강조 효과를 만들 수 있습니다."
+    },
+    {
+      "analogy": "도로의 폭",
+      "explanation": "고속도로는 넓고 골목길은 좁은 것처럼, 중요도에 따라 선의 굵기를 달리할 수 있습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "맥박형 굵기 애니메이션",
+      "description": "굵어졌다가 얇아지는 것을 반복하는 생동감 있는 효과",
+      "use_case": "심장 박동 표현, 호흡 효과, 리듬감 있는 디자인"
+    },
+    {
+      "concept": "속도에 따른 굵기 변화",
+      "description": "오브젝트의 이동 속도에 따라 자동으로 굵기가 조절되는 시스템",
+      "use_case": "붓으로 그리는 캘리그래피 효과, 속도감 표현"
+    },
+    {
+      "concept": "거리 기반 굵기 조절",
+      "description": "특정 지점이나 오브젝트와의 거리에 따라 굵기가 변하는 인터랙티브 효과",
+      "use_case": "마우스 따라 변하는 선, 중심점에서 멀어질수록 얇아지는 효과"
+    },
+    {
+      "concept": "다층 굵기 시스템",
+      "description": "여러 개의 서로 다른 굵기 레이어를 조합한 복합적 표현",
+      "use_case": "그림자 효과, 테두리와 내부 구분, 입체감 표현"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "붓 굵기 바꾸기 블록을 사용해서 선의 굵기를 조절할 수 있다",
+      "example": "그리기 전에 굵기를 한 번 변경하여 굵은 선이나 얇은 선 그리기"
+    },
+    {
+      "level": "중급",
+      "criteria": "반복문과 함께 사용해서 점진적인 굵기 변화 효과를 만들 수 있다",
+      "example": "점점 굵어지거나 얇아지는 동적인 선 그리기"
+    },
+    {
+      "level": "고급",
+      "criteria": "조건문과 센서를 활용해서 상황에 따라 굵기가 변하는 인터랙티브 시스템을 구현할 수 있다",
+      "example": "마우스 위치, 시간, 다른 변수 등에 따라 굵기가 실시간으로 변화하는 그리기 도구"
+    }
+  ]
+}

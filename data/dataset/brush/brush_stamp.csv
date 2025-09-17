@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-brush_stamp_001,explain,brush_stamp,,,
-brush_stamp_002,explain,brush_stamp,,,
-brush_stamp_003,explain,brush_stamp,,,
-brush_stamp_004,explain,brush_stamp,,,
-brush_stamp_005,explain,brush_stamp,,,
+brush_stamp_001,explain,brush_stamp,‘도장 찍기’ 블록은 어떤 역할을 하나요?,캐릭터 모양 확인 → 현재 위치 고정 → 무대에 그림으로 남김,잘 물어봤어요! 😀 이 블록은 지금 캐릭터의 모양을 그대로 무대에 도장처럼 찍어주는 기능이에요.
+brush_stamp_002,explain,brush_stamp,이 블록이 없으면 어떤 문제가 생길까요?,캐릭터 위치만 표시 → 흔적을 남길 수 없음,좋은 질문이에요! 👀 이 블록이 없으면 캐릭터가 움직이더라도 그 위치에 모양을 남기지 못해요. 따라서 경로 기록이나 그림 그리기가 불가능해요.
+brush_stamp_003,explain,brush_stamp,실생활에서 이 블록은 무엇과 비슷할까요?,"도장 찍기, 스탬프 아트","멋진 생각이에요 🙌 이 블록은 종이에 도장을 꾹 찍거나, 스탬프 아트로 그림을 만드는 것과 같아요."
+brush_stamp_004,explain,brush_stamp,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"발자국 남기기, 패턴 만들기","좋아요! 👍 이 블록을 쓰면 캐릭터가 걸어가며 발자국을 남기거나, 반복해서 무늬를 찍어내는 패턴 아트를 만들 수 있어요 👣."
+brush_stamp_005,explain,brush_stamp,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,도장 찍기 + 반복/이동 → 연속 무늬,대단해요! 👏 반복 블록과 합치면 “앞으로 10만큼 움직이고 도장 찍기”를 반복해서 발자국이나 줄무늬를 만들 수 있어요 ✨.

@@ -1,0 +1,331 @@
+{
+  "id": "count_match_string",
+  "category": "calc",
+  "name": "[문자]에 [찾을 문자]가 포함된 횟수",
+  "description": "주어진 문자열에서 특정 문자나 문자열이 몇 번 나타나는지 세어주는 블록입니다. 문자열 분석과 패턴 찾기에 활용됩니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "문자열 검색과 패턴 매칭의 개념 이해",
+      "반복되는 패턴을 찾아 계산하는 방법 학습",
+      "문자열 분석 기법의 기초 습득",
+      "수학적 계산과 문자열 처리의 연결 이해",
+      "텍스트 데이터 처리의 기본 원리 파악"
+    ],
+    "key_concepts": [
+      {
+        "concept": "문자열 검색(String Searching)",
+        "explanation": "긴 문자열에서 특정 문자나 단어를 찾는 과정으로, 텍스트 처리의 가장 기본적인 연산"
+      },
+      {
+        "concept": "패턴 매칭(Pattern Matching)",
+        "explanation": "문자열에서 특정한 패턴이나 규칙을 찾아내는 방법으로, 데이터 분석의 핵심 기술"
+      },
+      {
+        "concept": "횟수 계산(Counting)",
+        "explanation": "조건을 만족하는 요소의 개수를 세는 것으로, 통계와 분석의 기초가 되는 연산"
+      },
+      {
+        "concept": "부분 문자열(Substring)",
+        "explanation": "전체 문자열의 일부분으로, 찾고자 하는 대상이 되는 문자나 문자열 조합"
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": [
+      "문자열의 기본 개념 이해",
+      "숫자와 텍스트 구분",
+      "기본 블록 조립 방법",
+      "연산 블록 사용 경험",
+      "변수 사용법 이해"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "단일 문자 개수 세기",
+      "description": "문장에서 특정 글자가 몇 번 나오는지 확인",
+      "scenario": "문장 '안녕하세요 안녕히 가세요'에서 '안'이 몇 번 나오는지 세기",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('문장', '안녕하세요 안녕히 가세요')",
+        "set_variable('개수', count_match_string('문장', '안'))",
+        "speak_something(combine_something('안이 ', combine_something('개수', '번 나옵니다')))"
+      ],
+      "explanation": "문장에서 '안'이라는 글자가 몇 번 나타나는지 세어서 결과를 말해줍니다. (결과: 2번)"
+    },
+    {
+      "title": "단어 개수 확인",
+      "description": "문장에서 특정 단어의 반복 횟수 측정",
+      "scenario": "반복되는 단어의 빈도 분석",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('문장을 입력하세요')",
+        "set_variable('입력문장', answer)",
+        "ask_and_wait('찾을 단어를 입력하세요')",
+        "set_variable('찾을단어', answer)",
+        "set_variable('결과', count_match_string('입력문장', '찾을단어'))",
+        "speak_something(combine_something(combine_something('찾을단어', '가 '), combine_something('결과', '번 나타납니다')))"
+      ],
+      "explanation": "사용자가 입력한 문장에서 원하는 단어가 몇 번 나오는지 세어서 알려줍니다."
+    },
+    {
+      "title": "패턴 분석하기",
+      "description": "특정 패턴의 반복 횟수로 규칙 찾기",
+      "scenario": "전화번호에서 특정 숫자 패턴 분석",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('전화번호', '010-1234-5678')",
+        "set_variable('하이픈개수', count_match_string('전화번호', '-'))",
+        "if_condition((하이픈개수) = (2))",
+        "  speak_something('올바른 전화번호 형식입니다')",
+        "else",
+        "  speak_something('전화번호 형식을 확인해주세요')"
+      ],
+      "explanation": "전화번호에서 하이픈(-)의 개수를 세어 올바른 형식인지 확인합니다."
+    },
+    {
+      "title": "문자열 품질 검사",
+      "description": "특정 문자의 빈도로 텍스트 특성 파악",
+      "scenario": "문장에서 공백의 개수로 단어 수 추정",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('문장을 입력하세요')",
+        "set_variable('입력문장', answer)",
+        "set_variable('공백개수', count_match_string('입력문장', ' '))",
+        "set_variable('단어추정', calc_basic('공백개수', '+', 1))",
+        "speak_something(combine_something('약 ', combine_something('단어추정', '개의 단어가 있습니다')))"
+      ],
+      "explanation": "문장에서 공백의 개수를 세어 대략적인 단어 수를 추정합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "문자열에서 특정 글자를 찾는 방법을 모르겠어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "'Where's Wally?' 게임처럼 긴 문장에서 특정 글자를 찾는 것과 같아요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'연산' 카테고리에서 문자열 관련 블록들을 찾아보세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "'[문자]에 [찾을 문자]가 포함된 횟수' 블록을 사용하면 자동으로 개수를 세어줘요"
+        }
+      ]
+    },
+    {
+      "situation": "결과가 예상과 다르게 나와요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "대소문자를 구분하고, 공백이나 특수문자도 정확히 입력해야 해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "찾는 문자나 단어를 따로 변수에 저장해서 정확한지 확인해보세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "'[문자]을(를) [말하기]' 블록으로 원본 문자열과 찾는 문자를 출력해서 확인해보세요"
+        }
+      ]
+    },
+    {
+      "situation": "긴 단어나 문장을 찾고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "한 글자뿐만 아니라 여러 글자로 이루어진 단어나 구문도 찾을 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "찾을 문자 자리에 '안녕'처럼 여러 글자를 넣어도 돼요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "변수를 사용해서 찾을 단어를 저장하면 더 편리해요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "대소문자를 구분하지 않고 검색",
+      "why_it_happens": "영어의 경우 대문자와 소문자를 다른 문자로 인식함",
+      "consequence": "예상보다 적은 개수가 나오거나 0이 나올 수 있음",
+      "solution": "대소문자 변환 블록을 사용하거나 정확한 대소문자로 입력",
+      "teaching_moment": "컴퓨터는 'A'와 'a'를 완전히 다른 문자로 보기 때문에 정확히 입력해야 해요."
+    },
+    {
+      "mistake": "공백이나 특수문자를 빼먹고 검색",
+      "why_it_happens": "눈에 잘 보이지 않는 공백이나 특수문자를 놓침",
+      "consequence": "원하는 결과가 나오지 않음",
+      "solution": "찾을 문자를 변수에 저장해서 정확히 확인한 후 사용",
+      "teaching_moment": "숨바꼭질에서 잘 보이지 않는 곳에 숨은 친구를 찾는 것처럼, 공백도 하나의 문자예요."
+    },
+    {
+      "mistake": "겹치는 패턴을 잘못 계산",
+      "why_it_happens": "'aaa'에서 'aa'를 찾을 때 겹치는 부분의 처리 방식을 오해",
+      "consequence": "예상과 다른 개수가 나올 수 있음",
+      "solution": "간단한 예시로 먼저 테스트해보고 패턴을 이해",
+      "teaching_moment": "'111'에서 '11'을 찾으면 겹치지 않게 세어서 1개만 나와요. 블록의 동작 방식을 이해하는 것이 중요해요."
+    },
+    {
+      "mistake": "빈 문자열이나 null 값으로 검색",
+      "why_it_happens": "변수가 제대로 설정되지 않았거나 입력이 없는 상태",
+      "consequence": "오류가 발생하거나 예상과 다른 결과",
+      "solution": "변수가 제대로 설정되었는지 먼저 확인",
+      "teaching_moment": "요리할 때 재료가 준비되어 있는지 확인하는 것처럼, 문자열도 제대로 준비되어 있어야 해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "연산 블록 찾기",
+      "instruction": "블록 팔레트에서 '연산' 카테고리를 클릭하세요.",
+      "visual_hint": "초록색 계산기 모양의 아이콘을 찾아보세요."
+    },
+    {
+      "step": 2,
+      "title": "문자열 개수 블록 선택",
+      "instruction": "'[문자]에 [찾을 문자]가 포함된 횟수' 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "둥근 모서리의 초록색 블록으로, 두 개의 입력 자리가 있어요."
+    },
+    {
+      "step": 3,
+      "title": "원본 문자열 입력",
+      "instruction": "첫 번째 자리에 검색할 전체 문자열을 입력하거나 변수를 연결하세요.",
+      "visual_hint": "긴 문장이나 텍스트가 들어가는 자리예요."
+    },
+    {
+      "step": 4,
+      "title": "찾을 문자 입력",
+      "instruction": "두 번째 자리에 찾고 싶은 문자나 단어를 입력하세요.",
+      "visual_hint": "한 글자부터 여러 글자까지 모두 가능해요."
+    },
+    {
+      "step": 5,
+      "title": "결과 활용",
+      "instruction": "이 블록의 결과는 숫자이므로 변수에 저장하거나 다른 연산에 활용할 수 있어요.",
+      "visual_hint": "결과를 말하거나 다른 계산에 사용해보세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "index_of_string",
+      "relationship": "문자열 위치 찾기",
+      "explanation": "개수가 아닌 첫 번째 위치를 찾을 때 사용. 찾는 문자가 몇 번째에 있는지 알려줌"
+    },
+    {
+      "block_id": "length_of_string",
+      "relationship": "문자열 길이 측정",
+      "explanation": "전체 문자열의 길이를 구해서 비율 계산 등에 활용 가능"
+    },
+    {
+      "block_id": "substring",
+      "relationship": "문자열 자르기",
+      "explanation": "특정 부분만 잘라내어 그 부분에서 개수를 세는 용도로 조합 가능"
+    },
+    {
+      "block_id": "replace_string",
+      "relationship": "문자열 바꾸기",
+      "explanation": "찾은 문자를 다른 문자로 바꾸는 후속 작업에 활용"
+    },
+    {
+      "block_id": "combine_something",
+      "relationship": "문자열 합치기",
+      "explanation": "결과 숫자를 다른 텍스트와 합쳐서 완전한 문장으로 만들기"
+    },
+    {
+      "block_id": "_if",
+      "relationship": "조건부 실행",
+      "explanation": "개수가 특정 값과 같거나 다를 때 다른 동작을 하도록 조건 블록과 함께 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "항상 0이 나와요",
+      "possible_causes": [
+        "대소문자가 맞지 않음",
+        "공백이나 특수문자가 포함되어 있음",
+        "찾는 문자가 실제로 없음",
+        "변수가 제대로 설정되지 않음"
+      ],
+      "solutions": [
+        "원본 문자열과 찾는 문자를 각각 출력해서 확인하기",
+        "간단한 예시('abc'에서 'a' 찾기)로 블록 작동 확인",
+        "대소문자 변환 블록 사용해서 통일하기",
+        "변수 값이 제대로 들어있는지 확인하기"
+      ]
+    },
+    {
+      "problem": "예상보다 많거나 적은 개수가 나와요",
+      "possible_causes": [
+        "겹치는 패턴의 계산 방식을 잘못 이해",
+        "원본 문자열에 보이지 않는 문자가 포함",
+        "찾는 문자의 범위를 잘못 설정"
+      ],
+      "solutions": [
+        "간단한 예시로 블록의 동작 방식 이해하기",
+        "문자열 길이 블록으로 전체 길이 확인하기",
+        "부분별로 나누어서 각각 테스트해보기"
+      ]
+    },
+    {
+      "problem": "한글이 제대로 인식되지 않아요",
+      "possible_causes": ["자음/모음이 분리되어 입력됨", "유사해 보이지만 다른 문자 사용", "입력 방식의 차이"],
+      "solutions": ["복사-붙여넣기로 정확한 문자 사용", "변수에 저장해서 값 확인하기", "간단한 한글 예시로 먼저 테스트"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "책에서 특정 단어 찾기",
+      "explanation": "책을 읽으면서 특정 단어가 몇 번 나오는지 세는 것과 같아요. 소설에서 주인공 이름이 몇 번 언급되는지 확인하는 것처럼요."
+    },
+    {
+      "analogy": "검색 엔진의 키워드 검색",
+      "explanation": "구글에서 검색할 때 특정 단어가 포함된 페이지를 찾는 것처럼, 텍스트에서 원하는 패턴을 찾는 기본 원리가 같아요."
+    },
+    {
+      "analogy": "품질 검사",
+      "explanation": "공장에서 제품의 결함을 확인하듯이, 텍스트에서 특정 패턴의 빈도를 측정해서 데이터의 특성을 파악할 수 있어요."
+    },
+    {
+      "analogy": "암호 해독",
+      "explanation": "암호문에서 특정 글자가 얼마나 자주 나타나는지 분석해서 암호를 푸는 것처럼, 패턴 분석의 기초가 돼요."
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "단일 문자의 개수를 정확히 셀 수 있고, 블록의 기본 사용법을 이해한다"
+    },
+    {
+      "level": "중급",
+      "criteria": "여러 글자로 된 단어의 개수를 세고, 결과를 다른 블록과 연결해서 활용할 수 있다"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 패턴 분석에 활용하고, 조건 블록과 조합해서 텍스트 품질 검사나 데이터 분석을 수행할 수 있다"
+    }
+  ]
+}

@@ -1,0 +1,354 @@
+{
+  "id": "set_brush_tranparency",
+  "category": "brush",
+  "name": "붓 투명도를 [값]으로 정하기",
+  "description": "붓의 투명도를 지정된 값으로 직접 설정하는 블록입니다. 0은 완전히 불투명하고, 100은 완전히 투명합니다. 투명도는 0~100 범위에서 설정할 수 있습니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "절대값 설정과 상대값 변화의 차이점 이해",
+      "투명도 개념과 시각적 효과 학습",
+      "정확한 값 제어를 통한 의도적 표현 구현",
+      "레이어와 깊이감 표현 기법 습득",
+      "디지털 아트의 기본 도구 활용법 익히기"
+    ],
+    "key_concepts": [
+      {
+        "concept": "절대값 설정",
+        "explanation": "현재 값에 관계없이 특정 값으로 직접 설정하는 방식으로, 정확한 제어가 가능합니다."
+      },
+      {
+        "concept": "투명도 스케일",
+        "explanation": "0(불투명)부터 100(투명)까지의 수치로 투명도를 표현하는 시스템입니다."
+      },
+      {
+        "concept": "시각적 레이어링",
+        "explanation": "투명도를 활용해서 여러 요소를 겹쳐서 보여주는 시각적 표현 기법입니다."
+      },
+      {
+        "concept": "즉시 적용",
+        "explanation": "설정 즉시 효과가 적용되어 다음 그리기부터 새로운 투명도가 반영됩니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": [
+      "기본 붓 블록들의 사용법 이해",
+      "투명도 개념에 대한 기본 지식",
+      "숫자 입력과 범위 개념",
+      "그리기와 도장 찍기 경험"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "반투명 배경 만들기",
+      "description": "50% 투명도로 은은한 배경 효과",
+      "blocks": [
+        "when_run_button_click",
+        "set_brush_tranparency(50)",
+        "repeat_basic(20)",
+        "  locate_xy(<calc_rand(-200, 200)>, <calc_rand(-150, 150)>)",
+        "  brush_stamp"
+      ],
+      "explanation": "투명도를 50으로 설정해서 반투명한 도장을 여러 개 찍어 은은한 배경 효과를 만듭니다."
+    },
+    {
+      "title": "단계별 투명도 패턴",
+      "description": "규칙적인 투명도 변화로 그라데이션 효과",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_basic(10)",
+        "  set_brush_tranparency(<calc_basic(10, '*', <get_variable('i')>)>)",
+        "  locate_x(<calc_basic(-200, '+', <calc_basic(40, '*', <get_variable('i')>)>)>)",
+        "  brush_stamp",
+        "  change_variable('i', 1)"
+      ],
+      "explanation": "0%, 10%, 20%... 순서로 투명도를 설정해서 왼쪽부터 오른쪽으로 점점 투명해지는 패턴을 만듭니다."
+    },
+    {
+      "title": "투명도별 레이어 그리기",
+      "description": "다양한 투명도로 겹치는 효과",
+      "blocks": [
+        "when_run_button_click",
+        "set_brush_tranparency(80)",
+        "brush_stamp",
+        "move_xy(20, 20)",
+        "set_brush_tranparency(60)",
+        "brush_stamp",
+        "move_xy(20, 20)",
+        "set_brush_tranparency(40)",
+        "brush_stamp"
+      ],
+      "explanation": "투명도를 80, 60, 40으로 각각 설정해서 겹치는 도장 효과를 만들어 깊이감을 표현합니다."
+    },
+    {
+      "title": "조건별 투명도 설정",
+      "description": "상황에 따라 다른 투명도 적용",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_while_true",
+        "  if_condition(<is_clicked>)",
+        "    set_brush_tranparency(0)",
+        "  else",
+        "    set_brush_tranparency(70)",
+        "  brush_stamp",
+        "  wait_second(0.1)"
+      ],
+      "explanation": "마우스를 클릭하면 불투명(0)으로, 클릭하지 않으면 투명(70)으로 설정해서 인터랙티브한 효과를 만듭니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "붓의 투명도를 정확한 값으로 설정하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'붓' 카테고리에서 투명도 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'붓 투명도를 [값]으로 정하기' 블록을 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "0은 완전히 불투명, 100은 완전히 투명이에요. 원하는 투명도 값을 직접 입력하세요"
+        }
+      ]
+    },
+    {
+      "situation": "투명도 단계를 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "여러 단계로 나누어서 각각 다른 투명도를 설정하면 그라데이션 효과를 만들 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'흐름' 카테고리의 반복 블록과 '계산' 카테고리의 수식을 함께 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "반복할 때마다 투명도를 10이나 20씩 다르게 설정해보세요"
+        }
+      ]
+    },
+    {
+      "situation": "현재 투명도와 상관없이 새로 시작하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "이 블록은 현재 값에 관계없이 새로운 값으로 설정하므로 초기화에 적합해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "프로그램 시작 부분에 원하는 투명도 값으로 설정하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "확실한 시작을 위해 0(불투명) 또는 원하는 기본값으로 설정하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "투명도 범위를 벗어난 값 입력",
+      "why_it_happens": "0~100 범위를 모르고 임의의 큰 값을 입력함",
+      "consequence": "100을 넘는 값은 100으로, 0보다 작은 값은 0으로 자동 조정됨",
+      "solution": "0~100 범위 내에서 값을 설정하고, 원하는 투명도에 맞는 적절한 수치 사용",
+      "teaching_moment": "투명도는 퍼센트(%)와 같아서 0~100 사이의 값만 의미가 있어요."
+    },
+    {
+      "mistake": "투명도와 불투명도 개념 혼동",
+      "why_it_happens": "0과 100의 의미를 반대로 이해함",
+      "consequence": "원하는 것과 반대 효과가 나타남",
+      "solution": "0은 완전히 보임(불투명), 100은 완전히 안 보임(투명)으로 기억하기",
+      "teaching_moment": "투명도는 '투명한 정도'를 나타내니까, 숫자가 클수록 더 투명해져요."
+    },
+    {
+      "mistake": "투명도 설정 후 그리기를 하지 않음",
+      "why_it_happens": "설정만 하고 실제 그리기 동작을 빼먹음",
+      "consequence": "투명도가 바뀌었지만 화면에 아무것도 나타나지 않음",
+      "solution": "투명도 설정 후에 반드시 그리기나 도장 찍기 블록 추가",
+      "teaching_moment": "도구의 설정을 바꾸고 나서는 실제로 사용해야 효과를 볼 수 있어요."
+    },
+    {
+      "mistake": "너무 높은 투명도로 설정해서 안 보임",
+      "why_it_happens": "90이상의 높은 투명도로 설정함",
+      "consequence": "그린 것이 거의 보이지 않아서 제대로 동작하지 않는 것처럼 느껴짐",
+      "solution": "처음에는 30~70 정도의 중간 투명도로 시작해서 효과 확인",
+      "teaching_moment": "너무 투명하면 보이지 않으니까, 적당한 투명도로 시작해서 조절해보세요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "붓 카테고리 찾기",
+      "instruction": "블록 팔레트에서 주황색 '붓' 카테고리를 클릭하세요.",
+      "visual_hint": "붓 모양의 아이콘이 있는 주황색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "투명도 설정 블록 선택",
+      "instruction": "'붓 투명도를 [값]으로 정하기' 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "숫자 입력 자리가 하나 있는 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "투명도 값 입력",
+      "instruction": "블록의 숫자 자리에 원하는 투명도 값(0~100)을 입력하세요.",
+      "visual_hint": "0은 완전히 불투명, 50은 반투명, 100은 완전히 투명입니다."
+    },
+    {
+      "step": 4,
+      "title": "그리기 블록과 조합",
+      "instruction": "투명도 설정 후에 그리기나 도장 찍기 블록을 사용하세요.",
+      "visual_hint": "투명도를 설정한 다음에 그려야 새로운 투명도가 적용됩니다."
+    },
+    {
+      "step": 5,
+      "title": "효과 확인 및 조정",
+      "instruction": "프로그램을 실행해서 투명도가 적절한지 확인하고 필요하면 값을 조정하세요.",
+      "visual_hint": "배경과 대비해서 투명도 효과가 잘 보이는지 확인하세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "change_brush_transparency",
+      "relationship": "상대적 변화",
+      "explanation": "현재 투명도에서 일정량 증가/감소시킬 때 사용하는 블록과 구별됨"
+    },
+    {
+      "block_id": "start_drawing",
+      "relationship": "그리기 시작",
+      "explanation": "투명도를 설정한 후 실제로 그리기를 시작할 때 사용"
+    },
+    {
+      "block_id": "brush_stamp",
+      "relationship": "투명 도장",
+      "explanation": "설정된 투명도로 도장을 찍을 때 함께 사용"
+    },
+    {
+      "block_id": "set_color",
+      "relationship": "색상과 투명도",
+      "explanation": "색상과 투명도를 함께 설정해서 원하는 시각적 효과 구현"
+    },
+    {
+      "block_id": "repeat_basic",
+      "relationship": "다중 투명도",
+      "explanation": "여러 번 반복하면서 각각 다른 투명도를 설정할 때 사용"
+    },
+    {
+      "block_id": "calc_basic",
+      "relationship": "계산된 투명도",
+      "explanation": "수식으로 계산한 값을 투명도로 설정할 때 함께 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "투명도를 설정했는데 변화가 없어요",
+      "possible_causes": [
+        "투명도 설정 후에 그리기를 하지 않음",
+        "배경과 비슷한 색상으로 인해 투명도 변화가 눈에 띄지 않음",
+        "이미 같은 투명도로 설정되어 있음"
+      ],
+      "solutions": [
+        "투명도 설정 후에 반드시 그리기나 도장 찍기 실행",
+        "배경과 대비되는 색상으로 붓 색깔 변경하거나 다른 투명도 값 시도",
+        "확실히 다른 투명도 값(예: 0과 80)으로 테스트해보기"
+      ]
+    },
+    {
+      "problem": "투명도가 너무 높아서 거의 보이지 않아요",
+      "possible_causes": ["90 이상의 높은 투명도 값 설정", "반복적으로 높은 투명도 설정", "배경과 비슷한 색상 조합"],
+      "solutions": [
+        "투명도를 30~70 범위로 조정하여 적절한 가시성 확보",
+        "0으로 리셋한 후 원하는 투명도로 다시 설정",
+        "색상과 투명도를 함께 조정하여 최적의 조합 찾기"
+      ]
+    },
+    {
+      "problem": "원하는 투명도 효과가 나오지 않아요",
+      "possible_causes": ["투명도 값의 의미를 잘못 이해함", "중첩 효과를 고려하지 않음", "적절하지 않은 배경이나 색상 조합"],
+      "solutions": [
+        "0(불투명)과 100(투명)의 방향성 재확인",
+        "여러 요소가 겹칠 때의 투명도 효과 실험해보기",
+        "단순한 배경에서 투명도 효과를 먼저 테스트하기"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "유리창의 투명도",
+      "explanation": "완전히 맑은 유리(0)부터 뿌연 유리(100)까지 다양한 투명도를 설정하는 것과 같습니다."
+    },
+    {
+      "analogy": "물감의 농도",
+      "explanation": "진한 물감(0)과 물을 많이 탄 연한 물감(100) 사이에서 원하는 농도를 선택하는 것과 비슷합니다."
+    },
+    {
+      "analogy": "선글라스의 진하기",
+      "explanation": "투명한 안경(0)부터 아주 진한 선글라스(100)까지 원하는 진하기를 선택하는 것과 같습니다."
+    },
+    {
+      "analogy": "커튼의 두께",
+      "explanation": "얇은 커튼(투명)과 두꺼운 커튼(불투명) 중에서 적절한 것을 선택하는 것과 같은 개념입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "투명도 프리셋 시스템",
+      "description": "자주 사용하는 투명도 값들을 미리 설정해놓고 빠르게 적용하는 시스템",
+      "use_case": "반투명(50), 연한(80), 진한(20) 등의 프리셋 버튼 구현"
+    },
+    {
+      "concept": "조건부 투명도 시스템",
+      "description": "특정 조건에 따라 자동으로 적절한 투명도가 설정되는 스마트 시스템",
+      "use_case": "시간대별 투명도, 거리별 투명도, 상황별 자동 조절"
+    },
+    {
+      "concept": "투명도 기반 게임 메커니즘",
+      "description": "투명도를 게임의 핵심 요소로 활용하는 창의적 활용법",
+      "use_case": "은신 게임, 투명도 퍼즐, 페이드 인/아웃 스토리텔링"
+    },
+    {
+      "concept": "다중 레이어 투명도 관리",
+      "description": "여러 레이어의 투명도를 체계적으로 관리하는 고급 시스템",
+      "use_case": "배경/중간/전경 레이어별 투명도 제어, 복합적 시각 효과"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "붓 투명도 정하기 블록을 사용해서 원하는 투명도로 설정할 수 있다",
+      "example": "0~100 범위의 값으로 투명도를 직접 설정하여 투명/불투명 효과 만들기"
+    },
+    {
+      "level": "중급",
+      "criteria": "다양한 투명도 값을 활용해서 단계적이고 체계적인 시각 효과를 만들 수 있다",
+      "example": "여러 단계의 투명도로 그라데이션이나 레이어 효과 구현"
+    },
+    {
+      "level": "고급",
+      "criteria": "투명도를 창의적으로 활용해서 복잡한 시각적 표현이나 인터랙티브 시스템을 구현할 수 있다",
+      "example": "조건부 투명도 변화, 게임 메커니즘 연동, 예술적 표현 등의 고급 활용"
+    }
+  ]
+}

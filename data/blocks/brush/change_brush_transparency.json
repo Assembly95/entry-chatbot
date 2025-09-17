@@ -1,0 +1,359 @@
+{
+  "id": "change_brush_transparency",
+  "category": "brush",
+  "name": "붓 투명도를 [값]만큼 바꾸기",
+  "description": "현재 붓의 투명도를 지정된 값만큼 증가 또는 감소시키는 블록입니다. 양수 값을 입력하면 더 투명해지고, 음수 값을 입력하면 더 불투명해집니다. 투명도는 0~100 범위에서 조절됩니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "투명도 개념과 시각적 효과 이해",
+      "상대값과 절대값의 차이점 학습",
+      "점진적 변화와 애니메이션 효과 구현",
+      "색상과 투명도의 관계 파악",
+      "창작에서의 시각적 깊이감 표현 기법 습득"
+    ],
+    "key_concepts": [
+      {
+        "concept": "투명도 (Transparency/Opacity)",
+        "explanation": "물체가 얼마나 투명한지를 나타내는 값으로, 0에 가까울수록 불투명하고 100에 가까울수록 투명해집니다."
+      },
+      {
+        "concept": "상대적 변화",
+        "explanation": "현재 값을 기준으로 증가나 감소시키는 방식으로, 절대적인 값 설정과 구별되는 개념입니다."
+      },
+      {
+        "concept": "점진적 효과",
+        "explanation": "한 번에 크게 변화시키지 않고 조금씩 변화시켜서 자연스러운 애니메이션 효과를 만드는 기법입니다."
+      },
+      {
+        "concept": "시각적 깊이감",
+        "explanation": "투명도를 활용해서 원근감이나 레이어 효과를 표현하여 입체적인 느낌을 만드는 방법입니다."
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": [
+      "기본 붓 블록들의 사용법 이해",
+      "숫자와 계산의 기본 개념",
+      "반복문과 조건문 활용 경험",
+      "색상과 그리기 도구에 대한 기본 지식"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "서서히 사라지는 선 그리기",
+      "description": "그리면서 점점 투명해지는 효과",
+      "blocks": [
+        "when_run_button_click",
+        "start_drawing",
+        "repeat_basic(20)",
+        "  move_direction(10)",
+        "  change_brush_transparency(5)"
+      ],
+      "explanation": "선을 그리면서 투명도를 5씩 증가시켜서 점점 사라지는 그래데이션 효과를 만듭니다."
+    },
+    {
+      "title": "깜빡이는 도장 효과",
+      "description": "투명도를 반복적으로 변화시켜 깜빡임 구현",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_inf",
+        "  repeat_basic(10)",
+        "    change_brush_transparency(10)",
+        "    brush_stamp",
+        "    wait_second(0.1)",
+        "  repeat_basic(10)",
+        "    change_brush_transparency(-10)",
+        "    brush_stamp",
+        "    wait_second(0.1)"
+      ],
+      "explanation": "투명도를 증가시켰다가 감소시키는 과정을 반복해서 깜빡이는 효과를 만듭니다."
+    },
+    {
+      "title": "안개 효과 만들기",
+      "description": "무작위 투명도로 몽환적인 분위기 연출",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_basic(50)",
+        "  locate_xy(<calc_rand(-200, 200)>, <calc_rand(-150, 150)>)",
+        "  change_brush_transparency(<calc_rand(30, 70)>)",
+        "  brush_stamp"
+      ],
+      "explanation": "무작위 위치와 투명도로 도장을 찍어서 안개나 구름같은 몽환적인 배경을 만듭니다."
+    },
+    {
+      "title": "거리에 따른 투명도 조절",
+      "description": "마우스와의 거리에 따라 투명도 변화",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_while_true",
+        "  set_variable('거리', <distance_something('마우스')>)",
+        "  if_condition(<get_variable('거리') < 100>)",
+        "    change_brush_transparency(-5)",
+        "  else",
+        "    change_brush_transparency(5)",
+        "  brush_stamp",
+        "  wait_second(0.1)"
+      ],
+      "explanation": "마우스와 가까우면 불투명해지고 멀면 투명해지는 인터랙티브한 효과를 만듭니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "붓의 투명도를 조절하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'붓' 카테고리에서 투명도 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'붓 투명도를 [값]만큼 바꾸기' 블록을 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "양수를 입력하면 더 투명해지고, 음수를 입력하면 더 불투명해져요"
+        }
+      ]
+    },
+    {
+      "situation": "점점 사라지는 효과를 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "반복하면서 투명도를 조금씩 증가시키면 점점 사라지는 효과를 만들 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'흐름' 카테고리의 반복 블록과 함께 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "반복할 때마다 투명도를 3~5 정도씩 증가시켜보세요"
+        }
+      ]
+    },
+    {
+      "situation": "투명도가 너무 빨리 변해요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "변화량을 더 작게 하거나 기다리는 시간을 추가하면 천천히 변할 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "변화량을 1~2 정도로 줄이고 '기다리기' 블록을 추가해보세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "'흐름' 카테고리의 '기다리기' 블록으로 속도를 조절하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "투명도가 100을 넘어서 계속 증가시키려고 함",
+      "why_it_happens": "투명도의 최대값과 최소값 범위를 모름",
+      "consequence": "투명도가 최대값에서 더 이상 변화하지 않음",
+      "solution": "투명도는 0~100 범위에서만 동작한다는 것을 이해하고 적절한 값 사용",
+      "teaching_moment": "모든 속성에는 최대값과 최소값이 있어서, 그 범위를 넘으면 더 이상 변하지 않아요."
+    },
+    {
+      "mistake": "음수와 양수의 효과를 반대로 이해",
+      "why_it_happens": "투명도 증가/감소의 방향성을 혼동",
+      "consequence": "원하는 것과 반대 효과가 나타남",
+      "solution": "양수는 더 투명하게(사라지는 방향), 음수는 더 불투명하게(나타나는 방향)",
+      "teaching_moment": "투명도에서 큰 숫자는 더 투명한 것이고, 작은 숫자는 더 선명한 것이에요."
+    },
+    {
+      "mistake": "변화량이 너무 커서 자연스럽지 않은 효과",
+      "why_it_happens": "한 번에 큰 값으로 투명도를 변화시킴",
+      "consequence": "급작스럽게 변해서 어색한 효과가 나타남",
+      "solution": "작은 값(1~10 정도)으로 점진적으로 변화시키기",
+      "teaching_moment": "자연스러운 애니메이션은 작은 변화를 여러 번 반복하는 것이 비밀이에요."
+    },
+    {
+      "mistake": "투명도 변화를 그리기 전에 적용",
+      "why_it_happens": "블록의 실행 순서를 잘못 이해",
+      "consequence": "투명도 변화 효과가 예상한 곳에 나타나지 않음",
+      "solution": "그리기나 도장 찍기 전에 투명도를 먼저 설정하기",
+      "teaching_moment": "요리할 때 재료를 준비하고 나서 요리하는 것처럼, 속성을 먼저 설정하고 그린 다음에 그려야 해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "붓 카테고리 찾기",
+      "instruction": "블록 팔레트에서 주황색 '붓' 카테고리를 클릭하세요.",
+      "visual_hint": "붓 모양의 아이콘이 있는 주황색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "투명도 변경 블록 선택",
+      "instruction": "'붓 투명도를 [값]만큼 바꾸기' 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "숫자 입력 자리가 하나 있는 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "변화량 설정",
+      "instruction": "블록의 숫자 자리에 원하는 변화량을 입력하세요.",
+      "visual_hint": "양수는 더 투명하게, 음수는 더 불투명하게 만듭니다."
+    },
+    {
+      "step": 4,
+      "title": "그리기 블록과 조합",
+      "instruction": "투명도 변경 후에 그리기나 도장 찍기 블록을 사용하세요.",
+      "visual_hint": "투명도를 바꾼 다음에 그려야 변경된 투명도가 적용됩니다."
+    },
+    {
+      "step": 5,
+      "title": "효과 확인 및 조정",
+      "instruction": "프로그램을 실행해서 투명도 변화가 자연스러운지 확인하고 값을 조정하세요.",
+      "visual_hint": "변화가 너무 급작스럽다면 더 작은 값을, 너무 느리다면 더 큰 값을 사용하세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "set_brush_tranparency",
+      "relationship": "절대값 설정",
+      "explanation": "특정 투명도로 직접 설정할 때 사용하는 블록으로, 상대적 변화와 구별됨"
+    },
+    {
+      "block_id": "start_drawing",
+      "relationship": "그리기 시작",
+      "explanation": "투명도를 설정한 후 실제로 그리기를 시작할 때 사용"
+    },
+    {
+      "block_id": "brush_stamp",
+      "relationship": "투명 도장",
+      "explanation": "설정된 투명도로 도장을 찍을 때 함께 사용"
+    },
+    {
+      "block_id": "repeat_basic",
+      "relationship": "점진적 변화",
+      "explanation": "투명도를 반복적으로 조금씩 변화시켜 애니메이션 효과를 만들 때 사용"
+    },
+    {
+      "block_id": "wait_second",
+      "relationship": "속도 조절",
+      "explanation": "투명도 변화 속도를 조절하기 위해 대기 시간을 추가할 때 사용"
+    },
+    {
+      "block_id": "calc_rand",
+      "relationship": "무작위 투명도",
+      "explanation": "무작위 투명도 변화로 다양한 효과를 만들 때 함께 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "투명도가 변하지 않아요",
+      "possible_causes": [
+        "투명도가 이미 최대값(100) 또는 최소값(0)에 도달함",
+        "변화량이 0이거나 너무 작음",
+        "그리기를 시작하지 않은 상태에서 투명도만 변경함"
+      ],
+      "solutions": [
+        "현재 투명도 값을 확인하고 적절한 변화량 설정",
+        "변화량을 5~10 정도로 설정해서 눈에 보이는 변화 만들기",
+        "투명도 변경 후에 반드시 그리기나 도장 찍기 실행"
+      ]
+    },
+    {
+      "problem": "투명도 변화가 너무 급작스러워요",
+      "possible_causes": ["변화량이 너무 큼", "반복할 때 기다리는 시간이 없음", "한 번에 너무 많이 변화시킴"],
+      "solutions": [
+        "변화량을 1~3 정도로 줄이기",
+        "반복문에 '기다리기' 블록 추가하여 속도 조절",
+        "더 많은 단계로 나누어서 점진적으로 변화시키기"
+      ]
+    },
+    {
+      "problem": "투명도 효과가 보이지 않아요",
+      "possible_causes": [
+        "배경과 비슷한 색상으로 인해 투명도 변화가 눈에 띄지 않음",
+        "투명도가 이미 너무 높아서 변화를 감지하기 어려움",
+        "그리는 선이 너무 얇거나 작음"
+      ],
+      "solutions": [
+        "배경과 대비되는 색상으로 붓 색깔 변경",
+        "투명도를 먼저 0으로 설정한 후 변화 시작",
+        "붓 굵기를 늘리거나 더 큰 도장 사용"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "물감의 농도 조절",
+      "explanation": "물감에 물을 조금씩 더하면 점점 연해지는 것처럼 투명도를 조절하는 것과 같습니다."
+    },
+    {
+      "analogy": "안개나 연기",
+      "explanation": "안개가 점점 짙어지거나 옅어지는 자연 현상을 투명도로 표현할 수 있습니다."
+    },
+    {
+      "analogy": "볼륨 조절기",
+      "explanation": "음악의 볼륨을 조금씩 올리거나 내리는 것처럼 투명도도 점진적으로 조절할 수 있습니다."
+    },
+    {
+      "analogy": "선글라스의 진하기",
+      "explanation": "선글라스가 점점 진해지거나 연해지는 효과를 투명도 변화로 구현할 수 있습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "왕복 투명도 애니메이션",
+      "description": "투명해졌다가 다시 불투명해지는 순환적 효과",
+      "use_case": "호흡하는 듯한 효과, 심장 박동 표현, 깜빡이는 신호등"
+    },
+    {
+      "concept": "조건부 투명도 변화",
+      "description": "특정 조건에 따라 투명도 변화 방향이나 속도를 바꾸는 기능",
+      "use_case": "마우스 근접 시 투명도 변화, 게임에서 체력에 따른 투명도 조절"
+    },
+    {
+      "concept": "다중 오브젝트 투명도 동기화",
+      "description": "여러 오브젝트의 투명도를 함께 조절하는 시스템",
+      "use_case": "배경 전체의 시간대별 변화, 그룹 단위 페이드 인/아웃 효과"
+    },
+    {
+      "concept": "투명도 기반 인터랙션",
+      "description": "투명도 값에 따라 다른 동작을 하는 인터랙티브 시스템",
+      "use_case": "투명도에 따른 충돌 감지 변화, 은신 게임 메커니즘"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "붓 투명도 바꾸기 블록을 사용해서 투명도를 조절할 수 있다",
+      "example": "그리기 전에 투명도를 한 번 변경하여 반투명한 선 그리기"
+    },
+    {
+      "level": "중급",
+      "criteria": "반복문과 함께 사용해서 점진적인 투명도 변화 효과를 만들 수 있다",
+      "example": "서서히 사라지거나 나타나는 애니메이션 효과 구현"
+    },
+    {
+      "level": "고급",
+      "criteria": "조건문과 변수를 활용해서 복잡한 투명도 제어 시스템을 구현할 수 있다",
+      "example": "사용자 입력이나 게임 상황에 따라 투명도가 동적으로 변화하는 인터랙티브 시스템"
+    }
+  ]
+}

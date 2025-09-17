@@ -1,0 +1,223 @@
+{
+  "id": "get_nickname",
+  "category": "calc",
+  "name": "사용자 닉네임",
+  "description": "Entry에 로그인한 사용자의 닉네임을 가져옵니다. 개인화된 인터랙션과 맞춤형 메시지 제작에 활용됩니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "사용자 정보 활용의 개념 이해",
+      "개인화된 프로그래밍 경험 구현",
+      "데이터 접근과 활용 방법 학습",
+      "인터랙티브 소통 기법 습득"
+    ],
+    "key_concepts": [
+      {
+        "concept": "사용자 정보",
+        "explanation": "프로그램이 현재 사용 중인 사람의 정보를 가져와서 활용하는 것"
+      },
+      {
+        "concept": "개인화(Personalization)",
+        "explanation": "사용자 개인에게 맞춤화된 경험을 제공하는 프로그래밍 기법"
+      },
+      {
+        "concept": "닉네임",
+        "explanation": "사용자가 Entry에서 사용하는 고유한 표시 이름"
+      },
+      {
+        "concept": "동적 콘텐츠",
+        "explanation": "사용자에 따라 내용이 달라지는 프로그램 요소"
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": ["Entry 계정 로그인", "말하기 블록 사용법", "문자열 합치기 이해", "변수 개념 파악"]
+  },
+
+  "usage_examples": [
+    {
+      "scenario": "개인화된 인사말",
+      "blocks": [
+        "when_run_button_click",
+        "speak_something(combine_something('안녕하세요, ', combine_something(get_nickname(), '님!')))"
+      ],
+      "explanation": "'안녕하세요, 홍길동님!' 처럼 사용자 닉네임을 포함한 개인화된 인사말을 출력합니다"
+    },
+    {
+      "scenario": "게임 시작 환영 메시지",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('닉네임', get_nickname())",
+        "speak_something(combine_something('닉네임', '님, 게임에 오신 걸 환영합니다!'))",
+        "wait_second(2)",
+        "speak_something('재미있게 플레이하세요!')"
+      ],
+      "explanation": "게임 시작 시 사용자 이름으로 환영 인사를 하고 게임 안내를 제공합니다"
+    },
+    {
+      "scenario": "점수 발표",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('퀴즈: 1+1은?')",
+        "if_condition((answer) = (2))",
+        "  speak_something(combine_something(get_nickname(), '님, 정답입니다!'))",
+        "else",
+        "  speak_something(combine_something(get_nickname(), '님, 아쉽게도 틀렸어요'))"
+      ],
+      "explanation": "퀴즈 정답 여부를 사용자 이름과 함께 개인화된 메시지로 알려줍니다"
+    },
+    {
+      "scenario": "작품 제작자 정보",
+      "blocks": [
+        "when_run_button_click",
+        "speak_something(combine_something('이 작품은 ', combine_something(get_nickname(), '님이 만들었습니다')))",
+        "text_write(combine_something('제작자: ', get_nickname()))"
+      ],
+      "explanation": "프로젝트에 제작자 정보를 자동으로 표시합니다"
+    },
+    {
+      "scenario": "개인 기록 저장",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('플레이어', get_nickname())",
+        "set_variable('점수', 150)",
+        "speak_something(combine_something(combine_something('플레이어', '님의 점수는 '), combine_something('점수', '점입니다')))"
+      ],
+      "explanation": "게임 플레이어 이름과 점수를 함께 기록하고 발표합니다"
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "닉네임을 어떻게 활용할지 모르겠어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "친구와 대화할 때 이름을 부르면 더 친근하게 느껴지는 것처럼, 프로그램도 사용자 이름을 불러주면 더 특별해져요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'연산' 카테고리에서 사용자 닉네임 블록을 찾아보세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "'문자 합치기' 블록과 함께 사용해서 '○○님 안녕하세요!' 같은 메시지를 만들어보세요"
+        }
+      ]
+    },
+    {
+      "situation": "닉네임이 제대로 나오지 않아요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "Entry에 로그인이 되어 있는지 확인해보세요. 로그인하지 않으면 닉네임을 가져올 수 없어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "닉네임 블록을 말하기 블록에 직접 넣어서 어떤 값이 나오는지 테스트해보세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "변수에 저장해서 값을 확인한 후 다른 블록과 조합해보세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "로그인하지 않은 상태에서 사용",
+      "solution": "Entry에 로그인한 후 사용해야 닉네임을 가져올 수 있음",
+      "teaching_moment": "도서관에서 책을 빌리려면 도서증이 필요한 것처럼, 닉네임을 가져오려면 로그인이 필요해요"
+    },
+    {
+      "mistake": "닉네임과 실명을 혼동",
+      "solution": "Entry에서 설정한 닉네임이 나오며, 실제 이름과는 다를 수 있음을 이해",
+      "teaching_moment": "게임에서 사용하는 캐릭터 이름처럼, 닉네임은 Entry에서 사용하는 별명이에요"
+    },
+    {
+      "mistake": "한 번만 가져오면 계속 같다고 생각",
+      "solution": "사용자가 닉네임을 변경할 수 있으므로 필요할 때마다 새로 가져오는 것이 좋음",
+      "teaching_moment": "친구가 헤어스타일을 바꿀 수 있듯이, 닉네임도 변경될 수 있어요"
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_name": "get_user_name",
+      "relationship": "사용자 정보",
+      "explanation": "사용자의 실제 이름을 가져오는 블록과 비교해서 용도에 맞게 선택"
+    },
+    {
+      "block_name": "combine_something",
+      "relationship": "메시지 조합",
+      "explanation": "닉네임을 다른 텍스트와 합쳐서 완전한 인사말이나 메시지 생성"
+    },
+    {
+      "block_name": "dialog",
+      "relationship": "개인화된 대화",
+      "explanation": "닉네임을 포함한 말풍선으로 친근한 소통"
+    },
+    {
+      "block_name": "text_write",
+      "relationship": "화면 표시",
+      "explanation": "닉네임을 화면에 텍스트로 표시"
+    },
+    {
+      "block_name": "_if",
+      "relationship": "사용자별 분기",
+      "explanation": "특정 닉네임일 때만 다른 동작을 하도록 조건 설정"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "빈 값이 나와요",
+      "solutions": [
+        "Entry 계정에 로그인되어 있는지 확인",
+        "닉네임이 제대로 설정되어 있는지 프로필에서 확인",
+        "인터넷 연결 상태 점검"
+      ]
+    },
+    {
+      "problem": "예상과 다른 닉네임이 나와요",
+      "solutions": [
+        "현재 로그인된 계정이 본인 계정인지 확인",
+        "Entry 프로필 설정에서 닉네임 확인",
+        "다른 사람의 컴퓨터를 사용하고 있는지 점검"
+      ]
+    },
+    {
+      "problem": "한글이 깨져서 나와요",
+      "solutions": [
+        "브라우저 설정에서 문자 인코딩 확인",
+        "Entry 사이트를 새로고침한 후 다시 시도",
+        "다른 브라우저에서 테스트해보기"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "카페 멤버십 카드",
+      "explanation": "카페에서 '○○님 안녕하세요!' 하고 인사하는 것처럼, 프로그램도 사용자를 개인적으로 인식할 수 있어요"
+    },
+    {
+      "analogy": "스마트폰 개인화",
+      "explanation": "스마트폰이 주인의 이름으로 알림을 보내는 것처럼, 프로그램도 개인에게 맞춤 메시지를 줄 수 있어요"
+    },
+    {
+      "analogy": "게임 캐릭터 이름",
+      "explanation": "온라인 게임에서 플레이어 이름이 화면에 표시되는 것처럼, Entry에서도 닉네임을 활용할 수 있어요"
+    },
+    {
+      "analogy": "도서관 대출 시스템",
+      "explanation": "도서관에서 '○○님이 빌린 책' 목록을 보여주는 것처럼, 사용자별 정보를 관리할 수 있어요"
+    }
+  ]
+}

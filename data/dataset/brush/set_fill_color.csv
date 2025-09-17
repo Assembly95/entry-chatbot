@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-set_fill_color_001,explain,set_fill_color,,,
-set_fill_color_002,explain,set_fill_color,,,
-set_fill_color_003,explain,set_fill_color,,,
-set_fill_color_004,explain,set_fill_color,,,
-set_fill_color_005,explain,set_fill_color,,,
+set_fill_color_001,explain,set_fill_color,‘채우기 색을 ~로 정하기’ 블록은 어떤 역할을 하나요?,입력값 확인 → 현재 채우기 색 무시 → 새 색상으로 고정,잘 물어봤어요! 😀 이 블록은 도형이나 도장이 채워지는 색을 지정한 색으로 고정해요. 예를 들어 파랑으로 정하면 내부가 파랗게 채워져요.
+set_fill_color_002,explain,set_fill_color,이 블록이 없으면 어떤 문제가 생길까요?,내부 색 고정 불가 → 항상 기본색만 사용,"좋은 질문이에요! 👀 이 블록이 없으면 내부 색을 다양하게 바꿀 수 없고, 항상 같은 색만 사용할 수 있어요."
+set_fill_color_003,explain,set_fill_color,실생활에서 이 블록은 무엇과 비슷할까요?,페인트 통으로 색 채우기,멋진 생각이에요 🙌 이 블록은 미술 시간에 도형 안을 페인트로 색칠하는 것과 같아요 🎨.
+set_fill_color_004,explain,set_fill_color,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"색칠 놀이, 패턴 디자인","좋아요! 👍 이 블록을 쓰면 아이들이 색칠 놀이를 하거나, 패턴 디자인 프로젝트를 만들 수 있어요. 도형마다 다른 색으로 채워 표현할 수 있죠."
+set_fill_color_005,explain,set_fill_color,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,채우기 색 고정 + 반복/조건,대단해요! 👏 반복 블록과 합치면 여러 도형을 다른 색으로 채워서 무늬를 만들 수 있어요. 조건 블록과 합치면 상황에 따라 자동으로 색을 정하는 프로젝트도 가능해요 ✨.

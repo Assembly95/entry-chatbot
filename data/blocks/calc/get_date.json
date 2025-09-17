@@ -1,0 +1,222 @@
+{
+  "id": "get_date",
+  "category": "calc",
+  "name": "현재 [년도/월/일/요일/시/분/초]",
+  "description": "컴퓨터의 현재 날짜와 시간에서 원하는 부분(년도, 월, 일, 요일, 시, 분, 초)을 숫자로 가져옵니다. 실시간 정보를 활용한 프로그램 제작에 사용됩니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "실시간 데이터 활용 개념 이해",
+      "날짜와 시간의 프로그래밍적 표현 학습",
+      "시간 기반 조건부 프로그래밍 구현",
+      "일상생활과 프로그래밍의 연결 이해"
+    ],
+    "key_concepts": [
+      {
+        "concept": "시스템 시간",
+        "explanation": "컴퓨터가 내장하고 있는 현재 날짜와 시간 정보"
+      },
+      {
+        "concept": "실시간 데이터",
+        "explanation": "프로그램이 실행되는 순간의 현재 정보를 가져오는 것"
+      },
+      {
+        "concept": "시간 단위",
+        "explanation": "년, 월, 일, 시, 분, 초로 구분되는 시간의 각 구성요소"
+      },
+      {
+        "concept": "요일 시스템",
+        "explanation": "일요일(0)부터 토요일(6)까지 숫자로 표현하는 방식"
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": ["숫자와 문자의 구분", "드롭다운 메뉴 사용법", "변수 저장과 활용", "기본 연산 블록 이해"]
+  },
+
+  "usage_examples": [
+    {
+      "scenario": "현재 시간 표시",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('현재시', get_date('시'))",
+        "set_variable('현재분', get_date('분'))",
+        "speak_something(combine_something(combine_something('현재시', '시 '), combine_something('현재분', '분')))"
+      ],
+      "explanation": "현재 시각을 '15시 30분' 형태로 말해줍니다"
+    },
+    {
+      "scenario": "생일 축하 프로그램",
+      "blocks": [
+        "when_run_button_click",
+        "if_condition((get_date('월')) = (12))",
+        "  if_condition((get_date('일')) = (25))",
+        "    speak_something('메리 크리스마스!')",
+        "    play_sound('크리스마스 음악')"
+      ],
+      "explanation": "12월 25일에만 크리스마스 축하 메시지를 출력합니다"
+    },
+    {
+      "scenario": "요일별 인사말",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('오늘요일', get_date('요일'))",
+        "if_condition(('오늘요일') = (1))",
+        "  speak_something('즐거운 월요일!')",
+        "if_condition(('오늘요일') = (5))",
+        "  speak_something('불금이에요!')"
+      ],
+      "explanation": "월요일(1)과 금요일(5)에 각각 다른 인사말을 출력합니다"
+    },
+    {
+      "scenario": "디지털 시계",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_inf",
+        "  set_variable('시계', combine_something(combine_something(get_date('시'), ':'), get_date('분')))",
+        "  text_write('시계')",
+        "  wait_second(1)"
+      ],
+      "explanation": "1초마다 업데이트되는 디지털 시계를 만듭니다"
+    },
+    {
+      "scenario": "새해 카운트다운",
+      "blocks": [
+        "when_run_button_click",
+        "if_condition((get_date('월')) = (12))",
+        "  if_condition((get_date('일')) = (31))",
+        "    speak_something('새해가 얼마 남지 않았어요!')"
+      ],
+      "explanation": "12월 31일에 새해 준비 메시지를 출력합니다"
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "날짜와 시간을 어떻게 활용할지 모르겠어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "스마트폰에서 알람이 정해진 시간에 울리거나, 생일에 축하 메시지가 오는 것처럼 시간을 활용할 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'연산' 카테고리에서 현재 시간 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "드롭다운에서 필요한 시간 단위(년/월/일/시/분/초)를 선택해보세요"
+        }
+      ]
+    },
+    {
+      "situation": "요일이 숫자로 나와서 이해하기 어려워요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "일요일이 0, 월요일이 1, 화요일이 2... 토요일이 6으로 표현돼요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "조건 블록과 함께 사용해서 '요일이 1이면 월요일' 같은 방식으로 활용해보세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "문자열 합치기 블록으로 '오늘은 1요일입니다' 같은 메시지를 만들어보세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "월(month) 값이 예상과 다름",
+      "solution": "1월이 1, 2월이 2로 표시되므로 일반적인 월 표기와 동일",
+      "teaching_moment": "다른 프로그래밍 언어와 달리 Entry는 1월을 1로 표시해서 이해하기 쉬워요"
+    },
+    {
+      "mistake": "요일 숫자를 잘못 이해",
+      "solution": "일요일=0, 월요일=1, 화요일=2, 수요일=3, 목요일=4, 금요일=5, 토요일=6 순서로 기억",
+      "teaching_moment": "달력을 보면 일요일부터 시작하는 것처럼, 컴퓨터도 일요일을 0번째로 생각해요"
+    },
+    {
+      "mistake": "시간이 실시간으로 업데이트되지 않는다고 착각",
+      "solution": "이 블록은 실행될 때마다 최신 시간을 가져오므로 반복문에서 사용하면 실시간 업데이트 가능",
+      "teaching_moment": "시계처럼 계속 변하는 값이므로 반복해서 확인해야 변화를 볼 수 있어요"
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_name": "_if",
+      "relationship": "시간 조건 설정",
+      "explanation": "특정 시간이나 날짜에만 실행되는 조건문 만들기"
+    },
+    {
+      "block_name": "combine_something",
+      "relationship": "시간 표시",
+      "explanation": "시간을 '15시 30분' 같은 읽기 쉬운 형태로 조합"
+    },
+    {
+      "block_name": "repeat_inf",
+      "relationship": "실시간 업데이트",
+      "explanation": "시계나 실시간 표시를 위한 지속적인 시간 확인"
+    },
+    {
+      "block_name": "wait_second",
+      "relationship": "주기적 확인",
+      "explanation": "1초마다 시간을 확인해서 부드러운 실시간 업데이트"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "시간이 이상하게 나와요",
+      "solutions": [
+        "컴퓨터의 시간 설정이 올바른지 확인",
+        "드롭다운에서 올바른 시간 단위를 선택했는지 점검",
+        "24시간 형식(0-23시)으로 표시됨을 이해"
+      ]
+    },
+    {
+      "problem": "요일 숫자가 예상과 달라요",
+      "solutions": [
+        "일요일=0부터 시작하는 시스템임을 확인",
+        "실제 요일과 숫자를 대조해서 패턴 파악",
+        "간단한 테스트로 오늘 요일 숫자 확인"
+      ]
+    },
+    {
+      "problem": "시간이 업데이트되지 않아요",
+      "solutions": [
+        "반복문 안에서 계속 확인하도록 구성",
+        "wait_second 블록으로 적절한 간격 설정",
+        "변수에 저장 후 화면에 표시하는 구조 확인"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "스마트폰 알람",
+      "explanation": "설정한 시간에 정확히 울리는 알람처럼, 특정 시간에 프로그램이 실행되도록 만들 수 있어요"
+    },
+    {
+      "analogy": "은행 ATM 시간 표시",
+      "explanation": "ATM 화면에 현재 시간이 계속 업데이트되는 것처럼, 실시간 시간 정보를 활용할 수 있어요"
+    },
+    {
+      "analogy": "방송국 시보",
+      "explanation": "정시마다 '몇 시를 알려드립니다'라고 하는 것처럼, 특정 시각에 메시지를 출력할 수 있어요"
+    },
+    {
+      "analogy": "생일 축하 앱",
+      "explanation": "생일 당일에 자동으로 축하 메시지를 보내는 앱처럼, 날짜를 확인해서 이벤트를 실행할 수 있어요"
+    }
+  ]
+}

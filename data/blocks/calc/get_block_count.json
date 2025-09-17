@@ -1,0 +1,162 @@
+{
+  "id": "get_block_count",
+  "category": "calc",
+  "name": "[오브젝트]의 블록 수",
+  "description": "선택한 오브젝트나 장면에 있는 전체 블록의 개수를 세어 반환합니다. 프로젝트 복잡도 측정이나 자동 평가에 활용됩니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "프로젝트 구조와 복잡도 이해",
+      "메타프로그래밍 개념 학습",
+      "자동 평가 시스템 구현",
+      "코드 분석과 통계 기초"
+    ],
+    "key_concepts": [
+      {
+        "concept": "메타프로그래밍",
+        "explanation": "프로그램이 자기 자신이나 다른 프로그램을 분석하고 조작하는 기법"
+      },
+      {
+        "concept": "코드 복잡도",
+        "explanation": "프로그램의 크기나 구조의 복잡한 정도를 측정하는 지표"
+      }
+    ],
+    "difficulty_level": "고급",
+    "prerequisites": ["오브젝트와 장면 개념 이해", "변수와 연산 블록 사용", "조건 블록 활용 경험"]
+  },
+
+  "usage_examples": [
+    {
+      "scenario": "프로젝트 진행도 체크",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('내블록수', get_block_count('self'))",
+        "if_condition(('내블록수') > (10))",
+        "  speak_something('충분히 많은 블록을 사용했네요!')",
+        "else",
+        "  speak_something('더 많은 블록을 사용해보세요')"
+      ],
+      "explanation": "자신의 오브젝트에 사용된 블록 수가 10개보다 많으면 완성도를 칭찬"
+    },
+    {
+      "scenario": "자동 채점 시스템",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('전체블록', get_block_count('all'))",
+        "set_variable('점수', calc_basic('전체블록', '*', 5))",
+        "speak_something(combine_something('총 점수: ', '점수'))"
+      ],
+      "explanation": "프로젝트 전체 블록 수에 따라 자동으로 점수를 계산"
+    },
+    {
+      "scenario": "복잡도 비교",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('고양이블록', get_block_count('object-고양이'))",
+        "set_variable('강아지블록', get_block_count('object-강아지'))",
+        "if_condition(('고양이블록') > ('강아지블록'))",
+        "  speak_something('고양이가 더 복잡해요!')",
+        "else",
+        "  speak_something('강아지가 더 복잡해요!')"
+      ],
+      "explanation": "두 오브젝트의 블록 수를 비교해서 어느 쪽이 더 복잡한지 판단"
+    },
+    {
+      "scenario": "장면별 통계",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('현재장면블록', get_block_count('scene-1'))",
+        "speak_something(combine_something('이 장면에는 ', combine_something('현재장면블록', '개의 블록이 있어요')))"
+      ],
+      "explanation": "특정 장면에 포함된 모든 블록의 개수를 확인"
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "블록 개수를 어떻게 활용할지 모르겠어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "선생님이 학생 과제를 확인하듯이, 프로젝트가 얼마나 열심히 만들어졌는지 확인할 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'연산' 카테고리에서 블록 수 세기 블록을 찾아보세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "조건 블록과 함께 사용해서 '블록이 00개 이상이면' 같은 조건을 만들어보세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "오브젝트 이름을 잘못 입력",
+      "solution": "드롭다운에서 정확한 오브젝트나 'self', 'all' 옵션을 선택",
+      "teaching_moment": "컴퓨터는 정확한 이름을 요구해요. 'object-고양이' 형태로 정확히 지정해야 해요"
+    },
+    {
+      "mistake": "시작 블록이나 모양 블록 등도 개수에 포함된다는 것을 놓침",
+      "solution": "모든 종류의 블록이 계산에 포함됨을 이해",
+      "teaching_moment": "사람을 셀 때 어른, 아이 구분 없이 모두 세는 것처럼 모든 블록이 포함돼요"
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_name": "_if",
+      "relationship": "조건부 실행",
+      "explanation": "블록 수 조건에 따른 다른 동작 구현"
+    },
+    {
+      "block_name": "calc_basic",
+      "relationship": "수치 계산",
+      "explanation": "블록 수를 이용한 점수 계산이나 비율 계산"
+    },
+    {
+      "block_name": "combine_something",
+      "relationship": "결과 출력",
+      "explanation": "블록 수를 포함한 메시지 만들기"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "항상 0이 나와요",
+      "solutions": [
+        "오브젝트 이름이 정확한지 확인 ('object-' 접두사 포함)",
+        "해당 오브젝트가 실제로 존재하는지 확인",
+        "'self'나 'all' 옵션으로 먼저 테스트해보기"
+      ]
+    },
+    {
+      "problem": "예상보다 많은 개수가 나와요",
+      "solutions": [
+        "시작 블록, 이벤트 블록도 개수에 포함됨을 이해",
+        "숨겨진 블록이나 사용하지 않는 블록도 계산됨을 확인",
+        "다른 오브젝트의 블록까지 세고 있는지 범위 확인"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "건물의 벽돌 개수",
+      "explanation": "집의 크기를 벽돌 개수로 측정하듯이, 프로그램의 크기를 블록 개수로 측정할 수 있어요"
+    },
+    {
+      "analogy": "작문의 글자 수",
+      "explanation": "에세이나 소설의 분량을 글자 수로 세는 것처럼, 프로그램의 복잡도를 블록 수로 파악해요"
+    },
+    {
+      "analogy": "레고 조각 개수",
+      "explanation": "레고 작품의 규모를 조각 개수로 알 수 있듯이, Entry 작품도 블록 개수로 규모를 알 수 있어요"
+    }
+  ]
+}

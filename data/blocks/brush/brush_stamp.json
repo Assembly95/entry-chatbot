@@ -1,0 +1,338 @@
+{
+  "id": "brush_stamp",
+  "category": "brush",
+  "name": "도장 찍기",
+  "description": "현재 오브젝트의 모양을 현재 위치에 도장처럼 찍어서 화면에 남기는 블록입니다. 오브젝트가 이동해도 찍힌 도장은 그 자리에 그대로 남아있습니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "스탬프와 복사의 개념 이해",
+      "정적 이미지와 동적 오브젝트의 차이점 학습",
+      "패턴 만들기와 반복적 장식 기법 익히기",
+      "창작 활동에서의 도구 활용법 습득",
+      "예술적 표현과 프로그래밍의 결합 경험"
+    ],
+    "key_concepts": [
+      {
+        "concept": "스탬프 기능",
+        "explanation": "현재 오브젝트의 모습을 복사해서 화면에 고정시키는 기능으로, 실제 도장을 찍는 것과 같은 개념입니다."
+      },
+      {
+        "concept": "정적 이미지 생성",
+        "explanation": "움직이는 오브젝트와 달리 한 번 찍힌 도장은 화면에 고정되어 변하지 않는 이미지가 됩니다."
+      },
+      {
+        "concept": "패턴과 반복",
+        "explanation": "도장을 반복적으로 찍어서 아름다운 패턴이나 배경을 만들 수 있는 디자인 기법입니다."
+      },
+      {
+        "concept": "레이어 개념",
+        "explanation": "도장은 배경 레이어에 그려지므로 오브젝트들보다 뒤에 표시되는 시각적 계층 구조를 이해할 수 있습니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": [
+      "오브젝트의 이동과 위치 개념 이해",
+      "모양 변경 블록 사용 경험",
+      "반복문의 기본 이해",
+      "Entry 기본 인터페이스 조작법"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "꽃잎 패턴 만들기",
+      "description": "회전하면서 도장을 찍어 꽃 모양 패턴 생성",
+      "blocks": ["when_run_button_click", "repeat_basic(8)", "  brush_stamp", "  direction_relative(45)"],
+      "explanation": "45도씩 회전하면서 8번 도장을 찍어서 꽃잎 모양의 아름다운 패턴을 만듭니다."
+    },
+    {
+      "title": "발자국 만들기",
+      "description": "이동하면서 도장을 찍어 이동 경로 표시",
+      "blocks": ["when_run_button_click", "repeat_basic(10)", "  brush_stamp", "  move_direction(30)", "  wait_second(0.5)"],
+      "explanation": "0.5초마다 도장을 찍으면서 이동하여 발자국이나 이동 경로를 시각적으로 표현합니다."
+    },
+    {
+      "title": "랜덤 배경 만들기",
+      "description": "무작위 위치에 도장을 찍어 배경 장식",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_basic(20)",
+        "  locate_xy(<calc_rand(-200, 200)>, <calc_rand(-150, 150)>)",
+        "  set_scale_size(<calc_rand(30, 100)>)",
+        "  brush_stamp"
+      ],
+      "explanation": "무작위 위치와 크기로 도장을 20개 찍어서 다양한 배경 효과를 만듭니다."
+    },
+    {
+      "title": "눈송이 효과",
+      "description": "하늘에서 떨어지는 눈송이 도장",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_while_true",
+        "  locate_xy(<calc_rand(-240, 240)>, 180)",
+        "  repeat_while_true",
+        "    move_y(-5)",
+        "    if_condition(<coordinate_object('y') < -180>)",
+        "      break",
+        "    brush_stamp",
+        "    wait_second(0.1)"
+      ],
+      "explanation": "화면 위에서 시작해서 아래로 이동하면서 도장을 찍어 눈이 내리는 효과를 만듭니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "도장을 찍고 싶은데 어떻게 해야 할지 모르겠어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'붓' 카테고리에서 도장 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'도장 찍기' 블록을 찾아서 사용해보세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "이 블록을 실행하면 현재 위치에 오브젝트의 모양이 도장처럼 찍혀요"
+        }
+      ]
+    },
+    {
+      "situation": "패턴을 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "반복하면서 도장을 찍고 위치나 방향을 바꾸면 아름다운 패턴을 만들 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'흐름' 카테고리의 반복 블록과 '동작' 카테고리의 이동/회전 블록을 함께 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "도장 찍기 → 이동/회전 → 도장 찍기 순서로 반복해보세요"
+        }
+      ]
+    },
+    {
+      "situation": "도장이 너무 크거나 작아요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'모양' 카테고리에서 크기 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'크기를 [값]으로 정하기' 블록으로 오브젝트 크기를 조절하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "크기를 바꾼 후에 도장을 찍으면 바뀐 크기로 도장이 찍혀요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "도장이 예상과 다른 위치에 찍힘",
+      "why_it_happens": "오브젝트의 현재 위치가 생각한 위치와 다름",
+      "consequence": "원하는 곳에 도장이 찍히지 않음",
+      "solution": "도장을 찍기 전에 오브젝트를 원하는 위치로 이동시키기",
+      "teaching_moment": "도장은 항상 오브젝트가 있는 그 자리에 찍힌다는 것을 기억하세요."
+    },
+    {
+      "mistake": "도장이 보이지 않음",
+      "why_it_happens": "오브젝트가 숨겨져 있거나 투명도가 높음",
+      "consequence": "도장을 찍어도 화면에 나타나지 않음",
+      "solution": "먼저 오브젝트를 보이게 하고, 투명도를 0으로 설정한 후 도장 찍기",
+      "teaching_moment": "보이지 않는 것은 도장으로도 찍을 수 없어요."
+    },
+    {
+      "mistake": "도장을 너무 많이 찍어서 화면이 복잡해짐",
+      "why_it_happens": "반복문에서 도장 찍기를 과도하게 사용",
+      "consequence": "화면이 지저분해지고 원하는 효과를 얻기 어려움",
+      "solution": "적절한 횟수로 제한하거나, 위치 간격을 충분히 두기",
+      "teaching_moment": "적당히 사용하는 것이 더 아름다운 결과를 만들어요."
+    },
+    {
+      "mistake": "도장이 오브젝트 앞에 나타날 것으로 기대",
+      "why_it_happens": "도장과 오브젝트의 레이어 관계를 잘못 이해",
+      "consequence": "도장이 오브젝트에 가려져서 잘 보이지 않음",
+      "solution": "도장은 항상 배경에 찍힌다는 것을 이해하고 설계",
+      "teaching_moment": "도장은 배경지에 찍히는 것이고, 오브젝트는 그 위에서 움직이는 거예요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "붓 카테고리 찾기",
+      "instruction": "블록 팔레트에서 주황색 '붓' 카테고리를 클릭하세요.",
+      "visual_hint": "붓 모양의 아이콘이 있는 주황색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "도장 찍기 블록 선택",
+      "instruction": "'도장 찍기' 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "입력 자리가 없는 단순한 형태의 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "위치 설정",
+      "instruction": "도장을 찍고 싶은 위치로 오브젝트를 이동시키세요.",
+      "visual_hint": "'동작' 카테고리의 이동 블록들을 사용해서 원하는 위치로 이동합니다."
+    },
+    {
+      "step": 4,
+      "title": "크기 조정 (선택사항)",
+      "instruction": "원한다면 '모양' 카테고리의 크기 블록으로 도장 크기를 조정하세요.",
+      "visual_hint": "크기를 바꾼 후에 도장을 찍으면 바뀐 크기로 찍힙니다."
+    },
+    {
+      "step": 5,
+      "title": "도장 찍기 실행",
+      "instruction": "프로그램을 실행해서 도장이 제대로 찍히는지 확인하세요.",
+      "visual_hint": "오브젝트가 이동해도 도장은 찍힌 자리에 그대로 남아있어야 합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "locate_xy",
+      "relationship": "위치 설정",
+      "explanation": "도장을 찍기 전에 원하는 위치로 오브젝트를 이동시킬 때 사용"
+    },
+    {
+      "block_id": "set_scale_size",
+      "relationship": "크기 조절",
+      "explanation": "도장의 크기를 조절하기 위해 오브젝트 크기를 바꿀 때 사용"
+    },
+    {
+      "block_id": "direction_relative",
+      "relationship": "방향 조절",
+      "explanation": "회전하면서 도장을 찍어 패턴을 만들 때 함께 사용"
+    },
+    {
+      "block_id": "repeat_basic",
+      "relationship": "패턴 생성",
+      "explanation": "여러 개의 도장을 찍어 패턴이나 배경을 만들 때 반복과 함께 사용"
+    },
+    {
+      "block_id": "brush_erase_all",
+      "relationship": "도장 지우기",
+      "explanation": "찍어둔 모든 도장을 지우고 새로 시작할 때 사용"
+    },
+    {
+      "block_id": "change_to_some_shape",
+      "relationship": "모양 변경",
+      "explanation": "다른 모양의 도장을 찍기 위해 오브젝트 모양을 바꿀 때 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "도장을 찍었는데 보이지 않아요",
+      "possible_causes": ["오브젝트가 숨겨져 있거나 투명함", "오브젝트가 화면 밖에 위치함", "오브젝트의 크기가 너무 작음"],
+      "solutions": [
+        "먼저 '모양 보이기' 블록으로 오브젝트를 보이게 하기",
+        "오브젝트를 화면 안의 위치로 이동시키기",
+        "크기를 적절하게 조정한 후 도장 찍기"
+      ]
+    },
+    {
+      "problem": "도장이 원하는 위치에 찍히지 않아요",
+      "possible_causes": ["오브젝트의 현재 위치가 예상과 다름", "도장 찍기 전에 위치 이동을 하지 않음", "좌표 값을 잘못 설정함"],
+      "solutions": [
+        "도장 찍기 전에 오브젝트 위치를 확인하고 조정",
+        "이동 블록 다음에 도장 찍기 블록 배치",
+        "좌표 블록을 사용해서 현재 위치 확인하기"
+      ]
+    },
+    {
+      "problem": "패턴이 예상과 다르게 나와요",
+      "possible_causes": [
+        "반복 횟수나 이동 거리가 부적절함",
+        "회전 각도가 원하는 패턴과 맞지 않음",
+        "도장 찍기와 이동의 순서가 잘못됨"
+      ],
+      "solutions": [
+        "반복 횟수를 줄여서 패턴 확인 후 조정",
+        "각도를 360도를 반복횟수로 나눈 값으로 설정",
+        "도장 찍기 → 이동/회전 순서로 블록 배치"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "실제 도장",
+      "explanation": "사무실에서 사용하는 도장처럼 한 번 찍으면 그 자리에 인장이 남는 것과 같습니다."
+    },
+    {
+      "analogy": "스탬프 놀이",
+      "explanation": "어린이들이 좋아하는 스탬프로 종이에 그림을 찍는 놀이와 동일한 개념입니다."
+    },
+    {
+      "analogy": "벽지 패턴",
+      "explanation": "벽지나 포장지의 반복되는 패턴을 만드는 방식과 비슷합니다."
+    },
+    {
+      "analogy": "발자국",
+      "explanation": "모래나 눈 위를 걸을 때 남는 발자국처럼 이동 경로를 표시하는 것과 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "다양한 모양 도장",
+      "description": "오브젝트 모양을 바꿔가며 여러 종류의 도장 찍기",
+      "use_case": "다채로운 배경 만들기, 계절별 장식 효과"
+    },
+    {
+      "concept": "크기 변화 패턴",
+      "description": "도장을 찍을 때마다 크기를 바꿔서 역동적인 패턴 만들기",
+      "use_case": "원근감 있는 배경, 점점 작아지거나 커지는 효과"
+    },
+    {
+      "concept": "조건부 도장",
+      "description": "특정 조건을 만족할 때만 도장을 찍는 기능",
+      "use_case": "게임에서 특정 아이템 수집 시 흔적 남기기, 퍼즐 해결 과정 표시"
+    },
+    {
+      "concept": "시간차 도장",
+      "description": "일정 시간 간격으로 자동으로 도장을 찍는 시스템",
+      "use_case": "연속적인 궤적 표시, 시간의 흐름 시각화"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "도장 찍기 블록을 사용해서 원하는 위치에 오브젝트 모양을 찍을 수 있다",
+      "example": "특정 위치로 이동한 후 도장을 찍어서 그 자리에 모양 남기기"
+    },
+    {
+      "level": "중급",
+      "criteria": "반복문과 이동 블록을 조합해서 간단한 패턴이나 배경을 만들 수 있다",
+      "example": "원형, 직선, 격자 등의 기본 패턴을 도장으로 구현하기"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 조건과 다양한 블록을 활용해서 창의적이고 아름다운 도장 작품을 만들 수 있다",
+      "example": "무작위 요소, 크기 변화, 색상 효과 등을 활용한 예술적 작품 창작"
+    }
+  ]
+}

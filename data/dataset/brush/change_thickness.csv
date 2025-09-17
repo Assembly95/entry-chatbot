@@ -1,6 +1,6 @@
 ﻿id,task_type,block_id,question,cot_steps,answer
-change_thickness_001,explain,change_thickness,,,
-change_thickness_002,explain,change_thickness,,,
-change_thickness_003,explain,change_thickness,,,
-change_thickness_004,explain,change_thickness,,,
-change_thickness_005,explain,change_thickness,,,
+change_thickness_001,explain,change_thickness,‘선 두께 바꾸기’ 블록은 어떤 역할을 하나요?,현재 두께 확인 → 값 더하기/빼기 → 새로운 두께 적용,잘 물어봤어요! 😀 이 블록은 펜으로 그리는 선의 굵기를 더 두껍게 하거나 더 얇게 만들 수 있어요.
+change_thickness_002,explain,change_thickness,이 블록이 없으면 어떤 문제가 생길까요?,선의 두께 고정 → 표현 다양성 제한,"좋은 질문이에요! 👀 이 블록이 없으면 선의 두께가 항상 일정해서, 굵고 얇은 선을 조절한 그림을 만들 수 없어요."
+change_thickness_003,explain,change_thickness,실생활에서 이 블록은 무엇과 비슷할까요?,"연필 심 굵기 바꾸기, 붓으로 힘 조절","멋진 생각이에요 🙌 이 블록은 연필을 두꺼운 걸로 바꾸거나, 붓에 힘을 주어 굵게 그리는 것과 같아요 ✏️."
+change_thickness_004,explain,change_thickness,이 블록으로 어떤 프로젝트를 만들 수 있을까요?,"드로잉 게임, 강조 효과","좋아요! 👍 이 블록을 쓰면 그림판에서 특정 부분을 강조하거나, 만화에서 굵은 선으로 표현하는 효과를 줄 수 있어요."
+change_thickness_005,explain,change_thickness,이 블록을 다른 블록과 합치면 어떤 효과가 있나요?,두께 변경 + 반복/조건 → 점진적 연출,대단해요! 👏 반복 블록과 합치면 “선 두께를 1씩 바꾸기”를 여러 번 실행해서 점점 두꺼워지는 선을 만들 수 있어요. 조건과 합치면 상황에 맞게 굵기를 자동으로 조절할 수도 있죠 ✨.

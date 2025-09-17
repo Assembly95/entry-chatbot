@@ -1,0 +1,187 @@
+{
+  "id": "get_boolean_value",
+  "category": "calc",
+  "name": "[참/거짓] 값을 문자열로 바꾸기",
+  "description": "참(True) 또는 거짓(False) 값을 'TRUE' 또는 'FALSE' 문자열로 변환합니다. 논리값을 텍스트로 표시하거나 저장할 때 사용됩니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "데이터 타입 변환 개념 이해",
+      "불린값과 문자열의 차이 학습",
+      "디버깅과 결과 확인 방법 습득",
+      "논리값 시각화 기법 학습"
+    ],
+    "key_concepts": [
+      {
+        "concept": "타입 변환(Type Conversion)",
+        "explanation": "한 데이터 타입을 다른 데이터 타입으로 바꾸는 과정"
+      },
+      {
+        "concept": "불린값(Boolean Value)",
+        "explanation": "참(True) 또는 거짓(False) 두 가지 값만 가질 수 있는 논리 데이터 타입"
+      },
+      {
+        "concept": "문자열 표현",
+        "explanation": "프로그램 내부 값을 사람이 읽을 수 있는 텍스트 형태로 나타내는 방법"
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": ["조건 블록과 판단 블록 이해", "참/거짓 개념 숙지", "문자열 블록 사용 경험", "말하기 블록 활용"]
+  },
+
+  "usage_examples": [
+    {
+      "scenario": "조건 결과 확인",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('결과', get_boolean_value(is_clicked()))",
+        "speak_something(combine_something('마우스 클릭 상태: ', '결과'))"
+      ],
+      "explanation": "마우스 클릭 상태를 TRUE/FALSE 문자열로 변환해서 말하기"
+    },
+    {
+      "scenario": "디버깅용 로그",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('충돌여부', reach_something('벽')),",
+        "set_variable('상태텍스트', get_boolean_value('충돌여부'))",
+        "text_write(combine_something('충돌: ', '상태텍스트'))"
+      ],
+      "explanation": "벽 충돌 여부를 텍스트로 변환해서 화면에 표시"
+    },
+    {
+      "scenario": "게임 상태 표시",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('게임종료', (get_variable('점수')) > (100))",
+        "set_variable('종료상태', get_boolean_value('게임종료'))",
+        "speak_something(combine_something('게임 종료: ', '종료상태'))"
+      ],
+      "explanation": "점수가 100 초과인지 확인한 결과를 TRUE/FALSE로 표시"
+    },
+    {
+      "scenario": "설정값 저장",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('소리를 켤까요? (예/아니오)')",
+        "set_variable('소리설정', (answer) = ('예'))",
+        "set_variable('설정문자', get_boolean_value('소리설정'))",
+        "text_write(combine_something('소리 설정: ', '설정문자'))"
+      ],
+      "explanation": "사용자 답변을 불린값으로 변환 후 다시 문자열로 표시"
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "불린값을 문자로 바꾸는 이유를 모르겠어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "참/거짓은 컴퓨터가 이해하는 값이고, TRUE/FALSE는 사람이 읽기 쉬운 글자예요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'연산' 카테고리에서 불린값 변환 블록을 찾아보세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "'말하기' 블록이나 '텍스트 쓰기' 블록과 함께 사용해서 결과를 확인해보세요"
+        }
+      ]
+    },
+    {
+      "situation": "언제 이 블록을 사용하면 좋을지 모르겠어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "프로그램이 제대로 작동하는지 확인하거나, 게임 상태를 보여줄 때 유용해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "조건 블록의 결과를 확인하고 싶을 때 이 블록으로 변환해보세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "변수와 함께 사용해서 상태를 저장하고 나중에 확인할 수도 있어요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "이미 문자열인 값에 이 블록을 사용",
+      "solution": "참/거짓 값(불린)에만 사용하고, 이미 문자인 것은 그대로 사용",
+      "teaching_moment": "사과를 사과라고 부르는 것처럼, 이미 글자인 것을 또 글자로 바꿀 필요는 없어요"
+    },
+    {
+      "mistake": "결과를 예상하지 못함",
+      "solution": "TRUE는 참, FALSE는 거짓을 의미한다는 것을 기억",
+      "teaching_moment": "영어로 TRUE(참)와 FALSE(거짓)이 나오는 것은 컴퓨터의 국제 표준이에요"
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_name": "boolean_basic_operator",
+      "relationship": "불린값 생성",
+      "explanation": "비교 연산의 결과를 문자열로 변환할 때 함께 사용"
+    },
+    {
+      "block_name": "combine_something",
+      "relationship": "텍스트 조합",
+      "explanation": "변환된 문자열을 다른 텍스트와 합쳐서 완전한 메시지 만들기"
+    },
+    {
+      "block_name": "dialog",
+      "relationship": "결과 출력",
+      "explanation": "변환된 문자열을 말풍선으로 표시"
+    },
+    {
+      "block_name": "text_write",
+      "relationship": "화면 표시",
+      "explanation": "변환된 결과를 텍스트박스에 출력"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "결과가 예상과 달라요",
+      "solutions": [
+        "입력한 불린값이 정말 참/거짓인지 먼저 확인",
+        "조건 블록의 결과를 따로 확인해보기",
+        "간단한 참/거짓 값(예: True 블록)으로 테스트"
+      ]
+    },
+    {
+      "problem": "TRUE/FALSE가 아닌 다른 값이 나와요",
+      "solutions": [
+        "불린값이 아닌 다른 타입의 값을 넣었는지 확인",
+        "조건 블록이 제대로 연결되어 있는지 점검",
+        "블록의 입력 자리에 올바른 블록이 들어있는지 확인"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "신호등 상태 표시",
+      "explanation": "신호등이 빨간불/파란불인지를 '정지'/진행'이라는 글자로 표시하는 것과 같아요"
+    },
+    {
+      "analogy": "시험 결과 표시",
+      "explanation": "O/X 표시를 '정답'/'오답'이라는 글자로 바꿔서 보여주는 것과 비슷해요"
+    },
+    {
+      "analogy": "전원 상태 표시",
+      "explanation": "기계의 켜짐/꺼짐 상태를 'ON'/'OFF' 글자로 화면에 표시하는 것과 같은 원리예요"
+    }
+  ]
+}

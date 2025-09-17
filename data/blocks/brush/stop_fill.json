@@ -1,0 +1,324 @@
+{
+  "id": "stop_fill",
+  "category": "brush",
+  "name": "채우기 멈추기",
+  "description": "채우기 기능을 완료하는 블록입니다. '채우기 시작하기' 블록으로 시작한 채우기 작업을 끝내고, 오브젝트가 그린 닫힌 영역을 실제로 색상으로 채웁니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "채우기 완료 기능의 중요성 이해",
+      "페어링 블록의 완성 개념 학습",
+      "닫힌 도형 채우기의 실행 원리 파악",
+      "순차적 프로그래밍의 시작-끝 구조 이해",
+      "그래픽 렌더링의 완성 단계 체험"
+    ],
+    "key_concepts": [
+      {
+        "concept": "채우기 완료(Fill Completion)",
+        "explanation": "시작된 채우기 작업을 마무리하여 실제로 영역에 색상을 적용하는 과정으로, 그래픽 프로그래밍의 핵심 완료 단계"
+      },
+      {
+        "concept": "페어링 완성(Pairing Completion)",
+        "explanation": "'채우기 시작하기'와 '채우기 멈추기'가 쌍을 이루어 완전한 기능을 구현하는 블록 구조"
+      },
+      {
+        "concept": "영역 렌더링(Area Rendering)",
+        "explanation": "그려진 경로로 둘러싸인 영역을 실제 색상으로 채우는 그래픽 렌더링 과정"
+      },
+      {
+        "concept": "작업 종료(Task Termination)",
+        "explanation": "시작된 작업을 명시적으로 종료하여 의도한 결과를 얻는 프로그래밍 패턴"
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": [
+      "채우기 시작하기 블록 사용 경험",
+      "기본적인 도형 그리기 이해",
+      "오브젝트 이동과 회전 블록 사용법",
+      "닫힌 도형과 열린 도형의 차이점 이해"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "기본 삼각형 채우기",
+      "description": "간단한 삼각형을 그리고 채우기",
+      "blocks": [
+        "when_run_button_click",
+        "set_fill_color('초록색')",
+        "start_fill",
+        "repeat_basic(3)",
+        "  move_direction(80)",
+        "  direction_relative(120)",
+        "stop_fill"
+      ],
+      "explanation": "삼각형을 그리면서 채우기를 시작하고, '채우기 멈추기'로 완료하여 초록색 삼각형을 만듭니다."
+    },
+    {
+      "title": "여러 도형 연속 채우기",
+      "description": "여러 도형을 각각 다른 색으로 채우기",
+      "blocks": [
+        "when_run_button_click",
+        "set_fill_color('빨간색')",
+        "start_fill",
+        "repeat_basic(4)",
+        "  move_direction(50)",
+        "  direction_relative(90)",
+        "stop_fill",
+        "move_direction(100)",
+        "set_fill_color('파란색')",
+        "start_fill",
+        "repeat_basic(6)",
+        "  move_direction(40)",
+        "  direction_relative(60)",
+        "stop_fill"
+      ],
+      "explanation": "빨간색 사각형을 그리고 채운 후, 위치를 이동해서 파란색 육각형을 추가로 그려 채웁니다."
+    },
+    {
+      "title": "조건부 채우기",
+      "description": "특정 조건에서만 채우기 완료",
+      "blocks": [
+        "when_run_button_click",
+        "set_fill_color('노란색')",
+        "start_fill",
+        "repeat_basic(5)",
+        "  move_direction(60)",
+        "  direction_relative(72)",
+        "if_condition((x좌표) > (0))",
+        "  stop_fill",
+        "else",
+        "  start_fill"
+      ],
+      "explanation": "별 모양을 그린 후, x좌표가 0보다 클 때만 채우기를 완료하여 조건부 채우기를 구현합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "채우기 멈추기를 언제 사용하는지 모르겠어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "'채우기 시작하기' 블록을 사용했다면 반드시 '채우기 멈추기'로 완료해야 해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "도형을 모두 그린 후에 '채우기 멈추기'를 사용해서 실제로 색을 채워보세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "붓 블록 카테고리에서 '채우기 멈추기' 블록을 찾을 수 있어요"
+        }
+      ]
+    },
+    {
+      "situation": "채우기 멈추기를 했는데 색이 채워지지 않아요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "도형이 완전히 닫혀있는지 확인해보세요. 시작점과 끝점이 연결되어야 해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'채우기 색을 [ ]으로 정하기' 블록으로 색상을 먼저 설정했는지 확인하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "채우기 색상이 배경색과 다른지, 투명도 설정을 확인해보세요"
+        }
+      ]
+    },
+    {
+      "situation": "여러 도형을 각각 다른 색으로 채우고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "각 도형마다 '채우기 시작하기' - 도형 그리기 - '채우기 멈추기' 패턴을 반복하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "도형을 그리기 전에 '채우기 색을 [ ]으로 정하기'로 각각 다른 색상을 설정하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "위치 이동 블록을 사용해서 도형들이 겹치지 않게 배치하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "채우기 시작하기 없이 채우기 멈추기만 사용",
+      "why_it_happens": "채우기의 시작-끝 구조를 이해하지 못하고 완료 블록만 사용",
+      "consequence": "채우기 기능이 전혀 작동하지 않음",
+      "solution": "'채우기 시작하기' 블록을 먼저 사용한 후에 '채우기 멈추기' 사용",
+      "teaching_moment": "요리를 시작하지 않고 마무리할 수 없는 것처럼, 채우기도 시작한 후에 끝낼 수 있어요."
+    },
+    {
+      "mistake": "도형을 완성하기 전에 채우기 멈추기 사용",
+      "why_it_happens": "도형이 완전히 그려지기 전에 성급하게 채우기를 완료",
+      "consequence": "불완전한 도형이 채워지거나 채우기가 되지 않음",
+      "solution": "닫힌 도형을 완전히 그린 후에 '채우기 멈추기' 사용",
+      "teaching_moment": "울타리를 다 치기 전에 페인트칠을 하면 안 되는 것처럼, 도형을 완성한 후에 채워야 해요."
+    },
+    {
+      "mistake": "채우기 멈추기를 여러 번 사용",
+      "why_it_happens": "하나의 채우기 작업에 대해 중복으로 완료 명령을 내림",
+      "consequence": "예상과 다른 결과가 나오거나 오류 발생",
+      "solution": "하나의 '채우기 시작하기'에 대해 하나의 '채우기 멈추기'만 사용",
+      "teaching_moment": "하나의 일을 끝내는데 여러 번 마무리할 필요는 없어요. 한 번만 정확히 끝내면 돼요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "채우기 시작 확인",
+      "instruction": "'채우기 시작하기' 블록이 먼저 사용되었는지 확인하세요.",
+      "visual_hint": "채우기를 완료하려면 먼저 시작된 것이 있어야 해요."
+    },
+    {
+      "step": 2,
+      "title": "도형 완성 확인",
+      "instruction": "닫힌 도형이 완전히 그려졌는지 확인하세요.",
+      "visual_hint": "시작점과 끝점이 연결되어 완전한 도형이 되어야 채우기가 가능해요."
+    },
+    {
+      "step": 3,
+      "title": "채우기 멈추기 블록 배치",
+      "instruction": "'채우기 멈추기' 블록을 도형 그리기 완료 후에 배치하세요.",
+      "visual_hint": "오렌지색 블록에 붓 아이콘이 있는 블록이에요."
+    },
+    {
+      "step": 4,
+      "title": "색상 설정 확인",
+      "instruction": "채우기 색상이 제대로 설정되었는지 확인하세요.",
+      "visual_hint": "'채우기 색을 [ ]으로 정하기' 블록이 먼저 실행되었는지 확인하세요."
+    },
+    {
+      "step": 5,
+      "title": "결과 확인",
+      "instruction": "프로그램을 실행해보고 도형이 제대로 채워지는지 확인하세요.",
+      "visual_hint": "도형 내부가 설정한 색상으로 채워져야 정상입니다."
+    },
+    {
+      "step": 6,
+      "title": "추가 도형 그리기",
+      "instruction": "다른 도형을 추가로 그리려면 새로운 채우기 시작하기-멈추기 패턴을 사용하세요.",
+      "visual_hint": "각 도형마다 독립적인 채우기 과정이 필요해요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "start_fill",
+      "relationship": "필수 페어링 블록",
+      "explanation": "'채우기 멈추기'와 반드시 함께 사용해야 하는 '채우기 시작하기' 블록"
+    },
+    {
+      "block_id": "set_fill_color",
+      "relationship": "채우기 색상 설정",
+      "explanation": "채우기에 사용할 색상을 미리 정하는 블록으로 채우기 시작 전에 사용"
+    },
+    {
+      "block_id": "move_direction",
+      "relationship": "도형 경로 생성",
+      "explanation": "채우기할 도형의 경로를 만드는 핵심 블록으로 시작과 멈추기 사이에 사용"
+    },
+    {
+      "block_id": "direction_relative",
+      "relationship": "도형 모양 제어",
+      "explanation": "회전을 통해 다양한 모양의 닫힌 도형을 만드는 블록"
+    },
+    {
+      "block_id": "repeat_basic",
+      "relationship": "규칙적 도형 생성",
+      "explanation": "규칙적인 다각형을 쉽게 그리기 위한 반복 블록"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "채우기 멈추기를 했는데 아무것도 채워지지 않아요",
+      "possible_causes": [
+        "채우기 시작하기 블록이 없음",
+        "도형이 닫히지 않음",
+        "채우기 색상이 설정되지 않음",
+        "채우기 색상과 배경색이 동일함"
+      ],
+      "solutions": [
+        "'채우기 시작하기' 블록을 먼저 추가",
+        "도형의 시작점과 끝점이 연결되도록 수정",
+        "'채우기 색을 [ ]으로 정하기' 블록으로 색상 설정",
+        "배경색과 구별되는 색상으로 변경"
+      ]
+    },
+    {
+      "problem": "일부만 채워지거나 이상하게 채워져요",
+      "possible_causes": ["도형이 복잡하거나 경로가 교차함", "여러 개의 열린 선분이 있음", "채우기 시작과 멈추기 위치가 잘못됨"],
+      "solutions": [
+        "간단한 도형부터 시작해서 점차 복잡하게 만들기",
+        "각 선분이 연결되어 완전한 도형을 만드는지 확인",
+        "채우기 시작하기를 도형 그리기 전에, 멈추기를 도형 완성 후에 배치"
+      ]
+    },
+    {
+      "problem": "여러 도형을 그리는데 채우기가 이상해요",
+      "possible_causes": [
+        "각 도형마다 독립적인 채우기 과정을 거치지 않음",
+        "이전 채우기가 완료되지 않은 상태에서 새 채우기 시작",
+        "도형들이 겹쳐서 예상과 다른 결과"
+      ],
+      "solutions": [
+        "각 도형마다 채우기 시작하기-도형 그리기-채우기 멈추기 패턴 적용",
+        "이전 채우기를 완료한 후에 새로운 채우기 시작",
+        "도형들이 겹치지 않도록 위치 조정"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "컵에 물 채우기",
+      "explanation": "컵에 물을 부으면서 가득 찰 때 멈추는 것처럼, 도형 안을 색으로 채운 후 완료하는 과정입니다."
+    },
+    {
+      "analogy": "색칠공책 완성하기",
+      "explanation": "윤곽선 안을 색연필로 칠하기 시작해서 끝까지 완성하는 것과 같은 과정입니다."
+    },
+    {
+      "analogy": "벽 페인트칠 마무리",
+      "explanation": "벽에 페인트칠을 시작해서 모든 영역을 칠하고 마무리하는 것처럼 채우기를 완료합니다."
+    },
+    {
+      "analogy": "농장 울타리 완성",
+      "explanation": "울타리를 다 치고 나서 '완성됐다'고 선언하는 것처럼, 도형을 그리고 채우기를 완료합니다."
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "채우기 시작하기와 채우기 멈추기를 올바른 순서로 사용하여 간단한 닫힌 도형을 성공적으로 채울 수 있다"
+    },
+    {
+      "level": "중급",
+      "criteria": "여러 도형을 각각 다른 색상으로 채우고, 채우기 과정에서 발생하는 문제를 스스로 해결할 수 있다"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 도형이나 조건부 채우기를 구현하고, 채우기 기능을 창의적으로 활용한 작품을 만들 수 있다"
+    }
+  ]
+}
