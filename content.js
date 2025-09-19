@@ -3,13 +3,16 @@
 
   let isInitialized = false;
   let sidebar = null;
-  let conversationHistory = []; // 대화 기록 저장
-
-  // 아이콘 클릭이 초기화 전에 오면 기억해뒀다가 자동으로 열기
+  let conversationHistory = [];
   let pendingOpenRequest = false;
-
-  // ===== 엔트리 준비 플래그 =====
   let isEntryReady = false;
+  let currentCoT = null;
+
+  // ===== 블록 JSON -> Entry Script Array 변환 함수 =====
+  function blockJsonToScriptArray(blockJson) {
+    if (!blockJson || !blockJson.fileName) return [];
+    return [[blockJson.fileName, [], []]];
+  }
 
   function injectEntryProbe() {
     const s = document.createElement("script");
@@ -93,6 +96,9 @@
       </div>
     </div>
 
+    <!-- Block Renderer (hidden) -->
+    <div id="entry-hidden-renderer" style="position:fixed; left:-9999px; top:-9999px; width:800px; height:600px;"></div>
+
     <!-- 사이드바 토글 트리거 버튼 -->
     <div id="sidebar-trigger" class="sidebar-trigger" title="AI 도우미 열기">
       <img src="${chrome.runtime.getURL("icon.png")}" class="trigger-icon" style="width: 28px; height: 28px;">
@@ -107,12 +113,12 @@
   // ===== 채팅 메시지 추가 함수 =====
   function addChatMessage(content, isBot = false, type = "text") {
     const messagesContainer = document.getElementById("chat-messages");
-    const messageDiv = document.createElement("div");
+    if (!messagesContainer) return;
 
+    const messageDiv = document.createElement("div");
     const now = new Date();
     const timeStr = now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
 
-    // 시스템 메시지 타입 추가
     if (type === "system") {
       messageDiv.className = "message system-message";
       messageDiv.innerHTML = `
@@ -120,34 +126,59 @@
           <div class="message-text">${content}</div>
         </div>
       `;
+    } else if (type === "image") {
+      messageDiv.className = `message ${isBot ? "bot-message" : "user-message"}`;
+      messageDiv.innerHTML = `
+        <div class="message-avatar">
+          ${isBot ? `<img src="${chrome.runtime.getURL("icon.png")}" style="width:20px;height:20px;">` : "👤"}
+        </div>
+        <div class="message-content">
+          <img src="${content}" style="max-width:100%; max-height:200px; border-radius:8px; display:block;"/>
+          <div class="message-time">${timeStr}</div>
+        </div>
+      `;
+    } else if (type === "block-step") {
+      // 블록 단계 메시지를 위한 새로운 타입
+      messageDiv.className = "message bot-message";
+      messageDiv.innerHTML = `
+        <div class="message-avatar">
+          <img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">
+        </div>
+        <div class="message-content">
+          ${content}
+          <div class="message-time">${timeStr}</div>
+        </div>
+      `;
     } else {
       messageDiv.className = `message ${isBot ? "bot-message" : "user-message"}`;
-
-      if (type === "analysis") {
-        messageDiv.innerHTML = `
-          <div class="message-avatar">${
-            isBot ? `<img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">` : "👤"
-          }</div>
-          <div class="message-content analysis-message">
-            ${content}
-            <div class="message-time">${timeStr}</div>
-          </div>
-        `;
-      } else {
-        messageDiv.innerHTML = `
-          <div class="message-avatar">${
-            isBot ? `<img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">` : "👤"
-          }</div>
-          <div class="message-content">
-            <div class="message-text">${content}</div>
-            <div class="message-time">${timeStr}</div>
-          </div>
-        `;
-      }
+      messageDiv.innerHTML = `
+        <div class="message-avatar">${
+          isBot ? `<img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">` : "👤"
+        }</div>
+        <div class="message-content">
+          <div class="message-text">${content}</div>
+          <div class="message-time">${timeStr}</div>
+        </div>
+      `;
     }
 
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+
+  // ===== 블록 렌더링 이미지 함수 =====
+  function renderBlockImage(scriptJSON) {
+    return new Promise((resolve) => {
+      window.postMessage({ __ENTRY_HELPER__: true, type: "RENDER_BLOCK", script: scriptJSON }, "*");
+
+      function handler(e) {
+        if (e?.data && e.data.__ENTRY_HELPER__ && e.data.type === "BLOCK_RENDERED") {
+          window.removeEventListener("message", handler);
+          resolve(e.data.dataUrl);
+        }
+      }
+      window.addEventListener("message", handler);
+    });
   }
 
   // ===== 열기/닫기 =====
@@ -172,13 +203,10 @@
       }
 
       const context = [];
-
-      // 현재 오브젝트 정보
       const currentObject = Entry.playground.object;
       if (currentObject) {
         context.push(`현재 오브젝트: ${currentObject.name || "이름없음"}`);
 
-        // 블록 정보
         const getList = currentObject.script?.getBlockList;
         if (typeof getList === "function") {
           const blockList = getList.call(currentObject.script);
@@ -186,20 +214,17 @@
           context.push(`사용된 블록 수: ${blockCount}개`);
 
           if (blockCount > 0) {
-            // 주요 블록 타입들 (처음 3개만)
             const blockTypes = blockList.slice(0, 3).map((block) => block?.type || "알 수 없는 블록");
             context.push(`주요 블록들: ${blockTypes.join(", ")}`);
           }
 
-          // 복잡도
           const complexity = blockCount > 10 ? "복잡함" : blockCount > 3 ? "보통" : "간단함";
           context.push(`복잡도: ${complexity}`);
         }
       }
 
-      // 전체 오브젝트 수
       const objects = Entry.container.getAllObjects?.() || [];
-      context.push(`총 오브젝트 수: ${objects.length}개`);
+      context.push(`전체 오브젝트 수: ${objects.length}개`);
 
       return context.join(" | ");
     } catch (e) {
@@ -207,14 +232,14 @@
     }
   }
 
+  // ===== RAG 토글 함수 =====
   async function toggleRAGMode() {
     try {
       console.log("RAG 모드 토글 시작");
 
       chrome.runtime.sendMessage({ action: "toggleRAG" }, (response) => {
-        // Chrome runtime 에러 체크
         if (chrome.runtime.lastError) {
-          console.error("RAG 토글 Chrome runtime 에러:", chrome.runtime.lastError);
+          console.error("RAG 토글 Chrome runtime 오류:", chrome.runtime.lastError);
           addChatMessage("RAG 모드 변경 중 오류가 발생했어요.", true, "system");
           return;
         }
@@ -223,8 +248,6 @@
 
         if (response && response.success) {
           updateRAGStatus(response.ragEnabled);
-
-          // 사용자에게 알림 메시지 추가
           const modeText = response.ragEnabled ? "Entry 전문 지식" : "일반 AI 지식";
           addChatMessage(`🔄 모드가 변경되었습니다: ${modeText}`, true, "system");
         } else {
@@ -271,10 +294,9 @@
     const chatInput = document.getElementById("chat-input");
     const chatSend = document.getElementById("chat-send");
 
-    // 한국어 입력 상태 추적 - 함수 스코프 밖으로 이동
     let isComposing = false;
 
-    // RAG 토글 버튼 이벤트 추가 - 에러 처리 강화
+    // RAG 토글 버튼 이벤트
     const ragToggleBtn = document.getElementById("rag-toggle");
     if (ragToggleBtn) {
       ragToggleBtn.addEventListener("click", () => {
@@ -290,10 +312,9 @@
     document.getElementById("sidebar-trigger").addEventListener("click", () => toggleSidebarOpen());
     document.getElementById("sidebar-close").addEventListener("click", () => toggleSidebarOpen(false));
 
-    // 메시지 전송 함수 - 에러 처리 강화
+    // 메시지 전송 함수
     function sendMessage() {
       try {
-        // 조합 중일 때는 전송하지 않음
         if (isComposing) {
           console.log("한국어 입력 조합 중이므로 전송 중지");
           return;
@@ -308,80 +329,81 @@
         console.log("메시지 전송 시작:", message);
         addChatMessage(message, false);
 
-        // 사용자 메시지를 대화 기록에 추가
         conversationHistory.push({ role: "user", content: message });
 
         chatInput.value = "";
         chatInput.style.height = "auto";
 
-        // 타이핑 인디케이터 표시
         const typingIndicator = document.getElementById("typing-indicator");
         if (typingIndicator) {
           typingIndicator.classList.remove("hidden");
         }
 
-        // 현재 선택된 모드 가져오기
         const modeSelect = document.getElementById("chat-mode-header");
         const mode = modeSelect ? modeSelect.value : "auto";
-
-        // Entry 프로젝트 컨텍스트 수집
-        const projectContext =
-          typeof gatherProjectContext === "function" ? gatherProjectContext() : "컨텍스트 함수를 찾을 수 없습니다.";
+        const projectContext = gatherProjectContext();
 
         console.log("Chrome runtime에 메시지 전송 중...");
 
-        // 실제 AI API 호출 (대화 기록 포함) - 에러 처리 강화
+        // 실제 AI API 호출
         chrome.runtime.sendMessage(
           {
             action: "generateAIResponse",
             message: message,
             mode: mode,
             projectContext: projectContext,
-            conversationHistory: conversationHistory.slice(), // 복사본 전송
+            conversationHistory: conversationHistory.slice(),
           },
           (response) => {
             console.log("AI 응답 수신:", response);
 
-            // 타이핑 인디케이터 숨기기
             if (typingIndicator) {
               typingIndicator.classList.add("hidden");
             }
 
-            // Chrome runtime 에러 체크
             if (chrome.runtime.lastError) {
-              console.error("Chrome runtime 에러:", chrome.runtime.lastError);
+              console.error("Chrome runtime 오류:", chrome.runtime.lastError);
               addChatMessage("연결 오류가 발생했어요. 확장 프로그램을 다시 로드해주세요!", true);
               return;
             }
 
             if (response && response.success) {
+              console.log("🔨 Content에서 받은 전체 응답:", response);
+
+              // 여기서 직접 메시지 추가 (중복 방지)
               addChatMessage(response.response, true);
 
-              // AI 응답을 대화 기록에 추가
               conversationHistory.push({ role: "assistant", content: response.response });
 
-              // 대화 기록이 너무 길면 오래된 것 삭제 (최근 10개만 유지)
               if (conversationHistory.length > 10) {
                 conversationHistory = conversationHistory.slice(-10);
               }
+
+              // blockSequence가 있으면 엔트리 스타일 블록 이미지 표시
+              if (response.blockSequence && response.blockSequence.blocks && response.blockSequence.blocks.length > 0) {
+                console.log("🖼️ 엔트리 스타일 블록 이미지 생성");
+                try {
+                  const entryStyleSvg = generateEntryStyleBlockImage(response.blockSequence);
+                  displayEntryBlockImageInChat(entryStyleSvg, response.blockSequence);
+                } catch (error) {
+                  console.error("블록 이미지 생성 실패:", error);
+                  addChatMessage(
+                    `📦 필요한 블록들: ${response.blockSequence.blocks.map((b) => b.name || b.fileName).join(", ")}`,
+                    true
+                  );
+                }
+              }
             } else {
               const errorMessage = response?.error || "연결에 문제가 있어요. 다시 시도해주세요!";
-              console.error("AI 응답 에러:", errorMessage);
+              console.error("AI 응답 오류:", errorMessage);
               addChatMessage(`죄송해요, ${errorMessage}`, true);
             }
           }
         );
       } catch (error) {
-        console.error("sendMessage 함수 에러:", error);
+        console.error("sendMessage 함수 오류:", error);
+        addChatMessage("메시지 전송 중 오류가 발생했어요.", true);
 
-        // addChatMessage가 정의되어 있는지 확인 후 호출
-        if (typeof addChatMessage === "function") {
-          addChatMessage("메시지 전송 중 오류가 발생했어요.", true);
-        } else {
-          console.error("addChatMessage 함수를 찾을 수 없습니다.");
-        }
-
-        // 타이핑 인디케이터 숨기기 - 안전하게 처리
         const typingIndicator = document.getElementById("typing-indicator");
         if (typingIndicator) {
           typingIndicator.classList.add("hidden");
@@ -389,30 +411,26 @@
       }
     }
 
-    // 한국어 입력 조합 이벤트 처리 - 에러 처리 추가
+    // 한국어 입력 조합 이벤트 처리
     chatInput.addEventListener("compositionstart", () => {
-      console.log("한국어 입력 조합 시작");
       isComposing = true;
     });
 
     chatInput.addEventListener("compositionend", () => {
-      console.log("한국어 입력 조합 종료");
       isComposing = false;
     });
 
     // 버튼 클릭
     chatSend.addEventListener("click", () => {
-      console.log("전송 버튼 클릭됨");
       sendMessage();
     });
 
-    // 키보드 이벤트 (수정된 부분) - 에러 처리 강화
+    // 키보드 이벤트
     chatInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         console.log("Enter 키 눌림, isComposing:", isComposing);
 
-        // 조합 중이 아닐 때만 전송
         if (!isComposing) {
           sendMessage();
         }
@@ -436,6 +454,7 @@
           <span class="status-text">준비 완료</span>
         `;
         }
+        testBlockRender();
       }
     });
   }
@@ -449,15 +468,13 @@
     setupEventListeners();
     injectEntryProbe();
 
-    // RAG 상태 로드 후 자동으로 활성화
     loadRAGStatus();
 
-    // 1초 후에 RAG가 비활성화되어 있으면 자동으로 켜기
     setTimeout(() => {
       chrome.runtime.sendMessage({ action: "getSettings" }, (response) => {
         if (response && !response.ragEnabled) {
           console.log("RAG가 비활성화 상태 - 자동으로 활성화합니다");
-          toggleRAGMode(); // 자동으로 RAG 켜기
+          toggleRAGMode();
         }
       });
     }, 1000);
@@ -465,7 +482,6 @@
     isInitialized = true;
     console.log("🚀 Entry Block Helper 초기화 완료");
 
-    // 아이콘 클릭이 먼저 왔다면 지금 연다
     if (pendingOpenRequest) {
       const shouldOpen = pendingOpenRequest;
       pendingOpenRequest = false;
@@ -473,13 +489,193 @@
     }
   }
 
-  // ===== 메시지 수신 (아이콘 클릭) =====
+  // ===== 블록 이미지 렌더링 테스트 함수 =====
+  async function testBlockRender() {
+    const exampleScript = [["when_run_button_click", [], [["repeat_inf", [], [["move_direction", [10], []]]]]]];
+    try {
+      const url = await renderBlockImage(exampleScript);
+      if (url) {
+        addChatMessage("🎉 Entry 연결 완료! 블록 이미지를 생성할 수 있어요.", true, "system");
+      } else {
+        console.warn("블록 렌더링 실패");
+      }
+    } catch (error) {
+      console.warn("블록 렌더링 테스트 오류:", error);
+    }
+  }
+
+  // ===== 메시지 수신 (아이콘 클릭) - 중복 제거 =====
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg?.type === "TOGGLE_SIDEBAR") {
       toggleSidebarOpen(true);
       sendResponse({ ok: true });
+      return true;
     }
+
+    // AI_RESPONSE는 sendMessage 함수의 콜백에서만 처리하도록 제거
   });
+
+  // 카테고리별 색상 반환
+  function getCategoryColor(category) {
+    const colors = {
+      start: "#4CAF50",
+      moving: "#2196F3",
+      looks: "#9C27B0",
+      sound: "#FF9800",
+      judgement: "#F44336",
+      repeat: "#FF5722",
+      variable: "#795548",
+      func: "#607D8B",
+      calc: "#009688",
+      brush: "#E91E63",
+      flow: "#3F51B5",
+    };
+    return colors[category] || "#757575";
+  }
+
+  // 카테고리 한국어 변환 (content script용)
+  function getCategoryKorean(category) {
+    const categoryMap = {
+      start: "시작",
+      moving: "움직임",
+      looks: "모양",
+      sound: "소리",
+      judgement: "판단",
+      repeat: "반복",
+      variable: "변수",
+      func: "함수",
+      calc: "계산",
+      brush: "붓",
+      flow: "흐름",
+    };
+    return categoryMap[category] || category;
+  }
+
+  // 엔트리 실제 블록 스타일로 SVG 생성하는 새 함수 추가
+  function generateEntryStyleBlockImage(stepData) {
+    const { blocks, step, title, explanation } = stepData;
+
+    const svgWidth = 280; // 320 -> 280으로 축소
+    const svgHeight = Math.max(150, blocks.length * 50 + 60); // 간격도 조정
+
+    let svg = `<svg width="${svgWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg" style="background: #ffffff; border-radius: 8px;">`;
+
+    svg += `<rect width="100%" height="100%" fill="#ffffff" stroke="#e9ecef" stroke-width="1" rx="8"/>`;
+
+    svg += `<text x="${
+      svgWidth / 2
+    }" y="20" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#495057">${step}단계: ${title}</text>`;
+
+    blocks.forEach((block, index) => {
+      const x = 20; // 30 -> 20으로 조정
+      const y = 40 + index * 45; // 간격 축소
+
+      svg += generateEntryStyleBlock(block, x, y, 240, 38); // 크기 조정
+
+      if (index < blocks.length - 1) {
+        const arrowY = y + 42;
+        svg += `<path d="M${svgWidth / 2 - 5},${arrowY} L${svgWidth / 2},${arrowY + 8} L${svgWidth / 2 + 5},${arrowY} L${
+          svgWidth / 2 + 3
+        },${arrowY + 2} L${svgWidth / 2},${arrowY + 6} L${svgWidth / 2 - 3},${arrowY + 2} Z" fill="#6c757d"/>`;
+      }
+    });
+
+    svg += `</svg>`;
+    return svg;
+  }
+
+  // 엔트리 실제 블록 모양으로 그리는 함수 추가
+  function generateEntryStyleBlock(block, x, y, width, height) {
+    const entryColors = {
+      start: "#4CAF50",
+      moving: "#3F51B5",
+      looks: "#9C27B0",
+      sound: "#FF9800",
+      judgement: "#F44336",
+      repeat: "#FF5722",
+      variable: "#795548",
+      func: "#607D8B",
+      calc: "#009688",
+      brush: "#E91E63",
+      flow: "#3F51B5",
+    };
+
+    const color = entryColors[block.category] || "#757575";
+    const blockName = block.name || block.fileName || "Unknown Block";
+
+    let blockSvg = "";
+
+    if (block.category === "judgement") {
+      const cx = x + width / 2;
+      const cy = y + height / 2;
+      const r = height / 2 - 2;
+      blockSvg += `<polygon points="${cx - r},${cy} ${cx - r / 2},${cy - r} ${cx + r / 2},${cy - r} ${cx + r},${cy} ${
+        cx + r / 2
+      },${cy + r} ${cx - r / 2},${cy + r}" fill="${color}" stroke="${color}" stroke-width="2"/>`;
+    } else if (block.category === "calc") {
+      blockSvg += `<ellipse cx="${x + width / 2}" cy="${y + height / 2}" rx="${width / 2}" ry="${
+        height / 2
+      }" fill="${color}" stroke="${color}" stroke-width="2"/>`;
+    } else if (block.category === "flow" && block.fileName === "_if") {
+      blockSvg += `<path d="M${x + width} ${y + 5} L${x + 15} ${y + 5} L${x + 5} ${y + 15} L${x + 5} ${y + height - 15} L${
+        x + 15
+      } ${y + height - 5} L${x + width} ${y + height - 5} L${x + width - 10} ${y + height - 15} L${x + 20} ${y + height - 15} L${
+        x + 20
+      } ${y + 15} L${x + width - 10} ${y + 15} Z" fill="${color}" stroke="${color}" stroke-width="1"/>`;
+    } else {
+      blockSvg += `<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${color}" stroke="${color}" stroke-width="2" rx="12" ry="12"/>`;
+      blockSvg += `<rect x="${x - 3}" y="${y + height / 2 - 5}" width="6" height="10" fill="${color}"/>`;
+      blockSvg += `<rect x="${x + width - 3}" y="${y + height / 2 - 5}" width="6" height="10" fill="${color}"/>`;
+    }
+
+    let displayText = blockName;
+    if (displayText.length > 20) {
+      displayText = displayText.substring(0, 17) + "...";
+    }
+
+    const textX = x + width / 2;
+    const textY = y + height / 2 + 5;
+
+    blockSvg += `<text x="${textX}" y="${textY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white" font-weight="bold">${displayText}</text>`;
+
+    return blockSvg;
+  }
+
+  // 기존 chat-messages 영역에 블록 이미지 표시하는 함수 추가
+  function displayEntryBlockImageInChat(svgContent, blockSequence) {
+    console.log("🖼️ 엔트리 스타일 블록 이미지 표시");
+
+    const htmlContent = `
+      <div class="block-step-container" style="
+        background: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        padding: 12px;
+        margin: 8px 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        max-width: 100%;
+        overflow: hidden;
+      ">
+        <h4 style="margin: 0 0 8px 0; color: #495057; font-size: 13px;">${blockSequence.step}단계: ${blockSequence.title}</h4>
+        ${
+          blockSequence.explanation
+            ? `<p style="margin: 0 0 10px 0; color: #6c757d; font-size: 12px; line-height: 1.4;">${blockSequence.explanation}</p>`
+            : ""
+        }
+        <div style="text-align: center; overflow-x: auto; overflow-y: hidden;">
+          <div style="display: inline-block; max-width: 100%;">${svgContent}</div>
+        </div>
+        ${
+          blockSequence.nextHint
+            ? `<p style="margin: 10px 0 0 0; color: #28a745; font-size: 12px; font-style: italic;">💡 ${blockSequence.nextHint}</p>`
+            : ""
+        }
+      </div>
+    `;
+
+    addChatMessage(htmlContent, true, "block-step");
+    console.log("✅ 엔트리 스타일 블록 이미지 표시 완료");
+  }
 
   // DOM 준비 즉시 초기화
   if (document.readyState === "loading") {

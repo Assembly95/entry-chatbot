@@ -164,6 +164,7 @@ function getCategoryKorean(category) {
 
   return categoryMap[category] || category;
 }
+
 function getKnownBlockFiles(category) {
   const fileMap = {
     brush: [
@@ -507,7 +508,7 @@ async function callOpenAI(messages, apiKey = null) {
   }
 }
 
-// ===== 교육적 AI 응답 생성 (RAG 통합 버전으로 교체) =====
+// ===== 교육적 AI 응답 생성 (단계적 힌트 시스템) =====
 async function generateEducationalResponse(userMessage, mode, projectContext, conversationHistory = []) {
   try {
     // API 키 확인
@@ -523,17 +524,19 @@ async function generateEducationalResponse(userMessage, mode, projectContext, co
     const messageCount = conversationHistory.length;
     const conversationCount = Math.floor(messageCount / 2);
 
-    // 즉시 도움이 필요한 상황 판단
-    const needsImmediateHelp =
-      userMessage.includes("모르겠어") ||
-      userMessage.includes("모르겠습니다") ||
-      userMessage.includes("막혔어") ||
-      userMessage.includes("막혔습니다") ||
-      userMessage.includes("도와줘") ||
-      userMessage.includes("도와주세요") ||
+    // 사용자 질문 분석
+    const needsHelp =
+      userMessage.includes("모르겠") ||
+      userMessage.includes("막혔") ||
+      userMessage.includes("도와") ||
       userMessage.includes("안 돼") ||
-      userMessage.includes("안 됩니다") ||
-      conversationCount >= 2; // 3번째 -> 2번째로 단축
+      userMessage.includes("안 되") ||
+      userMessage.includes("어려워");
+
+    // 사용자가 얼마나 많이 시도해봤는지 확인
+    const attemptCount = conversationHistory.filter(
+      (msg) => msg.role === "user" && (msg.content.includes("모르겠") || msg.content.includes("막혔"))
+    ).length;
 
     // 기본 프롬프트
     let systemPrompt = `당신은 Entry(엔트리) 블록코딩 교육 전문 튜터입니다.
@@ -542,11 +545,12 @@ async function generateEducationalResponse(userMessage, mode, projectContext, co
 • 2-3문장으로 간결하게 응답
 • 소크라테스식 단계적 질문으로 학습 유도
 • 현재 ${conversationCount + 1}번째 대화입니다
+• 학생이 ${attemptCount}번 도움 요청함
 
 현재 상황: ${projectContext || "프로젝트 정보 없음"}
 선택된 모드: ${getModeDescription(mode)}`;
 
-    // generateEducationalResponse 함수의 RAG 부분 수정
+    // RAG 검색 수행
     if (USE_RAG) {
       const relevantBlocks = await searchEntryBlocks(userMessage);
 
@@ -555,50 +559,94 @@ async function generateEducationalResponse(userMessage, mode, projectContext, co
           .map((block) => {
             let info = `• ${getCategoryKorean(block.category)} 분류: ${block.name || block.fileName}`;
             if (block.description) info += ` - ${block.description}`;
-
-            // 소리 관련 문제라면 디버깅 팁 추가
-            if (userMessage.includes("소리") && block.debugging_tips) {
-              info += `\n  디버깅: ${JSON.stringify(block.debugging_tips)}`;
-            }
-
             return info;
           })
           .join("\n");
 
-        systemPrompt += `
+        // 단계별 힌트 제공 전략
+        if (attemptCount === 0 && !needsHelp) {
+          // 첫 번째 시도: 개념적 힌트만 제공
+          systemPrompt += `
 
-=== Entry 전문 지식 ===
+=== Entry 전문 지식 (1단계 - 개념 힌트) ===
+찾아낸 관련 블록들:
 ${contextInfo}
 
-**중요 지시사항:**
-- 반드시 한국어 블록명 사용: "${relevantBlocks[0]?.name || "해당 블록"}"
-- 영어 용어 절대 사용 금지 (when_object_click ❌, 오브젝트를 클릭했을 때 ✅)
-- ${getCategoryKorean(relevantBlocks[0]?.category || "")} 분류라고 명시
-- 구체적인 해결 단계 제시`;
+**중요 지시사항 - 1단계 (개념 힌트):**
+- 구체적인 블록명은 절대 언급하지 마세요
+- "이런 상황에서는 조건을 확인하는 방법이 필요해요"처럼 개념만 설명
+- "어떤 일이 일어났을 때 반응하게 하려면 어떻게 해야 할까요?" 같은 유도 질문
+- 프로그래밍 개념(조건문, 반복문 등)만 간접적으로 언급
+- 답을 직접 주지 말고 스스로 생각하도록 유도`;
+        } else if (attemptCount === 1 || (attemptCount === 0 && needsHelp)) {
+          // 두 번째 시도 또는 첫 시도에 도움 요청: 카테고리 힌트
+          systemPrompt += `
 
-        console.log("🧠 RAG 모드: Entry 전문 데이터 적용");
+=== Entry 전문 지식 (2단계 - 카테고리 힌트) ===
+찾아낸 관련 블록들:
+${contextInfo}
+
+**중요 지시사항 - 2단계 (카테고리 힌트):**
+- 구체적인 블록명은 아직 언급하지 마세요
+- "${getCategoryKorean(relevantBlocks[0]?.category || "")} 카테고리를 살펴보세요"라고 안내
+- "이 카테고리에서 ~하는 블록을 찾아보세요" 형태로 힌트 제공
+- 블록의 일반적인 기능은 설명해도 됨
+- 여전히 정답은 직접 주지 않음`;
+        } else {
+          // 세 번째 이상 시도: 구체적인 블록 안내
+          systemPrompt += `
+
+=== Entry 전문 지식 (3단계 - 구체적 안내) ===
+찾아낸 관련 블록들:
+${contextInfo}
+
+**중요 지시사항 - 3단계 (구체적 안내):**
+- 이제 한국어 블록명 사용: "${relevantBlocks[0]?.name || "해당 블록"}"
+- 영어 용어 절대 사용 금지 (when_object_click ❌, 오브젝트를 클릭했을 때 ✅)
+- ${getCategoryKorean(relevantBlocks[0]?.category || "")} 카테고리라고 명시
+- 구체적인 사용 방법과 단계별 설명 제공
+- 블록을 어떻게 연결하는지 상세히 안내`;
+        }
+
+        console.log(`🧠 RAG 모드: ${attemptCount + 1}단계 힌트 제공`);
       }
     } else {
-      systemPrompt += `
+      // RAG 비활성화 시에도 단계별 접근
+      if (attemptCount === 0 && !needsHelp) {
+        systemPrompt += `
 
-일반 블록코딩 원칙:
-• 이벤트블록: 클릭, 키보드 입력 등 시작조건
-• 동작블록: 움직임, 모양변경 등 실행내용
-• 조건문: if-else 분기처리
-• 반복문: 루프 실행
+일반 블록코딩 원칙 (1단계):
+• 개념적 설명만 제공
+• "이런 기능을 하려면 어떤 종류의 블록이 필요할까요?" 질문
+• 직접적인 답변 금지`;
+      } else if (attemptCount === 1 || (attemptCount === 0 && needsHelp)) {
+        systemPrompt += `
 
-Entry 전문 데이터가 제한적이므로 일반적인 프로그래밍 원칙으로 안내합니다.`;
+일반 블록코딩 원칙 (2단계):
+• 관련 카테고리 언급 가능
+• "시작 카테고리에서 찾아보세요" 같은 힌트
+• 구체적 블록명은 아직 비공개`;
+      } else {
+        systemPrompt += `
 
-      console.log("📝 일반 모드: RAG 비활성화");
+일반 블록코딩 원칙 (3단계):
+• 이제 구체적인 도움 제공
+• 블록 이름과 사용법 설명
+• 단계별 연결 방법 안내`;
+      }
+
+      console.log(`📚 일반 모드: ${attemptCount + 1}단계 힌트 제공`);
     }
 
-    // 대화 단계별 지시사항
-    if (needsImmediateHelp) {
-      systemPrompt += `\n\n[지시] 학생이 도움을 요청했습니다. 구체적인 블록명과 단계별 방법을 알려주세요.`;
-    } else if (conversationCount === 0) {
-      systemPrompt += `\n\n[지시] 첫 번째 질문입니다. 답을 바로 주지 말고 유도 질문 1개만 하세요.`;
+    // 대화 단계별 추가 지시사항
+    if (attemptCount === 0 && !needsHelp) {
+      systemPrompt += `\n\n[지시] 첫 시도입니다. 답을 절대 주지 말고 개념적 질문만 하세요.
+예: "어떤 일이 일어났을 때 반응하게 하려면 어떻게 해야 할까요?"`;
+    } else if (attemptCount === 1 || (attemptCount === 0 && needsHelp)) {
+      systemPrompt += `\n\n[지시] 두 번째 시도이거나 도움 요청입니다. 카테고리 힌트만 제공하세요.
+예: "흐름 카테고리를 한번 살펴보는 게 어떨까요?"`;
     } else {
-      systemPrompt += `\n\n[지시] ${conversationCount + 1}번째 시도입니다. 적절한 카테고리 힌트를 주세요.`;
+      systemPrompt += `\n\n[지시] 여러 번 시도했으니 이제 구체적인 블록명과 사용법을 알려주세요.`;
     }
 
     const messages = [
@@ -696,22 +744,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     case "generateAIResponse":
       handleAIRequest(request)
-        .then(async (response) => {
-          // 🧩 관련 블록 JSON 검색 (최대 1개)
-          const relevantBlocks = await searchEntryBlocks(request.message, 1);
-          const blockJson = relevantBlocks[0] || null;
+        .then(async (result) => {
+          const { response, blockSequence, rawBlocks } = result;
 
-          // content.js 사이드바로 전달
           if (sender.tab?.id) {
             chrome.tabs.sendMessage(sender.tab.id, {
               type: "AI_RESPONSE",
               response,
-              blockJson,
+              blockSequence,
+              rawBlocks,
             });
           }
 
-          // 기존 sendResponse도 blockJson 포함
-          sendResponse({ success: true, response, blockJson });
+          sendResponse({
+            success: true,
+            response,
+            blockSequence,
+            rawBlocks,
+          });
         })
         .catch((error) => sendResponse({ success: false, error: error.message }));
       return true;
@@ -726,10 +776,56 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// ===== AI 요청 처리 =====
 async function handleAIRequest(request) {
   const { message, mode, projectContext, conversationHistory = [] } = request;
-  return await generateEducationalResponse(message, mode, projectContext, conversationHistory);
+
+  console.log("🚀 AI 요청 처리 시작:", { message, mode });
+
+  // 진행중인 CoT가 있는지 확인
+  if (isCoTInProgress(conversationHistory)) {
+    console.log("📖 CoT 진행 중인 요청 처리");
+    return handleCoTProgress(message, conversationHistory);
+  }
+
+  // 새로운 질문 처리
+  console.log("🆕 새로운 질문 처리 시작");
+
+  try {
+    // AI 응답 생성
+    const response = await generateEducationalResponse(message, mode, projectContext, conversationHistory);
+    console.log("💬 AI 응답 생성 완료:", response.substring(0, 100) + "...");
+
+    // RAG 블록 검색
+    const relevantBlocks = await searchEntryBlocks(message, 5);
+    console.log("🔍 RAG 검색 완료:", relevantBlocks.length, "개 블록 발견");
+
+    // CoT 프로세스 초기화 (기존 organizeBlocksIntoSteps 대신)
+    const cotProcess = initializeCoTProcess(relevantBlocks, response);
+    console.log("🧩 CoT 프로세스 초기화:", cotProcess ? "성공" : "실패");
+
+    // 블록 시퀀스 생성 (cotProcess가 있을 때만)
+    let blockSequence = null;
+    if (cotProcess) {
+      blockSequence = generateCurrentStep(relevantBlocks, cotProcess.currentStep, cotProcess.blockStructure, response);
+      console.log("📋 블록 시퀀스 생성:", blockSequence ? "성공" : "실패");
+    }
+
+    return {
+      response: response,
+      blockSequence: blockSequence, // null일 수 있음
+      cotProcess: cotProcess, // null일 수 있음
+      rawBlocks: relevantBlocks,
+    };
+  } catch (error) {
+    console.error("❌ AI 요청 처리 중 오류:", error);
+
+    return {
+      response: getFallbackResponse(error.message),
+      blockSequence: null,
+      cotProcess: null,
+      rawBlocks: [],
+    };
+  }
 }
 
 // ===== 사용량 통계 (RAG 사용 여부 포함) =====
@@ -809,6 +905,278 @@ function waitTabComplete(tabId, timeoutMs = 15000) {
 
     chrome.tabs.onUpdated.addListener(listener);
   });
+}
+
+// ===== CoT 관련 함수들 =====
+
+function initializeCoTProcess(blocks, responseText) {
+  console.log("🧩 적응형 CoT 프로세스 초기화:", blocks);
+
+  if (!blocks || blocks.length === 0) {
+    return null;
+  }
+
+  const blockStructure = inferBlockRelationship(blocks);
+  const totalSteps = detectStepCount(responseText);
+
+  return {
+    totalSteps: totalSteps,
+    currentStep: 1,
+    allBlocks: blocks,
+    blockStructure: blockStructure,
+    isWaitingForProgress: false,
+  };
+}
+
+// 현재 단계만 생성하는 새 함수
+function generateCurrentStep(blocks, stepNumber, blockStructure, responseText) {
+  // stepNumber에 해당하는 단계만 생성
+  if (stepNumber === 1) {
+    return createFirstStep(blocks, blockStructure);
+  } else if (stepNumber === 2) {
+    return createSecondStep(blocks, blockStructure);
+  }
+  // ... 기타 단계들
+}
+
+/**
+ * 응답에서 단계 수 감지
+ */
+function detectStepCount(responseText) {
+  const stepIndicators = responseText.match(/(\d+\.|먼저|다음|그다음|마지막)/g);
+  return stepIndicators ? stepIndicators.length : 3; // 기본 3단계
+}
+
+/**
+ * 블록들 간의 관계 추정
+ */
+function inferBlockRelationship(blocks) {
+  const categories = blocks.map((block) => block.category);
+  const hasCondition = categories.includes("flow") && blocks.some((block) => block.name && block.name.includes("만약"));
+  const hasLoop = categories.includes("flow") && blocks.some((block) => block.name && block.name.includes("반복"));
+  const hasJudgement = categories.includes("judgement");
+
+  if (hasCondition && hasJudgement) {
+    return { type: "condition", mainBlock: blocks.find((b) => b.name.includes("만약")) };
+  }
+  if (hasLoop) {
+    return { type: "loop", mainBlock: blocks.find((b) => b.name.includes("반복")) };
+  }
+  if (blocks.length >= 3) {
+    return { type: "complex" };
+  }
+
+  return { type: "sequence" };
+}
+
+/**
+ * 모든 연결 관계 생성
+ */
+function generateAllConnections(blocks) {
+  // 실제 엔트리 블록 구조에 맞는 연결 관계 생성
+  // 이 부분은 블록 타입에 따라 더 정교하게 구현 가능
+  const connections = [];
+
+  // 기본 순차 연결
+  const sequenceBlocks = blocks.filter((b) => ["start", "moving", "looks", "sound"].includes(b.category));
+  connections.push(...generateSequenceConnections(sequenceBlocks));
+
+  // 제어 구조 연결
+  const controlBlocks = blocks.filter((b) => ["flow", "judgement"].includes(b.category));
+  connections.push(...generateControlConnections(controlBlocks));
+
+  return connections;
+}
+
+/**
+ * 순차 연결 관계 생성
+ */
+function generateSequenceConnections(blocks) {
+  const connections = [];
+  for (let i = 0; i < blocks.length - 1; i++) {
+    connections.push({
+      from: blocks[i].id,
+      to: blocks[i + 1].id,
+      type: "sequence",
+    });
+  }
+  return connections;
+}
+
+/**
+ * 제어 구조 연결 관계 생성
+ */
+function generateControlConnections(blocks) {
+  const connections = [];
+  const conditionBlock = blocks.find((b) => b.name && b.name.includes("만약"));
+  const judgementBlock = blocks.find((b) => b.category === "judgement");
+
+  if (conditionBlock && judgementBlock) {
+    connections.push({
+      from: conditionBlock.id,
+      to: judgementBlock.id,
+      type: "parameter",
+    });
+  }
+
+  return connections;
+}
+
+// CoT 진행 관련 함수들
+function isCoTInProgress(conversationHistory) {
+  // 최근 대화에서 CoT 진행 중인지 확인
+  if (conversationHistory.length === 0) return false;
+
+  const recentMessages = conversationHistory.slice(-4); // 최근 2번의 대화
+  return recentMessages.some((msg) => msg.role === "assistant" && msg.content.includes("단계"));
+}
+
+function handleCoTProgress(message, conversationHistory) {
+  // CoT 진행 중인 사용자 메시지 처리
+  console.log("CoT 진행 중 메시지 처리:", message);
+
+  if (isStuckSignal(message)) {
+    return {
+      response: "더 자세히 도와드릴게요! 어떤 부분이 어려우신가요?",
+      cotAction: "provide_help",
+    };
+  } else if (isProgressSignal(message)) {
+    return {
+      response: "잘했어요! 다음 단계로 넘어갑시다.",
+      cotAction: "next_step",
+    };
+  }
+
+  // 일반 응답
+  return generateEducationalResponse(message, "auto", "", conversationHistory);
+}
+
+function isStuckSignal(message) {
+  const stuckKeywords = ["막혔", "모르겠", "어려워", "도와줘", "힌트"];
+  return stuckKeywords.some((keyword) => message.includes(keyword));
+}
+
+function isProgressSignal(message) {
+  const progressKeywords = ["했어", "완료", "됐어", "성공", "다음"];
+  return progressKeywords.some((keyword) => message.includes(keyword));
+}
+
+// 첫 번째 단계 생성 함수
+function createFirstStep(blocks, blockStructure) {
+  console.log("🥇 1단계 생성 중:", blockStructure.type);
+
+  // 시작 블록 우선 반환
+  const startBlocks = blocks.filter((block) => block.category === "start");
+
+  if (startBlocks.length > 0) {
+    return {
+      step: 1,
+      title: "시작 조건 설정",
+      explanation: "프로그램이 언제 실행될지 정하는 시작 블록을 배치해보세요.",
+      blocks: startBlocks,
+      blockConnections: [],
+      isComplete: false,
+      nextHint: "시작 블록을 작업 영역에 드래그해 보세요!",
+    };
+  }
+
+  // 시작 블록이 없으면 가장 중요한 블록부터
+  const mainBlock = blockStructure.mainBlock || blocks[0];
+
+  return {
+    step: 1,
+    title: `${getCategoryKorean(mainBlock.category)} 블록 준비`,
+    explanation: `${mainBlock.name || mainBlock.fileName} 블록을 사용해보겠습니다.`,
+    blocks: [mainBlock],
+    blockConnections: [],
+    isComplete: false,
+    nextHint: `${getCategoryKorean(mainBlock.category)} 카테고리에서 블록을 찾아보세요!`,
+  };
+}
+
+// 두 번째 단계 생성 함수
+function createSecondStep(blocks, blockStructure) {
+  console.log("🥈 2단계 생성 중:", blockStructure.type);
+
+  const startBlocks = blocks.filter((block) => block.category === "start");
+
+  if (blockStructure.type === "condition") {
+    // 조건문 구조일 때
+    const conditionBlock = blocks.find(
+      (block) => block.fileName === "_if" || block.fileName === "if_else" || (block.name && block.name.includes("만약"))
+    );
+
+    const relevantBlocks = startBlocks.concat(conditionBlock ? [conditionBlock] : []);
+
+    return {
+      step: 2,
+      title: "조건 블록 추가",
+      explanation: "조건을 확인하는 '만약 ~라면' 블록을 시작 블록 아래에 연결해보세요.",
+      blocks: relevantBlocks,
+      blockConnections:
+        relevantBlocks.length > 1
+          ? [
+              {
+                from: relevantBlocks[0].id || "start",
+                to: relevantBlocks[1].id || "condition",
+                type: "sequence",
+              },
+            ]
+          : [],
+      isComplete: false,
+      nextHint: "흐름 카테고리에서 '만약 ~라면' 블록을 찾아보세요!",
+    };
+  }
+
+  if (blockStructure.type === "loop") {
+    // 반복문 구조일 때
+    const loopBlock = blocks.find((block) => block.name && block.name.includes("반복"));
+
+    const relevantBlocks = startBlocks.concat(loopBlock ? [loopBlock] : []);
+
+    return {
+      step: 2,
+      title: "반복 블록 추가",
+      explanation: "반복할 횟수를 정하는 반복 블록을 추가해보세요.",
+      blocks: relevantBlocks,
+      blockConnections:
+        relevantBlocks.length > 1
+          ? [
+              {
+                from: relevantBlocks[0].id || "start",
+                to: relevantBlocks[1].id || "repeat",
+                type: "sequence",
+              },
+            ]
+          : [],
+      isComplete: false,
+      nextHint: "흐름 카테고리에서 반복 블록을 찾아보세요!",
+    };
+  }
+
+  // 일반적인 순차 실행인 경우
+  const actionBlocks = blocks.filter((block) => !["start", "flow"].includes(block.category)).slice(0, 1); // 첫 번째 액션 블록만
+
+  const relevantBlocks = startBlocks.concat(actionBlocks);
+
+  return {
+    step: 2,
+    title: "첫 번째 동작 추가",
+    explanation: `${actionBlocks[0]?.name || "동작 블록"}을 시작 블록에 연결해보세요.`,
+    blocks: relevantBlocks,
+    blockConnections:
+      relevantBlocks.length > 1
+        ? [
+            {
+              from: relevantBlocks[0].id || "start",
+              to: relevantBlocks[1].id || "action1",
+              type: "sequence",
+            },
+          ]
+        : [],
+    isComplete: false,
+    nextHint: `${getCategoryKorean(actionBlocks[0]?.category)} 카테고리를 확인해보세요!`,
+  };
 }
 
 async function openOrFocusEntryAndToggle(fromTab) {
