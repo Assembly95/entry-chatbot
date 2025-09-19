@@ -8,6 +8,9 @@
   let isEntryReady = false;
   let currentCoT = null;
 
+  // 블록 렌더러 인스턴스 추가
+  const blockRenderer = new EntryBlockRenderer();
+
   // ===== 블록 JSON -> Entry Script Array 변환 함수 =====
   function blockJsonToScriptArray(blockJson) {
     if (!blockJson || !blockJson.fileName) return [];
@@ -380,11 +383,52 @@
               }
 
               // blockSequence가 있으면 엔트리 스타일 블록 이미지 표시
+              // RAG 검색 결과 블록 리스트 표시 (새로 추가)
+              if (response.rawBlocks && response.rawBlocks.length > 0) {
+                console.log("🎯 RAG 블록 리스트 표시");
+                const blockListSvg = blockRenderer.renderBlockList(response.rawBlocks);
+
+                const blockListHtml = `
+    <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin: 8px 0;">
+      <div style="font-size: 12px; color: #6c757d; margin-bottom: 8px;">📦 관련 블록들:</div>
+      ${blockListSvg}
+    </div>
+  `;
+
+                addChatMessage(blockListHtml, true, "block-step");
+              }
+
+              // 구조화된 블록 시퀀스 표시 (기존 코드 수정)
               if (response.blockSequence && response.blockSequence.blocks && response.blockSequence.blocks.length > 0) {
-                console.log("🖼️ 엔트리 스타일 블록 이미지 생성");
+                console.log("🖼️ 블록 시퀀스 표시");
                 try {
-                  const entryStyleSvg = generateEntryStyleBlockImage(response.blockSequence);
-                  displayEntryBlockImageInChat(entryStyleSvg, response.blockSequence);
+                  // blockRenderer 사용
+                  const blockSvg = blockRenderer.renderBlocks(response.blockSequence.blocks);
+
+                  const htmlContent = `
+      <div class="block-step-container" style="
+        background: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        padding: 12px;
+        margin: 8px 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      ">
+        ${
+          response.blockSequence.step
+            ? `<h4 style="margin: 0 0 8px 0; color: #495057; font-size: 13px;">${response.blockSequence.step}단계: ${response.blockSequence.title}</h4>`
+            : ""
+        }
+        ${blockSvg}
+        ${
+          response.blockSequence.nextHint
+            ? `<p style="margin: 10px 0 0 0; color: #28a745; font-size: 12px; font-style: italic;">💡 ${response.blockSequence.nextHint}</p>`
+            : ""
+        }
+      </div>
+    `;
+
+                  addChatMessage(htmlContent, true, "block-step");
                 } catch (error) {
                   console.error("블록 이미지 생성 실패:", error);
                   addChatMessage(
@@ -641,37 +685,43 @@
     return blockSvg;
   }
 
-  // 기존 chat-messages 영역에 블록 이미지 표시하는 함수 추가
-  function displayEntryBlockImageInChat(svgContent, blockSequence) {
+  function displayEntryBlockImageInChat(blocks, stepData) {
     console.log("🖼️ 엔트리 스타일 블록 이미지 표시");
 
+    // blockRenderer 사용하여 SVG 생성
+    const svgContent = blockRenderer.renderBlocks(stepData || blocks);
+
     const htmlContent = `
-      <div class="block-step-container" style="
-        background: #ffffff;
-        border: 1px solid #dee2e6;
-        border-radius: 12px;
-        padding: 12px;
-        margin: 8px 0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        max-width: 100%;
-        overflow: hidden;
-      ">
-        <h4 style="margin: 0 0 8px 0; color: #495057; font-size: 13px;">${blockSequence.step}단계: ${blockSequence.title}</h4>
-        ${
-          blockSequence.explanation
-            ? `<p style="margin: 0 0 10px 0; color: #6c757d; font-size: 12px; line-height: 1.4;">${blockSequence.explanation}</p>`
-            : ""
-        }
-        <div style="text-align: center; overflow-x: auto; overflow-y: hidden;">
-          <div style="display: inline-block; max-width: 100%;">${svgContent}</div>
-        </div>
-        ${
-          blockSequence.nextHint
-            ? `<p style="margin: 10px 0 0 0; color: #28a745; font-size: 12px; font-style: italic;">💡 ${blockSequence.nextHint}</p>`
-            : ""
-        }
+    <div class="block-step-container" style="
+      background: #ffffff;
+      border: 1px solid #dee2e6;
+      border-radius: 12px;
+      padding: 12px;
+      margin: 8px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      max-width: 100%;
+      overflow: hidden;
+    ">
+      ${
+        stepData
+          ? `<h4 style="margin: 0 0 8px 0; color: #495057; font-size: 13px;">${stepData.step}단계: ${stepData.title}</h4>`
+          : ""
+      }
+      ${
+        stepData?.explanation
+          ? `<p style="margin: 0 0 10px 0; color: #6c757d; font-size: 12px; line-height: 1.4;">${stepData.explanation}</p>`
+          : ""
+      }
+      <div style="text-align: center; overflow-x: auto; overflow-y: hidden;">
+        <div style="display: inline-block; max-width: 100%;">${svgContent}</div>
       </div>
-    `;
+      ${
+        stepData?.nextHint
+          ? `<p style="margin: 10px 0 0 0; color: #28a745; font-size: 12px; font-style: italic;">💡 ${stepData.nextHint}</p>`
+          : ""
+      }
+    </div>
+  `;
 
     addChatMessage(htmlContent, true, "block-step");
     console.log("✅ 엔트리 스타일 블록 이미지 표시 완료");
