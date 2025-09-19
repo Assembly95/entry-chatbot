@@ -426,7 +426,7 @@
   }
 
   function loadRAGStatus() {
-    chrome.runtime.sendMessage({ action: "getSettings" }, async (response) => {
+    chrome.runtime.sendMessage({ action: "getSettings" }, (response) => {
       if (response) {
         updateRAGStatus(response.ragEnabled);
       }
