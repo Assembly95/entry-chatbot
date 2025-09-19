@@ -496,3 +496,30 @@
   color: #1e40af;
   max-width: 80%;
 }
+
+/* 블록 이미지 카드 호버 효과 */
+.block-image-card {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.block-image-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 블록 이미지 로딩 애니메이션 */
+@keyframes blockImageLoad {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.block-image-container img {
+  animation: blockImageLoad 0.3s ease-out;
+}

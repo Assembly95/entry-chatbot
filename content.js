@@ -122,13 +122,18 @@
     const now = new Date();
     const timeStr = now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
 
-    if (type === "system") {
-      messageDiv.className = "message system-message";
+    if (type === "block-with-image") {
+      // 블록 이미지와 함께 표시하는 새로운 타입
+      messageDiv.className = "message bot-message";
       messageDiv.innerHTML = `
-        <div class="message-content system-message-content">
-          <div class="message-text">${content}</div>
-        </div>
-      `;
+      <div class="message-avatar">
+        <img src="${chrome.runtime.getURL("icon.png")}" style="width:20px;height:20px;">
+      </div>
+      <div class="message-content">
+        ${content}
+        <div class="message-time">${timeStr}</div>
+      </div>
+    `;
     } else if (type === "image") {
       messageDiv.className = `message ${isBot ? "bot-message" : "user-message"}`;
       messageDiv.innerHTML = `
@@ -168,7 +173,143 @@
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
+  function createBlockListWithImages(blocks) {
+    if (!blocks || blocks.length === 0) return "";
 
+    let html = `
+    <div style="
+      background: #f8f9fa; 
+      border-radius: 12px; 
+      padding: 16px; 
+      margin: 12px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    ">
+      <div style="
+        font-size: 13px; 
+        color: #495057; 
+        margin-bottom: 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      ">
+        <span style="font-size: 16px;">🎯</span>
+        <span>이런 블록들을 사용해보세요!</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+  `;
+
+    blocks.forEach((block) => {
+      const displayInfo = block.displayInfo || {};
+      const blockName = displayInfo.name || block.name || block.fileName || "알 수 없는 블록";
+      const category = displayInfo.category || getCategoryKorean(block.category);
+      const color = getCategoryColor(block.category);
+      const hasImage = displayInfo.hasImage || block.hasImage;
+      const imageUrl = displayInfo.imageUrl || block.imageUrl;
+
+      html += `
+      <div style="
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        transition: all 0.2s;
+        cursor: pointer;
+      " 
+      onmouseover="this.style.transform='translateX(4px)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'"
+      onmouseout="this.style.transform='translateX(0)'; this.style.boxShadow='none'">
+    `;
+
+      // 블록 이미지 또는 대체 아이콘
+      if (hasImage && imageUrl) {
+        html += `
+        <div style="
+          width: 60px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #f8f9fa;
+          border-radius: 6px;
+          overflow: hidden;
+          flex-shrink: 0;
+        ">
+          <img src="${imageUrl}" 
+               style="max-width: 100%; max-height: 100%; object-fit: contain;"
+               onerror="this.parentElement.innerHTML='<div style=\\'width:100%;height:100%;background:${color};opacity:0.2;display:flex;align-items:center;justify-content:center;color:${color};font-weight:bold;font-size:20px;\\'>📦</div>'"
+               alt="${blockName}">
+        </div>
+      `;
+      } else {
+        // 이미지가 없을 때 카테고리 색상으로 대체 아이콘
+        html += `
+        <div style="
+          width: 60px;
+          height: 40px;
+          background: ${color};
+          opacity: 0.15;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        ">
+          <span style="font-size: 20px; opacity: 0.8;">📦</span>
+        </div>
+      `;
+      }
+
+      // 블록 정보
+      html += `
+        <div style="flex: 1; min-width: 0;">
+          <div style="
+            font-weight: 600;
+            color: #212529;
+            font-size: 13px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          ">${blockName}</div>
+          <div style="
+            font-size: 11px;
+            color: #6c757d;
+          ">${category} 카테고리</div>
+        </div>
+        
+        <div style="
+          padding: 4px 8px;
+          background: ${color};
+          color: white;
+          border-radius: 4px;
+          font-size: 10px;
+          font-weight: 600;
+          white-space: nowrap;
+        ">${category}</div>
+      </div>
+    `;
+    });
+
+    html += `
+      </div>
+      <div style="
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #e9ecef;
+        font-size: 11px;
+        color: #6c757d;
+        font-style: italic;
+      ">
+        💡 팁: 블록 이름을 클릭하면 자세한 설명을 볼 수 있어요!
+      </div>
+    </div>
+  `;
+
+    return html;
+  }
   // ===== 블록 렌더링 이미지 함수 =====
   function renderBlockImage(scriptJSON) {
     return new Promise((resolve) => {
@@ -285,7 +426,7 @@
   }
 
   function loadRAGStatus() {
-    chrome.runtime.sendMessage({ action: "getSettings" }, (response) => {
+    chrome.runtime.sendMessage({ action: "getSettings" }, async (response) => {
       if (response) {
         updateRAGStatus(response.ragEnabled);
       }
@@ -357,7 +498,7 @@
             projectContext: projectContext,
             conversationHistory: conversationHistory.slice(),
           },
-          (response) => {
+          async (response) => {
             console.log("AI 응답 수신:", response);
 
             if (typingIndicator) {
@@ -371,13 +512,17 @@
             }
 
             if (response && response.success) {
-              console.log("🔨 Content에서 받은 전체 응답:", response);
-
-              // 여기서 직접 메시지 추가 (중복 방지)
               addChatMessage(response.response, true);
-
               conversationHistory.push({ role: "assistant", content: response.response });
 
+
+              conversationHistory.push({ role: "assistant", content: response.response });
+              // 블록 이미지와 함께 표시 (개선된 버전)
+              if (response.rawBlocks && response.rawBlocks.length > 0) {
+                console.log("🎯 블록 이미지 표시:", response.rawBlocks);
+                const blockListHtml = createBlockListWithImages(response.rawBlocks);
+                addChatMessage(blockListHtml, true, "block-with-image");
+              }
               if (conversationHistory.length > 10) {
                 conversationHistory = conversationHistory.slice(-10);
               }
@@ -684,7 +829,305 @@
 
     return blockSvg;
   }
+// content.js에 추가할 함수들
+// 기존 코드 아래에 이 함수들을 추가하세요
 
+// ===== 카테고리 관련 새로운 함수들 =====
+
+// 카테고리 아이콘 경로 매핑
+function getCategoryIconPath(category) {
+  const iconPath = chrome.runtime.getURL(`data/block_icon/${category}_icon.svg`);
+  return iconPath;
+}
+
+// 카테고리 아이콘 가져오기 (SVG 우선, 실패시 이모지 폴백)
+async function getCategoryIconElement(category) {
+  const iconPath = getCategoryIconPath(category);
+  
+  try {
+    const response = await fetch(iconPath);
+    if (response.ok) {
+      return `<img src="${iconPath}" style="width: 24px; height: 24px; vertical-align: middle;" alt="${category}">`;
+    }
+  } catch (error) {
+    console.log(`아이콘 로드 실패 (${category}):`, error);
+  }
+  
+  // 폴백: 이모지 사용
+  const emojiIcons = {
+    start: '🚩',
+    flow: '🔄',
+    moving: '🏃',
+    looks: '🎨',
+    brush: '🖌️',
+    sound: '🔊',
+    judgement: '❓',
+    calc: '🔢',
+    variable: '📦',
+    func: '⚙️'
+  };
+  
+  return `<span style="font-size: 24px;">${emojiIcons[category] || '📦'}</span>`;
+}
+
+// 카테고리 카드 생성 함수 (새로 추가)
+async function createCategoryCards(blocks) {
+  if (!blocks || blocks.length === 0) return "";
+
+  // 카테고리별로 그룹화
+  const blocksByCategory = {};
+  blocks.forEach(block => {
+    const category = block.category;
+    if (!blocksByCategory[category]) {
+      blocksByCategory[category] = [];
+    }
+    blocksByCategory[category].push(block);
+  });
+
+  let html = `
+    <div style="
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 16px 0;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      border: 1px solid rgba(0,0,0,0.05);
+    ">
+      <div style="
+        font-size: 14px;
+        color: #495057;
+        margin-bottom: 16px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      ">
+        <span style="font-size: 18px;">📚</span>
+        <span>이런 카테고리를 살펴보세요!</span>
+      </div>
+      <div style="
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+      ">
+  `;
+
+  // 각 카테고리 카드 생성
+  for (const [category, categoryBlocks] of Object.entries(blocksByCategory)) {
+    const categoryName = getCategoryKorean(category);
+    const color = getCategoryColor(category);
+    const iconElement = await getCategoryIconElement(category);
+    
+    html += `
+      <div style="
+        background: white;
+        border: 2px solid ${color}30;
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      "
+      onmouseover="
+        this.style.transform='translateY(-4px) scale(1.02)';
+        this.style.boxShadow='0 8px 24px rgba(0,0,0,0.12)';
+        this.style.borderColor='${color}';
+        this.style.background='linear-gradient(135deg, ${color}08, ${color}15)';
+      "
+      onmouseout="
+        this.style.transform='translateY(0) scale(1)';
+        this.style.boxShadow='none';
+        this.style.borderColor='${color}30';
+        this.style.background='white';
+      "
+      onclick="window.showCategoryDetails && window.showCategoryDetails('${category}')"
+      >
+        <div style="
+          position: absolute;
+          top: -20px;
+          right: -20px;
+          width: 60px;
+          height: 60px;
+          background: ${color}10;
+          border-radius: 50%;
+          pointer-events: none;
+        "></div>
+        
+        <div style="
+          margin-bottom: 10px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 36px;
+        ">${iconElement}</div>
+        
+        <div style="
+          font-weight: 700;
+          color: ${color};
+          font-size: 14px;
+          margin-bottom: 4px;
+          letter-spacing: -0.3px;
+        ">${categoryName}</div>
+        
+        <div style="
+          font-size: 11px;
+          color: #868e96;
+          font-weight: 500;
+        ">블록 ${categoryBlocks.length}개</div>
+        
+        <div style="
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          background: ${color};
+          color: white;
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 10px;
+          font-weight: bold;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        ">${categoryBlocks.length}</div>
+      </div>
+    `;
+  }
+
+  html += `
+      </div>
+      <div style="
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #e9ecef;
+        font-size: 11px;
+        color: #868e96;
+        text-align: center;
+        font-style: italic;
+      ">
+        💡 카테고리를 클릭하면 해당 블록들을 자세히 볼 수 있어요!
+      </div>
+    </div>
+  `;
+
+  return html;
+}
+
+// 카테고리 상세 표시 함수
+window.showCategoryDetails = async function(category) {
+  const categoryName = getCategoryKorean(category);
+  const iconElement = await getCategoryIconElement(category);
+  const color = getCategoryColor(category);
+  
+  const detailHTML = `
+    <div style="
+      background: linear-gradient(135deg, ${color}10, ${color}05);
+      border-left: 4px solid ${color};
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin: 8px 0;
+    ">
+      <div style="
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      ">
+        ${iconElement}
+        <span style="
+          font-weight: 700;
+          color: ${color};
+          font-size: 14px;
+        ">${categoryName} 카테고리</span>
+      </div>
+      <div style="
+        font-size: 12px;
+        color: #495057;
+        line-height: 1.5;
+      ">
+        이 카테고리에서 필요한 블록을 찾아보세요! 블록 팔레트에서 ${categoryName} 탭을 클릭하면 관련 블록들을 볼 수 있어요.
+      </div>
+    </div>
+  `;
+  
+  addChatMessage(detailHTML, true, "block-with-image");
+};
+
+// 아이콘 사전 로드 함수
+async function preloadCategoryIcons() {
+  const categories = ['start', 'flow', 'moving', 'looks', 'brush', 'sound', 'judgement', 'calc', 'variable', 'func'];
+  const loadedIcons = {};
+  
+  for (const category of categories) {
+    try {
+      const iconPath = getCategoryIconPath(category);
+      const response = await fetch(iconPath);
+      if (response.ok) {
+        loadedIcons[category] = iconPath;
+        console.log(`✅ ${category} 아이콘 로드 성공`);
+      }
+    } catch (error) {
+      console.log(`❌ ${category} 아이콘 로드 실패`);
+    }
+  }
+  
+  console.log('로드된 아이콘:', loadedIcons);
+  return loadedIcons;
+}
+
+// ===== sendMessage 함수 수정 부분 =====
+// 기존 sendMessage 함수에서 이 부분을 찾아서 수정하세요:
+
+// response 처리 부분에서
+if (response && response.success) {
+  // AI 텍스트 응답 표시
+  addChatMessage(response.response, true);
+  conversationHistory.push({ role: "assistant", content: response.response });
+
+  // 대화 횟수에 따라 다른 UI 표시
+  const attemptCount = conversationHistory.filter(
+    (msg) => msg.role === "user" && 
+    (msg.content.includes("모르겠") || msg.content.includes("막혔") || msg.content.includes("도와"))
+  ).length;
+
+  if (response.rawBlocks && response.rawBlocks.length > 0) {
+    if (attemptCount <= 1) {
+      // 처음에는 카테고리만 표시
+      console.log("📂 카테고리 카드 표시");
+      const categoryCards = await createCategoryCards(response.rawBlocks); // await 추가
+      addChatMessage(categoryCards, true, "block-with-image");
+    } else {
+      // 여러 번 시도 후에는 구체적인 블록 표시
+      console.log("🎯 구체적인 블록 표시");
+      const blockListHtml = createBlockListWithImages(response.rawBlocks);
+      addChatMessage(blockListHtml, true, "block-with-image");
+    }
+  }
+}
+
+// ===== initialize 함수 수정 부분 =====
+// 기존 initialize 함수에 아이콘 사전 로드 추가:
+
+function initialize() {
+  if (isInitialized) return;
+  console.log("🤖 Entry Block Helper 시작...");
+
+  sidebar = createSidebar();
+  setupEventListeners();
+  injectEntryProbe();
+  
+  // 아이콘 사전 로드 추가
+  preloadCategoryIcons().then(icons => {
+    console.log('카테고리 아이콘 준비 완료:', Object.keys(icons).length + '개');
+  });
+
+  loadRAGStatus();
+
+  // ... 나머지 코드
+}
   function displayEntryBlockImageInChat(blocks, stepData) {
     console.log("🖼️ 엔트리 스타일 블록 이미지 표시");
 

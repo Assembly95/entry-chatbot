@@ -26,7 +26,7 @@ chrome.runtime.onInstalled.addListener(() => {
   loadEntryBlockData();
 });
 
-// ===== 블록 데이터 로드 함수 (새로 추가) =====
+// ===== 블록 데이터 로드 함수 수정 =====
 async function loadEntryBlockData() {
   if (entryBlockData) return entryBlockData;
   if (dataLoadPromise) return dataLoadPromise;
@@ -57,14 +57,29 @@ async function loadEntryBlockData() {
               const response = await fetch(chrome.runtime.getURL(`data/blocks/${category}/${fileName}`));
               if (response.ok) {
                 const blockData = await response.json();
+
+                // 블록 이미지 경로 추가
+                const imagePath = `data/block-images/${category}/${fileName.replace(".json", ".png")}`;
+                const imageUrl = chrome.runtime.getURL(imagePath);
+
+                // 이미지 존재 확인
+                let hasImage = false;
+                try {
+                  const imgResponse = await fetch(imageUrl, { method: "HEAD" });
+                  hasImage = imgResponse.ok;
+                } catch {
+                  hasImage = false;
+                }
+
                 allBlocks.push({
                   category,
                   fileName: fileName.replace(".json", ""),
+                  imageUrl: hasImage ? imageUrl : null,
+                  hasImage,
                   ...blockData,
                 });
               }
             } catch (fileError) {
-              // 파일이 없어도 계속 진행
               console.log(`파일 건너뜀: ${category}/${fileName}`);
             }
           }
@@ -78,7 +93,7 @@ async function loadEntryBlockData() {
       return allBlocks;
     } catch (error) {
       console.error("Entry 데이터 로드 실패:", error);
-      entryBlockData = []; // 빈 배열로 초기화
+      entryBlockData = [];
       return [];
     }
   })();
@@ -449,6 +464,7 @@ async function searchEntryBlocks(userMessage, topK = 3) {
     return { block, score };
   });
 
+  // 결과에 이미지 URL 포함 확인
   const results = scored
     .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score)
@@ -459,7 +475,11 @@ async function searchEntryBlocks(userMessage, topK = 3) {
   if (results.length > 0) {
     console.log(
       "검색된 블록들:",
-      results.map((b) => `${b.name || b.fileName} (${getCategoryKorean(b.category)})`)
+      results.map((b) => ({
+        name: b.name || b.fileName,
+        category: getCategoryKorean(b.category),
+        hasImage: b.hasImage,
+      }))
     );
   }
 
@@ -776,54 +796,43 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
+// ===== handleAIRequest 함수 수정 - 블록 이미지 정보 포함 =====
 async function handleAIRequest(request) {
   const { message, mode, projectContext, conversationHistory = [] } = request;
 
   console.log("🚀 AI 요청 처리 시작:", { message, mode });
-
-  // 진행중인 CoT가 있는지 확인
-  if (isCoTInProgress(conversationHistory)) {
-    console.log("📖 CoT 진행 중인 요청 처리");
-    return handleCoTProgress(message, conversationHistory);
-  }
-
-  // 새로운 질문 처리
-  console.log("🆕 새로운 질문 처리 시작");
 
   try {
     // AI 응답 생성
     const response = await generateEducationalResponse(message, mode, projectContext, conversationHistory);
     console.log("💬 AI 응답 생성 완료:", response.substring(0, 100) + "...");
 
-    // RAG 블록 검색
+    // RAG 블록 검색 (이미지 정보 포함)
     const relevantBlocks = await searchEntryBlocks(message, 5);
     console.log("🔍 RAG 검색 완료:", relevantBlocks.length, "개 블록 발견");
 
-    // CoT 프로세스 초기화 (기존 organizeBlocksIntoSteps 대신)
-    const cotProcess = initializeCoTProcess(relevantBlocks, response);
-    console.log("🧩 CoT 프로세스 초기화:", cotProcess ? "성공" : "실패");
-
-    // 블록 시퀀스 생성 (cotProcess가 있을 때만)
-    let blockSequence = null;
-    if (cotProcess) {
-      blockSequence = generateCurrentStep(relevantBlocks, cotProcess.currentStep, cotProcess.blockStructure, response);
-      console.log("📋 블록 시퀀스 생성:", blockSequence ? "성공" : "실패");
-    }
+    // 블록 이미지 정보 추가
+    const blocksWithImages = relevantBlocks.map((block) => ({
+      ...block,
+      displayInfo: {
+        name: block.name || convertFileNameToKorean(block.fileName),
+        category: getCategoryKorean(block.category),
+        imageUrl: block.imageUrl,
+        hasImage: block.hasImage,
+      },
+    }));
 
     return {
       response: response,
-      blockSequence: blockSequence, // null일 수 있음
-      cotProcess: cotProcess, // null일 수 있음
-      rawBlocks: relevantBlocks,
+      rawBlocks: blocksWithImages,
+      blockSequence: null, // 필요시 추가
     };
   } catch (error) {
     console.error("❌ AI 요청 처리 중 오류:", error);
-
     return {
       response: getFallbackResponse(error.message),
-      blockSequence: null,
-      cotProcess: null,
       rawBlocks: [],
+      blockSequence: null,
     };
   }
 }
