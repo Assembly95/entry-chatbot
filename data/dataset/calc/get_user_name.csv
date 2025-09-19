@@ -1,6 +1,0 @@
-﻿id,task_type,block_id,question,cot_steps,answer
-get_user_name_001,explain,get_user_name,,,
-get_user_name_002,explain,get_user_name,,,
-get_user_name_003,explain,get_user_name,,,
-get_user_name_004,explain,get_user_name,,,
-get_user_name_005,explain,get_user_name,,,
