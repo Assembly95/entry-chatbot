@@ -523,3 +523,63 @@
 .block-image-container img {
   animation: blockImageLoad 0.3s ease-out;
 }
+
+/* CoT 스타일 */
+.cot-response {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 8px 0;
+}
+
+.cot-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cot-badge {
+  background: #007bff;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.cot-step {
+  margin: 8px 0;
+  border-left: 3px solid #dee2e6;
+  padding-left: 12px;
+}
+
+.cot-step.active {
+  border-left-color: #007bff;
+}
+
+.step-content.collapsed {
+  display: none;
+}
+
+.step-content.expanded {
+  display: block;
+  padding: 8px 0;
+}
+
+.cot-navigation {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.cot-navigation button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+  background: white;
+  cursor: pointer;
+}
+
+.cot-navigation button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
