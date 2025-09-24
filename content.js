@@ -1,12 +1,183 @@
+// 전역 함수들을 IIFE 외부에 선언
+window.saveApiKeyFromModal = async function () {
+  const keyInput = document.getElementById("modal-api-key");
+  const apiKey = keyInput.value.trim();
+
+  if (!apiKey) {
+    window.showModalMessage("API 키를 입력해주세요.", "error");
+    return;
+  }
+
+  if (!apiKey.startsWith("sk-")) {
+    window.showModalMessage("올바른 OpenAI API 키 형식이 아닙니다.", "error");
+    return;
+  }
+
+  try {
+    await chrome.storage.sync.set({ openai_api_key: apiKey });
+
+    const indicator = document.getElementById("key-status-indicator");
+    const message = document.getElementById("key-status-message");
+    if (indicator && message) {
+      indicator.style.background = "#10b981";
+      message.textContent = "키가 저장되었습니다";
+    }
+    keyInput.value = "";
+
+    window.showModalMessage("API 키가 성공적으로 저장되었습니다!", "success");
+
+    setTimeout(() => {
+      const modal = document.getElementById("api-key-modal");
+      if (modal) modal.remove();
+    }, 1500);
+  } catch (error) {
+    window.showModalMessage("저장 실패: " + error.message, "error");
+  }
+};
+
+// testStoredKey 함수도 전역으로 이동
+window.testStoredKey = async function (apiKey) {
+  window.showModalMessage("연결을 테스트하고 있습니다...", "info");
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: "Hi" }],
+        max_tokens: 5,
+      }),
+    });
+
+    const indicator = document.getElementById("key-status-indicator");
+    const message = document.getElementById("key-status-message");
+
+    if (response.ok) {
+      if (indicator && message) {
+        indicator.style.background = "#10b981";
+        message.textContent = "키가 정상 작동합니다";
+      }
+      window.showModalMessage("API 키 연결이 성공했습니다!", "success");
+    } else {
+      if (indicator && message) {
+        indicator.style.background = "#ef4444";
+      }
+
+      let errorMessage = "연결 실패";
+      if (response.status === 401) {
+        errorMessage = "API 키가 유효하지 않습니다";
+        if (message) message.textContent = "키 인증에 실패했습니다";
+      } else if (response.status === 429) {
+        errorMessage = "사용량을 초과했습니다";
+        if (message) message.textContent = "사용량 초과";
+      } else if (response.status === 402) {
+        errorMessage = "크레딧이 부족합니다";
+        if (message) message.textContent = "크레딧 부족";
+      }
+
+      window.showModalMessage(errorMessage, "error");
+    }
+  } catch (error) {
+    const indicator = document.getElementById("key-status-indicator");
+    const message = document.getElementById("key-status-message");
+
+    if (indicator && message) {
+      indicator.style.background = "#ef4444";
+      message.textContent = "연결 테스트 실패";
+    }
+    window.showModalMessage("테스트 실패: " + error.message, "error");
+  }
+};
+
+// 모달에서 API 키 테스트 (전역 함수로 이동)
+window.testApiKeyFromModal = async function () {
+  const keyInput = document.getElementById("modal-api-key");
+  const apiKey = keyInput.value.trim();
+
+  if (!apiKey) {
+    // 저장된 키로 테스트
+    try {
+      const result = await chrome.storage.sync.get(["openai_api_key"]);
+      if (!result.openai_api_key) {
+        window.showModalMessage("먼저 API 키를 입력하거나 저장해주세요.", "error");
+        return;
+      }
+      window.testStoredKey(result.openai_api_key);
+    } catch (error) {
+      window.showModalMessage("저장된 키를 불러올 수 없습니다.", "error");
+    }
+  } else {
+    window.testStoredKey(apiKey);
+  }
+};
+
+// 모달 메시지 표시 - 전역 함수로 이동
+window.showModalMessage = function (message, type) {
+  const statusDiv = document.getElementById("modal-status-message");
+  if (!statusDiv) return;
+
+  const colors = {
+    success: { bg: "#dcfce7", color: "#166534", border: "#bbf7d0" },
+    error: { bg: "#fef2f2", color: "#991b1b", border: "#fecaca" },
+    info: { bg: "#eff6ff", color: "#1e40af", border: "#bfdbfe" },
+  };
+
+  const style = colors[type] || colors.info;
+  statusDiv.style.background = style.bg;
+  statusDiv.style.color = style.color;
+  statusDiv.style.border = `1px solid ${style.border}`;
+  statusDiv.style.display = "block";
+  statusDiv.textContent = message;
+
+  if (type === "success") {
+    setTimeout(() => {
+      statusDiv.style.display = "none";
+    }, 3000);
+  }
+};
+
+// 그 다음에 IIFE 시작
 (function () {
   "use strict";
-
+  // 기존 코드...
   let isInitialized = false;
   let sidebar = null;
   let conversationHistory = [];
   let pendingOpenRequest = false;
   let isEntryReady = false;
   let currentCoT = null;
+
+  // 카테고리 세부사항 표시 함수
+  window.showCategoryDetails = function (category) {
+    console.log(`${category} 카테고리 세부사항 표시`);
+    const categoryName = getCategoryKorean ? getCategoryKorean(category) : category;
+    // addChatMessage 함수를 직접 호출할 수 없으므로 이벤트를 통해 처리
+    setTimeout(() => {
+      const chatMessages = document.getElementById("chat-messages");
+      if (chatMessages) {
+        // 직접 DOM에 메시지 추가
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "message bot-message";
+        messageDiv.innerHTML = `
+        <div class="message-avatar">
+          <img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">
+        </div>
+        <div class="message-content">
+          <div class="message-text">
+            ${categoryName} 카테고리의 블록들에 대해 더 자세히 알고 싶으시군요! 어떤 부분이 궁금하신가요?
+          </div>
+          <div class="message-time">${new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</div>
+        </div>
+      `;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    }, 100);
+  };
 
   // ===== 블록 JSON -> Entry Script Array 변환 함수 =====
   function blockJsonToScriptArray(blockJson) {
@@ -406,10 +577,6 @@
           <div class="status-indicator" id="entry-status">
             <span class="status-dot"></span>
             <span class="status-text">준비 중...</span>
-          </div>
-          <!-- RAG 상태 표시 추가 -->
-          <div class="rag-status" id="rag-status">
-            <span class="status-dot" id="rag-status-dot"></span>
           </div>
         </div>
         <div class="sidebar-controls">
@@ -1219,280 +1386,172 @@
       }
 
       const modalHtml = `
+    <div style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      z-index: 10001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    " id="api-key-modal">
+      <div style="
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      ">
         <div style="
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          background: rgba(0,0,0,0.5);
-          z-index: 10001;
           display: flex;
+          justify-content: space-between;
           align-items: center;
-          justify-content: center;
-        " id="api-key-modal">
+          margin-bottom: 16px;
+        ">
+          <h3 style="margin: 0; color: #333; font-size: 18px;">OpenAI API 키 설정</h3>
+          <button id="modal-close-btn" 
+                  style="border: none; background: none; font-size: 20px; cursor: pointer; color: #666;">×</button>
+        </div>
+        
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555; font-size: 14px;">
+            API 키 입력
+          </label>
+          <input type="password" id="modal-api-key" placeholder="sk-proj-... 또는 sk-..." 
+                 style="
+                   width: 100%;
+                   padding: 10px;
+                   border: 2px solid #e1e5e9;
+                   border-radius: 6px;
+                   font-size: 14px;
+                   box-sizing: border-box;
+                   transition: border-color 0.2s;
+                 ">
           <div style="
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+            font-size: 12px;
           ">
-            <div style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-bottom: 16px;
-            ">
-              <h3 style="margin: 0; color: #333; font-size: 18px;">OpenAI API 키 설정</h3>
-              <button onclick="this.closest('#api-key-modal').remove()" 
-                      style="border: none; background: none; font-size: 20px; cursor: pointer; color: #666;">×</button>
-            </div>
-            
-            <div style="margin-bottom: 16px;">
-              <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555; font-size: 14px;">
-                API 키 입력
-              </label>
-              <input type="password" id="modal-api-key" placeholder="sk-proj-... 또는 sk-..." 
-                     style="
-                       width: 100%;
-                       padding: 10px;
-                       border: 2px solid #e1e5e9;
-                       border-radius: 6px;
-                       font-size: 14px;
-                       box-sizing: border-box;
-                       transition: border-color 0.2s;
-                     "
-                     onfocus="this.style.borderColor='#3b82f6'"
-                     onblur="this.style.borderColor='#e1e5e9'">
-              <div style="
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                margin-top: 6px;
-                font-size: 12px;
-              ">
-                <span id="key-status-indicator" style="
-                  width: 8px;
-                  height: 8px;
-                  border-radius: 50%;
-                  background: #ef4444;
-                "></span>
-                <span id="key-status-message" style="color: #666;">키가 설정되지 않음</span>
-              </div>
-            </div>
-            
-            <div style="margin-bottom: 16px;">
-              <p style="
-                font-size: 12px;
-                color: #666;
-                line-height: 1.4;
-                margin: 0;
-              ">
-                <a href="https://platform.openai.com/api-keys" target="_blank" 
-                   style="color: #3b82f6; text-decoration: none;">OpenAI 대시보드</a>에서 API 키를 발급받으세요.
-              </p>
-            </div>
-            
-            <div style="display: flex; gap: 8px;">
-              <button onclick="testApiKeyFromModal()" style="
-                flex: 1;
-                padding: 10px;
-                border: 2px solid #10b981;
-                background: white;
-                color: #10b981;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 14px;
-                font-weight: 500;
-                transition: all 0.2s;
-              " onmouseover="this.style.background='#10b981'; this.style.color='white'"
-                 onmouseout="this.style.background='white'; this.style.color='#10b981'">
-                테스트
-              </button>
-              <button onclick="saveApiKeyFromModal()" style="
-                flex: 2;
-                padding: 10px;
-                border: none;
-                background: #3b82f6;
-                color: white;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 14px;
-                font-weight: 500;
-                transition: background-color 0.2s;
-              " onmouseover="this.style.background='#2563eb'"
-                 onmouseout="this.style.background='#3b82f6'">
-                저장하기
-              </button>
-            </div>
-            
-            <div id="modal-status-message" style="
-              margin-top: 12px;
-              padding: 8px 12px;
-              border-radius: 6px;
-              font-size: 13px;
-              display: none;
-            "></div>
+            <span id="key-status-indicator" style="
+              width: 8px;
+              height: 8px;
+              border-radius: 50%;
+              background: #ef4444;
+            "></span>
+            <span id="key-status-message" style="color: #666;">키가 설정되지 않음</span>
           </div>
         </div>
-      `;
+        
+        <div style="margin-bottom: 16px;">
+          <p style="
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+            margin: 0;
+          ">
+            <a href="https://platform.openai.com/api-keys" target="_blank" 
+               style="color: #3b82f6; text-decoration: none;">OpenAI 대시보드</a>에서 API 키를 발급받으세요.
+          </p>
+        </div>
+        
+        <div style="display: flex; gap: 8px;">
+          <button id="modal-test-btn" style="
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #10b981;
+            background: white;
+            color: #10b981;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+          ">
+            테스트
+          </button>
+          <button id="modal-save-btn" style="
+            flex: 2;
+            padding: 10px;
+            border: none;
+            background: #3b82f6;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+          ">
+            저장하기
+          </button>
+        </div>
+        
+        <div id="modal-status-message" style="
+          margin-top: 12px;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 13px;
+          display: none;
+        "></div>
+      </div>
+    </div>
+  `;
 
       document.body.insertAdjacentHTML("beforeend", modalHtml);
 
-      // 현재 저장된 키 상태 확인
-      loadCurrentKeyStatus();
-
-      // Enter 키로 저장
-      document.getElementById("modal-api-key").addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          saveApiKeyFromModal();
-        }
-      });
-    }
-
-    // 모달에서 API 키 저장 (전역 함수로 이동)
-    window.saveApiKeyFromModal = async function () {
+      // 이벤트 리스너 설정
+      const closeBtn = document.getElementById("modal-close-btn");
+      const testBtn = document.getElementById("modal-test-btn");
+      const saveBtn = document.getElementById("modal-save-btn");
       const keyInput = document.getElementById("modal-api-key");
-      const apiKey = keyInput.value.trim();
 
-      if (!apiKey) {
-        window.showModalMessage("API 키를 입력해주세요.", "error");
-        return;
+      // 닫기 버튼
+      if (closeBtn) {
+        closeBtn.addEventListener("click", function () {
+          document.getElementById("api-key-modal").remove();
+        });
       }
 
-      if (!apiKey.startsWith("sk-")) {
-        window.showModalMessage("올바른 OpenAI API 키 형식이 아닙니다.", "error");
-        return;
+      // 테스트 버튼
+      if (testBtn) {
+        testBtn.addEventListener("click", function () {
+          window.testApiKeyFromModal();
+        });
       }
 
-      try {
-        await chrome.storage.sync.set({ openai_api_key: apiKey });
-
-        const indicator = document.getElementById("key-status-indicator");
-        const message = document.getElementById("key-status-message");
-        if (indicator && message) {
-          indicator.style.background = "#10b981";
-          message.textContent = "키가 저장되었습니다";
-        }
-        keyInput.value = "";
-
-        window.showModalMessage("API 키가 성공적으로 저장되었습니다!", "success");
-
-        setTimeout(() => {
-          const modal = document.getElementById("api-key-modal");
-          if (modal) modal.remove();
-        }, 1500);
-      } catch (error) {
-        window.showModalMessage("저장 실패: " + error.message, "error");
+      // 저장 버튼
+      if (saveBtn) {
+        saveBtn.addEventListener("click", function () {
+          window.saveApiKeyFromModal();
+        });
       }
-    };
 
-    // 모달에서 API 키 테스트 (전역 함수로 이동)
-    window.testApiKeyFromModal = async function () {
-      const keyInput = document.getElementById("modal-api-key");
-      const apiKey = keyInput.value.trim();
-
-      if (!apiKey) {
-        // 저장된 키로 테스트
-        try {
-          const result = await chrome.storage.sync.get(["openai_api_key"]);
-          if (!result.openai_api_key) {
-            window.showModalMessage("먼저 API 키를 입력하거나 저장해주세요.", "error");
-            return;
-          }
-          testStoredKey(result.openai_api_key);
-        } catch (error) {
-          window.showModalMessage("저장된 키를 불러올 수 없습니다.", "error");
-        }
-      } else {
-        testStoredKey(apiKey);
-      }
-    };
-
-    // API 키 테스트 함수
-    async function testStoredKey(apiKey) {
-      window.showModalMessage("연결을 테스트하고 있습니다...", "info");
-
-      try {
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [{ role: "user", content: "Hi" }],
-            max_tokens: 5,
-          }),
+      // 입력 필드 포커스/블러 효과
+      if (keyInput) {
+        keyInput.addEventListener("focus", function () {
+          this.style.borderColor = "#3b82f6";
         });
 
-        const indicator = document.getElementById("key-status-indicator");
-        const message = document.getElementById("key-status-message");
+        keyInput.addEventListener("blur", function () {
+          this.style.borderColor = "#e1e5e9";
+        });
 
-        if (response.ok) {
-          if (indicator && message) {
-            indicator.style.background = "#10b981";
-            message.textContent = "키가 정상 작동합니다";
+        // Enter 키로 저장
+        keyInput.addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            window.saveApiKeyFromModal();
           }
-          window.showModalMessage("API 키 연결이 성공했습니다!", "success");
-        } else {
-          if (indicator && message) {
-            indicator.style.background = "#ef4444";
-          }
-
-          let errorMessage = "연결 실패";
-          if (response.status === 401) {
-            errorMessage = "API 키가 유효하지 않습니다";
-            if (message) message.textContent = "키 인증에 실패했습니다";
-          } else if (response.status === 429) {
-            errorMessage = "사용량을 초과했습니다";
-            if (message) message.textContent = "사용량 초과";
-          } else if (response.status === 402) {
-            errorMessage = "크레딧이 부족합니다";
-            if (message) message.textContent = "크레딧 부족";
-          }
-
-          window.showModalMessage(errorMessage, "error");
-        }
-      } catch (error) {
-        const indicator = document.getElementById("key-status-indicator");
-        const message = document.getElementById("key-status-message");
-
-        if (indicator && message) {
-          indicator.style.background = "#ef4444";
-          message.textContent = "연결 테스트 실패";
-        }
-        window.showModalMessage("테스트 실패: " + error.message, "error");
+        });
       }
+
+      // 현재 저장된 키 상태 확인
+      loadCurrentKeyStatus();
     }
-
-    // 모달 메시지 표시 - 전역 함수로 이동
-    window.showModalMessage = function (message, type) {
-      const statusDiv = document.getElementById("modal-status-message");
-      if (!statusDiv) return;
-
-      const colors = {
-        success: { bg: "#dcfce7", color: "#166534", border: "#bbf7d0" },
-        error: { bg: "#fef2f2", color: "#991b1b", border: "#fecaca" },
-        info: { bg: "#eff6ff", color: "#1e40af", border: "#bfdbfe" },
-      };
-
-      const style = colors[type] || colors.info;
-      statusDiv.style.background = style.bg;
-      statusDiv.style.color = style.color;
-      statusDiv.style.border = `1px solid ${style.border}`;
-      statusDiv.style.display = "block";
-      statusDiv.textContent = message;
-
-      if (type === "success") {
-        setTimeout(() => {
-          statusDiv.style.display = "none";
-        }, 3000);
-      }
-    };
 
     // 한국어 입력 조합 이벤트 처리
     if (chatInput) {
@@ -1883,7 +1942,7 @@
         /* 트리거 버튼 스타일 */
         .sidebar-trigger {
           position: fixed;
-          top: 20px;
+          top: 50%;
           right: 20px;
           width: 56px;
           height: 56px;
@@ -2051,4 +2110,10 @@
       initializeChatbot();
     },
   };
+  // Chrome extension 메시지 리스너
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.type === "TOGGLE_SIDEBAR") {
+      toggleSidebarOpen();
+    }
+  });
 })();
