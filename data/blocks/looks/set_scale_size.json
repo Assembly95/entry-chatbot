@@ -1,0 +1,424 @@
+{
+  "id": "set_scale_size",
+  "category": "looks",
+  "name": "크기 정하기",
+  "description": "오브젝트의 크기를 지정한 퍼센트 값으로 직접 설정하는 블록입니다. 100%가 원본 크기이며, 50%는 절반, 200%는 두 배 크기가 됩니다. 현재 크기와 관계없이 정확한 크기로 즉시 변경할 때 사용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "절대적 크기 설정 방법 이해",
+      "퍼센트 기반 크기 조절 학습",
+      "정확한 크기 제어 기법 습득",
+      "스케일 값과 시각적 크기의 관계 이해",
+      "다양한 크기 설정을 통한 시각 효과 구현"
+    ],
+    "key_concepts": [
+      {
+        "concept": "절대 크기 설정",
+        "explanation": "현재 크기와 관계없이 지정한 크기로 직접 변경하는 방식입니다."
+      },
+      {
+        "concept": "퍼센트 스케일",
+        "explanation": "100%를 기준으로 한 상대적 크기 표현으로, 원본 대비 비율을 나타냅니다."
+      },
+      {
+        "concept": "즉시 적용",
+        "explanation": "애니메이션 없이 바로 지정한 크기로 변경되는 방식입니다."
+      },
+      {
+        "concept": "크기 범위",
+        "explanation": "일반적으로 1%에서 수천%까지 설정 가능하며, 실용적으로는 10-500% 범위를 주로 사용합니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": ["오브젝트 개념 이해", "퍼센트 개념", "기본 수치 입력"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "캐릭터 선택 화면",
+      "description": "선택된 캐릭터를 크게 표시",
+      "blocks": [
+        "when_run_button_click",
+        "// 기본 크기 설정",
+        "set_scale_size(80)",
+        "set_effect('brightness', -30)",
+        "",
+        "when_object_click",
+        "// 선택 시 확대",
+        "set_scale_size(120)",
+        "set_effect('brightness', 20)",
+        "speak_something('선택됨!')",
+        "broadcast_message_to_all('다른캐릭터축소')",
+        "",
+        "when_message_cast('다른캐릭터축소')",
+        "// 다른 캐릭터는 축소",
+        "if_condition(not <is_clicked()>)",
+        "  set_scale_size(80)",
+        "  set_effect('brightness', -30)",
+        "  remove_dialog()"
+      ],
+      "explanation": "set_scale_size로 선택된 캐릭터는 크게, 나머지는 작게 표시합니다."
+    },
+    {
+      "title": "거리에 따른 원근감",
+      "description": "Y좌표에 따라 크기 자동 조절",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_while_true",
+        "  // Y좌표를 크기로 변환 (-180~180 → 50~150)",
+        "  set_variable('크기비율', <calc_operation(<coordinate_object('y')>, '+', 180)>)",
+        "  set_variable('크기비율', <calc_operation(<get_variable('크기비율')>, '/', 3.6)>)",
+        "  set_variable('최종크기', <calc_operation(<get_variable('크기비율')>, '+', 50)>)",
+        "  ",
+        "  // 크기 적용",
+        "  set_scale_size(<get_variable('최종크기')>)",
+        "  ",
+        "  // 원근감 효과 추가",
+        "  if_condition(<coordinate_object('y') < 0>)",
+        "    go_to_back()",
+        "    set_effect('brightness', <calc_operation(<coordinate_object('y')>, '/', 5)>)",
+        "  else",
+        "    go_to_front()",
+        "    clear_effect()",
+        "  ",
+        "  wait_second(0.02)"
+      ],
+      "explanation": "Y좌표에 따라 set_scale_size로 크기를 조절하여 원근감을 표현합니다."
+    },
+    {
+      "title": "아이템 등급별 크기",
+      "description": "아이템 등급에 따른 크기 차별화",
+      "blocks": [
+        "when_clone_start",
+        "// 아이템 등급 설정",
+        "set_variable('등급', <random_select(['일반', '희귀', '전설'])>)",
+        "",
+        "// 등급별 크기 설정",
+        "if_condition(<get_variable('등급') = '일반'>)",
+        "  set_scale_size(70)",
+        "  set_effect('brightness', -20)",
+        "else_if(<get_variable('등급') = '희귀'>)",
+        "  set_scale_size(100)",
+        "  set_effect('color', 150)",
+        "else_if(<get_variable('등급') = '전설'>)",
+        "  set_scale_size(130)",
+        "  set_effect('color', 50)",
+        "  // 반짝임 효과",
+        "  repeat_while_true",
+        "    change_effect_amount('brightness', 20)",
+        "    wait_second(0.3)",
+        "    change_effect_amount('brightness', -20)",
+        "    wait_second(0.3)"
+      ],
+      "explanation": "아이템 등급에 따라 set_scale_size로 다른 크기를 설정합니다."
+    },
+    {
+      "title": "체력바 시스템",
+      "description": "체력에 따른 바 크기 조절",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('최대체력', 100)",
+        "set_variable('현재체력', 100)",
+        "set_costume('체력바')",
+        "",
+        "// 체력바 업데이트",
+        "define_function('체력바업데이트')",
+        "  // 체력 비율 계산",
+        "  set_variable('체력비율', <calc_operation(<get_variable('현재체력')>, '/', <get_variable('최대체력')>)>)",
+        "  set_variable('바크기', <calc_operation(<get_variable('체력비율')>, '*', 100)>)",
+        "  ",
+        "  // X축 크기만 조절 (가로 체력바)",
+        "  set_scale_size_x(<get_variable('바크기')>)",
+        "  set_scale_size_y(100)",
+        "  ",
+        "  // 체력에 따른 색상",
+        "  if_condition(<get_variable('체력비율') > 0.6>)",
+        "    set_effect('color', 80)",
+        "  else_if(<get_variable('체력비율') > 0.3>)",
+        "    set_effect('color', 30)",
+        "  else",
+        "    set_effect('color', 0)",
+        "",
+        "when_message_cast('데미지')",
+        "change_variable('현재체력', -10)",
+        "if_condition(<get_variable('현재체력') < 0>)",
+        "  set_variable('현재체력', 0)",
+        "call_function('체력바업데이트')"
+      ],
+      "explanation": "체력 비율에 따라 set_scale_size로 체력바의 크기를 조절합니다."
+    },
+    {
+      "title": "줌 인/아웃 카메라",
+      "description": "카메라 줌 효과 구현",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('줌레벨', 100)",
+        "set_scale_size(100)",
+        "",
+        "// 줌 인 (휠 업)",
+        "when_some_key_pressed('up')",
+        "if_condition(<get_variable('줌레벨') < 200>)",
+        "  change_variable('줌레벨', 20)",
+        "  // 모든 오브젝트 확대",
+        "  set_scale_size(<get_variable('줌레벨')>)",
+        "  broadcast_message_to_all('줌변경')",
+        "  set_text('줌: ' + <get_variable('줌레벨')> + '%')",
+        "",
+        "// 줌 아웃 (휠 다운)",
+        "when_some_key_pressed('down')",
+        "if_condition(<get_variable('줌레벨') > 50>)",
+        "  change_variable('줌레벨', -20)",
+        "  set_scale_size(<get_variable('줌레벨')>)",
+        "  broadcast_message_to_all('줌변경')",
+        "  set_text('줌: ' + <get_variable('줌레벨')> + '%')",
+        "",
+        "// 줌 리셋",
+        "when_some_key_pressed('r')",
+        "set_variable('줌레벨', 100)",
+        "set_scale_size(100)",
+        "broadcast_message_to_all('줌리셋')",
+        "set_text('줌: 100%')"
+      ],
+      "explanation": "set_scale_size를 사용하여 카메라 줌 인/아웃 효과를 구현합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "오브젝트를 특정 크기로 설정하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'생김새' 카테고리에서 크기 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'크기 정하기' 블록을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "100이 원본 크기, 50은 절반, 200은 두 배예요"
+        }
+      ]
+    },
+    {
+      "situation": "정확한 크기로 맞추고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "set_scale_size는 절대값으로 설정해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "원하는 퍼센트 값을 직접 입력하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "change_scale_size와 달리 현재 크기와 무관해요"
+        }
+      ]
+    },
+    {
+      "situation": "크기별로 다른 효과를 주고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "조건문으로 크기 범위를 구분하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "크기와 함께 색상, 밝기 효과도 조절하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "get_size()로 현재 크기를 확인할 수 있어요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "퍼센트를 소수로 입력",
+      "why_it_happens": "0.5를 50%로 착각",
+      "consequence": "거의 보이지 않을 정도로 작아짐",
+      "solution": "50처럼 퍼센트 값을 그대로 입력",
+      "teaching_moment": "50%는 50으로, 200%는 200으로 입력해요."
+    },
+    {
+      "mistake": "너무 큰 값 사용",
+      "why_it_happens": "제한을 모름",
+      "consequence": "화면을 벗어나거나 성능 문제",
+      "solution": "10~500 범위 내에서 사용",
+      "teaching_moment": "실용적으로는 10~500% 정도가 적당해요."
+    },
+    {
+      "mistake": "음수 값 사용",
+      "why_it_happens": "반전 효과 기대",
+      "consequence": "오류 또는 보이지 않음",
+      "solution": "양수만 사용, 반전은 flip 사용",
+      "teaching_moment": "크기는 양수만 가능해요. 반전은 flip 블록을 사용하세요."
+    },
+    {
+      "mistake": "상대 변경과 혼동",
+      "why_it_happens": "change_scale_size와 혼동",
+      "consequence": "예상과 다른 크기",
+      "solution": "절대값 설정임을 이해",
+      "teaching_moment": "set은 직접 설정, change는 현재 값에서 변경이에요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "생김새 카테고리 열기",
+      "instruction": "블록 팔레트에서 보라색 '생김새' 카테고리를 클릭하세요.",
+      "visual_hint": "붓 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "크기 정하기 블록 선택",
+      "instruction": "'크기 정하기' 블록을 작업 영역으로 드래그하세요.",
+      "visual_hint": "퍼센트 입력란이 있는 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "크기 값 입력",
+      "instruction": "원하는 크기를 퍼센트로 입력하세요 (예: 150).",
+      "visual_hint": "100이 원본 크기입니다."
+    },
+    {
+      "step": 4,
+      "title": "실행 시점 설정",
+      "instruction": "언제 크기를 변경할지 이벤트나 조건과 연결하세요.",
+      "visual_hint": "클릭, 키 입력, 조건문 등과 함께 사용합니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트",
+      "instruction": "실행하여 오브젝트가 지정한 크기로 변경되는지 확인하세요.",
+      "visual_hint": "즉시 해당 크기로 변경됩니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "change_scale_size",
+      "relationship": "상대적 변경",
+      "explanation": "현재 크기에서 증감"
+    },
+    {
+      "block_id": "reset_scale_size",
+      "relationship": "크기 초기화",
+      "explanation": "100%로 리셋 (set_scale_size(100)과 동일)"
+    },
+    {
+      "block_id": "get_size",
+      "relationship": "크기 확인",
+      "explanation": "현재 크기 값 가져오기"
+    },
+    {
+      "block_id": "set_effect",
+      "relationship": "효과 조합",
+      "explanation": "크기와 함께 시각 효과 적용"
+    },
+    {
+      "block_id": "if_condition",
+      "relationship": "조건부 설정",
+      "explanation": "조건에 따른 크기 설정"
+    },
+    {
+      "block_id": "coordinate_object",
+      "relationship": "위치 연동",
+      "explanation": "위치에 따른 크기 조절"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "크기가 변하지 않아요",
+      "possible_causes": ["블록이 실행되지 않음", "같은 크기로 설정", "다른 코드가 덮어씀"],
+      "solutions": ["실행 경로 확인", "현재 크기와 다른 값 입력", "코드 실행 순서 점검"]
+    },
+    {
+      "problem": "오브젝트가 사라져요",
+      "possible_causes": ["너무 작은 값 (0~5)", "음수 입력", "투명도와 혼동"],
+      "solutions": ["10 이상의 값 사용", "양수만 입력", "투명도 설정 확인"]
+    },
+    {
+      "problem": "화면을 벗어나요",
+      "possible_causes": ["너무 큰 값 사용", "위치와 크기 조합 문제", "해상도 고려 안 함"],
+      "solutions": ["적절한 범위 사용 (50~200)", "위치 조정 병행", "화면 크기 고려"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "사진 크기 조절",
+      "explanation": "이미지 편집 프로그램에서 크기를 퍼센트로 설정하는 것과 같습니다."
+    },
+    {
+      "analogy": "화면 배율",
+      "explanation": "모니터나 브라우저의 화면 배율을 설정하는 것과 비슷합니다."
+    },
+    {
+      "analogy": "복사기 배율",
+      "explanation": "복사기에서 확대/축소 배율을 설정하는 것과 같은 원리입니다."
+    },
+    {
+      "analogy": "지도 축척",
+      "explanation": "지도를 특정 축척으로 표시하는 것과 유사한 개념입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "반응형 크기",
+      "description": "화면 크기에 따른 자동 크기 조절",
+      "use_case": "반응형 UI, 다양한 해상도 지원"
+    },
+    {
+      "concept": "크기 애니메이션",
+      "description": "목표 크기까지 부드럽게 전환",
+      "use_case": "전환 효과, 호버 효과, 선택 애니메이션"
+    },
+    {
+      "concept": "비례 크기 시스템",
+      "description": "여러 오브젝트의 상대적 크기 유지",
+      "use_case": "UI 레이아웃, 씬 스케일링"
+    },
+    {
+      "concept": "동적 크기 계산",
+      "description": "실시간으로 적절한 크기 계산 및 적용",
+      "use_case": "원근감, 물리 시뮬레이션, 적응형 UI"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "set_scale_size로 오브젝트 크기를 설정할 수 있다",
+      "example": "고정 크기 설정, 클릭 시 크기 변경"
+    },
+    {
+      "level": "중급",
+      "criteria": "조건과 변수를 활용한 동적 크기 제어를 구현할 수 있다",
+      "example": "상태별 크기, 거리 기반 크기, UI 시스템"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 크기 시스템과 시각 효과를 설계할 수 있다",
+      "example": "원근감 시스템, 줌 카메라, 반응형 레이아웃"
+    }
+  ]
+}

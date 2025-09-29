@@ -1,0 +1,506 @@
+{
+  "id": "locate_y",
+  "category": "movement",
+  "name": "Y 위치로 이동하기",
+  "description": "오브젝트의 Y좌표(세로 위치)를 지정한 값으로 즉시 설정하는 블록입니다. X좌표는 그대로 유지하면서 세로 위치만 변경합니다. 수직 이동, 높이 조절, 수직 정렬 등에 사용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "Y좌표 개념과 수직 이동 이해",
+      "절대 위치 설정 방법 학습",
+      "좌표계에서 Y축의 역할 파악",
+      "정확한 높이 제어 기법 습득",
+      "수직 정렬과 배치 시스템 구축"
+    ],
+    "key_concepts": [
+      {
+        "concept": "Y좌표",
+        "explanation": "화면의 세로 위치를 나타내는 값으로, 아래쪽이 음수(-), 위쪽이 양수(+)입니다."
+      },
+      {
+        "concept": "절대 위치",
+        "explanation": "현재 위치와 관계없이 지정한 좌표로 직접 이동하는 방식입니다."
+      },
+      {
+        "concept": "수직 이동",
+        "explanation": "X좌표는 유지하면서 Y좌표만 변경하여 위아래로만 이동하는 것입니다."
+      },
+      {
+        "concept": "높이 레벨",
+        "explanation": "게임에서 플랫폼, 바닥, 천장 등 수직적 위치를 나타내는 개념입니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": ["좌표계 기본 이해", "X축과 Y축 구분", "음수와 양수 개념"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "엘리베이터 시스템",
+      "description": "층별로 이동하는 엘리베이터",
+      "blocks": [
+        "when_run_button_click",
+        "// 엘리베이터 초기 설정",
+        "locate_x(0)",
+        "locate_y(-150)",
+        "set_variable('현재층', 1)",
+        "set_variable('이동중', false)",
+        "",
+        "// 층별 Y좌표 정의",
+        "set_list('층높이', [-150, -50, 50, 150])",
+        "",
+        "// 1층 버튼",
+        "when_some_key_pressed('1')",
+        "if_condition(not <get_variable('이동중')>)",
+        "  set_variable('이동중', true)",
+        "  speak_something('1층으로 이동')",
+        "  repeat_until(<coordinate_object('y') = -150>)",
+        "    change_y(<calc_operation(-150, '-', <coordinate_object('y')>) / 10>)",
+        "    wait_second(0.05)",
+        "  locate_y(-150)",
+        "  set_variable('현재층', 1)",
+        "  speak_something('1층 도착')",
+        "  play_sound('딩동')",
+        "  set_variable('이동중', false)",
+        "",
+        "// 2층 버튼",
+        "when_some_key_pressed('2')",
+        "if_condition(not <get_variable('이동중')>)",
+        "  set_variable('이동중', true)",
+        "  speak_something('2층으로 이동')",
+        "  repeat_until(<abs(<calc_operation(<coordinate_object('y')>, '-', -50)>) < 5>)",
+        "    change_y(<calc_operation(-50, '-', <coordinate_object('y')>) / 10>)",
+        "    wait_second(0.05)",
+        "  locate_y(-50)",
+        "  set_variable('현재층', 2)",
+        "  speak_something('2층 도착')",
+        "  play_sound('딩동')",
+        "  set_variable('이동중', false)",
+        "",
+        "// 3층, 4층도 동일한 방식..."
+      ],
+      "explanation": "locate_y를 사용하여 엘리베이터가 정확한 층 높이에 도착하도록 합니다."
+    },
+    {
+      "title": "점프와 중력 시스템",
+      "description": "플랫포머 게임의 수직 이동",
+      "blocks": [
+        "when_run_button_click",
+        "// 캐릭터 초기 설정",
+        "locate_xy(-200, -100)",
+        "set_variable('바닥Y', -100)",
+        "set_variable('속도Y', 0)",
+        "set_variable('중력', -1)",
+        "set_variable('점프중', false)",
+        "",
+        "// 점프",
+        "when_some_key_pressed('space')",
+        "if_condition(not <get_variable('점프중')>)",
+        "  set_variable('점프중', true)",
+        "  set_variable('속도Y', 15)",
+        "  play_sound('점프')",
+        "",
+        "// 중력 적용",
+        "repeat_while_true",
+        "  // Y속도 적용",
+        "  change_y(<get_variable('속도Y')>)",
+        "  // 중력 가속",
+        "  change_variable('속도Y', <get_variable('중력')>)",
+        "  ",
+        "  // 바닥 체크",
+        "  if_condition(<coordinate_object('y') <= <get_variable('바닥Y')>>)",
+        "    locate_y(<get_variable('바닥Y')>)",
+        "    set_variable('속도Y', 0)",
+        "    set_variable('점프중', false)",
+        "  ",
+        "  // 플랫폼 체크",
+        "  if_condition(<touching('플랫폼')>)",
+        "    if_condition(<get_variable('속도Y') < 0>)",
+        "      // 플랫폼 위에 착지",
+        "      locate_y(<get_object_y('플랫폼')> + 30)",
+        "      set_variable('속도Y', 0)",
+        "      set_variable('점프중', false)",
+        "  ",
+        "  wait_second(0.02)"
+      ],
+      "explanation": "locate_y로 캐릭터를 바닥이나 플랫폼의 정확한 높이에 위치시킵니다."
+    },
+    {
+      "title": "수직 스크롤 메뉴",
+      "description": "위아래로 스크롤되는 메뉴",
+      "blocks": [
+        "when_run_button_click",
+        "// 메뉴 아이템 리스트",
+        "set_list('메뉴', ['시작', '설정', '도움말', '크레딧', '종료'])",
+        "set_variable('메뉴Y시작', 100)",
+        "set_variable('아이템간격', 40)",
+        "set_variable('스크롤위치', 0)",
+        "",
+        "// 메뉴 아이템 생성",
+        "repeat_basic(5)",
+        "  create_clone_of('메뉴아이템')",
+        "",
+        "when_clone_start",
+        "set_variable('내번호', <get_clone_number()>)",
+        "set_text(<get_list_item('메뉴', <get_variable('내번호')>)>)",
+        "locate_x(0)",
+        "// 초기 Y위치 설정",
+        "locate_y(<calc_operation(<get_variable('메뉴Y시작')>, '-', <calc_operation(<get_variable('내번호')>, '*', <get_variable('아이템간격')>)>)>)",
+        "",
+        "// 스크롤 업",
+        "when_some_key_pressed('up')",
+        "if_condition(<get_variable('스크롤위치') > 0>)",
+        "  change_variable('스크롤위치', -1)",
+        "  broadcast_message('메뉴스크롤')",
+        "",
+        "// 스크롤 다운",
+        "when_some_key_pressed('down')",
+        "if_condition(<get_variable('스크롤위치') < 2>)",
+        "  change_variable('스크롤위치', 1)",
+        "  broadcast_message('메뉴스크롤')",
+        "",
+        "// 각 아이템 위치 업데이트",
+        "when_message_cast('메뉴스크롤')",
+        "set_variable('목표Y', <calc_operation(<get_variable('메뉴Y시작')>, '-', <calc_operation(<calc_operation(<get_variable('내번호')>, '-', <get_variable('스크롤위치')>)>, '*', <get_variable('아이템간격')>)>)>)",
+        "// 부드러운 스크롤",
+        "repeat_basic(10)",
+        "  change_y(<calc_operation(<get_variable('목표Y')>, '-', <coordinate_object('y')>) / 5>)",
+        "  wait_second(0.02)",
+        "locate_y(<get_variable('목표Y')>)"
+      ],
+      "explanation": "locate_y를 사용하여 메뉴 아이템들을 정확한 수직 위치에 배치합니다."
+    },
+    {
+      "title": "물 수위 시스템",
+      "description": "변하는 물 높이 표현",
+      "blocks": [
+        "when_run_button_click",
+        "// 물 오브젝트 초기화",
+        "set_costume('물')",
+        "locate_x(0)",
+        "locate_y(-180)",
+        "stretch_scale_size('x', 240)",
+        "set_variable('수위', -180)",
+        "set_effect('transparency', 40)",
+        "",
+        "// 수위 상승",
+        "when_message_cast('물차오름')",
+        "repeat_basic(100)",
+        "  change_variable('수위', 2)",
+        "  locate_y(<get_variable('수위')>)",
+        "  ",
+        "  // 플레이어가 물에 잠김 체크",
+        "  if_condition(<get_object_y('플레이어') < <get_variable('수위')>>)",
+        "    broadcast_message_to('플레이어', '물속')",
+        "  ",
+        "  wait_second(0.1)",
+        "",
+        "// 수위 하강",
+        "when_message_cast('물빠짐')",
+        "repeat_basic(100)",
+        "  change_variable('수위', -2)",
+        "  locate_y(<get_variable('수위')>)",
+        "  ",
+        "  if_condition(<get_variable('수위') < -180>)",
+        "    locate_y(-180)",
+        "    set_variable('수위', -180)",
+        "    stop_this_script()",
+        "  ",
+        "  wait_second(0.1)",
+        "",
+        "// 파도 효과",
+        "when_run_button_click",
+        "set_variable('파도각도', 0)",
+        "repeat_while_true",
+        "  change_variable('파도각도', 5)",
+        "  set_variable('파도높이', <calc_operation(<sin(<get_variable('파도각도')>)>, '*', 5)>)",
+        "  locate_y(<calc_operation(<get_variable('수위')>, '+', <get_variable('파도높이')>)>)",
+        "  wait_second(0.05)"
+      ],
+      "explanation": "locate_y로 물의 수위를 정확하게 제어하고 파도 효과를 만듭니다."
+    },
+    {
+      "title": "수직 리듬 게임",
+      "description": "위아래로 움직이는 리듬 바",
+      "blocks": [
+        "when_run_button_click",
+        "// 판정 라인",
+        "set_costume('판정라인')",
+        "locate_xy(0, 0)",
+        "",
+        "// 리듬 바 생성",
+        "when_message_cast('게임시작')",
+        "set_variable('비트타이밍', [0.5, 1, 1.5, 2, 2.5, 3.5, 4])",
+        "repeat_basic(<length_of_list('비트타이밍')>)",
+        "  wait_second(<get_list_item('비트타이밍', <get_repeat_index()>)>)",
+        "  create_clone_of('리듬바')",
+        "",
+        "// 리듬바 클론",
+        "when_clone_start",
+        "set_variable('방향', <random_select(['위', '아래'])>)",
+        "locate_x(0)",
+        "",
+        "if_condition(<get_variable('방향') = '위'>)",
+        "  locate_y(180)",
+        "  repeat_until(<coordinate_object('y') < -180>)",
+        "    change_y(-5)",
+        "    // 판정 구간",
+        "    if_condition(<abs(<coordinate_object('y')>) < 20>)",
+        "      if_condition(<key_pressed('up')>)",
+        "        broadcast_message('퍼펙트')",
+        "        delete_clone()",
+        "    wait_second(0.02)",
+        "else",
+        "  locate_y(-180)",
+        "  repeat_until(<coordinate_object('y') > 180>)",
+        "    change_y(5)",
+        "    if_condition(<abs(<coordinate_object('y')>) < 20>)",
+        "      if_condition(<key_pressed('down')>)",
+        "        broadcast_message('퍼펙트')",
+        "        delete_clone()",
+        "    wait_second(0.02)",
+        "",
+        "delete_clone()"
+      ],
+      "explanation": "locate_y로 리듬바의 시작 위치를 설정하고 수직으로 이동시킵니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "Y좌표만 변경하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'움직임' 카테고리에서 위치 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'Y 위치로 이동하기' 블록을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "-180~180 사이의 값을 입력하세요"
+        }
+      ]
+    },
+    {
+      "situation": "위아래로만 움직이게 하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "locate_y는 X를 유지하며 Y만 변경해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "change_y와 locate_y를 적절히 조합하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "중력이나 점프는 Y축 이동이에요"
+        }
+      ]
+    },
+    {
+      "situation": "특정 높이에 정확히 배치하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "locate_y는 즉시 해당 Y좌표로 이동해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "플랫폼이나 바닥 높이를 변수로 저장하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "충돌 시 locate_y로 정확한 위치에 배치하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "X좌표도 변경될 것으로 기대",
+      "why_it_happens": "locate_xy와 혼동",
+      "consequence": "X는 그대로이고 Y만 변경됨",
+      "solution": "X도 변경하려면 locate_x 추가 사용",
+      "teaching_moment": "locate_y는 Y좌표만 변경해요. 전체 위치는 locate_xy를 사용하세요."
+    },
+    {
+      "mistake": "화면 범위 초과",
+      "why_it_happens": "Y좌표 범위를 모름",
+      "consequence": "오브젝트가 화면 밖에 위치",
+      "solution": "-180~180 범위 내 사용",
+      "teaching_moment": "엔트리 화면 Y좌표는 -180~180이에요."
+    },
+    {
+      "mistake": "상대 이동과 혼동",
+      "why_it_happens": "change_y와 혼동",
+      "consequence": "예상과 다른 위치로 이동",
+      "solution": "절대 위치임을 이해",
+      "teaching_moment": "locate_y는 절대 위치, change_y는 상대 이동이에요."
+    },
+    {
+      "mistake": "음수 양수 방향 혼동",
+      "why_it_happens": "좌표계 방향 헷갈림",
+      "consequence": "위아래가 반대로 동작",
+      "solution": "위가 양수, 아래가 음수",
+      "teaching_moment": "Y축은 위쪽이 +, 아래쪽이 -예요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "움직임 카테고리 열기",
+      "instruction": "블록 팔레트에서 파란색 '움직임' 카테고리를 클릭하세요.",
+      "visual_hint": "화살표 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "locate_y 블록 찾기",
+      "instruction": "'Y 위치로 이동하기' 블록을 찾으세요.",
+      "visual_hint": "Y: [  ] 형태의 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "Y좌표 값 입력",
+      "instruction": "원하는 Y좌표 값을 입력하세요 (-180~180).",
+      "visual_hint": "0은 중앙, 음수는 아래, 양수는 위입니다."
+    },
+    {
+      "step": 4,
+      "title": "실행 시점 설정",
+      "instruction": "언제 이동할지 이벤트나 조건과 연결하세요.",
+      "visual_hint": "점프, 충돌, 버튼 등과 연결합니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트",
+      "instruction": "실행하여 오브젝트가 지정한 Y위치로 이동하는지 확인하세요.",
+      "visual_hint": "X좌표는 그대로 유지됩니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "locate_x",
+      "relationship": "X좌표 설정",
+      "explanation": "X좌표만 변경"
+    },
+    {
+      "block_id": "locate_xy",
+      "relationship": "전체 위치",
+      "explanation": "X와 Y를 동시에 설정"
+    },
+    {
+      "block_id": "change_y",
+      "relationship": "상대 이동",
+      "explanation": "현재 Y에서 증감"
+    },
+    {
+      "block_id": "coordinate_object('y')",
+      "relationship": "Y좌표 확인",
+      "explanation": "현재 Y좌표 값 가져오기"
+    },
+    {
+      "block_id": "glide_to_y",
+      "relationship": "부드러운 이동",
+      "explanation": "Y위치로 시간을 두고 이동"
+    },
+    {
+      "block_id": "mouse_y",
+      "relationship": "마우스 Y",
+      "explanation": "마우스의 Y좌표 가져오기"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "이동하지 않아요",
+      "possible_causes": ["블록이 실행되지 않음", "이미 같은 Y위치", "다른 코드가 위치 변경"],
+      "solutions": ["이벤트 연결 확인", "다른 Y값으로 테스트", "다른 이동 코드 확인"]
+    },
+    {
+      "problem": "화면 밖으로 사라져요",
+      "possible_causes": ["Y값이 범위 초과", "계산 오류", "오브젝트 크기 미고려"],
+      "solutions": ["-180~180 범위 확인", "계산식 검토", "오브젝트 크기 고려"]
+    },
+    {
+      "problem": "X좌표도 바뀌어요",
+      "possible_causes": ["locate_xy 사용", "다른 X 변경 코드", "오브젝트 회전"],
+      "solutions": ["locate_y만 사용", "X 변경 코드 제거", "회전 스타일 확인"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "엘리베이터",
+      "explanation": "같은 위치에서 위아래로만 움직이는 엘리베이터와 같습니다."
+    },
+    {
+      "analogy": "체스 룩",
+      "explanation": "체스의 룩이 세로로만 이동하는 것과 비슷합니다."
+    },
+    {
+      "analogy": "수위계",
+      "explanation": "물의 높이를 나타내는 수위계처럼 수직 위치를 표현합니다."
+    },
+    {
+      "analogy": "온도계",
+      "explanation": "온도계의 수은주가 위아래로 움직이는 것과 같은 원리입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "수직 스크롤",
+      "description": "화면을 위아래로 스크롤하는 효과",
+      "use_case": "종스크롤 게임, 메뉴 스크롤"
+    },
+    {
+      "concept": "층 시스템",
+      "description": "고정된 Y위치들을 층으로 활용",
+      "use_case": "플랫폼 게임, 건물 시뮬레이션"
+    },
+    {
+      "concept": "수직 정렬",
+      "description": "여러 오브젝트를 Y축으로 정렬",
+      "use_case": "리스트 UI, 순위표"
+    },
+    {
+      "concept": "높이 제한",
+      "description": "Y좌표 제한으로 이동 범위 설정",
+      "use_case": "점프 제한, 천장과 바닥"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "locate_y로 Y좌표를 설정할 수 있다",
+      "example": "특정 높이로 이동, 초기 위치 설정"
+    },
+    {
+      "level": "중급",
+      "criteria": "조건과 계산을 활용한 Y좌표 제어를 구현할 수 있다",
+      "example": "층 이동, 중력 시스템, 수직 정렬"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 수직 이동 시스템을 설계할 수 있다",
+      "example": "엘리베이터, 수위 시스템, 스크롤 메뉴"
+    }
+  ]
+}

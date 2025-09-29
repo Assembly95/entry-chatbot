@@ -1,0 +1,351 @@
+{
+  "id": "reverse_of_string",
+  "category": "calc",
+  "name": "[텍스트]를 뒤집기",
+  "description": "입력한 텍스트의 글자 순서를 완전히 뒤집어서 반환하는 값 블록입니다. 첫 글자가 마지막으로, 마지막 글자가 첫 번째로 오도록 순서를 반대로 만듭니다. 회문 확인이나 특수 효과에 활용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "문자열 뒤집기와 순서 변경 개념 이해",
+      "회문과 대칭 구조에 대한 학습",
+      "알고리즘적 사고와 문자열 조작 능력 개발",
+      "텍스트 변환과 특수 효과 구현 방법 익히기",
+      "데이터 구조의 순서와 방향성 이해"
+    ],
+    "key_concepts": [
+      {
+        "concept": "문자열 뒤집기 (String Reverse)",
+        "explanation": "텍스트의 모든 문자 순서를 정반대로 바꾸는 작업으로, 거울에 비친 것처럼 좌우가 바뀝니다."
+      },
+      {
+        "concept": "회문 (Palindrome)",
+        "explanation": "앞에서 읽어도 뒤에서 읽어도 같은 단어나 문장으로, 뒤집기로 확인할 수 있습니다."
+      },
+      {
+        "concept": "문자 단위 처리",
+        "explanation": "각 문자를 개별적으로 처리하여 순서를 재배열하는 방식입니다."
+      },
+      {
+        "concept": "원본 보존",
+        "explanation": "원래 텍스트는 변경되지 않고 뒤집힌 새로운 텍스트가 생성됩니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": ["문자열과 텍스트 개념 이해", "변수 사용 기초 지식", "조건 블록 활용 경험", "기본 텍스트 처리 블록 사용법"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "회문 판별기",
+      "description": "앞뒤가 똑같은 단어인지 확인",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('단어를 입력하세요 (예: 기러기, 토마토)')",
+        "set_variable('원본', <get_variable('답변')>)",
+        "set_variable('뒤집기', <reverse_of_string(<get_variable('원본')>)>)",
+        "if_condition(<get_variable('원본') = <get_variable('뒤집기')>)",
+        "  speak_something(<join_something(<get_variable('원본')>, '는 회문이에요! 앞뒤가 똑같아요')>)",
+        "else",
+        "  speak_something(<join_something(<get_variable('원본')>, '는 회문이 아니에요')>)",
+        "  set_text(<join_something('뒤집으면 ', <get_variable('뒤집기')>, '가 돼요')>)"
+      ],
+      "explanation": "입력한 단어를 뒤집어서 원본과 비교하여 회문인지 판별하는 프로그램입니다."
+    },
+    {
+      "title": "거울 텍스트 효과",
+      "description": "텍스트를 거울에 비친 것처럼 표시",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('메시지', 'HELLO ENTRY')",
+        "set_variable('거울텍스트', <reverse_of_string(<get_variable('메시지')>)>)",
+        "set_text(<join_something(<get_variable('메시지')>, ' | ', <get_variable('거울텍스트')>)>)",
+        "repeat_basic(5)",
+        "  wait_second(0.5)",
+        "  set_text(<get_variable('메시지')>)",
+        "  wait_second(0.5)",
+        "  set_text(<get_variable('거울텍스트')>)"
+      ],
+      "explanation": "원본과 뒤집힌 텍스트를 번갈아 보여주는 거울 효과 애니메이션입니다."
+    },
+    {
+      "title": "비밀 메시지 해독기",
+      "description": "거꾸로 쓴 비밀 메시지 해독",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('암호', '요해녕안 는람사운좋 신당')",
+        "speak_something('암호를 발견했어요!')",
+        "set_text(<get_variable('암호')>)",
+        "wait_second(2)",
+        "speak_something('해독 중...')",
+        "wait_second(1)",
+        "set_variable('해독', <reverse_of_string(<get_variable('암호')>)>)",
+        "set_text(<join_something('해독 완료: ', <get_variable('해독')>)>)",
+        "speak_something(<get_variable('해독')>)"
+      ],
+      "explanation": "거꾸로 쓰여진 비밀 메시지를 뒤집어서 원래 메시지를 해독하는 시스템입니다."
+    },
+    {
+      "title": "타이핑 되감기 효과",
+      "description": "글자가 거꾸로 지워지는 애니메이션",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('텍스트', '엔트리 코딩')",
+        "set_variable('길이', <length_of_string(<get_variable('텍스트')>)>)",
+        "set_text(<get_variable('텍스트')>)",
+        "wait_second(1)",
+        "speak_something('되감기 시작!')",
+        "set_variable('뒤집기', <reverse_of_string(<get_variable('텍스트')>)>)",
+        "repeat_basic(<get_variable('길이')>)",
+        "  set_variable('남은텍스트', <substring(<get_variable('텍스트')>, 1, <calc_operation(<get_variable('길이')>, '-', <get_variable('i')>)>)>)",
+        "  set_text(<get_variable('남은텍스트')>)",
+        "  wait_second(0.2)",
+        "  change_variable('i', 1)",
+        "set_text('되감기 완료!')"
+      ],
+      "explanation": "텍스트가 뒤에서부터 한 글자씩 사라지는 되감기 애니메이션 효과입니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "텍스트를 거꾸로 뒤집고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'계산' 카테고리에서 문자열 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'[텍스트]를 뒤집기' 블록을 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "이 블록은 글자 순서를 완전히 반대로 만들어요"
+        }
+      ]
+    },
+    {
+      "situation": "회문인지 확인하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "원본과 뒤집은 결과가 같으면 회문이에요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'흐름' 카테고리의 조건 블록과 함께 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "원본 = 뒤집기 조건으로 회문을 판별할 수 있어요"
+        }
+      ]
+    },
+    {
+      "situation": "특수 효과를 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "뒤집기를 반복이나 애니메이션과 결합하면 재미있는 효과를 만들 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'흐름' 카테고리의 반복과 기다리기 블록을 활용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "원본과 뒤집은 텍스트를 번갈아 보여주면 깜빡이는 효과가 나와요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "공백도 뒤집힐 것을 고려하지 않음",
+      "why_it_happens": "단어만 뒤집힐 것으로 기대",
+      "consequence": "여러 단어가 있을 때 단어 순서까지 바뀜",
+      "solution": "전체 문자가 뒤집힌다는 것을 이해하고 사용",
+      "teaching_moment": "'안녕 하세요'를 뒤집으면 '요세하 녕안'이 돼요. 공백 위치도 바뀌어요."
+    },
+    {
+      "mistake": "원본이 바뀔 것으로 기대",
+      "why_it_happens": "뒤집기가 원본을 수정할 것으로 생각",
+      "consequence": "원본 변수를 확인해도 바뀌지 않음",
+      "solution": "뒤집기 결과를 새 변수에 저장하기",
+      "teaching_moment": "뒤집기는 새로운 텍스트를 만들어요. 원본은 그대로예요."
+    },
+    {
+      "mistake": "숫자를 뒤집으려고 시도",
+      "why_it_happens": "숫자와 텍스트의 차이를 모름",
+      "consequence": "숫자 타입에서 오류 발생",
+      "solution": "숫자를 먼저 텍스트로 변환한 후 뒤집기",
+      "teaching_moment": "123같은 숫자도 '123' 텍스트로 바꾸면 '321'로 뒤집을 수 있어요."
+    },
+    {
+      "mistake": "특수문자나 이모지 처리 실패",
+      "why_it_happens": "복잡한 유니코드 문자의 특성을 모름",
+      "consequence": "일부 이모지가 깨지거나 이상하게 표시됨",
+      "solution": "기본 텍스트로 먼저 테스트하고 특수문자는 주의해서 사용",
+      "teaching_moment": "간단한 텍스트부터 시작해서 복잡한 문자는 나중에 시도해보세요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "계산 카테고리 찾기",
+      "instruction": "블록 팔레트에서 초록색 '계산' 카테고리를 클릭하세요.",
+      "visual_hint": "계산기 모양의 아이콘이 있는 초록색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "뒤집기 블록 선택",
+      "instruction": "'[텍스트]를 뒤집기' 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "텍스트 입력 자리가 하나 있는 둥근 값 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "텍스트 입력",
+      "instruction": "블록의 텍스트 자리에 뒤집을 문자열을 입력하거나 변수를 연결하세요.",
+      "visual_hint": "직접 텍스트를 입력하거나 답변, 변수 등을 넣을 수 있습니다."
+    },
+    {
+      "step": 4,
+      "title": "결과 저장 또는 사용",
+      "instruction": "뒤집힌 결과를 변수에 저장하거나 다른 블록에서 직접 사용하세요.",
+      "visual_hint": "원본은 변경되지 않으므로 결과를 별도로 저장해야 합니다."
+    },
+    {
+      "step": 5,
+      "title": "결과 활용",
+      "instruction": "회문 확인, 애니메이션 효과 등 원하는 용도로 활용하세요.",
+      "visual_hint": "조건 블록이나 출력 블록과 함께 사용하면 다양한 효과를 만들 수 있습니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "length_of_string",
+      "relationship": "길이 확인",
+      "explanation": "뒤집기 전후의 길이는 같은지 확인하거나 반복 횟수로 활용"
+    },
+    {
+      "block_id": "substring",
+      "relationship": "부분 추출",
+      "explanation": "텍스트의 일부만 뒤집거나 단계별로 처리할 때 함께 사용"
+    },
+    {
+      "block_id": "join_something",
+      "relationship": "텍스트 결합",
+      "explanation": "원본과 뒤집은 결과를 함께 표시할 때 사용"
+    },
+    {
+      "block_id": "if_condition",
+      "relationship": "회문 확인",
+      "explanation": "원본과 뒤집은 결과가 같은지 비교할 때 사용"
+    },
+    {
+      "block_id": "set_variable",
+      "relationship": "결과 저장",
+      "explanation": "뒤집은 텍스트를 변수에 저장하여 재사용"
+    },
+    {
+      "block_id": "char_at",
+      "relationship": "글자 단위 처리",
+      "explanation": "뒤집기를 직접 구현하거나 특정 위치 문자를 확인할 때 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "뒤집기가 작동하지 않아요",
+      "possible_causes": ["텍스트가 비어있음", "숫자를 직접 뒤집으려고 함", "결과를 저장하지 않음", "블록 연결이 잘못됨"],
+      "solutions": [
+        "텍스트가 있는지 먼저 확인",
+        "숫자는 텍스트로 변환 후 사용",
+        "뒤집기 결과를 변수에 저장",
+        "블록 연결 상태 재확인"
+      ]
+    },
+    {
+      "problem": "회문 판별이 제대로 안 돼요",
+      "possible_causes": ["공백이나 대소문자 차이", "특수문자 포함", "비교 조건이 잘못됨"],
+      "solutions": ["공백 제거 후 비교", "모두 소문자로 변환 후 비교", "특수문자 제거 후 처리"]
+    },
+    {
+      "problem": "이모지나 특수문자가 깨져요",
+      "possible_causes": ["복잡한 유니코드 문자", "결합 문자 사용", "인코딩 문제"],
+      "solutions": ["기본 텍스트로 먼저 테스트", "특수문자는 별도 처리", "간단한 문자만 사용"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "거울에 비친 글자",
+      "explanation": "거울에 글자를 비추면 좌우가 반대로 보이는 것처럼 텍스트가 뒤집힙니다."
+    },
+    {
+      "analogy": "비디오 되감기",
+      "explanation": "비디오를 거꾸로 재생하면 모든 동작이 반대로 되는 것과 같습니다."
+    },
+    {
+      "analogy": "책 페이지 역순",
+      "explanation": "책의 마지막 페이지부터 첫 페이지로 거꾸로 읽는 것과 비슷합니다."
+    },
+    {
+      "analogy": "DNA 역방향 가닥",
+      "explanation": "DNA의 두 가닥이 서로 반대 방향으로 읽히는 것과 같은 원리입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "단어 단위 뒤집기",
+      "description": "문자가 아닌 단어 순서만 뒤집는 시스템",
+      "use_case": "'안녕 하세요' → '하세요 안녕' 형태의 변환"
+    },
+    {
+      "concept": "조건부 뒤집기",
+      "description": "특정 조건을 만족하는 부분만 뒤집는 고급 기능",
+      "use_case": "숫자만 뒤집기, 한글만 뒤집기, 특정 구간만 뒤집기"
+    },
+    {
+      "concept": "애니메이션 뒤집기",
+      "description": "글자가 하나씩 뒤집히는 동적 효과",
+      "use_case": "타이핑 애니메이션, 변환 효과, 시각적 전환"
+    },
+    {
+      "concept": "암호화 활용",
+      "description": "뒤집기를 암호화의 한 단계로 사용",
+      "use_case": "간단한 암호 시스템, 메시지 숨기기, 퍼즐 게임"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "텍스트 뒤집기 블록을 사용해서 간단한 문자열을 뒤집을 수 있다",
+      "example": "단어 뒤집기, 결과 표시, 변수 저장"
+    },
+    {
+      "level": "중급",
+      "criteria": "뒤집기를 활용해서 회문 확인이나 특수 효과를 구현할 수 있다",
+      "example": "회문 판별기, 거울 텍스트 효과, 비밀 메시지"
+    },
+    {
+      "level": "고급",
+      "criteria": "뒤집기를 응용한 복잡한 텍스트 처리 시스템을 만들 수 있다",
+      "example": "단어별 뒤집기, 애니메이션 효과, 암호화 시스템"
+    }
+  ]
+}

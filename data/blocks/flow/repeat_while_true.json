@@ -1,180 +1,352 @@
 {
-  "id": "repeat_until",
+  "id": "repeat_while_true",
   "category": "flow",
-  "name": "~가 될 때까지 반복하기",
-  "description": "판단 블록에 따라 감싸인 블록이 반복 동작할지 결정합니다. 목록 상자를 클릭하면 반복을 멈추는 시점을 바꿀 수 있습니다. '이 될 때까지': 판단 블록이 참이 될 때까지(거짓인 동안) 반복합니다. '인 동안': 판단 블록이 참인 동안(거짓이 될 때까지) 반복합니다.",
+  "name": "조건이 참일 때까지 반복하기",
+  "description": "지정한 조건이 참(true)인 동안 내부 블록들을 계속 반복 실행하는 조건 반복 블록입니다. 조건이 거짓(false)이 되면 반복을 종료합니다. 정확한 반복 횟수를 모를 때 사용하는 핵심 반복 구조입니다.",
 
   "educational_context": {
     "learning_objectives": [
-      "조건부 반복문의 개념과 활용법 이해",
-      "조건 판단과 반복 제어의 결합 학습",
-      "'~까지'와 '~동안'의 논리적 차이 이해",
-      "목표 지향적 프로그래밍 사고력 향상"
+      "조건 기반 반복의 개념과 원리 이해",
+      "while 반복문의 작동 방식 학습",
+      "무한 반복과 종료 조건 설계 능력 개발",
+      "동적 반복 처리와 이벤트 기반 프로그래밍 습득",
+      "반복문 최적화와 효율적인 알고리즘 구현"
     ],
     "key_concepts": [
       {
-        "concept": "조건부 반복(Conditional Loop)",
-        "explanation": "특정 조건이 만족될 때까지 또는 만족되는 동안 반복하는 구조"
+        "concept": "조건 반복 (While Loop)",
+        "explanation": "조건을 먼저 검사하고, 참인 경우에만 반복을 수행하는 제어 구조로, 조건이 거짓이 될 때까지 계속됩니다."
       },
       {
         "concept": "종료 조건",
-        "explanation": "반복을 언제 멈출지를 결정하는 참/거짓 조건"
+        "explanation": "반복을 멈추게 하는 조건으로, 이것이 없으면 무한 반복에 빠질 수 있습니다."
       },
       {
-        "concept": "Until vs While",
-        "explanation": "'~까지'는 조건이 거짓인 동안, '~동안'은 조건이 참인 동안 반복"
+        "concept": "동적 반복",
+        "explanation": "실행 중에 조건이 변화하여 반복 횟수가 결정되는 유연한 반복 방식입니다."
       },
       {
-        "concept": "목표 달성형 반복",
-        "explanation": "특정 목표나 상태에 도달할 때까지 계속 시도하는 반복"
+        "concept": "조건 우선 검사",
+        "explanation": "반복 내용을 실행하기 전에 조건을 먼저 확인하므로, 조건이 처음부터 거짓이면 한 번도 실행되지 않습니다."
       }
     ],
     "difficulty_level": "중급",
-    "prerequisites": ["Entry 기본 인터페이스 이해", "n번 반복하기 사용법", "판단 블록 이해", "변수 기본 개념"]
+    "prerequisites": ["조건 블록 사용 경험", "변수와 연산자 활용 능력", "기본 반복 블록 이해", "논리 연산의 기초 지식"]
   },
 
   "usage_examples": [
     {
-      "title": "기본 사용법 - 벽에 닿을 때까지",
-      "description": "캐릭터가 벽에 닿을 때까지 계속 이동",
-      "blocks": ["when_run_button_click", "repeat_until(touching_wall)", "move_direction(10)", "wait_second(0.1)"],
-      "explanation": "벽에 닿지 않는 동안(거짓) 계속 앞으로 이동하고, 벽에 닿으면(참) 반복을 멈춥니다."
+      "title": "사용자 입력 검증",
+      "description": "올바른 입력을 받을 때까지 반복",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('올바른_입력', 0)",
+        "repeat_while_true(<get_variable('올바른_입력') = 0>)",
+        "  ask_and_wait('1부터 10 사이의 숫자를 입력하세요')",
+        "  set_variable('숫자', <get_variable('답변')>)",
+        "  if_condition(<get_variable('숫자') >= 1> and <get_variable('숫자') <= 10>)",
+        "    set_variable('올바른_입력', 1)",
+        "    speak_something('좋아요! 입력한 숫자는 ' + <get_variable('숫자')> + '입니다')",
+        "  else",
+        "    speak_something('잘못된 입력입니다. 다시 시도하세요')"
+      ],
+      "explanation": "1~10 범위의 올바른 숫자를 입력받을 때까지 계속 반복합니다."
     },
     {
-      "title": "변수 조건 - 점수가 100이 될 때까지",
-      "description": "점수가 100점에 도달할 때까지 점수 증가",
-      "blocks": ["when_run_button_click", "set_variable('점수', 0)", "repeat_until(variable('점수') >= 100)", "change_variable('점수', 10)", "say(variable('점수'))", "wait_second(0.5)"],
-      "explanation": "점수가 100보다 작은 동안 10점씩 증가시키고, 100에 도달하면 반복을 멈춥니다."
+      "title": "목표 점수 도달 게임",
+      "description": "목표 점수에 도달할 때까지 게임 진행",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('점수', 0)",
+        "set_variable('목표', 100)",
+        "repeat_while_true(<get_variable('점수') < <get_variable('목표')>>)",
+        "  ask_and_wait('주사위를 굴립니다! (아무키나 누르세요)')",
+        "  set_variable('주사위', <calc_rand(1, 6)>)",
+        "  speak_something('주사위: ' + <get_variable('주사위')>)",
+        "  change_variable('점수', <get_variable('주사위')>)",
+        "  set_text('현재 점수: ' + <get_variable('점수')> + ' / ' + <get_variable('목표')>)",
+        "speak_something('축하합니다! 목표 달성!')"
+      ],
+      "explanation": "점수가 목표에 도달할 때까지 주사위를 굴리는 게임입니다."
     },
     {
-      "title": "사용자 입력 - 정답을 맞출 때까지",
-      "description": "정답을 맞출 때까지 계속 질문",
-      "blocks": ["when_run_button_click", "set_variable('정답', '엔트리')", "repeat_until(variable('답') == variable('정답'))", "ask_and_wait('프로그래밍 언어 이름은?')", "set_variable('답', answer)", "wait_second(0.5)"],
-      "explanation": "사용자가 정답을 입력할 때까지 계속 질문을 반복합니다."
+      "title": "카운트다운 타이머",
+      "description": "시간이 0이 될 때까지 카운트다운",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('몇 초부터 시작할까요?')",
+        "set_variable('시간', <get_variable('답변')>)",
+        "repeat_while_true(<get_variable('시간') > 0>)",
+        "  set_text(<get_variable('시간')>)",
+        "  speak_something(<get_variable('시간')>)",
+        "  wait_second(1)",
+        "  change_variable('시간', -1)",
+        "set_text('시간 종료!')",
+        "speak_something('땡!')"
+      ],
+      "explanation": "지정한 시간부터 0까지 카운트다운하는 타이머입니다."
+    },
+    {
+      "title": "충돌 감지 이동",
+      "description": "벽에 닿을 때까지 이동",
+      "blocks": [
+        "when_run_button_click",
+        "point_direction(90)",
+        "repeat_while_true(not <is_touched('벽')>)",
+        "  move_direction(5)",
+        "  wait_second(0.1)",
+        "speak_something('벽에 도착했어요!')",
+        "wait_second(1)",
+        "point_direction(-90)",
+        "repeat_while_true(not <is_touched('벽')>)",
+        "  move_direction(5)",
+        "  wait_second(0.1)",
+        "speak_something('반대쪽 벽에 도착했어요!')"
+      ],
+      "explanation": "벽에 닿을 때까지 이동하고, 반대 방향으로 다시 이동하는 패턴입니다."
     }
   ],
 
   "progressive_hints": [
     {
-      "situation": "캐릭터가 특정 위치에 도달할 때까지 이동시키고 싶어요",
+      "situation": "조건이 참인 동안 계속 반복하고 싶어요",
       "steps": [
         {
           "step": 1,
           "hint_type": "category",
-          "content": "목표에 도달할 때까지 반복하려면 '흐름' 카테고리를 확인하세요"
+          "content": "'흐름' 카테고리에서 조건 반복 블록을 찾아보세요"
         },
         {
           "step": 2,
-          "hint_type": "concept",
-          "content": "정해진 횟수가 아니라 특정 조건이 만족될 때까지 반복해야 해요"
+          "hint_type": "specific_block",
+          "content": "'조건이 참일 때까지 반복하기' 블록을 사용하세요"
         },
         {
           "step": 3,
-          "hint_type": "specific_block",
-          "content": "'~가 될 때까지 반복하기' 블록에 위치나 접촉 조건을 넣어보세요"
+          "hint_type": "concept",
+          "content": "조건 자리에 원하는 조건을 넣으면 그 조건이 참인 동안 계속 반복돼요"
         }
       ]
     },
     {
-      "situation": "변수 값이 특정 숫자에 도달할 때까지 증가시키고 싶어요",
+      "situation": "무한 반복에서 빠져나올 수 없어요",
       "steps": [
         {
           "step": 1,
-          "hint_type": "category",
-          "content": "조건을 확인하면서 반복하려면 '흐름' 카테고리가 필요해요"
+          "hint_type": "concept",
+          "content": "반복 안에서 조건을 거짓으로 만들 수 있는 코드가 있어야 해요"
         },
         {
           "step": 2,
-          "hint_type": "concept",
-          "content": "변수가 목표 값에 도달했는지 계속 확인하면서 반복해야 해요"
+          "hint_type": "specific_block",
+          "content": "변수를 바꾸거나 break 블록을 사용해서 반복을 끝낼 수 있어요"
         },
         {
           "step": 3,
-          "hint_type": "specific_block",
-          "content": "'~가 될 때까지 반복하기' 블록에 변수 비교 조건을 넣어보세요"
+          "hint_type": "category",
+          "content": "조건이 언젠가는 거짓이 되도록 설계해야 해요"
         }
       ]
     },
     {
-      "situation": "사용자가 올바른 답을 입력할 때까지 계속 질문하고 싶어요",
+      "situation": "특정 상황까지 반복하고 싶어요",
       "steps": [
         {
           "step": 1,
-          "hint_type": "category",
-          "content": "정답을 맞출 때까지 반복하려면 '흐름' 카테고리를 사용하세요"
+          "hint_type": "concept",
+          "content": "목표 상황의 반대를 조건으로 설정하면 돼요"
         },
         {
           "step": 2,
-          "hint_type": "concept",
-          "content": "사용자 입력과 정답을 비교해서 맞을 때까지 계속 물어봐야 해요"
+          "hint_type": "category",
+          "content": "'계산' 카테고리의 비교 연산자를 활용하세요"
         },
         {
           "step": 3,
           "hint_type": "specific_block",
-    {
-      "step": 2,
-      "title": "조건부 반복 블록 선택", 
-      "instruction": "'~가 될 때까지 반복하기' 블록을 찾아 클릭하세요.",
-      "visual_hint": "조건을 넣을 수 있는 육각형 모양의 입력칸이 있는 반복 블록이에요."
-    },
-    {
-      "step": 3,
-      "title": "반복 조건 설정",
-      "instruction": "드롭다운 메뉴에서 '이 될 때까지' 또는 '인 동안' 중 원하는 옵션을 선택하세요.",
-      "visual_hint": "'이 될 때까지'는 조건이 거짓인 동안, '인 동안'은 조건이 참인 동안 반복해요."
-    },
-    {
-      "step": 4,
-      "title": "판단 조건 연결",
-      "instruction": "육각형 입력칸에 판단 블록을 연결하세요.",
-      "visual_hint": "벽에 닿기, 변수 비교, 키 누르기 등의 조건을 사용할 수 있어요."
-    },
-    {
-      "step": 5,
-      "title": "반복할 동작 추가",
-      "instruction": "조건이 만족될 때까지 반복할 블록들을 조건부 반복 블록 안에 넣으세요.",
-      "visual_hint": "조건에 영향을 주는 동작(이동, 변수 변경 등)을 포함해야 해요."
-    },
-    {
-      "step": 6,
-      "title": "실행 및 조건 확인",
-      "instruction": "프로그램을 실행해서 원하는 조건에서 반복이 멈추는지 확인하세요.",
-      "visual_hint": "무한 반복에 빠지지 않도록 조건 변화를 잘 관찰하세요."
+          "content": "예: 점수 < 100 조건으로 100점이 될 때까지 반복"
+        }
+      ]
     }
   ],
 
   "common_mistakes": [
     {
-      "mistake": "'~까지'와 '~동안'의 차이를 이해하지 못함",
-      "why_it_happens": "조건의 참/거짓과 반복 지속의 관계를 혼동",
-      "consequence": "원하는 때와 반대로 반복이 동작함",
-      "solution": "'~까지'는 조건이 거짓일 때 계속, '~동안'은 조건이 참일 때 계속이라는 점 강조",
-      "teaching_moment": "'집에 갈 때까지 공부한다'와 '비가 오는 동안 집에 있는다'의 차이처럼, 조건과 행동의 관계를 생각해보세요."
+      "mistake": "종료 조건을 만들지 않음",
+      "why_it_happens": "조건이 자동으로 거짓이 될 것으로 기대",
+      "consequence": "무한 반복에 빠져 프로그램이 멈추지 않음",
+      "solution": "반복 내부에서 조건을 변경하는 코드 추가",
+      "teaching_moment": "반복이 끝나려면 조건이 거짓이 되어야 해요. 그걸 만드는 건 우리의 책임이에요."
     },
     {
-      "mistake": "반복 안에서 조건이 변하지 않는 상황",
-      "why_it_happens": "조건에 영향을 주는 요소를 반복 내에서 변경하지 않음",
-      "consequence": "조건이 계속 같아서 무한 반복이 되거나 전혀 반복되지 않음",
-      "solution": "반복 안에서 조건에 영향을 주는 변수나 상태를 변경하는 블록 포함",
-      "teaching_moment": "목표를 향해 한 걸음씩 나아가야 도착할 수 있어요. 같은 자리에 있으면 영원히 도착하지 못해요."
+      "mistake": "조건을 반대로 설정",
+      "why_it_happens": "'~까지'와 '~인 동안'의 의미를 혼동",
+      "consequence": "원하는 것과 반대로 동작",
+      "solution": "조건이 참일 때 반복된다는 것을 이해",
+      "teaching_moment": "'점수가 100 미만인 동안' 반복하면 100이 되면 멈춰요."
     },
     {
-      "mistake": "조건을 너무 복잡하게 설정",
-      "why_it_happens": "여러 조건을 한 번에 확인하려고 시도",
-      "consequence": "의도한 대로 동작하지 않거나 이해하기 어려운 코드가 됨",
-      "solution": "단순한 조건부터 시작해서 점차 복잡한 조건으로 확장",
-      "teaching_moment": "복잡한 문제는 간단한 부분으로 나누어서 해결하는 것이 좋아요."
+      "mistake": "조건 검사 시점을 이해하지 못함",
+      "why_it_happens": "조건이 중간에 바뀌어도 계속 실행될 것으로 기대",
+      "consequence": "반복 중간에 멈추지 않고 끝까지 실행됨",
+      "solution": "조건은 각 반복 시작 시점에만 검사됨을 이해",
+      "teaching_moment": "조건은 반복이 시작할 때만 확인해요. 중간에는 확인하지 않아요."
+    },
+    {
+      "mistake": "초기 조건이 거짓일 때를 고려하지 않음",
+      "why_it_happens": "최소 한 번은 실행될 것으로 기대",
+      "consequence": "조건이 처음부터 거짓이면 한 번도 실행되지 않음",
+      "solution": "초기 상태 확인 및 do-while 패턴 고려",
+      "teaching_moment": "조건이 처음부터 거짓이면 반복 내용이 한 번도 실행되지 않아요."
     }
   ],
 
   "step_by_step_guide": [
     {
       "step": 1,
-      "title": "블록 찾기",
-      "instruction": "블록 팔레트에서 '흐름' 카테고리를 클릭하세요.",
-      "visual_hint": "주황색 화살표 모양의 아이콘을 찾아보세요."
+      "title": "흐름 카테고리 찾기",
+      "instruction": "블록 팔레트에서 주황색 '흐름' 카테고리를 클릭하세요.",
+      "visual_hint": "화살표 모양의 아이콘이 있는 주황색 카테고리입니다."
     },
     {
       "step": 2,
-      "title": "조건부 반복 블록 선택",
-      "instruction": "'
+      "title": "조건 반복 블록 선택",
+      "instruction": "'조건이 참일 때까지 반복하기' 블록을 찾아서 드래그하세요.",
+      "visual_hint": "육각형 조건 입력 자리가 있는 C자 모양 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "조건 설정",
+      "instruction": "육각형 자리에 반복 조건을 설정하세요.",
+      "visual_hint": "비교 연산이나 논리 연산 블록을 연결합니다."
+    },
+    {
+      "step": 4,
+      "title": "반복 내용 추가",
+      "instruction": "C자 안쪽에 반복할 블록들을 배치하세요.",
+      "visual_hint": "조건이 참인 동안 실행될 코드를 넣습니다."
+    },
+    {
+      "step": 5,
+      "title": "종료 조건 확인",
+      "instruction": "반복 내부에서 조건이 거짓이 될 수 있는지 확인하세요.",
+      "visual_hint": "변수 변경이나 상태 변화로 조건이 거짓이 되도록 합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "repeat_basic",
+      "relationship": "횟수 반복",
+      "explanation": "정해진 횟수만큼 반복할 때 사용하는 단순 반복"
+    },
+    {
+      "block_id": "repeat_inf",
+      "relationship": "무한 반복",
+      "explanation": "조건 없이 계속 반복할 때 사용"
+    },
+    {
+      "block_id": "break",
+      "relationship": "반복 탈출",
+      "explanation": "조건 반복을 강제로 종료할 때 사용"
+    },
+    {
+      "block_id": "continue_repeat",
+      "relationship": "다음 반복",
+      "explanation": "현재 반복을 건너뛰고 다음 반복으로 갈 때 사용"
+    },
+    {
+      "block_id": "if_condition",
+      "relationship": "조건 검사",
+      "explanation": "반복 내부에서 추가 조건을 확인할 때 사용"
+    },
+    {
+      "block_id": "calc_operation",
+      "relationship": "조건 생성",
+      "explanation": "반복 조건을 만들기 위한 비교 연산"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "무한 반복에 빠졌어요",
+      "possible_causes": ["종료 조건이 없음", "조건이 절대 거짓이 되지 않음", "변수 변경을 잊음", "조건 로직 오류"],
+      "solutions": [
+        "반복 내부에 조건 변경 코드 추가",
+        "break 블록으로 강제 종료 추가",
+        "변수가 제대로 변경되는지 확인",
+        "조건식을 다시 검토"
+      ]
+    },
+    {
+      "problem": "한 번도 실행되지 않아요",
+      "possible_causes": ["초기 조건이 거짓", "조건을 반대로 설정", "변수 초기값 오류"],
+      "solutions": ["초기 변수 값 확인", "조건의 참/거짓 방향 재확인", "먼저 한 번 실행 후 반복 고려"]
+    },
+    {
+      "problem": "예상보다 일찍 종료돼요",
+      "possible_causes": ["조건이 너무 빨리 거짓이 됨", "변수 변화량이 너무 큼", "의도하지 않은 break"],
+      "solutions": ["조건 범위 재조정", "변수 변화량 줄이기", "break 위치 확인"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "신호등 대기",
+      "explanation": "빨간불인 동안 기다리고, 초록불이 되면 건너는 것과 같습니다."
+    },
+    {
+      "analogy": "물 끓이기",
+      "explanation": "물이 100도가 될 때까지 계속 가열하는 것과 비슷합니다."
+    },
+    {
+      "analogy": "저금통 채우기",
+      "explanation": "목표 금액이 될 때까지 계속 돈을 넣는 것과 같은 원리입니다."
+    },
+    {
+      "analogy": "게임 레벨 클리어",
+      "explanation": "특정 조건을 달성할 때까지 계속 플레이하는 것과 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "복합 조건 반복",
+      "description": "여러 조건을 AND/OR로 결합한 복잡한 반복",
+      "use_case": "다중 종료 조건, 복합 상태 체크"
+    },
+    {
+      "concept": "중첩 조건 반복",
+      "description": "조건 반복 안에 또 다른 조건 반복을 포함",
+      "use_case": "2차원 탐색, 복잡한 알고리즘 구현"
+    },
+    {
+      "concept": "do-while 패턴",
+      "description": "최소 한 번은 실행하고 조건을 검사하는 패턴",
+      "use_case": "사용자 입력 검증, 메뉴 시스템"
+    },
+    {
+      "concept": "타임아웃 추가",
+      "description": "무한 반복 방지를 위한 시간 제한 또는 횟수 제한",
+      "use_case": "안전한 반복, 성능 보장, 에러 방지"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "조건 반복 블록을 사용해서 간단한 조건 기반 반복을 구현할 수 있다",
+      "example": "카운트다운, 목표 도달 반복"
+    },
+    {
+      "level": "중급",
+      "criteria": "적절한 종료 조건을 설계하여 안전한 조건 반복을 만들 수 있다",
+      "example": "입력 검증, 게임 루프, 충돌 감지 이동"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 조건과 중첩 구조를 활용한 고급 알고리즘을 구현할 수 있다",
+      "example": "탐색 알고리즘, 최적화 문제, 시뮬레이션"
+    }
+  ]
+}

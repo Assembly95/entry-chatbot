@@ -1,0 +1,414 @@
+{
+  "id": "functionAddButton",
+  "category": "function",
+  "name": "함수에 매개변수 추가 버튼",
+  "description": "함수 정의 시 매개변수를 추가하는 UI 버튼입니다. 이 버튼을 클릭하면 숫자, 문자열, 불린 타입의 매개변수나 설명 라벨을 함수에 추가할 수 있는 메뉴가 나타납니다. 함수의 입력 인터페이스를 설계하는 핵심 도구입니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "함수 매개변수 추가 방법 학습",
+      "다양한 매개변수 타입의 선택과 활용",
+      "함수 인터페이스 설계 능력 개발",
+      "매개변수와 라벨의 적절한 조합 방법 이해",
+      "사용자 친화적인 함수 설계 기법 습득"
+    ],
+    "key_concepts": [
+      {
+        "concept": "매개변수 추가",
+        "explanation": "함수가 외부에서 받을 입력값을 정의하는 과정으로, 함수의 유연성과 재사용성을 높입니다."
+      },
+      {
+        "concept": "타입 선택",
+        "explanation": "추가할 매개변수의 데이터 타입(숫자, 문자열, 불린)을 선택하여 타입 안정성을 보장합니다."
+      },
+      {
+        "concept": "인터페이스 디자인",
+        "explanation": "함수를 사용하기 쉽게 만들기 위해 매개변수와 라벨을 적절히 배치하는 설계 과정입니다."
+      },
+      {
+        "concept": "점진적 구성",
+        "explanation": "필요에 따라 매개변수를 하나씩 추가하며 함수를 점진적으로 구성하는 방식입니다."
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": [
+      "함수 만들기 블록 사용법",
+      "데이터 타입 개념 이해",
+      "매개변수와 인자의 차이 인식",
+      "기본적인 함수 설계 지식"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "기본 매개변수 추가",
+      "description": "다양한 타입의 매개변수를 순차적으로 추가",
+      "blocks": [
+        "// 1. 함수 생성 블록 배치",
+        "function_create('사용자정보설정')",
+        "",
+        "// 2. + 버튼 클릭 → '문자열' 선택",
+        "// → 매개변수 이름: '이름'",
+        "",
+        "// 3. + 버튼 클릭 → '숫자' 선택",
+        "// → 매개변수 이름: '나이'",
+        "",
+        "// 4. + 버튼 클릭 → '불린' 선택",
+        "// → 매개변수 이름: '회원여부'",
+        "",
+        "// 최종 함수 형태:",
+        "function_create('사용자정보설정',",
+        "  [string_param('이름'),",
+        "   number_param('나이'),",
+        "   boolean_param('회원여부')])",
+        "  set_variable('사용자이름', <param('이름')>)",
+        "  set_variable('사용자나이', <param('나이')>)",
+        "  if_condition(<param('회원여부')>)",
+        "    speak_something(<param('이름')> + '님은 ' + <param('나이')> + '세 회원입니다')",
+        "  else",
+        "    speak_something(<param('이름')> + '님은 ' + <param('나이')> + '세 비회원입니다')"
+      ],
+      "explanation": "+ 버튼을 통해 다양한 타입의 매개변수를 추가하는 과정입니다."
+    },
+    {
+      "title": "라벨과 매개변수 조합",
+      "description": "설명 라벨을 추가하여 가독성 향상",
+      "blocks": [
+        "// 1. 함수 생성",
+        "function_create('도형그리기')",
+        "",
+        "// 2. + 버튼 → '라벨' 선택",
+        "// → 텍스트: '=== 도형 설정 ==='",
+        "",
+        "// 3. + 버튼 → '라벨' 선택",
+        "// → 텍스트: '변의 개수:'",
+        "",
+        "// 4. + 버튼 → '숫자' 선택",
+        "// → 매개변수 이름: '변'",
+        "",
+        "// 5. + 버튼 → '라벨' 선택",
+        "// → 텍스트: '크기(픽셀):'",
+        "",
+        "// 6. + 버튼 → '숫자' 선택",
+        "// → 매개변수 이름: '크기'",
+        "",
+        "// 최종 함수 형태:",
+        "function_create('도형그리기',",
+        "  [label('=== 도형 설정 ==='),",
+        "   label('변의 개수:'), number_param('변'),",
+        "   label('크기(픽셀):'), number_param('크기')])",
+        "  start_drawing",
+        "  repeat_basic(<param('변')>)",
+        "    move_direction(<param('크기')>)",
+        "    direction_relative(<calc_operation(360, '/', <param('변')>)>)",
+        "  stop_drawing"
+      ],
+      "explanation": "라벨과 매개변수를 조합하여 이해하기 쉬운 함수 인터페이스를 만듭니다."
+    },
+    {
+      "title": "복잡한 함수 인터페이스",
+      "description": "여러 섹션으로 구분된 매개변수 구성",
+      "blocks": [
+        "// 단계별 매개변수 추가 과정",
+        "function_create('게임설정')",
+        "",
+        "// 섹션 1: 플레이어 설정",
+        "// + 버튼 → 라벨 '=== 플레이어 ==='",
+        "// + 버튼 → 라벨 '이름:'",
+        "// + 버튼 → 문자열 매개변수 '플레이어명'",
+        "// + 버튼 → 라벨 '난이도(1-5):'",
+        "// + 버튼 → 숫자 매개변수 '레벨'",
+        "",
+        "// 섹션 2: 게임 옵션",
+        "// + 버튼 → 라벨 '=== 옵션 ==='",
+        "// + 버튼 → 라벨 '사운드:'",
+        "// + 버튼 → 불린 매개변수 '소리켜기'",
+        "// + 버튼 → 라벨 '시간제한(초):'",
+        "// + 버튼 → 숫자 매개변수 '제한시간'",
+        "",
+        "// 최종 구성:",
+        "function_create('게임설정',",
+        "  [label('=== 플레이어 ==='),",
+        "   label('이름:'), string_param('플레이어명'),",
+        "   label('난이도(1-5):'), number_param('레벨'),",
+        "   label('=== 옵션 ==='),",
+        "   label('사운드:'), boolean_param('소리켜기'),",
+        "   label('시간제한(초):'), number_param('제한시간')])",
+        "  // 함수 내용 구현",
+        "  set_variable('player_name', <param('플레이어명')>)",
+        "  set_variable('difficulty', <param('레벨')>)",
+        "  set_variable('sound_on', <param('소리켜기')>)",
+        "  set_variable('time_limit', <param('제한시간')>)"
+      ],
+      "explanation": "복잡한 설정을 체계적으로 구성하기 위해 여러 매개변수를 추가합니다."
+    },
+    {
+      "title": "동적 매개변수 구성",
+      "description": "필요에 따라 매개변수를 추가/제거",
+      "blocks": [
+        "// 초기 함수",
+        "function_create('계산기', [number_param('숫자1'), number_param('숫자2')])",
+        "  return <calc_operation(<param('숫자1')>, '+', <param('숫자2')>)>",
+        "",
+        "// 기능 확장이 필요한 경우:",
+        "// 1. 기존 함수 수정",
+        "// 2. + 버튼 클릭",
+        "// 3. '문자열' 매개변수 '연산자' 추가",
+        "",
+        "// 확장된 함수:",
+        "function_create('계산기',",
+        "  [number_param('숫자1'),",
+        "   label('연산:'),",
+        "   string_param('연산자'),",
+        "   number_param('숫자2')])",
+        "  if_condition(<param('연산자')> = '+')",
+        "    return <calc_operation(<param('숫자1')>, '+', <param('숫자2')>)>",
+        "  else_if(<param('연산자')> = '-')",
+        "    return <calc_operation(<param('숫자1')>, '-', <param('숫자2')>)>",
+        "  else_if(<param('연산자')> = '*')",
+        "    return <calc_operation(<param('숫자1')>, '*', <param('숫자2')>)>",
+        "  else_if(<param('연산자')> = '/')",
+        "    return <calc_operation(<param('숫자1')>, '/', <param('숫자2')>)>"
+      ],
+      "explanation": "함수의 기능 확장에 따라 매개변수를 추가하여 발전시킵니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "함수에 입력값을 받고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "함수 만들기 블록을 먼저 배치하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "함수 블록에 있는 '+' 버튼을 클릭하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "원하는 매개변수 타입을 선택하고 이름을 지정하세요"
+        }
+      ]
+    },
+    {
+      "situation": "어떤 타입을 선택해야 할지 모르겠어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "숫자 계산: number, 텍스트: string, 예/아니오: boolean"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "설명만 필요하면 '라벨'을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "나중에 변경할 수 있으니 일단 추가해보세요"
+        }
+      ]
+    },
+    {
+      "situation": "매개변수 순서를 바꾸고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "매개변수를 드래그하여 순서를 변경할 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "또는 삭제 후 다시 추가하는 방법도 있어요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "라벨을 활용해 그룹을 만들면 정리가 쉬워요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "너무 많은 매개변수 추가",
+      "why_it_happens": "모든 옵션을 매개변수로 만들려 함",
+      "consequence": "함수가 복잡하고 사용하기 어려워짐",
+      "solution": "필수적인 매개변수만 추가",
+      "teaching_moment": "함수는 5-7개 이하의 매개변수가 적당해요. 너무 많으면 복잡해져요."
+    },
+    {
+      "mistake": "매개변수 이름 중복",
+      "why_it_happens": "같은 이름으로 여러 매개변수 생성",
+      "consequence": "어떤 매개변수인지 구분 불가",
+      "solution": "각 매개변수에 고유한 이름 부여",
+      "teaching_moment": "매개변수 이름은 서로 달라야 구분할 수 있어요."
+    },
+    {
+      "mistake": "잘못된 타입 선택",
+      "why_it_happens": "데이터 타입을 고려하지 않고 선택",
+      "consequence": "함수 사용 시 타입 오류",
+      "solution": "데이터 성격에 맞는 타입 선택",
+      "teaching_moment": "숫자는 number, 텍스트는 string, 참/거짓은 boolean이에요."
+    },
+    {
+      "mistake": "라벨과 매개변수 혼동",
+      "why_it_happens": "라벨도 값을 받는 것으로 착각",
+      "consequence": "라벨에 값을 전달하려 함",
+      "solution": "라벨은 설명용, 매개변수는 값 입력용",
+      "teaching_moment": "라벨은 읽기 전용 설명이고, 매개변수만 값을 받아요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "함수 만들기 블록 배치",
+      "instruction": "'함수' 카테고리에서 '함수 만들기' 블록을 작업 영역에 드래그하세요.",
+      "visual_hint": "빈 함수 정의 블록이 생성됩니다."
+    },
+    {
+      "step": 2,
+      "title": "+ 버튼 찾기",
+      "instruction": "함수 블록에서 '+' 모양의 추가 버튼을 찾으세요.",
+      "visual_hint": "함수 이름 옆이나 아래에 위치한 작은 버튼입니다."
+    },
+    {
+      "step": 3,
+      "title": "매개변수 타입 선택",
+      "instruction": "+ 버튼을 클릭하고 메뉴에서 원하는 타입을 선택하세요.",
+      "visual_hint": "숫자, 문자열, 불린, 라벨 중 선택할 수 있습니다."
+    },
+    {
+      "step": 4,
+      "title": "매개변수 이름 입력",
+      "instruction": "매개변수의 역할을 나타내는 명확한 이름을 입력하세요.",
+      "visual_hint": "이름은 함수 내부에서 이 값을 참조할 때 사용됩니다."
+    },
+    {
+      "step": 5,
+      "title": "추가 매개변수 설정",
+      "instruction": "필요한 만큼 + 버튼을 반복해서 클릭하여 매개변수를 추가하세요.",
+      "visual_hint": "매개변수들이 순서대로 나열됩니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "function_create",
+      "relationship": "함수 정의",
+      "explanation": "매개변수를 추가할 함수 정의 블록"
+    },
+    {
+      "block_id": "function_field_string",
+      "relationship": "문자열 매개변수",
+      "explanation": "+ 버튼으로 추가하는 문자열 타입"
+    },
+    {
+      "block_id": "function_field_number",
+      "relationship": "숫자 매개변수",
+      "explanation": "+ 버튼으로 추가하는 숫자 타입"
+    },
+    {
+      "block_id": "function_field_boolean",
+      "relationship": "불린 매개변수",
+      "explanation": "+ 버튼으로 추가하는 불린 타입"
+    },
+    {
+      "block_id": "function_field_label",
+      "relationship": "라벨",
+      "explanation": "+ 버튼으로 추가하는 설명 텍스트"
+    },
+    {
+      "block_id": "param",
+      "relationship": "매개변수 사용",
+      "explanation": "추가한 매개변수를 함수 내부에서 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "+ 버튼이 보이지 않아요",
+      "possible_causes": ["함수 블록이 제대로 배치되지 않음", "UI 로딩 문제", "브라우저 호환성"],
+      "solutions": ["함수 블록 다시 배치", "페이지 새로고침", "다른 브라우저 시도"]
+    },
+    {
+      "problem": "매개변수를 추가할 수 없어요",
+      "possible_causes": ["최대 개수 제한 도달", "블록이 잠김 상태", "권한 문제"],
+      "solutions": ["불필요한 매개변수 제거", "블록 상태 확인", "프로젝트 권한 확인"]
+    },
+    {
+      "problem": "추가한 매개변수가 사라져요",
+      "possible_causes": ["저장하지 않음", "실행 취소 동작", "동기화 오류"],
+      "solutions": ["변경사항 저장", "다시 추가", "자동 저장 확인"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "양식 작성",
+      "explanation": "온라인 양식에 입력 필드를 추가하는 것과 같습니다."
+    },
+    {
+      "analogy": "주문서 항목 추가",
+      "explanation": "주문서에 새로운 입력란을 추가하는 것과 비슷합니다."
+    },
+    {
+      "analogy": "설정 메뉴 구성",
+      "explanation": "앱의 설정 화면에 옵션을 추가하는 것과 같은 개념입니다."
+    },
+    {
+      "analogy": "레시피 재료 목록",
+      "explanation": "요리 레시피에 필요한 재료를 하나씩 추가하는 것과 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "매개변수 그룹화",
+      "description": "관련 매개변수들을 라벨로 구분하여 그룹화",
+      "use_case": "복잡한 설정 함수, 다중 섹션 입력"
+    },
+    {
+      "concept": "선택적 매개변수",
+      "description": "기본값을 가진 선택적 매개변수 설계",
+      "use_case": "유연한 API, 하위 호환성 유지"
+    },
+    {
+      "concept": "매개변수 검증",
+      "description": "입력된 매개변수의 유효성 검사",
+      "use_case": "안전한 함수, 오류 방지"
+    },
+    {
+      "concept": "동적 인터페이스",
+      "description": "실행 시점에 매개변수 구성 변경",
+      "use_case": "적응형 함수, 조건부 매개변수"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "+ 버튼을 사용하여 기본적인 매개변수를 추가할 수 있다",
+      "example": "1-2개의 간단한 매개변수 추가"
+    },
+    {
+      "level": "중급",
+      "criteria": "다양한 타입과 라벨을 조합하여 체계적인 함수 인터페이스를 만들 수 있다",
+      "example": "타입별 매개변수, 라벨 구분, 논리적 순서"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 요구사항에 맞는 최적화된 매개변수 구조를 설계할 수 있다",
+      "example": "섹션 구분, 매개변수 그룹화, 사용성 최적화"
+    }
+  ]
+}

@@ -1,0 +1,435 @@
+{
+  "id": "stretch_scale_size",
+  "category": "looks",
+  "name": "크기 늘이기/줄이기",
+  "description": "오브젝트의 가로(X축) 또는 세로(Y축) 크기를 독립적으로 늘이거나 줄이는 블록입니다. 정사각형을 직사각형으로 만들거나, 원을 타원으로 변형시키는 등 비율을 변경하여 형태를 왜곡시킬 때 사용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "비균등 스케일링 개념 이해",
+      "X축과 Y축 독립적 크기 조절 방법 학습",
+      "형태 왜곡과 변형 효과 구현",
+      "스트레치 애니메이션 기법 습득",
+      "창의적인 시각 효과 설계 능력 개발"
+    ],
+    "key_concepts": [
+      {
+        "concept": "비균등 스케일링",
+        "explanation": "가로와 세로를 다른 비율로 확대하거나 축소하여 원래 비율을 변경하는 변형입니다."
+      },
+      {
+        "concept": "축별 변형",
+        "explanation": "X축(가로)과 Y축(세로)을 독립적으로 조절하여 형태를 변경하는 방식입니다."
+      },
+      {
+        "concept": "형태 왜곡",
+        "explanation": "원래 모양을 늘이거나 압축하여 다른 형태로 변형시키는 효과입니다."
+      },
+      {
+        "concept": "스트레치 효과",
+        "explanation": "오브젝트를 고무줄처럼 늘이거나 압축하는 시각적 표현입니다."
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": ["set_scale_size 이해", "좌표계 개념", "기본 변형 이해", "X축/Y축 구분"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "점프 스쿼시 효과",
+      "description": "점프 시 캐릭터 압축과 신장",
+      "blocks": [
+        "when_some_key_pressed('space')",
+        "// 점프 준비 - 압축",
+        "stretch_scale_size('y', 70)",
+        "stretch_scale_size('x', 130)",
+        "wait_second(0.2)",
+        "",
+        "// 점프 상승 - 신장",
+        "stretch_scale_size('y', 140)",
+        "stretch_scale_size('x', 80)",
+        "repeat_basic(15)",
+        "  change_y(10)",
+        "  wait_second(0.02)",
+        "",
+        "// 공중에서 정상화",
+        "stretch_scale_size('y', 100)",
+        "stretch_scale_size('x', 100)",
+        "wait_second(0.1)",
+        "",
+        "// 하강",
+        "repeat_basic(15)",
+        "  change_y(-10)",
+        "  wait_second(0.02)",
+        "",
+        "// 착지 충격",
+        "stretch_scale_size('y', 60)",
+        "stretch_scale_size('x', 140)",
+        "wait_second(0.1)",
+        "",
+        "// 원상복구",
+        "stretch_scale_size('y', 100)",
+        "stretch_scale_size('x', 100)"
+      ],
+      "explanation": "점프 동작에 따라 캐릭터를 압축하고 늘여 탄성있는 애니메이션을 만듭니다."
+    },
+    {
+      "title": "그림자 효과",
+      "description": "Y축 압축으로 그림자 표현",
+      "blocks": [
+        "when_run_button_click",
+        "// 원본 오브젝트",
+        "locate_xy(0, 50)",
+        "",
+        "// 그림자 복제본 생성",
+        "clone_self()",
+        "",
+        "when_clone_start",
+        "// 그림자 설정",
+        "stretch_scale_size('y', 30)",
+        "stretch_scale_size('x', 120)",
+        "set_effect('brightness', -80)",
+        "set_effect('transparency', 50)",
+        "go_to_back()",
+        "locate_xy(0, -100)",
+        "",
+        "// 원본 움직임 따라가기",
+        "repeat_while_true",
+        "  set_x(<get_object_x('원본')>)",
+        "  // 높이에 따른 그림자 크기",
+        "  set_variable('원본높이', <get_object_y('원본')>)",
+        "  set_variable('그림자크기', <calc_operation(150, '-', <get_variable('원본높이')>)>)",
+        "  stretch_scale_size('x', <get_variable('그림자크기')>)",
+        "  wait_second(0.02)"
+      ],
+      "explanation": "Y축을 압축하고 X축을 늘여 바닥 그림자 효과를 만듭니다."
+    },
+    {
+      "title": "바람 효과",
+      "description": "바람에 날리는 깃발 애니메이션",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('바람각도', 0)",
+        "",
+        "repeat_while_true",
+        "  change_variable('바람각도', 10)",
+        "  ",
+        "  // 사인파로 바람 효과",
+        "  set_variable('바람세기', <sin(<get_variable('바람각도')>)>)",
+        "  ",
+        "  // X축 늘이기 (바람에 펄럭임)",
+        "  set_variable('X스트레치', <calc_operation(100, '+', <calc_operation(<get_variable('바람세기')>, '*', 20)>)>)",
+        "  stretch_scale_size('x', <get_variable('X스트레치')>)",
+        "  ",
+        "  // Y축도 약간 변형",
+        "  set_variable('Y스트레치', <calc_operation(100, '-', <calc_operation(<get_variable('바람세기')>, '*', 5)>)>)",
+        "  stretch_scale_size('y', <get_variable('Y스트레치')>)",
+        "  ",
+        "  // 약간의 기울기",
+        "  rotate(<calc_operation(<get_variable('바람세기')>, '*', 5)>)",
+        "  ",
+        "  wait_second(0.05)"
+      ],
+      "explanation": "X축과 Y축을 주기적으로 변형시켜 바람에 날리는 효과를 구현합니다."
+    },
+    {
+      "title": "포털 통과",
+      "description": "포털을 통과하며 압축되는 효과",
+      "blocks": [
+        "when_message_cast('포털진입')",
+        "// 포털로 이동",
+        "glide_to_xy(0, 0, 1)",
+        "",
+        "// X축 압축 시작",
+        "repeat_basic(10)",
+        "  stretch_scale_size('x', <calc_operation(100, '-', <calc_operation(<get_repeat_index()>, '*', 9)>)>)",
+        "  wait_second(0.03)",
+        "",
+        "// 완전 압축",
+        "stretch_scale_size('x', 1)",
+        "hide()",
+        "wait_second(0.5)",
+        "",
+        "// 반대편에서 나타남",
+        "locate_xy(0, -150)",
+        "show()",
+        "",
+        "// X축 복원",
+        "repeat_basic(10)",
+        "  stretch_scale_size('x', <calc_operation(<get_repeat_index()>, '*', 10)>)",
+        "  wait_second(0.03)",
+        "",
+        "stretch_scale_size('x', 100)",
+        "speak_something('도착!')"
+      ],
+      "explanation": "X축을 압축했다가 복원하여 포털 통과 효과를 만듭니다."
+    },
+    {
+      "title": "물 반사 왜곡",
+      "description": "물결에 의한 반사 이미지 왜곡",
+      "blocks": [
+        "when_clone_start",
+        "// 반사 이미지 설정",
+        "flip_y()",
+        "locate_xy(0, -100)",
+        "set_effect('transparency', 40)",
+        "set_variable('물결위상', <random_number(0, 360)>)",
+        "",
+        "repeat_while_true",
+        "  change_variable('물결위상', 5)",
+        "  ",
+        "  // 물결에 의한 X축 왜곡",
+        "  set_variable('X왜곡', <calc_operation(100, '+', <calc_operation(<sin(<get_variable('물결위상')>)>, '*', 15)>)>)",
+        "  stretch_scale_size('x', <get_variable('X왜곡')>)",
+        "  ",
+        "  // Y축도 약간 왜곡",
+        "  set_variable('Y왜곡', <calc_operation(100, '+', <calc_operation(<cos(<get_variable('물결위상')>)>, '*', 5)>)>)",
+        "  stretch_scale_size('y', <get_variable('Y왜곡')>)",
+        "  ",
+        "  // 위치도 약간 흔들림",
+        "  change_x(<calc_operation(<sin(<get_variable('물결위상')>)>, '*', 2)>)",
+        "  ",
+        "  wait_second(0.05)"
+      ],
+      "explanation": "물결 효과를 위해 X축과 Y축을 주기적으로 왜곡시킵니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "가로나 세로만 늘이고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'생김새' 카테고리에서 크기 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'크기 늘이기/줄이기' 블록을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "'x'는 가로, 'y'는 세로를 조절해요"
+        }
+      ]
+    },
+    {
+      "situation": "탄성있는 애니메이션을 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "압축과 신장을 번갈아 적용하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "X와 Y를 반대로 변형시키면 부피가 유지돼요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "타이밍에 맞춰 원래 크기로 복원하세요"
+        }
+      ]
+    },
+    {
+      "situation": "형태를 왜곡시키고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "X축과 Y축을 다른 비율로 설정하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "stretch_scale_size('x', 150)처럼 한 축만 늘려보세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "삼각함수를 사용하면 부드러운 왜곡이 가능해요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "축 이름을 잘못 입력",
+      "why_it_happens": "대소문자 구분이나 철자 오류",
+      "consequence": "변형이 적용되지 않음",
+      "solution": "'x' 또는 'y'를 정확히 입력",
+      "teaching_moment": "소문자 'x'와 'y'만 사용 가능해요."
+    },
+    {
+      "mistake": "너무 극단적인 값 사용",
+      "why_it_happens": "효과를 과장하려고 함",
+      "consequence": "오브젝트가 인식 불가능하게 왜곡",
+      "solution": "30~200% 범위 내에서 사용",
+      "teaching_moment": "적당한 왜곡이 더 효과적이에요."
+    },
+    {
+      "mistake": "원상복구를 잊음",
+      "why_it_happens": "애니메이션 후 리셋 누락",
+      "consequence": "계속 왜곡된 상태 유지",
+      "solution": "애니메이션 후 100%로 복원",
+      "teaching_moment": "효과 후에는 원래 상태로 돌려놓으세요."
+    },
+    {
+      "mistake": "두 축을 같은 값으로 설정",
+      "why_it_happens": "일반 크기 변경과 혼동",
+      "consequence": "스트레치 효과가 없음",
+      "solution": "축별로 다른 값 사용",
+      "teaching_moment": "같은 비율이면 set_scale_size와 같아요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "생김새 카테고리 열기",
+      "instruction": "블록 팔레트에서 보라색 '생김새' 카테고리를 클릭하세요.",
+      "visual_hint": "붓 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "스트레치 블록 선택",
+      "instruction": "'크기 늘이기/줄이기' 블록을 찾아 드래그하세요.",
+      "visual_hint": "축과 퍼센트를 입력하는 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "축 선택",
+      "instruction": "'x'(가로) 또는 'y'(세로)를 선택하세요.",
+      "visual_hint": "드롭다운 메뉴나 텍스트 입력으로 설정합니다."
+    },
+    {
+      "step": 4,
+      "title": "변형 비율 입력",
+      "instruction": "늘이거나 줄일 퍼센트 값을 입력하세요.",
+      "visual_hint": "100보다 크면 늘어나고, 작으면 줄어듭니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트 및 조정",
+      "instruction": "실행하여 원하는 형태로 변형되는지 확인하세요.",
+      "visual_hint": "필요시 다른 축도 조절하여 균형을 맞춥니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "set_scale_size",
+      "relationship": "균등 크기 조절",
+      "explanation": "X와 Y를 같은 비율로 조절"
+    },
+    {
+      "block_id": "change_scale_size",
+      "relationship": "상대적 크기 변경",
+      "explanation": "현재 크기에서 증감"
+    },
+    {
+      "block_id": "get_size",
+      "relationship": "크기 확인",
+      "explanation": "현재 크기 상태 확인"
+    },
+    {
+      "block_id": "rotate",
+      "relationship": "회전 변형",
+      "explanation": "스트레치와 함께 사용하여 복잡한 변형"
+    },
+    {
+      "block_id": "set_effect",
+      "relationship": "시각 효과",
+      "explanation": "왜곡과 함께 색상, 밝기 조절"
+    },
+    {
+      "block_id": "sin/cos",
+      "relationship": "주기적 변형",
+      "explanation": "부드러운 왜곡 애니메이션"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "변형이 적용되지 않아요",
+      "possible_causes": ["축 이름 오타", "블록이 실행되지 않음", "100%로 설정됨"],
+      "solutions": ["'x' 또는 'y' 정확히 입력", "실행 경로 확인", "100이 아닌 다른 값 사용"]
+    },
+    {
+      "problem": "오브젝트가 너무 왜곡돼요",
+      "possible_causes": ["극단적인 값 사용", "누적 변형", "복원 안 함"],
+      "solutions": ["적절한 범위 사용 (50~150)", "변형 전 리셋", "애니메이션 후 복원"]
+    },
+    {
+      "problem": "애니메이션이 부자연스러워요",
+      "possible_causes": ["변형 단계가 너무 큼", "타이밍 문제", "축 간 불균형"],
+      "solutions": ["작은 단계로 변형", "wait 시간 조정", "X와 Y 비율 조정"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "고무줄 늘이기",
+      "explanation": "고무줄을 한 방향으로만 늘이는 것과 같은 원리입니다."
+    },
+    {
+      "analogy": "거울의 왜곡",
+      "explanation": "볼록거울이나 오목거울에 비친 모습처럼 형태가 변형됩니다."
+    },
+    {
+      "analogy": "그림자 변형",
+      "explanation": "빛의 각도에 따라 그림자가 늘어나거나 줄어드는 것과 비슷합니다."
+    },
+    {
+      "analogy": "이미지 편집",
+      "explanation": "포토샵에서 이미지를 자유 변형하는 것과 같은 효과입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "스쿼시 앤 스트레치",
+      "description": "애니메이션의 12원칙 중 하나인 탄성 표현",
+      "use_case": "캐릭터 애니메이션, 충격 효과, 점프 동작"
+    },
+    {
+      "concept": "모핑 효과",
+      "description": "형태를 점진적으로 변형시키는 애니메이션",
+      "use_case": "변신, 형태 전환, 액체 효과"
+    },
+    {
+      "concept": "원근 왜곡",
+      "description": "거리감을 표현하기 위한 비균등 스케일링",
+      "use_case": "3D 효과, 원근법, 깊이 표현"
+    },
+    {
+      "concept": "물리 시뮬레이션",
+      "description": "충격, 압력 등에 의한 형태 변형",
+      "use_case": "충돌 효과, 바람 효과, 탄성체 시뮬레이션"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "stretch_scale_size로 축별 크기를 조절할 수 있다",
+      "example": "단순 늘이기/줄이기, 그림자 효과"
+    },
+    {
+      "level": "중급",
+      "criteria": "스트레치를 활용한 애니메이션을 구현할 수 있다",
+      "example": "스쿼시 앤 스트레치, 탄성 효과, 왜곡 애니메이션"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 변형 효과와 물리 시뮬레이션을 구현할 수 있다",
+      "example": "모핑, 물결 효과, 원근 시스템"
+    }
+  ]
+}

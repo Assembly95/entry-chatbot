@@ -1,0 +1,332 @@
+{
+  "id": "see_angle_object",
+  "category": "moving",
+  "name": "[오브젝트]의 방향 보기",
+  "description": "현재 오브젝트가 지정된 다른 오브젝트나 마우스를 바라보도록 방향을 즉시 설정하는 블록입니다. 추적, 조준, 시선 처리 등에 사용되며, 오브젝트 간의 상호작용을 구현할 때 필수적입니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "오브젝트 간 방향 관계 이해",
+      "동적 방향 설정을 통한 상호작용 구현",
+      "추적과 조준 시스템의 원리 학습",
+      "게임 AI의 기초적인 시선 처리 이해",
+      "좌표계에서의 각도 계산 개념 습득"
+    ],
+    "key_concepts": [
+      {
+        "concept": "방향 추적",
+        "explanation": "한 오브젝트가 다른 오브젝트의 위치를 계속 바라보도록 방향을 자동으로 조절하는 기능입니다."
+      },
+      {
+        "concept": "동적 방향 설정",
+        "explanation": "목표물의 위치가 변해도 실시간으로 방향을 재계산하여 항상 목표를 향하도록 하는 방식입니다."
+      },
+      {
+        "concept": "즉시 회전",
+        "explanation": "애니메이션 없이 즉시 목표 방향으로 회전하여 빠른 반응이 필요한 상황에 적합합니다."
+      },
+      {
+        "concept": "오브젝트 관계",
+        "explanation": "여러 오브젝트 간의 위치 관계를 방향으로 표현하여 상호작용을 구현하는 방법입니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": ["오브젝트의 개념 이해", "방향과 각도의 기본 개념", "마우스 포인터 사용 경험", "기본 이동 블록 사용 경험"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "마우스 추적 시스템",
+      "description": "마우스를 따라 바라보는 캐릭터",
+      "blocks": ["when_run_button_click", "repeat_while_true", "  see_angle_object('마우스')", "  wait_second(0.03)"],
+      "explanation": "마우스 위치를 실시간으로 추적하여 항상 마우스를 바라보는 효과를 만듭니다."
+    },
+    {
+      "title": "적 추적 포탑",
+      "description": "가장 가까운 적을 자동으로 조준",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_while_true",
+        "  if_condition(<object_exist('적')>)",
+        "    see_angle_object('적')",
+        "    if_condition(<distance_something('적') < 200>)",
+        "      broadcast('발사')",
+        "      wait_second(1)",
+        "  wait_second(0.1)"
+      ],
+      "explanation": "적을 자동으로 추적하고 거리가 가까워지면 발사하는 방어 포탑을 구현합니다."
+    },
+    {
+      "title": "대화 시스템",
+      "description": "대화 중 상대방을 바라보기",
+      "blocks": [
+        "when_message_cast('대화시작')",
+        "see_angle_object('플레이어')",
+        "speak_for_seconds('안녕하세요!', 2)",
+        "wait_second(0.5)",
+        "see_angle_object('NPC2')",
+        "speak_for_seconds('저쪽도 만나보세요', 2)"
+      ],
+      "explanation": "대화할 때 자연스럽게 상대방을 바라보는 NPC 상호작용을 구현합니다."
+    },
+    {
+      "title": "호밍 미사일",
+      "description": "목표를 추적하는 유도 미사일",
+      "blocks": [
+        "when_clone_start",
+        "repeat_while_true",
+        "  if_condition(<object_exist('목표')>)",
+        "    see_angle_object('목표')",
+        "    move_direction(10)",
+        "    if_condition(<touching_object('목표')>)",
+        "      broadcast('폭발')",
+        "      delete_clone",
+        "  else",
+        "    delete_clone"
+      ],
+      "explanation": "목표를 계속 추적하면서 따라가는 호밍 미사일을 구현합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "오브젝트가 다른 오브젝트를 바라보게 하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'동작' 카테고리에서 방향 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'[오브젝트]의 방향 보기' 블록을 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "드롭다운에서 바라볼 대상(오브젝트나 마우스)을 선택하세요"
+        }
+      ]
+    },
+    {
+      "situation": "마우스를 따라 보는 효과를 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "드롭다운 메뉴에서 '마우스'를 선택할 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'흐름' 카테고리의 반복 블록과 함께 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "반복 안에서 계속 마우스 방향을 보도록 설정하세요"
+        }
+      ]
+    },
+    {
+      "situation": "여러 오브젝트 중 하나를 선택해서 보고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "조건 블록으로 상황에 따라 다른 오브젝트를 바라보게 할 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'감지' 카테고리의 거리 블록으로 가장 가까운 것을 선택할 수 있어요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "변수에 대상을 저장하고 그 변수의 방향을 보도록 설정하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "존재하지 않는 오브젝트를 바라보려고 함",
+      "why_it_happens": "오브젝트가 삭제되었거나 숨겨진 상태를 확인하지 않음",
+      "consequence": "오류가 발생하거나 방향이 변하지 않음",
+      "solution": "오브젝트 존재 여부를 먼저 확인하는 조건 블록 사용",
+      "teaching_moment": "대상이 있는지 먼저 확인하고 나서 바라보도록 하는 것이 안전해요."
+    },
+    {
+      "mistake": "너무 자주 방향을 바꿔서 떨림 현상 발생",
+      "why_it_happens": "매 프레임마다 방향을 업데이트함",
+      "consequence": "오브젝트가 계속 떨리면서 부자연스러운 움직임",
+      "solution": "적절한 간격으로 방향을 업데이트하거나 임계값 설정",
+      "teaching_moment": "너무 자주 방향을 바꾸면 떨려 보이니 적당한 간격을 두세요."
+    },
+    {
+      "mistake": "방향만 바꾸고 이동하지 않음",
+      "why_it_happens": "방향 설정과 이동이 별개의 동작임을 이해하지 못함",
+      "consequence": "제자리에서 회전만 하고 추적하지 못함",
+      "solution": "방향을 본 후 이동 블록을 추가하여 실제로 따라가도록 구현",
+      "teaching_moment": "바라보기는 방향만 바꾸는 거예요. 따라가려면 이동도 해야 해요."
+    },
+    {
+      "mistake": "복제본이 원본을 바라보려고 함",
+      "why_it_happens": "복제본과 원본의 관계를 잘못 이해",
+      "consequence": "자기 자신을 바라보려고 해서 오류 발생",
+      "solution": "복제본은 다른 이름의 오브젝트를 바라보도록 설정",
+      "teaching_moment": "복제본은 원본과 같은 이름이니 다른 대상을 선택해야 해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "동작 카테고리 찾기",
+      "instruction": "블록 팔레트에서 파란색 '동작' 카테고리를 클릭하세요.",
+      "visual_hint": "움직임 관련 아이콘이 있는 파란색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "방향 보기 블록 선택",
+      "instruction": "'[오브젝트]의 방향 보기' 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "드롭다운 메뉴가 있는 방향 설정 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "대상 선택",
+      "instruction": "드롭다운 메뉴를 클릭해서 바라볼 대상을 선택하세요.",
+      "visual_hint": "마우스 또는 다른 오브젝트 이름을 선택할 수 있습니다."
+    },
+    {
+      "step": 4,
+      "title": "실행 조건 설정",
+      "instruction": "언제 방향을 바꿀지 결정하고 적절한 이벤트나 반복 블록과 연결하세요.",
+      "visual_hint": "계속 추적하려면 반복 블록 안에, 한 번만 보려면 이벤트 블록과 연결합니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트 및 조정",
+      "instruction": "프로그램을 실행해서 오브젝트가 대상을 제대로 바라보는지 확인하세요.",
+      "visual_hint": "필요하면 기다리기 시간을 조정하여 부드러운 움직임을 만드세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "direction_set",
+      "relationship": "특정 각도 설정",
+      "explanation": "고정된 각도로 방향을 설정할 때 사용하는 대체 블록"
+    },
+    {
+      "block_id": "move_direction",
+      "relationship": "방향으로 이동",
+      "explanation": "바라본 방향으로 실제 이동할 때 함께 사용"
+    },
+    {
+      "block_id": "distance_something",
+      "relationship": "거리 측정",
+      "explanation": "대상과의 거리를 확인하여 조건부 동작할 때 사용"
+    },
+    {
+      "block_id": "object_exist",
+      "relationship": "존재 확인",
+      "explanation": "오브젝트가 있는지 확인한 후 바라볼 때 사용"
+    },
+    {
+      "block_id": "coordinate_mouse",
+      "relationship": "마우스 좌표",
+      "explanation": "마우스 위치를 정확히 알아야 할 때 함께 사용"
+    },
+    {
+      "block_id": "broadcast",
+      "relationship": "이벤트 전달",
+      "explanation": "특정 대상을 바라본 후 행동을 시작할 때 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "오브젝트가 엉뚱한 방향을 봐요",
+      "possible_causes": ["대상 오브젝트 이름을 잘못 선택함", "오브젝트가 존재하지 않음", "여러 개의 같은 이름 오브젝트가 있음"],
+      "solutions": [
+        "드롭다운에서 정확한 오브젝트 이름 확인",
+        "오브젝트 존재 여부를 조건 블록으로 확인",
+        "오브젝트 이름을 고유하게 변경"
+      ]
+    },
+    {
+      "problem": "방향이 계속 떨려요",
+      "possible_causes": ["너무 빠른 속도로 방향 업데이트", "목표물이 너무 가까이 있음", "여러 곳에서 동시에 방향 설정"],
+      "solutions": ["'기다리기' 블록으로 업데이트 속도 조절", "최소 거리 조건 추가", "하나의 반복 블록에서만 방향 제어"]
+    },
+    {
+      "problem": "마우스를 따라보지 않아요",
+      "possible_causes": ["드롭다운에서 '마우스'를 선택하지 않음", "반복 블록을 사용하지 않음", "다른 방향 설정 블록이 충돌"],
+      "solutions": ["드롭다운 메뉴에서 '마우스' 선택 확인", "무한 반복 블록 안에서 실행", "다른 방향 관련 블록 제거 또는 조정"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "해바라기의 태양 추적",
+      "explanation": "해바라기가 태양을 따라 방향을 바꾸는 것처럼 대상을 추적합니다."
+    },
+    {
+      "analogy": "감시 카메라",
+      "explanation": "움직이는 물체를 자동으로 추적하는 CCTV 카메라와 같은 원리입니다."
+    },
+    {
+      "analogy": "눈맞춤",
+      "explanation": "대화할 때 상대방과 눈을 맞추는 자연스러운 행동과 같습니다."
+    },
+    {
+      "analogy": "레이더 추적",
+      "explanation": "레이더가 비행기나 배를 추적하는 것과 같은 방식입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "부드러운 추적",
+      "description": "즉시 방향을 바꾸지 않고 천천히 회전하며 추적",
+      "use_case": "자연스러운 캐릭터 움직임, 포탑 회전, 카메라 팬"
+    },
+    {
+      "concept": "다중 타겟 시스템",
+      "description": "여러 대상 중 우선순위에 따라 선택적 추적",
+      "use_case": "가장 가까운 적, 체력이 낮은 적, 특정 타입 우선 추적"
+    },
+    {
+      "concept": "예측 조준",
+      "description": "대상의 이동을 예측하여 미래 위치를 향해 조준",
+      "use_case": "이동하는 목표물 명중, 스포츠 게임의 패스, 전략적 차단"
+    },
+    {
+      "concept": "시야각 제한",
+      "description": "특정 각도 범위 내에서만 추적 가능한 시스템",
+      "use_case": "NPC 시야, 스텔스 게임, 현실적인 감지 시스템"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "오브젝트나 마우스를 바라보도록 방향을 설정할 수 있다",
+      "example": "마우스 추적, 단순한 NPC 시선 처리"
+    },
+    {
+      "level": "중급",
+      "criteria": "조건과 반복을 활용하여 동적인 추적 시스템을 구현할 수 있다",
+      "example": "적 자동 추적, 대화 시스템, 거리별 반응"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 AI와 상호작용 시스템을 구현할 수 있다",
+      "example": "다중 타겟 우선순위, 예측 조준, 시야각 기반 스텔스 시스템"
+    }
+  ]
+}

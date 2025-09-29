@@ -1,0 +1,358 @@
+{
+  "id": "move_to_angle",
+  "category": "moving",
+  "name": "[방향]으로 [거리]만큼 이동하기",
+  "description": "오브젝트를 지정된 각도 방향으로 지정된 거리만큼 이동시키는 블록입니다. 0도는 위쪽, 90도는 오른쪽, 180도는 아래쪽, 270도는 왼쪽 방향을 나타냅니다. 음수 거리를 입력하면 반대 방향으로 이동합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "각도와 방향의 관계 이해",
+      "극좌표계와 직교좌표계의 차이점 학습",
+      "벡터 이동 개념과 삼각함수의 기초 원리 이해",
+      "정밀한 위치 제어를 통한 수학적 사고력 향상",
+      "게임과 애니메이션에서의 방향 이동 활용법 습득"
+    ],
+    "key_concepts": [
+      {
+        "concept": "각도 체계",
+        "explanation": "엔트리에서는 0도가 위쪽(북쪽)을 가리키고, 시계방향으로 각도가 증가하는 체계를 사용합니다."
+      },
+      {
+        "concept": "방향 벡터",
+        "explanation": "특정 각도와 거리를 조합하여 이동 방향과 거리를 동시에 표현하는 수학적 개념입니다."
+      },
+      {
+        "concept": "상대적 이동",
+        "explanation": "현재 위치를 기준으로 특정 방향으로 이동하는 방식으로, 절대 좌표 이동과 구별됩니다."
+      },
+      {
+        "concept": "음수 거리",
+        "explanation": "음수 값을 입력하면 지정된 방향의 정반대로 이동하는 특성을 활용할 수 있습니다."
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": [
+      "기본 이동 블록들의 사용법 이해",
+      "각도 개념과 방향에 대한 기본 지식",
+      "좌표계에 대한 기초 이해",
+      "숫자 입력과 계산 블록 활용 경험"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "8방향 이동 시스템",
+      "description": "게임에서 자주 사용하는 8방향 이동 구현",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_while_true",
+        "  if_condition(<key_pressed('위')>)",
+        "    move_to_angle(0, 10)",
+        "  if_condition(<key_pressed('오른쪽')>)",
+        "    move_to_angle(90, 10)",
+        "  if_condition(<key_pressed('아래')>)",
+        "    move_to_angle(180, 10)",
+        "  if_condition(<key_pressed('왼쪽')>)",
+        "    move_to_angle(270, 10)"
+      ],
+      "explanation": "화살표 키를 누르면 해당 방향으로 이동하는 기본적인 게임 컨트롤을 구현합니다."
+    },
+    {
+      "title": "원형 패트롤 경로",
+      "description": "원을 따라 순찰하는 움직임",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('각도', 0)",
+        "repeat_while_true",
+        "  move_to_angle(<get_variable('각도')>, 5)",
+        "  change_variable('각도', 10)",
+        "  if_condition(<get_variable('각도') > 360>)",
+        "    set_variable('각도', 0)",
+        "  wait_second(0.1)"
+      ],
+      "explanation": "각도를 계속 증가시키면서 원형 경로를 따라 이동하는 패트롤 패턴을 만듭니다."
+    },
+    {
+      "title": "마우스 방향으로 이동",
+      "description": "마우스가 있는 방향으로 오브젝트 이동",
+      "blocks": [
+        "when_run_button_click",
+        "repeat_while_true",
+        "  set_variable('마우스_각도', <calc_angle_to_mouse()>)",
+        "  move_to_angle(<get_variable('마우스_각도')>, 5)",
+        "  wait_second(0.05)"
+      ],
+      "explanation": "마우스 위치를 향한 각도를 계산하고 그 방향으로 이동하여 추적 효과를 만듭니다."
+    },
+    {
+      "title": "총알 발사 시스템",
+      "description": "특정 각도로 발사되는 총알 구현",
+      "blocks": [
+        "when_message_cast('발사')",
+        "show",
+        "locate_xy(<get_x_of('플레이어')>, <get_y_of('플레이어')>)",
+        "set_variable('발사_각도', <get_direction_of('플레이어')>)",
+        "repeat_basic(50)",
+        "  move_to_angle(<get_variable('발사_각도')>, 15)",
+        "  if_condition(<touching_edge()>)",
+        "    hide",
+        "    break"
+      ],
+      "explanation": "플레이어의 방향으로 총알을 발사하고 화면 끝까지 직진하는 시스템입니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "특정 방향으로 이동시키고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'동작' 카테고리에서 각도와 거리로 이동하는 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'[방향]으로 [거리]만큼 이동하기' 블록을 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "0도는 위, 90도는 오른쪽, 180도는 아래, 270도는 왼쪽이에요"
+        }
+      ]
+    },
+    {
+      "situation": "대각선으로 이동하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "대각선 방향은 45도, 135도, 225도, 315도를 사용하면 돼요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "오른쪽 위는 45도, 오른쪽 아래는 135도로 설정하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "더 정밀한 각도가 필요하면 '계산' 블록으로 각도를 계산할 수 있어요"
+        }
+      ]
+    },
+    {
+      "situation": "뒤로 이동하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "거리에 음수 값을 넣으면 반대 방향으로 이동해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "move_to_angle(0, -10)은 아래쪽으로 10만큼 이동합니다"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "또는 각도에 180을 더해서 반대 방향을 만들 수도 있어요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "각도 체계를 잘못 이해",
+      "why_it_happens": "일반적인 수학의 각도 체계와 엔트리의 각도 체계가 다름",
+      "consequence": "원하는 방향과 다른 방향으로 이동",
+      "solution": "0도가 위쪽이고 시계방향으로 증가한다는 것을 기억",
+      "teaching_moment": "나침반처럼 북쪽(위)이 0도이고, 시계처럼 오른쪽으로 돌면서 각도가 커져요."
+    },
+    {
+      "mistake": "거리 값이 너무 크거나 작음",
+      "why_it_happens": "화면 크기와 이동 거리의 관계를 고려하지 않음",
+      "consequence": "너무 빠르게 이동하거나 거의 움직이지 않음",
+      "solution": "5~20 정도의 적절한 거리 값으로 시작해서 조정",
+      "teaching_moment": "화면의 크기를 생각하면서 적절한 이동 거리를 찾는 것이 중요해요."
+    },
+    {
+      "mistake": "360도 이상의 각도 입력",
+      "why_it_happens": "각도가 360도에서 다시 0도로 돌아온다는 것을 모름",
+      "consequence": "예상과 다른 방향으로 이동하거나 혼란 발생",
+      "solution": "각도는 0~359 범위 내에서 사용하거나 나머지 연산 활용",
+      "teaching_moment": "각도는 360도가 한 바퀴이므로, 370도는 10도와 같은 방향이에요."
+    },
+    {
+      "mistake": "화면 밖으로 이동해서 오브젝트가 사라짐",
+      "why_it_happens": "이동 후 위치를 확인하지 않음",
+      "consequence": "오브젝트가 화면 밖으로 나가서 보이지 않음",
+      "solution": "화면 끝에 닿으면 방향을 바꾸거나 위치를 제한하는 조건 추가",
+      "teaching_moment": "게임에서는 캐릭터가 화면 밖으로 나가지 않도록 경계를 확인하는 것이 중요해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "동작 카테고리 찾기",
+      "instruction": "블록 팔레트에서 파란색 '동작' 카테고리를 클릭하세요.",
+      "visual_hint": "움직임 관련 아이콘이 있는 파란색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "각도 이동 블록 선택",
+      "instruction": "'[방향]으로 [거리]만큼 이동하기' 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "두 개의 입력 자리가 있는 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "방향 각도 설정",
+      "instruction": "첫 번째 자리에 원하는 방향의 각도를 입력하세요.",
+      "visual_hint": "0(위), 90(오른쪽), 180(아래), 270(왼쪽) 또는 원하는 각도를 입력합니다."
+    },
+    {
+      "step": 4,
+      "title": "이동 거리 설정",
+      "instruction": "두 번째 자리에 이동할 거리를 입력하세요.",
+      "visual_hint": "양수는 해당 방향으로, 음수는 반대 방향으로 이동합니다."
+    },
+    {
+      "step": 5,
+      "title": "실행 및 테스트",
+      "instruction": "프로그램을 실행해서 오브젝트가 올바른 방향으로 이동하는지 확인하세요.",
+      "visual_hint": "필요하면 각도와 거리를 조정해서 원하는 움직임을 만드세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "move_direction",
+      "relationship": "현재 방향 기준 이동",
+      "explanation": "오브젝트의 현재 방향으로 이동할 때 사용하는 관련 블록"
+    },
+    {
+      "block_id": "locate_xy",
+      "relationship": "절대 위치 이동",
+      "explanation": "특정 좌표로 직접 이동할 때 사용하는 대체 방법"
+    },
+    {
+      "block_id": "direction_set",
+      "relationship": "방향 설정",
+      "explanation": "오브젝트의 방향을 먼저 설정한 후 move_direction과 함께 사용"
+    },
+    {
+      "block_id": "calc_angle_to_mouse",
+      "relationship": "각도 계산",
+      "explanation": "마우스나 다른 오브젝트를 향한 각도를 계산할 때 함께 사용"
+    },
+    {
+      "block_id": "touching_edge",
+      "relationship": "경계 감지",
+      "explanation": "화면 끝에 도달했는지 확인할 때 함께 사용"
+    },
+    {
+      "block_id": "if_condition",
+      "relationship": "조건부 이동",
+      "explanation": "특정 조건에서만 이동하도록 제어할 때 함께 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "오브젝트가 원하는 방향으로 이동하지 않아요",
+      "possible_causes": [
+        "각도 체계를 잘못 이해함 (0도가 위쪽임을 잊음)",
+        "각도 값을 잘못 입력함",
+        "오브젝트의 회전과 이동 방향을 혼동함"
+      ],
+      "solutions": [
+        "0도=위, 90도=오른쪽, 180도=아래, 270도=왼쪽 확인",
+        "각도 값을 다시 확인하고 필요하면 계산 블록 사용",
+        "이 블록은 오브젝트 모양의 방향과 무관하게 절대 각도로 이동함을 이해"
+      ]
+    },
+    {
+      "problem": "이동 속도가 너무 빠르거나 느려요",
+      "possible_causes": ["거리 값이 너무 크거나 작음", "반복문에서 기다리기 시간이 없음", "한 번에 너무 많은 이동 블록 실행"],
+      "solutions": [
+        "거리를 5~20 정도로 조정해서 적절한 속도 찾기",
+        "반복문에 '기다리기' 블록 추가하여 속도 조절",
+        "이동 블록 실행 빈도 조정"
+      ]
+    },
+    {
+      "problem": "오브젝트가 화면 밖으로 사라져요",
+      "possible_causes": ["이동 거리가 너무 큼", "화면 경계 체크를 하지 않음", "계속 같은 방향으로만 이동"],
+      "solutions": [
+        "'화면 끝에 닿았는가?' 조건 블록으로 경계 확인",
+        "화면 크기를 고려한 적절한 이동 거리 설정",
+        "경계에서 방향을 바꾸거나 위치를 제한하는 로직 추가"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "나침반과 걷기",
+      "explanation": "나침반으로 방향을 정하고 그 방향으로 일정 거리를 걷는 것과 같은 원리입니다."
+    },
+    {
+      "analogy": "비행기 항로",
+      "explanation": "비행기가 특정 방위각으로 일정 거리를 비행하는 것과 동일한 개념입니다."
+    },
+    {
+      "analogy": "시계의 시침",
+      "explanation": "시계의 시침이 특정 각도를 가리키는 것처럼 방향을 표현합니다."
+    },
+    {
+      "analogy": "GPS 네비게이션",
+      "explanation": "GPS가 '북쪽으로 100m 이동'처럼 안내하는 것과 같은 방식입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "부드러운 회전 이동",
+      "description": "이동하면서 점진적으로 방향을 바꾸는 곡선 이동",
+      "use_case": "자동차의 커브 주행, 미사일 유도, 자연스러운 추적 움직임"
+    },
+    {
+      "concept": "벡터 합성 이동",
+      "description": "여러 방향의 힘을 합성하여 최종 이동 방향 결정",
+      "use_case": "바람의 영향을 받는 비행, 물리 시뮬레이션, 중력 효과"
+    },
+    {
+      "concept": "극좌표 기반 패턴",
+      "description": "각도와 거리를 활용한 복잡한 기하학적 패턴 생성",
+      "use_case": "꽃잎 패턴, 나선형 이동, 별 모양 경로"
+    },
+    {
+      "concept": "AI 추적 시스템",
+      "description": "목표물까지의 각도를 계산하여 지능적으로 추적",
+      "use_case": "적 AI, 호밍 미사일, 자동 추적 카메라"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "각도와 거리를 입력하여 원하는 방향으로 오브젝트를 이동시킬 수 있다",
+      "example": "4방향 또는 8방향 키보드 이동 시스템 구현"
+    },
+    {
+      "level": "중급",
+      "criteria": "각도 계산과 조건을 활용하여 동적인 이동 패턴을 만들 수 있다",
+      "example": "원형 패트롤, 마우스 추적, 대각선 이동 등의 복잡한 움직임 구현"
+    },
+    {
+      "level": "고급",
+      "criteria": "벡터 개념을 활용하여 물리적으로 현실적이고 복잡한 이동 시스템을 구현할 수 있다",
+      "example": "관성 이동, 중력 영향, AI 추적, 궤도 운동 등의 고급 움직임 시뮬레이션"
+    }
+  ]
+}

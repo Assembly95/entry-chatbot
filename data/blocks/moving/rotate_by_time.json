@@ -1,0 +1,327 @@
+{
+  "id": "rotate_by_time",
+  "category": "moving",
+  "name": "[시간]초 동안 [횟수]번 돌기",
+  "description": "오브젝트를 지정된 시간 동안 지정된 횟수만큼 회전시키는 블록입니다. 양수는 시계방향, 음수는 반시계방향으로 회전합니다. 회전하는 동안 다른 블록들도 동시에 실행될 수 있어서 부드러운 애니메이션 효과를 만들 수 있습니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "시간 기반 애니메이션의 개념 이해",
+      "회전 속도와 시간의 관계 학습",
+      "동시성과 비동기 실행의 기초 개념 습득",
+      "부드러운 움직임을 위한 타이밍 제어 이해",
+      "게임과 애니메이션에서의 회전 효과 활용법 학습"
+    ],
+    "key_concepts": [
+      {
+        "concept": "시간 기반 회전",
+        "explanation": "일정 시간 동안 지속적으로 회전하면서 부드러운 애니메이션 효과를 만드는 방식입니다."
+      },
+      {
+        "concept": "회전 속도",
+        "explanation": "같은 시간에 더 많이 회전하면 빠르게, 적게 회전하면 천천히 도는 속도 개념입니다."
+      },
+      {
+        "concept": "비차단 실행",
+        "explanation": "이 블록이 실행되는 동안에도 다른 블록들이 동시에 실행될 수 있는 특성입니다."
+      },
+      {
+        "concept": "회전 방향",
+        "explanation": "양수는 시계방향(오른쪽), 음수는 반시계방향(왼쪽)으로 회전하는 규칙입니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": [
+      "기본 회전 개념 이해",
+      "시간 단위(초)에 대한 기본 지식",
+      "양수와 음수의 개념 이해",
+      "기본 애니메이션 원리에 대한 이해"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "바람개비 효과",
+      "description": "바람에 돌아가는 바람개비 구현",
+      "blocks": ["when_run_button_click", "repeat_while_true", "  rotate_by_time(2, 1)", "  wait_second(0.5)"],
+      "explanation": "2초 동안 한 바퀴씩 계속 회전하여 바람개비가 돌아가는 효과를 만듭니다."
+    },
+    {
+      "title": "점프 회전 동작",
+      "description": "점프하면서 공중제비 도는 효과",
+      "blocks": [
+        "when_some_key_pressed('스페이스')",
+        "broadcast_and_wait('점프시작')",
+        "rotate_by_time(0.5, 1)",
+        "change_y_by(100)",
+        "wait_second(0.5)",
+        "change_y_by(-100)"
+      ],
+      "explanation": "스페이스 키를 누르면 0.5초 동안 한 바퀴 회전하면서 점프하는 액션을 만듭니다."
+    },
+    {
+      "title": "시계 바늘 움직임",
+      "description": "시간에 따라 돌아가는 시계 바늘",
+      "blocks": ["when_run_button_click", "repeat_while_true", "  rotate_by_time(60, 1)", "  broadcast('1분경과')"],
+      "explanation": "60초(1분) 동안 한 바퀴 회전하여 실제 시계 바늘처럼 움직이는 효과를 만듭니다."
+    },
+    {
+      "title": "스핀 공격 효과",
+      "description": "게임 캐릭터의 회전 공격 모션",
+      "blocks": [
+        "when_message_cast('스핀공격')",
+        "set_effect('투명도', 50)",
+        "rotate_by_time(0.3, 3)",
+        "repeat_basic(10)",
+        "  if_condition(<touching_object('적')>)",
+        "    broadcast('데미지')",
+        "    break",
+        "  wait_second(0.03)",
+        "set_effect('투명도', 0)"
+      ],
+      "explanation": "0.3초 동안 3바퀴 빠르게 회전하면서 닿는 적에게 데미지를 주는 스핀 공격입니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "오브젝트를 부드럽게 회전시키고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'동작' 카테고리에서 시간 기반 회전 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'[시간]초 동안 [횟수]번 돌기' 블록을 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "시간을 길게 하면 천천히, 짧게 하면 빠르게 회전해요"
+        }
+      ]
+    },
+    {
+      "situation": "반대 방향으로 회전시키고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "회전 횟수에 음수를 넣으면 반대 방향으로 돌아요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "rotate_by_time(2, -1)은 2초 동안 반시계방향으로 한 바퀴 돌아요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "양수는 시계방향, 음수는 반시계방향이에요"
+        }
+      ]
+    },
+    {
+      "situation": "회전하면서 다른 동작도 함께 하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "이 블록은 실행되는 동안 다른 블록도 동시에 실행할 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'신호' 카테고리의 방송하기 블록으로 동시 실행을 구현할 수 있어요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "회전 블록 다음에 이동이나 크기 변경 블록을 추가해보세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "회전이 즉시 끝난다고 생각",
+      "why_it_happens": "시간 기반 실행을 이해하지 못함",
+      "consequence": "회전 중에 다른 동작을 시작해서 의도하지 않은 결과 발생",
+      "solution": "지정된 시간 동안 회전이 계속된다는 것을 이해하고 기다리기 사용",
+      "teaching_moment": "이 블록은 설정한 시간 동안 천천히 회전하는 애니메이션 블록이에요."
+    },
+    {
+      "mistake": "회전 속도를 조절할 수 없다고 생각",
+      "why_it_happens": "시간과 횟수의 관계를 이해하지 못함",
+      "consequence": "항상 같은 속도로만 회전",
+      "solution": "같은 횟수를 더 짧은 시간에 하면 빠르게, 긴 시간에 하면 천천히 회전",
+      "teaching_moment": "1초에 1바퀴는 보통 속도, 0.5초에 1바퀴는 빠른 속도예요."
+    },
+    {
+      "mistake": "너무 많은 회전 횟수 입력",
+      "why_it_happens": "회전 횟수가 바퀴 수를 의미한다는 것을 모름",
+      "consequence": "오브젝트가 너무 많이 돌아서 어지러운 효과",
+      "solution": "1~3 정도의 적절한 회전 횟수 사용",
+      "teaching_moment": "1은 한 바퀴(360도), 2는 두 바퀴(720도)를 의미해요."
+    },
+    {
+      "mistake": "회전 중에 방향 변경 시도",
+      "why_it_happens": "회전 중에는 방향이 계속 변한다는 것을 고려하지 않음",
+      "consequence": "예상하지 못한 이동 방향이나 동작",
+      "solution": "회전이 끝난 후에 방향을 설정하거나 이동 실행",
+      "teaching_moment": "회전하는 동안은 오브젝트의 방향이 계속 바뀌고 있어요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "동작 카테고리 찾기",
+      "instruction": "블록 팔레트에서 파란색 '동작' 카테고리를 클릭하세요.",
+      "visual_hint": "움직임 관련 아이콘이 있는 파란색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "시간 회전 블록 선택",
+      "instruction": "'[시간]초 동안 [횟수]번 돌기' 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "두 개의 입력 자리가 있는 회전 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "시간 설정",
+      "instruction": "첫 번째 자리에 회전할 시간(초)을 입력하세요.",
+      "visual_hint": "1~3초 정도가 적당하며, 소수점도 사용할 수 있습니다."
+    },
+    {
+      "step": 4,
+      "title": "회전 횟수 설정",
+      "instruction": "두 번째 자리에 회전할 바퀴 수를 입력하세요.",
+      "visual_hint": "양수는 시계방향, 음수는 반시계방향입니다."
+    },
+    {
+      "step": 5,
+      "title": "실행 및 확인",
+      "instruction": "프로그램을 실행해서 오브젝트가 부드럽게 회전하는지 확인하세요.",
+      "visual_hint": "회전 속도가 너무 빠르거나 느리면 시간과 횟수를 조정하세요."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "direction_relative",
+      "relationship": "즉시 회전",
+      "explanation": "각도만큼 즉시 회전시킬 때 사용하는 블록"
+    },
+    {
+      "block_id": "direction_set",
+      "relationship": "방향 설정",
+      "explanation": "특정 방향으로 즉시 설정할 때 사용하는 블록"
+    },
+    {
+      "block_id": "wait_second",
+      "relationship": "타이밍 조절",
+      "explanation": "회전이 끝날 때까지 기다릴 때 함께 사용"
+    },
+    {
+      "block_id": "repeat_while_true",
+      "relationship": "연속 회전",
+      "explanation": "계속 회전하는 효과를 만들 때 함께 사용"
+    },
+    {
+      "block_id": "broadcast",
+      "relationship": "동시 실행",
+      "explanation": "회전하면서 다른 동작을 동시에 실행할 때 사용"
+    },
+    {
+      "block_id": "set_effect",
+      "relationship": "회전 효과 강화",
+      "explanation": "회전하면서 투명도나 색상 효과를 추가할 때 함께 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "회전이 너무 빠르거나 느려요",
+      "possible_causes": ["시간과 횟수의 비율이 적절하지 않음", "시간 값이 너무 크거나 작음", "회전 횟수가 너무 많거나 적음"],
+      "solutions": [
+        "일반적으로 1초에 1바퀴 정도가 적당한 속도",
+        "빠른 회전은 0.5초에 1바퀴, 느린 회전은 2초에 1바퀴",
+        "시간과 횟수를 비례적으로 조정하여 속도 제어"
+      ]
+    },
+    {
+      "problem": "회전하면서 다른 동작이 이상해요",
+      "possible_causes": ["회전 중에 방향 기반 이동 사용", "회전이 끝나기 전에 다음 동작 시작", "동시에 여러 회전 블록 실행"],
+      "solutions": ["회전과 무관한 좌표 이동 사용", "회전 시간만큼 기다리기 블록 추가", "한 번에 하나의 회전만 실행하도록 조정"]
+    },
+    {
+      "problem": "회전이 끊겨 보여요",
+      "possible_causes": ["다른 무거운 작업이 동시에 실행됨", "너무 짧은 시간에 많은 회전", "컴퓨터 성능 문제"],
+      "solutions": ["회전 중에는 복잡한 계산 최소화", "시간을 늘리고 횟수를 줄여서 부드럽게", "불필요한 동시 실행 블록 정리"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "팽이 돌리기",
+      "explanation": "팽이가 일정 시간 동안 여러 바퀴 도는 것과 같은 원리입니다."
+    },
+    {
+      "analogy": "놀이기구 회전",
+      "explanation": "회전목마나 관람차가 정해진 시간 동안 천천히 도는 것과 비슷합니다."
+    },
+    {
+      "analogy": "피겨 스케이팅 스핀",
+      "explanation": "선수가 일정 시간 동안 여러 바퀴 회전하는 동작과 같습니다."
+    },
+    {
+      "analogy": "지구의 자전",
+      "explanation": "지구가 24시간 동안 한 바퀴 도는 것처럼 시간과 회전을 연결한 개념입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "가속/감속 회전",
+      "description": "점점 빨라지거나 느려지는 회전 효과",
+      "use_case": "팽이가 멈추는 효과, 엔진 시동, 프로펠러 가속"
+    },
+    {
+      "concept": "복합 회전",
+      "description": "여러 축으로 동시에 회전하는 3D 효과",
+      "use_case": "주사위 굴리기, 행성 공전과 자전, 체조 동작"
+    },
+    {
+      "concept": "조건부 회전",
+      "description": "특정 조건에 따라 회전 속도나 방향이 변하는 시스템",
+      "use_case": "풍향에 따른 풍차, 속도에 따른 바퀴 회전, 게임 아이템 효과"
+    },
+    {
+      "concept": "리듬 회전",
+      "description": "음악이나 비트에 맞춰 회전하는 동기화 시스템",
+      "use_case": "댄스 게임, 리듬 게임, 음악 시각화"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "시간과 횟수를 설정하여 기본적인 회전 애니메이션을 만들 수 있다",
+      "example": "바람개비, 시계 바늘, 단순 회전 효과 구현"
+    },
+    {
+      "level": "중급",
+      "criteria": "회전과 다른 동작을 조합하여 복잡한 애니메이션을 만들 수 있다",
+      "example": "점프 회전, 회전 공격, 이동하면서 회전하는 효과 구현"
+    },
+    {
+      "level": "고급",
+      "criteria": "회전을 활용한 창의적이고 현실적인 물리 시뮬레이션을 구현할 수 있다",
+      "example": "관성 회전, 중력 영향, 마찰에 의한 감속 등 현실적인 회전 시스템"
+    }
+  ]
+}

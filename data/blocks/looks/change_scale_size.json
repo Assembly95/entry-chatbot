@@ -1,0 +1,409 @@
+{
+  "id": "change_scale_size",
+  "category": "looks",
+  "name": "크기 변경하기",
+  "description": "오브젝트의 크기를 현재 크기에서 지정한 퍼센트만큼 증가시키거나 감소시키는 블록입니다. 양수를 입력하면 커지고, 음수를 입력하면 작아집니다. 크기를 점진적으로 변화시켜 확대/축소 애니메이션을 만들 때 사용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "상대적 크기 변경 개념 이해",
+      "스케일 애니메이션 구현 방법 학습",
+      "크기 변화를 통한 원근감 표현",
+      "점진적 변형 효과 구현 기법",
+      "동적 크기 제어 시스템 구축"
+    ],
+    "key_concepts": [
+      {
+        "concept": "상대적 스케일링",
+        "explanation": "현재 크기를 기준으로 일정 비율만큼 증가하거나 감소시키는 변형 방식입니다."
+      },
+      {
+        "concept": "퍼센트 단위",
+        "explanation": "100%를 기준으로 한 비율로, 10을 더하면 현재 크기의 110%가 됩니다."
+      },
+      {
+        "concept": "크기 누적",
+        "explanation": "반복적으로 크기를 변경하면 누적되어 점점 커지거나 작아집니다."
+      },
+      {
+        "concept": "스케일 애니메이션",
+        "explanation": "크기를 점진적으로 변화시켜 부드러운 확대/축소 효과를 만드는 기법입니다."
+      }
+    ],
+    "difficulty_level": "초중급",
+    "prerequisites": ["오브젝트 크기 개념", "퍼센트 이해", "반복문 사용 경험", "기본 애니메이션 원리"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "펄스 애니메이션",
+      "description": "심장박동처럼 주기적으로 크기가 변하는 효과",
+      "blocks": [
+        "when_run_button_click",
+        "set_size(100)",
+        "",
+        "repeat_while_true",
+        "  // 확대",
+        "  repeat_basic(10)",
+        "    change_scale_size(2)",
+        "    wait_second(0.03)",
+        "  ",
+        "  // 축소",
+        "  repeat_basic(10)",
+        "    change_scale_size(-2)",
+        "    wait_second(0.03)",
+        "  ",
+        "  wait_second(0.5)"
+      ],
+      "explanation": "크기를 2%씩 증가/감소시켜 맥동하는 효과를 만듭니다."
+    },
+    {
+      "title": "클릭 반응 효과",
+      "description": "클릭 시 튀어오르는 듯한 애니메이션",
+      "blocks": [
+        "when_object_click",
+        "// 빠른 확대",
+        "repeat_basic(5)",
+        "  change_scale_size(6)",
+        "  wait_second(0.02)",
+        "",
+        "// 오버슈트",
+        "repeat_basic(3)",
+        "  change_scale_size(-2)",
+        "  wait_second(0.02)",
+        "",
+        "// 원래 크기로 복귀",
+        "repeat_basic(12)",
+        "  change_scale_size(-2)",
+        "  wait_second(0.03)",
+        "",
+        "// 정확한 100%로 리셋",
+        "set_size(100)"
+      ],
+      "explanation": "클릭 시 빠르게 커졌다가 탄성있게 원래 크기로 돌아옵니다."
+    },
+    {
+      "title": "원근감 이동",
+      "description": "멀어지고 가까워지는 3D 효과",
+      "blocks": [
+        "when_run_button_click",
+        "set_size(50)",
+        "set_y(-100)",
+        "",
+        "// 가까이 오기",
+        "repeat_basic(50)",
+        "  change_scale_size(3)",
+        "  change_y(3)",
+        "  // 크기에 따른 속도 변화",
+        "  if_condition(<get_size()> > 100)",
+        "    change_x(<random_number(-1, 1)>)",
+        "  wait_second(0.05)",
+        "",
+        "wait_second(1)",
+        "",
+        "// 멀어지기",
+        "repeat_basic(50)",
+        "  change_scale_size(-2)",
+        "  change_y(-3)",
+        "  wait_second(0.05)"
+      ],
+      "explanation": "크기와 Y좌표를 함께 변경하여 원근감을 표현합니다."
+    },
+    {
+      "title": "먹이 먹기 게임",
+      "description": "아이템을 먹을 때마다 캐릭터가 성장",
+      "blocks": [
+        "when_run_button_click",
+        "set_size(50)",
+        "set_variable('점수', 0)",
+        "",
+        "when_touching('먹이')",
+        "// 먹이 먹기 효과",
+        "broadcast_message_to('먹이', '먹힘')",
+        "change_variable('점수', 1)",
+        "",
+        "// 성장 애니메이션",
+        "repeat_basic(5)",
+        "  change_scale_size(2)",
+        "  wait_second(0.02)",
+        "",
+        "// 크기 제한",
+        "if_condition(<get_size()> > 200)",
+        "  speak_something('최대 크기 도달!')",
+        "  set_size(200)",
+        "",
+        "// 크기에 따른 속도 변화",
+        "set_move_speed(<calc_operation(300, '-', <get_size()>)>)"
+      ],
+      "explanation": "먹이를 먹을 때마다 크기가 증가하며 게임 요소가 변화합니다."
+    },
+    {
+      "title": "호버 효과",
+      "description": "마우스 오버 시 부드러운 확대",
+      "blocks": [
+        "when_run_button_click",
+        "set_size(100)",
+        "set_variable('목표크기', 100)",
+        "set_variable('현재크기', 100)",
+        "",
+        "repeat_while_true",
+        "  // 마우스가 가까이 있을 때",
+        "  if_condition(<distance_to_mouse()> < 50)",
+        "    set_variable('목표크기', 120)",
+        "  else",
+        "    set_variable('목표크기', 100)",
+        "  ",
+        "  // 부드러운 전환",
+        "  set_variable('차이', <calc_operation(<get_variable('목표크기')>, '-', <get_variable('현재크기')>)>)",
+        "  ",
+        "  if_condition(<get_variable('차이') > 1>)",
+        "    change_scale_size(2)",
+        "    change_variable('현재크기', 2)",
+        "  else_if(<get_variable('차이') < -1>)",
+        "    change_scale_size(-2)",
+        "    change_variable('현재크기', -2)",
+        "  ",
+        "  wait_second(0.02)"
+      ],
+      "explanation": "마우스 거리에 따라 부드럽게 크기가 변화하는 인터랙티브 효과입니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "오브젝트를 점점 크게 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'생김새' 카테고리에서 크기 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'크기 변경하기' 블록을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "양수를 입력하면 커지고, 음수를 입력하면 작아져요"
+        }
+      ]
+    },
+    {
+      "situation": "부드러운 확대/축소를 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "작은 값을 여러 번 변경하면 부드러워요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "반복문과 대기 시간을 함께 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "repeat 안에서 change_scale_size(2)와 wait(0.05)를 조합하세요"
+        }
+      ]
+    },
+    {
+      "situation": "원래 크기로 돌아가고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "같은 양만큼 반대로 변경하거나 set_size(100) 사용"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "정확한 크기는 set_size로 설정하는 것이 좋아요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "변수에 원래 크기를 저장해두면 편리해요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "크기가 너무 크거나 작아짐",
+      "why_it_happens": "계속 한 방향으로만 변경",
+      "consequence": "오브젝트가 화면을 벗어나거나 보이지 않음",
+      "solution": "크기 제한 조건 추가",
+      "teaching_moment": "크기는 보통 10~400% 범위가 적당해요."
+    },
+    {
+      "mistake": "원래 크기로 정확히 돌아오지 않음",
+      "why_it_happens": "상대적 변경의 누적 오차",
+      "consequence": "반복 후 크기가 조금씩 달라짐",
+      "solution": "마지막에 set_size로 정확히 설정",
+      "teaching_moment": "상대적 변경은 오차가 누적될 수 있어요. 정확한 값이 필요하면 set_size를 사용하세요."
+    },
+    {
+      "mistake": "애니메이션이 끊겨 보임",
+      "why_it_happens": "너무 큰 변화량 사용",
+      "consequence": "부자연스러운 움직임",
+      "solution": "작은 변화량과 짧은 대기 시간",
+      "teaching_moment": "1~5% 정도씩 변경하면 부드러운 애니메이션이 돼요."
+    },
+    {
+      "mistake": "크기와 위치가 맞지 않음",
+      "why_it_happens": "크기 변경 시 중심점 이동",
+      "consequence": "의도하지 않은 위치 변화",
+      "solution": "크기 변경 후 위치 재조정",
+      "teaching_moment": "크기가 변해도 중심점은 같은 곳에 있어요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "생김새 카테고리 열기",
+      "instruction": "블록 팔레트에서 보라색 '생김새' 카테고리를 클릭하세요.",
+      "visual_hint": "붓 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "크기 변경 블록 선택",
+      "instruction": "'크기 변경하기' 블록을 작업 영역으로 드래그하세요.",
+      "visual_hint": "퍼센트 단위 입력란이 있는 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "변화량 입력",
+      "instruction": "증가(양수) 또는 감소(음수) 퍼센트를 입력하세요.",
+      "visual_hint": "2~10 정도가 적당한 애니메이션 값입니다."
+    },
+    {
+      "step": 4,
+      "title": "반복 구조 추가",
+      "instruction": "반복문과 대기를 추가하여 애니메이션을 만드세요.",
+      "visual_hint": "repeat와 wait_second를 함께 사용합니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트 및 조정",
+      "instruction": "실행하여 크기 변화가 자연스러운지 확인하세요.",
+      "visual_hint": "너무 빠르거나 느리면 값을 조정합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "set_size",
+      "relationship": "절대 크기 설정",
+      "explanation": "특정 크기로 직접 설정"
+    },
+    {
+      "block_id": "get_size",
+      "relationship": "현재 크기 확인",
+      "explanation": "오브젝트의 현재 크기 값 가져오기"
+    },
+    {
+      "block_id": "change_x/y",
+      "relationship": "위치 변경",
+      "explanation": "크기와 함께 위치도 변경하여 원근감 표현"
+    },
+    {
+      "block_id": "set_effect",
+      "relationship": "효과 조합",
+      "explanation": "크기와 효과를 함께 변경"
+    },
+    {
+      "block_id": "repeat_basic",
+      "relationship": "반복 실행",
+      "explanation": "점진적 크기 변화에 사용"
+    },
+    {
+      "block_id": "if_condition",
+      "relationship": "크기 제한",
+      "explanation": "최대/최소 크기 제한 조건"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "크기가 변하지 않아요",
+      "possible_causes": ["너무 작은 변화량", "블록이 실행되지 않음", "이미 최대/최소 크기"],
+      "solutions": ["변화량 증가 (5 이상)", "이벤트 연결 확인", "현재 크기 확인"]
+    },
+    {
+      "problem": "오브젝트가 사라져요",
+      "possible_causes": ["크기가 0에 가까움", "너무 커서 화면 밖", "음수 크기"],
+      "solutions": ["최소 크기 제한 설정", "최대 크기 제한 설정", "set_size로 리셋"]
+    },
+    {
+      "problem": "애니메이션이 부자연스러워요",
+      "possible_causes": ["변화량이 너무 큼", "대기 시간이 없음", "불규칙한 변화"],
+      "solutions": ["작은 변화량 사용", "wait_second 추가", "일정한 패턴 유지"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "카메라 줌",
+      "explanation": "카메라로 줌인/줌아웃하는 것처럼 점진적으로 확대/축소됩니다."
+    },
+    {
+      "analogy": "풍선 부풀리기",
+      "explanation": "풍선에 공기를 넣으면 점점 커지는 것과 같은 원리입니다."
+    },
+    {
+      "analogy": "돋보기 효과",
+      "explanation": "돋보기를 가까이 하거나 멀리하면 크기가 변하는 것과 비슷합니다."
+    },
+    {
+      "analogy": "성장",
+      "explanation": "식물이나 동물이 시간에 따라 크기가 변하는 자연 현상과 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "탄성 애니메이션",
+      "description": "물리적 탄성을 시뮬레이션한 크기 변화",
+      "use_case": "버튼 효과, 충돌 반응, 캐릭터 애니메이션"
+    },
+    {
+      "concept": "크기 기반 물리",
+      "description": "크기에 따른 속도, 중력 등의 변화",
+      "use_case": "성장 게임, 물리 시뮬레이션"
+    },
+    {
+      "concept": "원근법 시스템",
+      "description": "Y좌표와 크기를 연동한 3D 효과",
+      "use_case": "레이싱 게임, 3D 공간 표현"
+    },
+    {
+      "concept": "모핑 효과",
+      "description": "크기와 모양을 동시에 변화",
+      "use_case": "변신 애니메이션, 형태 전환"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "change_scale_size로 간단한 크기 변경을 할 수 있다",
+      "example": "확대/축소, 클릭 반응"
+    },
+    {
+      "level": "중급",
+      "criteria": "반복과 조건을 활용한 크기 애니메이션을 구현할 수 있다",
+      "example": "펄스 효과, 호버 효과, 성장 시스템"
+    },
+    {
+      "level": "고급",
+      "criteria": "크기 변화를 활용한 복잡한 시각 효과를 설계할 수 있다",
+      "example": "3D 원근감, 탄성 애니메이션, 물리 시뮬레이션"
+    }
+  ]
+}

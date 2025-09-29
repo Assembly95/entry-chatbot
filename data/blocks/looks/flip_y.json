@@ -1,0 +1,450 @@
+{
+  "id": "flip_y",
+  "category": "looks",
+  "name": "상하 뒤집기",
+  "description": "오브젝트를 상하로 뒤집는 블록입니다. 물에 비친 것처럼 오브젝트의 위아래가 반대로 바뀝니다. 점프 회전, 물 반사, 중력 반전 등의 효과를 구현할 때 사용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "상하 대칭과 반전 개념 이해",
+      "수직 반사 효과 구현 방법 학습",
+      "중력 반전과 방향 전환 기법",
+      "물리적 움직임의 시각적 표현",
+      "상하 대칭을 활용한 창의적 효과 구현"
+    ],
+    "key_concepts": [
+      {
+        "concept": "수직 반전",
+        "explanation": "X축을 기준으로 위아래를 뒤집는 변환으로, 수면 반사와 같은 효과입니다."
+      },
+      {
+        "concept": "상하 대칭",
+        "explanation": "수평선을 기준으로 위와 아래가 거울처럼 대칭되는 상태입니다."
+      },
+      {
+        "concept": "중력 방향",
+        "explanation": "오브젝트가 받는 중력의 방향을 시각적으로 표현하는 방법입니다."
+      },
+      {
+        "concept": "반사 효과",
+        "explanation": "물이나 거울 표면에 비친 모습을 표현하는 시각 기법입니다."
+      }
+    ],
+    "difficulty_level": "초중급",
+    "prerequisites": ["오브젝트 조작 기초", "좌표계 이해", "flip_x 사용 경험", "기본 물리 개념"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "점프 회전 애니메이션",
+      "description": "점프하며 공중제비 도는 효과",
+      "blocks": [
+        "when_some_key_pressed('space')",
+        "// 점프 상승",
+        "repeat_basic(10)",
+        "  change_y(15)",
+        "  if_condition(<get_repeat_index()> = 5)",
+        "    // 정점에서 뒤집기",
+        "    flip_y()",
+        "  wait_second(0.03)",
+        "",
+        "// 하강",
+        "repeat_basic(10)",
+        "  change_y(-15)",
+        "  if_condition(<get_repeat_index()> = 5)",
+        "    // 착지 전 원상복구",
+        "    flip_y()",
+        "  wait_second(0.03)",
+        "",
+        "speak_something('착지!')"
+      ],
+      "explanation": "점프 중간에 flip_y를 사용하여 공중제비 효과를 만듭니다."
+    },
+    {
+      "title": "물 반사 효과",
+      "description": "수면에 비친 반사 이미지 생성",
+      "blocks": [
+        "when_run_button_click",
+        "// 원본 오브젝트",
+        "locate_xy(0, 50)",
+        "set_variable('원본Y', 50)",
+        "",
+        "// 반사 복제본 생성",
+        "clone_self()",
+        "",
+        "when_clone_start",
+        "// 상하 뒤집기",
+        "flip_y()",
+        "// 수면 아래 위치",
+        "locate_xy(0, -50)",
+        "// 반사 효과",
+        "set_effect('transparency', 40)",
+        "set_effect('brightness', -30)",
+        "set_effect('color', 150)",
+        "",
+        "// 물결 효과",
+        "set_variable('물결', 0)",
+        "repeat_while_true",
+        "  change_variable('물결', 5)",
+        "  set_x(<calc_operation(<sin(<get_variable('물결')>)>, '*', 3)>)",
+        "  // 원본 움직임 반영",
+        "  set_y(<calc_operation(-1, '*', <get_object_y('원본')>)>)",
+        "  wait_second(0.05)"
+      ],
+      "explanation": "flip_y로 수면 반사를 구현하고 물결 효과를 추가합니다."
+    },
+    {
+      "title": "중력 반전 게임",
+      "description": "중력 방향이 바뀌는 플랫포머",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('중력방향', '아래')",
+        "set_variable('속도Y', 0)",
+        "",
+        "when_some_key_pressed('g')",
+        "// 중력 반전",
+        "flip_y()",
+        "if_condition(<get_variable('중력방향') = '아래'>)",
+        "  set_variable('중력방향', '위')",
+        "  set_variable('중력값', 1)",
+        "  speak_something('중력 반전!')",
+        "else",
+        "  set_variable('중력방향', '아래')",
+        "  set_variable('중력값', -1)",
+        "  speak_something('중력 정상!')",
+        "",
+        "// 중력 적용",
+        "repeat_while_true",
+        "  change_variable('속도Y', <get_variable('중력값')>)",
+        "  change_y(<get_variable('속도Y')>)",
+        "  ",
+        "  // 바닥/천장 충돌",
+        "  if_condition(<get_variable('중력방향') = '아래'>)",
+        "    if_condition(<coordinate_object('y') < -150>)",
+        "      set_y(-150)",
+        "      set_variable('속도Y', 0)",
+        "  else",
+        "    if_condition(<coordinate_object('y') > 150>)",
+        "      set_y(150)",
+        "      set_variable('속도Y', 0)",
+        "  ",
+        "  wait_second(0.02)"
+      ],
+      "explanation": "flip_y와 중력 시스템을 결합하여 중력 반전 메커닉을 구현합니다."
+    },
+    {
+      "title": "박쥐 매달리기",
+      "description": "천장에 거꾸로 매달린 박쥐",
+      "blocks": [
+        "when_run_button_click",
+        "// 박쥐 초기 설정",
+        "set_costume('박쥐')",
+        "locate_xy(0, 150)",
+        "flip_y()",
+        "set_variable('매달림', true)",
+        "",
+        "// 대기 애니메이션",
+        "repeat_while_true(<get_variable('매달림')>)",
+        "  // 날개 펄럭임",
+        "  change_size(2)",
+        "  wait_second(0.5)",
+        "  change_size(-2)",
+        "  wait_second(0.5)",
+        "",
+        "when_object_click",
+        "// 클릭하면 날아가기",
+        "set_variable('매달림', false)",
+        "flip_y()",
+        "speak_something('날아간다!')",
+        "",
+        "// 날아가는 애니메이션",
+        "repeat_basic(30)",
+        "  change_y(-5)",
+        "  change_x(<random_number(-3, 3)>)",
+        "  // 날개짓",
+        "  if_condition(<calc_operation(<get_repeat_index()>, '%', 3)> = 0)",
+        "    next_costume()",
+        "  wait_second(0.05)"
+      ],
+      "explanation": "flip_y로 박쥐가 거꾸로 매달린 상태를 표현합니다."
+    },
+    {
+      "title": "다이빙 애니메이션",
+      "description": "물에 다이빙하는 캐릭터",
+      "blocks": [
+        "when_some_key_pressed('d')",
+        "// 다이빙 준비",
+        "locate_xy(0, 100)",
+        "speak_something('다이빙!')",
+        "",
+        "// 하강하며 회전",
+        "repeat_basic(20)",
+        "  change_y(-8)",
+        "  // 중간에 뒤집기",
+        "  if_condition(<get_repeat_index()> = 10)",
+        "    flip_y()",
+        "  wait_second(0.02)",
+        "",
+        "// 물 입수",
+        "if_condition(<coordinate_object('y') < 0>)",
+        "  speak_something('첨벙!')",
+        "  set_effect('color', 150)",
+        "  set_effect('transparency', 30)",
+        "  ",
+        "  // 물속 이동",
+        "  repeat_basic(10)",
+        "    change_y(-3)",
+        "    change_effect_amount('transparency', 3)",
+        "    wait_second(0.05)",
+        "  ",
+        "  // 다시 떠오르기",
+        "  flip_y()",
+        "  repeat_basic(30)",
+        "    change_y(5)",
+        "    change_effect_amount('transparency', -2)",
+        "    wait_second(0.05)",
+        "  ",
+        "  erase_all_effects()"
+      ],
+      "explanation": "다이빙 동작에서 flip_y로 입수 자세를 표현합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "오브젝트를 위아래로 뒤집고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'생김새' 카테고리에서 뒤집기 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'상하 뒤집기' 블록을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "실행할 때마다 위아래가 반대로 바뀌어요"
+        }
+      ]
+    },
+    {
+      "situation": "물에 비친 반사를 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "복제본을 만들고 flip_y를 적용하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "투명도와 색상 효과를 추가하면 실감나요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "Y좌표를 반대로 설정하여 반사 위치를 맞추세요"
+        }
+      ]
+    },
+    {
+      "situation": "점프 회전을 구현하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "점프 최고점에서 flip_y를 실행하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "착지 전에 다시 flip_y로 원상복구하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "Y좌표 변화와 함께 사용하면 자연스러워요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "좌우도 바뀔 것으로 기대",
+      "why_it_happens": "flip의 범위를 잘못 이해",
+      "consequence": "위아래만 바뀌고 좌우는 그대로",
+      "solution": "좌우는 flip_x 사용",
+      "teaching_moment": "flip_y는 위아래만, flip_x는 좌우만 뒤집어요."
+    },
+    {
+      "mistake": "중력이 자동으로 바뀔 것으로 기대",
+      "why_it_happens": "시각적 변화와 물리를 혼동",
+      "consequence": "모양만 바뀌고 움직임은 그대로",
+      "solution": "중력 방향도 코드로 변경",
+      "teaching_moment": "flip_y는 모양만 바꿔요. 움직임은 직접 프로그래밍해야 해요."
+    },
+    {
+      "mistake": "반복 뒤집기로 깜빡거림",
+      "why_it_happens": "조건 없이 계속 실행",
+      "consequence": "오브젝트가 위아래로 깜빡거림",
+      "solution": "상태 변수로 중복 방지",
+      "teaching_moment": "flip_y는 토글이에요. 한 번만 실행해야 해요."
+    },
+    {
+      "mistake": "Y좌표와 혼동",
+      "why_it_happens": "위치 이동과 뒤집기를 혼동",
+      "consequence": "원하는 효과가 나오지 않음",
+      "solution": "flip_y는 모양, change_y는 위치",
+      "teaching_moment": "뒤집기는 모양 변화, Y좌표 이동은 위치 변화예요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "생김새 카테고리 열기",
+      "instruction": "블록 팔레트에서 보라색 '생김새' 카테고리를 클릭하세요.",
+      "visual_hint": "붓 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "flip_y 블록 찾기",
+      "instruction": "'상하 뒤집기' 블록을 찾으세요.",
+      "visual_hint": "단독으로 사용되는 실행 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "이벤트 설정",
+      "instruction": "언제 뒤집을지 결정하는 이벤트와 연결하세요.",
+      "visual_hint": "점프, 클릭, 특정 조건 등과 연결합니다."
+    },
+    {
+      "step": 4,
+      "title": "상태 관리",
+      "instruction": "필요시 현재 뒤집기 상태를 변수에 저장하세요.",
+      "visual_hint": "중복 실행을 방지할 수 있습니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트",
+      "instruction": "실행하여 상하가 올바르게 뒤집히는지 확인하세요.",
+      "visual_hint": "오브젝트가 거꾸로 뒤집힙니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "flip_x",
+      "relationship": "좌우 뒤집기",
+      "explanation": "좌우로 뒤집는 블록"
+    },
+    {
+      "block_id": "rotate",
+      "relationship": "회전",
+      "explanation": "각도를 변경하여 회전"
+    },
+    {
+      "block_id": "change_y",
+      "relationship": "Y축 이동",
+      "explanation": "위아래 위치 이동"
+    },
+    {
+      "block_id": "set_rotation_style",
+      "relationship": "회전 스타일",
+      "explanation": "회전 방식 설정"
+    },
+    {
+      "block_id": "clone_self",
+      "relationship": "복제 생성",
+      "explanation": "반사 이미지 만들기"
+    },
+    {
+      "block_id": "set_effect",
+      "relationship": "효과 적용",
+      "explanation": "반사 효과 추가"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "뒤집기가 안 돼요",
+      "possible_causes": ["블록이 실행되지 않음", "오브젝트가 상하 대칭", "이미 뒤집혀 있음"],
+      "solutions": ["이벤트 연결 확인", "비대칭 이미지 사용", "초기 상태 확인"]
+    },
+    {
+      "problem": "반사가 어색해요",
+      "possible_causes": ["Y좌표 계산 오류", "효과 설정 부족", "타이밍 불일치"],
+      "solutions": ["Y좌표 음수 처리", "투명도/색상 추가", "동기화 코드 확인"]
+    },
+    {
+      "problem": "중력 반전이 작동하지 않아요",
+      "possible_causes": ["시각적 뒤집기만 적용", "물리 로직 미구현", "변수 설정 오류"],
+      "solutions": ["중력 값도 변경", "이동 방향 반전", "변수 값 확인"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "물 반사",
+      "explanation": "호수나 물웅덩이에 비친 반사상처럼 위아래가 뒤집힌 모습입니다."
+    },
+    {
+      "analogy": "거꾸로 매달리기",
+      "explanation": "철봉에 거꾸로 매달렸을 때 세상이 뒤집혀 보이는 것과 같습니다."
+    },
+    {
+      "analogy": "다이빙",
+      "explanation": "다이빙 선수가 공중에서 회전하는 모습과 비슷합니다."
+    },
+    {
+      "analogy": "거울 천장",
+      "explanation": "천장에 거울이 있으면 위아래가 반대로 보이는 것과 같은 효과입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "3D 회전 시뮬레이션",
+      "description": "flip_x와 flip_y를 조합한 3D 효과",
+      "use_case": "3D 회전, 주사위 굴리기, 코인 던지기"
+    },
+    {
+      "concept": "반사 월드",
+      "description": "전체 세계가 상하로 뒤집힌 거울 세계",
+      "use_case": "퍼즐 게임, 평행 우주, 반사 스테이지"
+    },
+    {
+      "concept": "중력 조작 시스템",
+      "description": "flip_y와 물리 엔진을 결합한 중력 제어",
+      "use_case": "중력 반전 게임, 우주 시뮬레이션"
+    },
+    {
+      "concept": "물 시뮬레이션",
+      "description": "수면 반사와 물결 효과 구현",
+      "use_case": "낚시 게임, 수영 게임, 자연 시뮬레이션"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "flip_y를 사용하여 오브젝트를 상하로 뒤집을 수 있다",
+      "example": "클릭 시 뒤집기, 단순 토글"
+    },
+    {
+      "level": "중급",
+      "criteria": "flip_y를 활용한 애니메이션과 효과를 구현할 수 있다",
+      "example": "점프 회전, 반사 효과, 상태 관리"
+    },
+    {
+      "level": "고급",
+      "criteria": "flip_y를 활용한 복잡한 물리 시스템과 시각 효과를 구현할 수 있다",
+      "example": "중력 반전, 물 시뮬레이션, 3D 효과"
+    }
+  ]
+}

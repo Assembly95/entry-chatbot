@@ -1,0 +1,365 @@
+{
+  "id": "function_field_label",
+  "category": "function",
+  "name": "라벨 추가",
+  "description": "함수 정의에 설명 텍스트(라벨)를 추가하는 블록입니다. 매개변수가 아닌 단순 설명 텍스트로, 함수의 용도나 매개변수 설명을 명확하게 표시할 때 사용합니다. 함수 호출 시 가독성을 높이는 역할을 합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "함수 문서화와 가독성의 중요성 이해",
+      "라벨을 통한 명확한 함수 인터페이스 설계",
+      "코드 주석과 설명의 역할 학습",
+      "사용자 친화적인 함수 설계 방법 익히기",
+      "협업을 위한 코드 문서화 기법 습득"
+    ],
+    "key_concepts": [
+      {
+        "concept": "라벨 (Label)",
+        "explanation": "함수에 추가되는 설명 텍스트로, 매개변수가 아니라 단순히 정보를 제공하는 역할을 합니다."
+      },
+      {
+        "concept": "함수 인터페이스",
+        "explanation": "함수를 사용하는 방법을 명확하게 보여주는 외부 접점으로, 라벨이 이해를 돕습니다."
+      },
+      {
+        "concept": "코드 가독성",
+        "explanation": "코드를 읽고 이해하기 쉽게 만드는 것으로, 라벨은 중요한 가독성 도구입니다."
+      },
+      {
+        "concept": "문서화",
+        "explanation": "코드의 목적과 사용법을 설명하여 다른 사람(또는 미래의 자신)이 쉽게 이해할 수 있도록 하는 작업입니다."
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": ["함수 만들기 기본 사용법", "매개변수 추가 경험", "함수 호출 방법 이해", "기본적인 프로그래밍 구조 지식"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "도형 그리기 함수 설명",
+      "description": "매개변수 사이에 설명 라벨 추가",
+      "blocks": [
+        "function_create('도형그리기',",
+        "  [label('도형 종류:'),",
+        "   number_param('변의수'),",
+        "   label('픽셀 단위:'),",
+        "   number_param('크기')])",
+        "  start_drawing",
+        "  repeat_basic(<param('변의수')>)",
+        "    move_direction(<param('크기')>)",
+        "    direction_relative(<calc_operation(360, '/', <param('변의수')>)>)",
+        "  stop_drawing",
+        "",
+        "when_run_button_click",
+        "function_call('도형그리기', [3, 100])",
+        "// 함수 호출 시 '도형 종류: 3, 픽셀 단위: 100'으로 표시됨"
+      ],
+      "explanation": "라벨을 사용하여 각 매개변수의 의미를 명확하게 설명합니다."
+    },
+    {
+      "title": "색상 설정 함수",
+      "description": "RGB 값 설명 라벨",
+      "blocks": [
+        "function_create('색상설정',",
+        "  [label('RGB 색상값 (0-255)'),",
+        "   label('빨강:'), number_param('R'),",
+        "   label('초록:'), number_param('G'),",
+        "   label('파랑:'), number_param('B')])",
+        "  set_color(<rgb_to_hex(<param('R')>, <param('G')>, <param('B')>)>)",
+        "  speak_something('색상이 변경되었습니다')",
+        "",
+        "when_run_button_click",
+        "function_call('색상설정', [255, 128, 0])",
+        "// '빨강: 255, 초록: 128, 파랑: 0' 오렌지색 설정"
+      ],
+      "explanation": "RGB 각 구성 요소를 라벨로 명확히 표시하여 색상 값 입력을 돕습니다."
+    },
+    {
+      "title": "게임 설정 함수",
+      "description": "복잡한 설정을 라벨로 구분",
+      "blocks": [
+        "function_create('게임초기화',",
+        "  [label('=== 게임 설정 ==='),",
+        "   label('난이도 (1-5):'), number_param('난이도'),",
+        "   label('시간 제한 (초):'), number_param('시간'),",
+        "   label('=== 플레이어 설정 ==='),",
+        "   label('이름:'), string_param('플레이어명'),",
+        "   label('시작 위치 X:'), number_param('X'),",
+        "   label('시작 위치 Y:'), number_param('Y')])",
+        "  set_variable('난이도', <param('난이도')>)",
+        "  set_variable('제한시간', <param('시간')>)",
+        "  set_variable('플레이어', <param('플레이어명')>)",
+        "  locate_xy(<param('X')>, <param('Y')>)",
+        "  speak_something('게임 설정 완료!')",
+        "",
+        "when_run_button_click",
+        "function_call('게임초기화', [3, 60, '플레이어1', 0, 0])"
+      ],
+      "explanation": "구분선 라벨을 사용하여 매개변수들을 논리적으로 그룹화합니다."
+    },
+    {
+      "title": "애니메이션 타이밍 함수",
+      "description": "시간 단위 명시",
+      "blocks": [
+        "function_create('페이드효과',",
+        "  [label('방향:'), string_param('type'),",
+        "   label('지속 시간'), number_param('duration'), label('초'),",
+        "   label('단계 수:'), number_param('steps')])",
+        "  set_variable('간격', <calc_operation(<param('duration')>, '/', <param('steps')>)>)",
+        "  if_condition(<param('type') = 'in'>)",
+        "    set_transparency(100)",
+        "    repeat_basic(<param('steps')>)",
+        "      change_transparency(<calc_operation(-100, '/', <param('steps')>)>)",
+        "      wait_second(<get_variable('간격')>)",
+        "  else_if(<param('type') = 'out'>)",
+        "    set_transparency(0)",
+        "    repeat_basic(<param('steps')>)",
+        "      change_transparency(<calc_operation(100, '/', <param('steps')>)>)",
+        "      wait_second(<get_variable('간격')>)",
+        "",
+        "when_run_button_click",
+        "function_call('페이드효과', ['in', 2, 20])",
+        "// '방향: in, 지속 시간: 2초, 단계 수: 20'"
+      ],
+      "explanation": "라벨로 시간 단위와 각 매개변수의 역할을 명확히 표시합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "함수 매개변수를 더 이해하기 쉽게 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'함수' 카테고리에서 라벨 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'라벨 추가' 블록을 함수 정의에 추가하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "라벨은 설명만 하고 값을 받지 않아요"
+        }
+      ]
+    },
+    {
+      "situation": "매개변수를 그룹으로 구분하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "구분선이나 제목 역할의 라벨을 추가할 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'=== 섹션 이름 ===' 같은 라벨로 구분하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "관련된 매개변수들 앞에 설명 라벨을 배치하세요"
+        }
+      ]
+    },
+    {
+      "situation": "단위나 범위를 표시하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "매개변수 앞이나 뒤에 단위 라벨을 추가할 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'초', 'px', '(0-100)' 같은 라벨을 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "숫자 매개변수와 함께 사용하면 효과적이에요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "라벨을 매개변수로 착각",
+      "why_it_happens": "라벨과 매개변수의 차이를 이해하지 못함",
+      "consequence": "함수 호출 시 라벨에 값을 전달하려고 함",
+      "solution": "라벨은 설명용이고 값을 받지 않음을 이해",
+      "teaching_moment": "라벨은 읽기 전용 설명이에요. 값은 매개변수에만 전달해요."
+    },
+    {
+      "mistake": "너무 많은 라벨 사용",
+      "why_it_happens": "모든 것을 설명하려고 함",
+      "consequence": "함수 인터페이스가 복잡해짐",
+      "solution": "필수적인 설명만 라벨로 추가",
+      "teaching_moment": "적당한 라벨은 도움이 되지만, 너무 많으면 오히려 복잡해져요."
+    },
+    {
+      "mistake": "라벨 위치를 잘못 배치",
+      "why_it_happens": "라벨과 매개변수의 관계를 고려하지 않음",
+      "consequence": "설명이 엉뚱한 매개변수를 가리킴",
+      "solution": "관련된 매개변수 바로 앞이나 뒤에 배치",
+      "teaching_moment": "라벨은 설명하려는 매개변수 가까이에 두어야 해요."
+    },
+    {
+      "mistake": "동적 라벨을 만들려고 시도",
+      "why_it_happens": "라벨 내용을 변경하고 싶어함",
+      "consequence": "라벨은 정적 텍스트라 변경 불가",
+      "solution": "고정된 설명만 라벨로 사용",
+      "teaching_moment": "라벨은 함수 정의 시 고정되는 텍스트예요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "함수 생성",
+      "instruction": "함수 만들기 블록을 작업 영역에 배치하세요.",
+      "visual_hint": "새로운 함수 정의가 시작됩니다."
+    },
+    {
+      "step": 2,
+      "title": "라벨 추가 선택",
+      "instruction": "함수 블록에서 '추가' → '라벨' 선택하세요.",
+      "visual_hint": "설명 텍스트를 입력할 수 있는 라벨이 추가됩니다."
+    },
+    {
+      "step": 3,
+      "title": "설명 텍스트 입력",
+      "instruction": "라벨에 표시할 설명 텍스트를 입력하세요.",
+      "visual_hint": "예: '속도(1-10):', '단위:', '=== 설정 ===' 등"
+    },
+    {
+      "step": 4,
+      "title": "매개변수와 조합",
+      "instruction": "라벨과 매개변수를 적절히 배치하여 의미를 명확하게 하세요.",
+      "visual_hint": "라벨-매개변수 또는 매개변수-라벨 순서로 배치합니다."
+    },
+    {
+      "step": 5,
+      "title": "함수 호출 확인",
+      "instruction": "함수를 호출할 때 라벨이 어떻게 표시되는지 확인하세요.",
+      "visual_hint": "라벨은 함수 호출 시 가독성을 높여줍니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "function_field_string",
+      "relationship": "문자열 매개변수",
+      "explanation": "실제 텍스트 값을 받는 매개변수"
+    },
+    {
+      "block_id": "function_field_number",
+      "relationship": "숫자 매개변수",
+      "explanation": "숫자 값을 받는 매개변수"
+    },
+    {
+      "block_id": "function_field_boolean",
+      "relationship": "불린 매개변수",
+      "explanation": "참/거짓 값을 받는 매개변수"
+    },
+    {
+      "block_id": "function_create",
+      "relationship": "함수 정의",
+      "explanation": "라벨을 포함하는 함수 정의 블록"
+    },
+    {
+      "block_id": "function_call",
+      "relationship": "함수 호출",
+      "explanation": "라벨이 표시되는 함수 호출 시점"
+    },
+    {
+      "block_id": "comment",
+      "relationship": "코드 주석",
+      "explanation": "라벨과 비슷한 설명 역할을 하는 주석 블록"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "라벨이 표시되지 않아요",
+      "possible_causes": ["라벨 블록을 제대로 추가하지 않음", "함수 정의에 포함되지 않음", "텍스트를 입력하지 않음"],
+      "solutions": ["함수 정의에 라벨 블록 추가 확인", "라벨 텍스트 입력 확인", "함수 재정의 후 확인"]
+    },
+    {
+      "problem": "라벨 위치가 이상해요",
+      "possible_causes": ["잘못된 순서로 배치", "관련 없는 매개변수 사이에 위치", "너무 많은 라벨 사용"],
+      "solutions": ["관련 매개변수 근처로 이동", "논리적인 순서로 재배치", "불필요한 라벨 제거"]
+    },
+    {
+      "problem": "함수가 복잡해 보여요",
+      "possible_causes": ["너무 많은 라벨", "긴 설명 텍스트", "중복된 설명"],
+      "solutions": ["핵심 설명만 남기기", "간결한 텍스트 사용", "그룹화로 구조 개선"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "양식의 필드 라벨",
+      "explanation": "웹 양식에서 각 입력 필드 옆의 설명 텍스트와 같은 역할입니다."
+    },
+    {
+      "analogy": "제품 설명서",
+      "explanation": "제품의 각 부품이나 기능을 설명하는 라벨과 비슷합니다."
+    },
+    {
+      "analogy": "요리 레시피의 재료 설명",
+      "explanation": "각 재료의 양과 단위를 설명하는 텍스트와 같습니다."
+    },
+    {
+      "analogy": "도로 표지판",
+      "explanation": "방향이나 거리를 알려주는 표지판처럼 정보를 제공합니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "구조화된 라벨링",
+      "description": "섹션 구분과 계층적 라벨 사용",
+      "use_case": "복잡한 설정 함수, 다단계 매개변수"
+    },
+    {
+      "concept": "단위 시스템",
+      "description": "일관된 단위 표시 규칙",
+      "use_case": "물리 시뮬레이션, 게임 수치 설정"
+    },
+    {
+      "concept": "다국어 라벨",
+      "description": "여러 언어로 라벨 제공",
+      "use_case": "국제화 프로젝트, 교육용 콘텐츠"
+    },
+    {
+      "concept": "시맨틱 라벨링",
+      "description": "의미론적으로 명확한 라벨 체계",
+      "use_case": "API 설계, 라이브러리 개발"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "라벨을 추가하여 간단한 매개변수 설명을 제공할 수 있다",
+      "example": "단위 표시, 기본 설명 추가"
+    },
+    {
+      "level": "중급",
+      "criteria": "라벨을 효과적으로 사용하여 함수 인터페이스를 명확하게 만들 수 있다",
+      "example": "매개변수 그룹화, 범위 표시, 구조화된 설명"
+    },
+    {
+      "level": "고급",
+      "criteria": "체계적인 라벨링으로 복잡한 함수를 문서화하고 사용성을 높일 수 있다",
+      "example": "계층적 구조, 일관된 규칙, 전문적인 문서화"
+    }
+  ]
+}

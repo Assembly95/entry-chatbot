@@ -1,0 +1,406 @@
+{
+  "id": "function_param_boolean",
+  "category": "function",
+  "name": "불린 매개변수 값 가져오기",
+  "description": "함수 내부에서 전달받은 불린(참/거짓) 매개변수의 값을 가져오는 블록입니다. 함수 호출 시 전달된 true 또는 false 값을 함수 내부에서 사용할 때 활용합니다. 조건문이나 논리 연산에 직접 사용 가능합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "함수 매개변수 값 접근 방법 이해",
+      "불린 값의 활용과 처리 방법 학습",
+      "매개변수를 통한 함수 동작 제어",
+      "조건부 로직과 불린 매개변수의 연계",
+      "타입별 매개변수 처리 방법 습득"
+    ],
+    "key_concepts": [
+      {
+        "concept": "매개변수 접근",
+        "explanation": "함수에 전달된 값을 함수 내부에서 사용하기 위해 매개변수 이름으로 접근하는 방법입니다."
+      },
+      {
+        "concept": "불린 값 활용",
+        "explanation": "전달받은 true/false 값을 조건문, 논리 연산 등에 직접 사용하여 함수 동작을 제어합니다."
+      },
+      {
+        "concept": "타입 보장",
+        "explanation": "불린 매개변수는 항상 true 또는 false 값만 가지므로 타입 안정성이 보장됩니다."
+      },
+      {
+        "concept": "논리적 분기",
+        "explanation": "불린 매개변수 값에 따라 함수의 실행 경로를 다르게 설정할 수 있습니다."
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": ["함수 정의와 매개변수 추가", "불린 데이터 타입 이해", "조건문 사용 경험", "함수 호출과 인자 전달"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "디버그 모드 제어",
+      "description": "불린 매개변수로 디버그 정보 표시 제어",
+      "blocks": [
+        "function_create('게임실행', [boolean_param('디버그모드')])",
+        "  // 불린 매개변수 값 확인",
+        "  if_condition(<function_param_boolean('디버그모드')>)",
+        "    show_variable('점수')",
+        "    show_variable('체력')",
+        "    show_variable('레벨')",
+        "    speak_something('디버그 모드 활성화됨')",
+        "    set_variable('로그표시', true)",
+        "  else",
+        "    hide_variable('점수')",
+        "    hide_variable('체력')",
+        "    hide_variable('레벨')",
+        "    set_variable('로그표시', false)",
+        "  ",
+        "  // 게임 실행 중 디버그 확인",
+        "  repeat_while_true",
+        "    if_condition(<function_param_boolean('디버그모드')>)",
+        "      set_text('FPS: ' + <get_fps()>)",
+        "    // 게임 로직",
+        "",
+        "when_run_button_click",
+        "ask_and_wait('디버그 모드? (y/n)')",
+        "if_condition(<get_variable('답변') = 'y'>)",
+        "  function_general('게임실행', [true])",
+        "else",
+        "  function_general('게임실행', [false])"
+      ],
+      "explanation": "불린 매개변수 값을 확인하여 디버그 모드를 켜고 끄는 함수입니다."
+    },
+    {
+      "title": "방향 전환 애니메이션",
+      "description": "불린 값으로 애니메이션 방향 결정",
+      "blocks": [
+        "function_create('슬라이드이동', [boolean_param('오른쪽'), number_param('거리')])",
+        "  // 방향 설정",
+        "  if_condition(<function_param_boolean('오른쪽')>)",
+        "    set_variable('방향각도', 90)",
+        "    set_variable('이동단위', <calc_operation(<param('거리')>, '/', 10)>)",
+        "  else",
+        "    set_variable('방향각도', -90)",
+        "    set_variable('이동단위', <calc_operation(<param('거리')>, '/', 10)>)",
+        "  ",
+        "  point_direction(<get_variable('방향각도')>)",
+        "  repeat_basic(10)",
+        "    move_direction(<get_variable('이동단위')>)",
+        "    wait_second(0.05)",
+        "  ",
+        "  // 반대 방향 복귀 옵션",
+        "  if_condition(not <function_param_boolean('오른쪽')>)",
+        "    speak_something('왼쪽 이동 완료')",
+        "",
+        "when_run_button_click",
+        "function_general('슬라이드이동', [true, 100])",
+        "wait_second(1)",
+        "function_general('슬라이드이동', [false, 100])"
+      ],
+      "explanation": "불린 매개변수로 이동 방향을 결정하는 애니메이션 함수입니다."
+    },
+    {
+      "title": "조건부 데이터 처리",
+      "description": "정렬 옵션을 불린으로 제어",
+      "blocks": [
+        "function_create('리스트출력', [list_param('데이터'), boolean_param('정렬여부'), boolean_param('역순')])",
+        "  set_variable('출력리스트', <param('데이터')>)",
+        "  ",
+        "  // 정렬 여부 확인",
+        "  if_condition(<function_param_boolean('정렬여부')>)",
+        "    set_variable('출력리스트', <sort_list(<get_variable('출력리스트')>)>)",
+        "    speak_something('정렬됨')",
+        "  ",
+        "  // 역순 여부 확인",
+        "  if_condition(<function_param_boolean('역순')>)",
+        "    set_variable('출력리스트', <reverse_list(<get_variable('출력리스트')>)>)",
+        "    speak_something('역순 적용')",
+        "  ",
+        "  // 두 옵션 모두 true일 때",
+        "  if_condition(<function_param_boolean('정렬여부')> and <function_param_boolean('역순')>)",
+        "    speak_something('정렬 후 역순으로 출력')",
+        "  ",
+        "  foreach_list(<get_variable('출력리스트')>, 'item')",
+        "    set_text(<get_variable('item')>)",
+        "    wait_second(0.5)",
+        "",
+        "when_run_button_click",
+        "set_list('숫자들', [5, 2, 8, 1, 9, 3])",
+        "function_general('리스트출력', [<get_list('숫자들')>, true, false])",
+        "wait_second(2)",
+        "function_general('리스트출력', [<get_list('숫자들')>, true, true])"
+      ],
+      "explanation": "여러 불린 매개변수를 조합하여 데이터 처리 옵션을 제어합니다."
+    },
+    {
+      "title": "상태 토글 시스템",
+      "description": "불린 매개변수로 상태 전환",
+      "blocks": [
+        "function_create('설정변경', [string_param('항목'), boolean_param('활성화')])",
+        "  // 불린 값에 따른 상태 설정",
+        "  if_condition(<param('항목') = '소리'>)",
+        "    if_condition(<function_param_boolean('활성화')>)",
+        "      set_volume(100)",
+        "      set_variable('소리설정', true)",
+        "      speak_something('소리 켜짐')",
+        "    else",
+        "      set_volume(0)",
+        "      set_variable('소리설정', false)",
+        "      set_text('소리 꺼짐')",
+        "  else_if(<param('항목') = '효과'>)",
+        "    if_condition(<function_param_boolean('활성화')>)",
+        "      set_variable('효과설정', true)",
+        "      set_effect('brightness', 20)",
+        "    else",
+        "      set_variable('효과설정', false)",
+        "      clear_effect()",
+        "  ",
+        "  // NOT 연산 활용",
+        "  set_variable('비활성화', not <function_param_boolean('활성화')>)",
+        "  if_condition(<get_variable('비활성화')>)",
+        "    set_transparency(30)",
+        "",
+        "when_some_key_pressed('s')",
+        "set_variable('현재소리', not <get_variable('소리설정')>)",
+        "function_general('설정변경', ['소리', <get_variable('현재소리')>])"
+      ],
+      "explanation": "불린 매개변수를 활용한 설정 토글 시스템입니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "함수에서 불린 매개변수 값을 사용하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'함수' 카테고리에서 매개변수 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'불린 매개변수 값' 블록을 선택하고 매개변수 이름을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "이 블록은 true/false 값을 반환하므로 조건문에 직접 사용할 수 있어요"
+        }
+      ]
+    },
+    {
+      "situation": "불린 매개변수로 조건 분기를 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "if 조건문의 조건 자리에 불린 매개변수 블록을 넣으세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "if (<function_param_boolean('매개변수명')>) 형태로 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "true일 때와 false일 때 각각 다른 동작을 정의하세요"
+        }
+      ]
+    },
+    {
+      "situation": "여러 불린 매개변수를 조합하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "AND, OR 연산자로 여러 불린 매개변수를 조합할 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'계산' 카테고리의 논리 연산자를 활용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "<param1> and <param2> 형태로 복합 조건을 만드세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "매개변수 이름을 잘못 선택",
+      "why_it_happens": "정의한 매개변수 이름을 정확히 기억하지 못함",
+      "consequence": "값을 가져올 수 없거나 오류 발생",
+      "solution": "드롭다운에서 정확한 매개변수 이름 선택",
+      "teaching_moment": "매개변수 이름은 함수 정의와 정확히 일치해야 해요."
+    },
+    {
+      "mistake": "불린이 아닌 매개변수에 사용",
+      "why_it_happens": "매개변수 타입을 혼동",
+      "consequence": "타입 불일치로 오류 발생",
+      "solution": "불린 타입 매개변수에만 사용",
+      "teaching_moment": "이 블록은 불린 타입 매개변수 전용이에요."
+    },
+    {
+      "mistake": "함수 외부에서 사용 시도",
+      "why_it_happens": "매개변수 범위를 이해하지 못함",
+      "consequence": "매개변수에 접근할 수 없음",
+      "solution": "함수 정의 내부에서만 사용",
+      "teaching_moment": "매개변수는 해당 함수 내부에서만 유효해요."
+    },
+    {
+      "mistake": "NOT 연산 실수",
+      "why_it_happens": "불린 논리를 반대로 이해",
+      "consequence": "의도와 반대로 동작",
+      "solution": "NOT 연산자 사용 시 주의",
+      "teaching_moment": "NOT은 true를 false로, false를 true로 바꿔요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "함수 정의 확인",
+      "instruction": "사용할 불린 매개변수가 함수에 정의되어 있는지 확인하세요.",
+      "visual_hint": "함수 정의에서 불린 타입 매개변수를 찾습니다."
+    },
+    {
+      "step": 2,
+      "title": "매개변수 블록 추가",
+      "instruction": "'함수' 카테고리에서 '불린 매개변수 값' 블록을 선택하세요.",
+      "visual_hint": "육각형 모양의 값 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "매개변수 이름 선택",
+      "instruction": "드롭다운 메뉴에서 사용할 불린 매개변수 이름을 선택하세요.",
+      "visual_hint": "함수에 정의된 불린 매개변수 목록이 표시됩니다."
+    },
+    {
+      "step": 4,
+      "title": "조건문이나 논리식에 사용",
+      "instruction": "불린 값이 필요한 곳(조건문, 논리 연산 등)에 배치하세요.",
+      "visual_hint": "if 조건, AND/OR 연산, NOT 연산 등에 사용합니다."
+    },
+    {
+      "step": 5,
+      "title": "동작 테스트",
+      "instruction": "함수를 true와 false로 각각 호출하여 동작을 확인하세요.",
+      "visual_hint": "두 가지 경우 모두 테스트하여 올바르게 작동하는지 확인합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "function_field_boolean",
+      "relationship": "매개변수 정의",
+      "explanation": "불린 매개변수를 함수에 추가할 때 사용"
+    },
+    {
+      "block_id": "function_param_string",
+      "relationship": "문자열 매개변수",
+      "explanation": "문자열 타입 매개변수 값 가져오기"
+    },
+    {
+      "block_id": "function_param_number",
+      "relationship": "숫자 매개변수",
+      "explanation": "숫자 타입 매개변수 값 가져오기"
+    },
+    {
+      "block_id": "if_condition",
+      "relationship": "조건문",
+      "explanation": "불린 매개변수 값으로 분기 처리"
+    },
+    {
+      "block_id": "not",
+      "relationship": "논리 반전",
+      "explanation": "불린 값을 반대로 변환"
+    },
+    {
+      "block_id": "and_or",
+      "relationship": "논리 연산",
+      "explanation": "여러 불린 값을 조합"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "매개변수 값을 가져올 수 없어요",
+      "possible_causes": ["매개변수 이름 오타", "함수 외부에서 사용", "매개변수가 정의되지 않음", "잘못된 타입의 매개변수"],
+      "solutions": ["매개변수 이름 재확인", "함수 내부에서만 사용", "함수 정의 확인", "불린 타입 매개변수인지 확인"]
+    },
+    {
+      "problem": "항상 한쪽으로만 동작해요",
+      "possible_causes": ["함수 호출 시 같은 값만 전달", "조건문 논리 오류", "NOT 연산 실수"],
+      "solutions": ["true/false 모두 테스트", "조건문 로직 재검토", "논리 연산 확인"]
+    },
+    {
+      "problem": "복잡한 조건이 예상과 다르게 동작해요",
+      "possible_causes": ["AND/OR 우선순위 혼동", "여러 조건 조합 오류", "괄호 사용 실수"],
+      "solutions": ["조건을 단순화하여 테스트", "괄호로 우선순위 명확히", "각 조건 개별 확인"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "스위치 상태 확인",
+      "explanation": "전등 스위치가 켜져 있는지 꺼져 있는지 확인하는 것과 같습니다."
+    },
+    {
+      "analogy": "설정 옵션 읽기",
+      "explanation": "앱 설정에서 알림이 켜져 있는지 확인하는 것과 비슷합니다."
+    },
+    {
+      "analogy": "문 잠금 상태",
+      "explanation": "문이 잠겨 있는지(true) 열려 있는지(false) 확인하는 것과 같습니다."
+    },
+    {
+      "analogy": "체크박스 상태",
+      "explanation": "양식의 체크박스가 선택되었는지 확인하는 것과 동일합니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "플래그 조합",
+      "description": "여러 불린 매개변수를 조합한 복잡한 상태 관리",
+      "use_case": "게임 설정, 권한 시스템, 기능 토글"
+    },
+    {
+      "concept": "상태 패턴",
+      "description": "불린 조합으로 객체의 상태를 표현",
+      "use_case": "캐릭터 상태, UI 모드, 시스템 상태"
+    },
+    {
+      "concept": "조건부 실행",
+      "description": "불린 매개변수로 코드 블록 활성화/비활성화",
+      "use_case": "디버그 코드, 테스트 모드, A/B 테스트"
+    },
+    {
+      "concept": "검증 로직",
+      "description": "여러 불린 조건을 검증하는 시스템",
+      "use_case": "입력 검증, 권한 확인, 규칙 체크"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "불린 매개변수 값을 가져와 간단한 조건문에 사용할 수 있다",
+      "example": "단일 조건 확인, 기본 분기 처리"
+    },
+    {
+      "level": "중급",
+      "criteria": "여러 불린 매개변수를 조합하여 복잡한 로직을 구현할 수 있다",
+      "example": "AND/OR 조합, NOT 연산, 다중 조건 처리"
+    },
+    {
+      "level": "고급",
+      "criteria": "불린 매개변수를 활용한 고급 패턴과 시스템을 설계할 수 있다",
+      "example": "상태 머신, 플래그 시스템, 복잡한 검증 로직"
+    }
+  ]
+}

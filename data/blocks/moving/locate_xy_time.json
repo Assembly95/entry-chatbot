@@ -1,0 +1,495 @@
+{
+  "id": "locate_xy_time",
+  "category": "movement",
+  "name": "좌표로 이동하기 (시간)",
+  "description": "지정한 시간 동안 특정 X, Y 좌표로 부드럽게 이동하는 블록입니다. 시작 위치에서 목표 위치까지 일정한 속도로 직선 이동하며, 애니메이션처럼 부드러운 움직임을 만듭니다. glide 효과로도 알려져 있습니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "시간 기반 애니메이션 이동 이해",
+      "선형 보간 움직임 학습",
+      "정확한 경로 이동 구현",
+      "부드러운 전환 효과 만들기",
+      "타이밍 제어를 통한 속도 조절"
+    ],
+    "key_concepts": [
+      {
+        "concept": "선형 보간",
+        "explanation": "시작점과 끝점 사이를 일정한 속도로 부드럽게 이동하는 수학적 기법입니다."
+      },
+      {
+        "concept": "시간 기반 이동",
+        "explanation": "거리와 관계없이 정해진 시간 내에 목표에 도달하도록 속도를 자동 조절하는 방식입니다."
+      },
+      {
+        "concept": "직선 경로",
+        "explanation": "현재 위치에서 목표 위치까지 최단 거리인 직선으로 이동하는 경로입니다."
+      },
+      {
+        "concept": "블로킹 동작",
+        "explanation": "이동이 완료될 때까지 다음 명령을 기다리는 동기적 실행 방식입니다."
+      }
+    ],
+    "difficulty_level": "초중급",
+    "prerequisites": ["좌표계 이해", "시간 개념", "기본 이동 블록 경험", "애니메이션 기초"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "순찰 경로 시스템",
+      "description": "정해진 경로를 순찰하는 경비원",
+      "blocks": [
+        "when_run_button_click",
+        "// 순찰 시작",
+        "locate_xy(0, 0)",
+        "set_costume('경비원')",
+        "",
+        "repeat_while_true",
+        "  // 포인트 1로 이동",
+        "  locate_xy_time(150, 100, 3)",
+        "  speak_something('체크포인트 1')",
+        "  wait_second(1)",
+        "  remove_dialog()",
+        "  ",
+        "  // 포인트 2로 이동",
+        "  locate_xy_time(150, -100, 2)",
+        "  speak_something('체크포인트 2')",
+        "  wait_second(1)",
+        "  remove_dialog()",
+        "  ",
+        "  // 포인트 3으로 이동",
+        "  locate_xy_time(-150, -100, 2)",
+        "  speak_something('체크포인트 3')",
+        "  wait_second(1)",
+        "  remove_dialog()",
+        "  ",
+        "  // 포인트 4로 이동",
+        "  locate_xy_time(-150, 100, 2)",
+        "  speak_something('체크포인트 4')",
+        "  wait_second(1)",
+        "  remove_dialog()",
+        "  ",
+        "  // 시작점으로 복귀",
+        "  locate_xy_time(0, 0, 3)",
+        "  speak_something('순찰 완료')",
+        "  wait_second(2)",
+        "  remove_dialog()"
+      ],
+      "explanation": "locate_xy_time을 사용하여 정해진 경로를 일정 시간에 걸쳐 순찰합니다."
+    },
+    {
+      "title": "카메라 팬 효과",
+      "description": "영화같은 카메라 이동",
+      "blocks": [
+        "when_message_cast('컷신시작')",
+        "// 카메라 초기 위치",
+        "locate_xy(-200, 150)",
+        "set_variable('줌레벨', 100)",
+        "",
+        "// 씬 1: 전체 조망",
+        "speak_something('옛날 옛적에...')",
+        "locate_xy_time(200, 150, 5)",
+        "wait_second(1)",
+        "remove_dialog()",
+        "",
+        "// 씬 2: 주인공 클로즈업",
+        "speak_something('용감한 기사가 있었습니다.')",
+        "set_variable('줌레벨', 150)",
+        "broadcast_message('줌인')",
+        "locate_xy_time(0, 0, 3)",
+        "wait_second(2)",
+        "remove_dialog()",
+        "",
+        "// 씬 3: 성 전체",
+        "speak_something('그는 성을 지키고 있었죠.')",
+        "set_variable('줌레벨', 80)",
+        "broadcast_message('줌아웃')",
+        "locate_xy_time(-100, 100, 4)",
+        "wait_second(2)",
+        "remove_dialog()",
+        "",
+        "// 씬 4: 액션 시퀀스",
+        "speak_something('갑자기 드래곤이 나타났습니다!')",
+        "repeat_basic(3)",
+        "  locate_xy_time(<random_number(-100, 100)>, <random_number(-50, 50)>, 0.5)",
+        "  play_sound('폭발')",
+        "wait_second(1)",
+        "remove_dialog()"
+      ],
+      "explanation": "locate_xy_time으로 영화적인 카메라 움직임을 연출합니다."
+    },
+    {
+      "title": "탄막 패턴",
+      "description": "보스가 발사하는 탄막",
+      "blocks": [
+        "// 탄막 클론",
+        "when_clone_start",
+        "set_size(30)",
+        "set_costume('탄환')",
+        "// 보스 위치에서 시작",
+        "locate_xy(<get_object_x('보스')>, <get_object_y('보스')>)",
+        "",
+        "// 목표 위치 계산 (원형 패턴)",
+        "set_variable('각도', <calc_operation(<get_clone_number()>, '*', 30)>)",
+        "set_variable('목표X', <calc_operation(<cos(<get_variable('각도')>)>, '*', 200)>)",
+        "set_variable('목표Y', <calc_operation(<sin(<get_variable('각도')>)>, '*', 200)>)",
+        "",
+        "// 탄막 발사",
+        "locate_xy_time(<get_variable('목표X')>, <get_variable('목표Y')>, 2)",
+        "",
+        "// 화면 밖 도달",
+        "delete_clone()",
+        "",
+        "// 보스 오브젝트",
+        "when_message_cast('탄막패턴1')",
+        "// 12발 원형 탄막",
+        "repeat_basic(12)",
+        "  create_clone_of('myself')",
+        "  wait_second(0.05)",
+        "",
+        "wait_second(3)",
+        "",
+        "when_message_cast('탄막패턴2')",
+        "// 나선형 탄막",
+        "repeat_basic(36)",
+        "  create_clone_of('myself')",
+        "  turn_right(10)",
+        "  wait_second(0.1)"
+      ],
+      "explanation": "locate_xy_time을 사용하여 다양한 탄막 패턴을 구현합니다."
+    },
+    {
+      "title": "엘리베이터 시스템",
+      "description": "층별로 이동하는 엘리베이터",
+      "blocks": [
+        "when_run_button_click",
+        "// 엘리베이터 초기화",
+        "locate_xy(0, -150)",
+        "set_variable('현재층', 1)",
+        "set_variable('이동중', false)",
+        "",
+        "// 층별 Y좌표 정의",
+        "define_function('층별좌표', '층')",
+        "  if_condition(<get_parameter('층') = 1>)",
+        "    return(-150)",
+        "  else_if(<get_parameter('층') = 2>)",
+        "    return(-50)",
+        "  else_if(<get_parameter('층') = 3>)",
+        "    return(50)",
+        "  else_if(<get_parameter('층') = 4>)",
+        "    return(150)",
+        "",
+        "// 층 이동 함수",
+        "define_function('층이동', '목표층')",
+        "  if_condition(not <get_variable('이동중')>)",
+        "    set_variable('이동중', true)",
+        "    set_variable('목표Y', <call_function('층별좌표', <get_parameter('목표층')>)>)",
+        "    set_variable('거리', <abs(<calc_operation(<get_variable('목표Y')>, '-', <coordinate_object('y')>)>)>)",
+        "    set_variable('이동시간', <calc_operation(<get_variable('거리')>, '/', 100)>)",
+        "    ",
+        "    speak_something(<get_parameter('목표층')> + '층으로 이동')",
+        "    play_sound('엘리베이터')",
+        "    locate_xy_time(0, <get_variable('목표Y')>, <get_variable('이동시간')>)",
+        "    ",
+        "    set_variable('현재층', <get_parameter('목표층')>)",
+        "    speak_something(<get_parameter('목표층')> + '층 도착')",
+        "    play_sound('딩동')",
+        "    wait_second(1)",
+        "    remove_dialog()",
+        "    set_variable('이동중', false)",
+        "",
+        "// 버튼 입력",
+        "when_some_key_pressed('1')",
+        "call_function('층이동', 1)",
+        "",
+        "when_some_key_pressed('2')",
+        "call_function('층이동', 2)",
+        "",
+        "when_some_key_pressed('3')",
+        "call_function('층이동', 3)",
+        "",
+        "when_some_key_pressed('4')",
+        "call_function('층이동', 4)"
+      ],
+      "explanation": "locate_xy_time으로 층 간 거리에 비례한 시간으로 엘리베이터를 이동시킵니다."
+    },
+    {
+      "title": "별자리 그리기",
+      "description": "별들을 연결하여 별자리 만들기",
+      "blocks": [
+        "when_run_button_click",
+        "// 북두칠성 좌표",
+        "set_list('별X', [-200, -150, -80, -20, 40, 100, 140])",
+        "set_list('별Y', [100, 80, 60, 70, 50, 30, 60])",
+        "",
+        "// 펜 설정",
+        "pen_up()",
+        "set_pen_color('#FFFF00')",
+        "set_pen_size(3)",
+        "",
+        "// 시작 위치",
+        "locate_xy(<get_list_item('별X', 1)>, <get_list_item('별Y', 1)>)",
+        "stamp()",
+        "",
+        "// 별자리 그리기",
+        "pen_down()",
+        "repeat_basic(6)",
+        "  set_variable('다음별', <calc_operation(<get_repeat_index()>, '+', 1)>)",
+        "  set_variable('다음X', <get_list_item('별X', <get_variable('다음별')>)>)",
+        "  set_variable('다음Y', <get_list_item('별Y', <get_variable('다음별')>)>)",
+        "  ",
+        "  // 별을 연결하며 이동",
+        "  locate_xy_time(<get_variable('다음X')>, <get_variable('다음Y')>, 1)",
+        "  stamp()",
+        "  play_sound('반짝')",
+        "  ",
+        "  // 별 효과",
+        "  set_effect('brightness', 50)",
+        "  wait_second(0.2)",
+        "  clear_effect()",
+        "",
+        "pen_up()",
+        "speak_something('북두칠성 완성!')"
+      ],
+      "explanation": "locate_xy_time과 펜을 사용하여 별들을 연결하며 별자리를 그립니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "부드럽게 이동시키고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'움직임' 카테고리에서 시간 이동 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'좌표로 이동하기' 블록을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "X, Y 좌표와 이동 시간을 설정하세요"
+        }
+      ]
+    },
+    {
+      "situation": "경로를 따라 이동하게 하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "여러 locate_xy_time을 연속으로 사용하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "각 지점마다 적절한 시간을 설정하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "필요시 wait_second로 대기 시간을 추가하세요"
+        }
+      ]
+    },
+    {
+      "situation": "속도를 조절하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "시간을 늘리면 느리게, 줄이면 빠르게 이동해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "거리에 비례한 시간을 계산하면 일정한 속도가 돼요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "distance_to로 거리를 측정하고 시간을 계산하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "이동 중 다른 이동 명령 실행",
+      "why_it_happens": "블로킹 동작을 이해 못함",
+      "consequence": "이동이 중단되거나 이상해짐",
+      "solution": "이동 완료까지 기다리기",
+      "teaching_moment": "locate_xy_time은 완료될 때까지 기다려요."
+    },
+    {
+      "mistake": "너무 짧은 시간 설정",
+      "why_it_happens": "즉시 이동을 원함",
+      "consequence": "순간이동처럼 보임",
+      "solution": "0.5초 이상 설정",
+      "teaching_moment": "0.1초 이하는 거의 순간이동이에요."
+    },
+    {
+      "mistake": "화면 밖 좌표 설정",
+      "why_it_happens": "좌표 범위 모름",
+      "consequence": "오브젝트가 보이지 않음",
+      "solution": "X: -240~240, Y: -180~180",
+      "teaching_moment": "화면 범위를 확인하고 사용하세요."
+    },
+    {
+      "mistake": "거리 무시한 시간 설정",
+      "why_it_happens": "모든 이동에 같은 시간",
+      "consequence": "속도가 일정하지 않음",
+      "solution": "거리에 비례한 시간 계산",
+      "teaching_moment": "거리가 다르면 시간도 조정해야 일정한 속도가 돼요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "움직임 카테고리 열기",
+      "instruction": "블록 팔레트에서 파란색 '움직임' 카테고리를 클릭하세요.",
+      "visual_hint": "화살표 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "locate_xy_time 블록 선택",
+      "instruction": "'좌표로 이동하기' 블록을 찾아 드래그하세요.",
+      "visual_hint": "X, Y, 시간을 입력하는 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "목표 좌표 입력",
+      "instruction": "이동할 X좌표와 Y좌표를 입력하세요.",
+      "visual_hint": "(0, 0)은 화면 중앙입니다."
+    },
+    {
+      "step": 4,
+      "title": "이동 시간 설정",
+      "instruction": "몇 초 동안 이동할지 시간을 입력하세요.",
+      "visual_hint": "1은 1초, 0.5는 0.5초입니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트",
+      "instruction": "실행하여 오브젝트가 부드럽게 이동하는지 확인하세요.",
+      "visual_hint": "직선 경로로 일정한 속도로 이동합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "locate_xy",
+      "relationship": "즉시 이동",
+      "explanation": "애니메이션 없이 즉시 이동"
+    },
+    {
+      "block_id": "locate_object_time",
+      "relationship": "오브젝트 추적",
+      "explanation": "다른 오브젝트 위치로 시간 이동"
+    },
+    {
+      "block_id": "glide_to_mouse",
+      "relationship": "마우스 추적",
+      "explanation": "마우스 위치로 시간 이동"
+    },
+    {
+      "block_id": "move",
+      "relationship": "단계 이동",
+      "explanation": "현재 방향으로 이동"
+    },
+    {
+      "block_id": "change_x/y",
+      "relationship": "상대 이동",
+      "explanation": "현재 위치에서 증감"
+    },
+    {
+      "block_id": "distance_to",
+      "relationship": "거리 계산",
+      "explanation": "속도 계산용 거리 측정"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "이동하지 않아요",
+      "possible_causes": ["블록이 실행되지 않음", "이미 목표 위치에 있음", "시간이 0"],
+      "solutions": ["이벤트 연결 확인", "다른 좌표로 테스트", "시간을 0.5 이상으로"]
+    },
+    {
+      "problem": "이동이 끊겨요",
+      "possible_causes": ["다른 이동 명령 간섭", "이동 중 중단", "반복문 문제"],
+      "solutions": ["다른 이동 코드 제거", "이동 완료 대기", "코드 실행 순서 확인"]
+    },
+    {
+      "problem": "너무 빠르거나 느려요",
+      "possible_causes": ["시간 설정 오류", "거리 계산 실수", "단위 혼동"],
+      "solutions": ["적절한 시간 조정", "거리 기반 계산", "초 단위 확인"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "드론 비행",
+      "explanation": "드론이 목적지까지 일정한 속도로 직선 비행하는 것과 같습니다."
+    },
+    {
+      "analogy": "에스컬레이터",
+      "explanation": "정해진 시간 동안 일정한 속도로 이동하는 에스컬레이터와 비슷합니다."
+    },
+    {
+      "analogy": "GPS 경로",
+      "explanation": "네비게이션이 예상 도착 시간과 함께 경로를 안내하는 것과 같습니다."
+    },
+    {
+      "analogy": "애니메이션 트윈",
+      "explanation": "영상 편집에서 키프레임 사이를 부드럽게 연결하는 트윈과 같은 원리입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "경로 애니메이션",
+      "description": "여러 지점을 순서대로 이동하는 복잡한 경로",
+      "use_case": "순찰 시스템, 관광 투어, 컷신"
+    },
+    {
+      "concept": "속도 일정 시스템",
+      "description": "거리와 관계없이 일정한 속도로 이동",
+      "use_case": "리얼리즘 이동, 물리 시뮬레이션"
+    },
+    {
+      "concept": "곡선 이동",
+      "description": "여러 중간점을 거쳐 곡선처럼 이동",
+      "use_case": "포물선 운동, 베지어 곡선"
+    },
+    {
+      "concept": "동기화 이동",
+      "description": "여러 오브젝트가 동시에 도착하도록 조정",
+      "use_case": "군집 이동, 포메이션 변경"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "locate_xy_time으로 부드러운 이동을 구현할 수 있다",
+      "example": "단순 이동, A에서 B로 이동"
+    },
+    {
+      "level": "중급",
+      "criteria": "경로와 타이밍을 제어한 복잡한 이동을 구현할 수 있다",
+      "example": "순찰 경로, 다단계 이동, 속도 조절"
+    },
+    {
+      "level": "고급",
+      "criteria": "정교한 이동 시스템과 애니메이션을 설계할 수 있다",
+      "example": "카메라 시스템, 컷신, 동기화 이동"
+    }
+  ]
+}

@@ -1,0 +1,464 @@
+{
+  "id": "bounce_wall",
+  "category": "movement",
+  "name": "벽에 닿으면 튕기기",
+  "description": "오브젝트가 화면의 가장자리(벽)에 닿으면 자동으로 반사되어 튕기는 블록입니다. 공이 벽에 부딪혀 튀는 것처럼 입사각과 반사각이 같은 물리적 반사를 구현합니다. 화면 밖으로 나가지 않도록 제한하면서 자연스러운 반사 동작을 만들 때 사용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "반사의 물리 법칙 이해",
+      "입사각과 반사각의 관계 학습",
+      "화면 경계 감지와 처리 방법",
+      "자동 충돌 처리 시스템 구축",
+      "게임 물리 기초 개념 습득"
+    ],
+    "key_concepts": [
+      {
+        "concept": "반사 법칙",
+        "explanation": "입사각과 반사각이 같다는 물리 법칙으로, 벽에 부딪힌 물체가 같은 각도로 튕겨나가는 원리입니다."
+      },
+      {
+        "concept": "화면 경계",
+        "explanation": "프로그램 화면의 상하좌우 끝부분으로, 오브젝트가 이동할 수 있는 한계 영역입니다."
+      },
+      {
+        "concept": "자동 반사",
+        "explanation": "별도의 조건 확인 없이 벽 충돌을 자동으로 감지하고 처리하는 기능입니다."
+      },
+      {
+        "concept": "방향 전환",
+        "explanation": "충돌한 벽의 방향에 따라 오브젝트의 이동 방향이 적절히 변경되는 과정입니다."
+      }
+    ],
+    "difficulty_level": "초중급",
+    "prerequisites": ["이동 블록 사용 경험", "방향 개념 이해", "좌표계 기초 지식", "반복문 활용 능력"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "탁구공 시뮬레이션",
+      "description": "벽에 튕기는 탁구공 구현",
+      "blocks": [
+        "when_run_button_click",
+        "// 공 초기 설정",
+        "locate_xy(0, 0)",
+        "point_direction(<random_number(0, 360)>)",
+        "set_variable('속도', 5)",
+        "",
+        "repeat_while_true",
+        "  // 계속 이동",
+        "  move(<get_variable('속도')>)",
+        "  ",
+        "  // 벽에 닿으면 자동으로 튕김",
+        "  bounce_wall()",
+        "  ",
+        "  // 튕길 때 효과",
+        "  if_condition(<touching_wall()>)",
+        "    play_sound('탁구')",
+        "    set_effect('color', <random_number(0, 200)>)",
+        "    wait_second(0.05)",
+        "    clear_effect()",
+        "  ",
+        "  wait_second(0.02)"
+      ],
+      "explanation": "bounce_wall을 사용하여 공이 벽에 자연스럽게 튕기는 효과를 구현합니다."
+    },
+    {
+      "title": "벽돌깨기 게임 공",
+      "description": "패들과 벽을 오가는 공",
+      "blocks": [
+        "when_flag_click",
+        "// 공 초기화",
+        "set_costume('공')",
+        "set_size(50)",
+        "locate_xy(0, -100)",
+        "point_direction(45)",
+        "set_variable('공속도', 8)",
+        "set_variable('게임중', true)",
+        "",
+        "repeat_while_true(<get_variable('게임중')>)",
+        "  move(<get_variable('공속도')>)",
+        "  ",
+        "  // 벽 반사",
+        "  bounce_wall()",
+        "  ",
+        "  // 벽돌 충돌 체크",
+        "  if_condition(<touching('벽돌')>)",
+        "    broadcast_message_to('벽돌', '파괴')",
+        "    change_direction(180)",
+        "    change_variable('점수', 10)",
+        "    // 속도 증가",
+        "    change_variable('공속도', 0.2)",
+        "  ",
+        "  // 패들 충돌",
+        "  if_condition(<touching('패들')>)",
+        "    // 패들 위치에 따른 반사각 조정",
+        "    set_variable('패들X', <get_object_x('패들')>)",
+        "    set_variable('충돌위치', <calc_operation(<coordinate_object('x')>, '-', <get_variable('패들X')>)>)",
+        "    change_direction(<calc_operation(<get_variable('충돌위치')>, '*', 2)>)",
+        "    change_direction(180)",
+        "  ",
+        "  // 바닥 체크",
+        "  if_condition(<coordinate_object('y') < -170>)",
+        "    set_variable('게임중', false)",
+        "    broadcast_message('게임오버')",
+        "  ",
+        "  wait_second(0.01)"
+      ],
+      "explanation": "bounce_wall로 좌우와 위쪽 벽 반사를 처리하고, 패들과 벽돌은 별도로 처리합니다."
+    },
+    {
+      "title": "DVD 로고 스크린세이버",
+      "description": "화면을 돌아다니며 벽에 튕기는 로고",
+      "blocks": [
+        "when_run_button_click",
+        "// DVD 로고 설정",
+        "set_costume('DVD로고')",
+        "locate_xy(<random_number(-200, 200)>, <random_number(-150, 150)>)",
+        "point_direction(<random_select([30, 45, 60, 120, 135, 150])>)",
+        "",
+        "repeat_while_true",
+        "  // 일정한 속도로 이동",
+        "  move(3)",
+        "  ",
+        "  // 벽에서 반사",
+        "  bounce_wall()",
+        "  ",
+        "  // 모서리에 정확히 맞으면 특별 효과",
+        "  if_condition(<touching_wall_corner()>)",
+        "    repeat_basic(5)",
+        "      change_effect_amount('color', 40)",
+        "      wait_second(0.1)",
+        "    speak_something('완벽!')",
+        "    wait_second(1)",
+        "    remove_dialog()",
+        "  ",
+        "  // 색상 서서히 변경",
+        "  change_effect_amount('color', 1)",
+        "  wait_second(0.02)"
+      ],
+      "explanation": "bounce_wall을 사용한 클래식한 스크린세이버 효과를 구현합니다."
+    },
+    {
+      "title": "당구 시뮬레이션",
+      "description": "마찰력이 있는 당구공",
+      "blocks": [
+        "when_object_click",
+        "// 큐로 치기",
+        "set_variable('초기속도', 15)",
+        "point_to_mouse()",
+        "",
+        "repeat_while_true(<get_variable('초기속도') > 0.5>)",
+        "  // 현재 속도로 이동",
+        "  move(<get_variable('초기속도')>)",
+        "  ",
+        "  // 벽 반사",
+        "  bounce_wall()",
+        "  ",
+        "  // 벽에 부딪히면 속도 감소",
+        "  if_condition(<touching_wall()>)",
+        "    change_variable('초기속도', -2)",
+        "    play_sound('당구벽')",
+        "  ",
+        "  // 마찰력에 의한 감속",
+        "  change_variable('초기속도', -0.1)",
+        "  ",
+        "  // 다른 공과 충돌",
+        "  if_condition(<touching('다른공')>)",
+        "    broadcast_message_to('다른공', '충돌')",
+        "    change_direction(<random_number(-30, 30)>)",
+        "    change_variable('초기속도', -3)",
+        "    play_sound('당구충돌')",
+        "  ",
+        "  wait_second(0.02)",
+        "",
+        "// 정지",
+        "speak_something('정지')",
+        "wait_second(1)",
+        "remove_dialog()"
+      ],
+      "explanation": "bounce_wall과 마찰력을 조합하여 실감나는 당구 물리를 구현합니다."
+    },
+    {
+      "title": "적 AI 순찰",
+      "description": "벽에 부딪히면 방향을 바꾸는 적",
+      "blocks": [
+        "when_run_button_click",
+        "// 적 초기 설정",
+        "set_costume('적')",
+        "locate_xy(-150, 0)",
+        "point_direction(0)",
+        "set_variable('순찰속도', 3)",
+        "set_variable('플레이어발견', false)",
+        "",
+        "repeat_while_true",
+        "  if_condition(not <get_variable('플레이어발견')>)",
+        "    // 순찰 모드",
+        "    move(<get_variable('순찰속도')>)",
+        "    bounce_wall()",
+        "    ",
+        "    // 벽에 닿으면 방향 약간 조정",
+        "    if_condition(<touching_wall()>)",
+        "      change_direction(<random_number(-10, 10)>)",
+        "      // 벽에서 반전 애니메이션",
+        "      flip_x()",
+        "      speak_something('순찰 중...')",
+        "      wait_second(1)",
+        "      remove_dialog()",
+        "    ",
+        "    // 플레이어 감지",
+        "    if_condition(<distance_to('플레이어') < 100>)",
+        "      set_variable('플레이어발견', true)",
+        "      speak_something('발견!')",
+        "      set_effect('color', 0)",
+        "  else",
+        "    // 추격 모드",
+        "    point_to('플레이어')",
+        "    move(5)",
+        "    // 추격 중에도 벽 처리",
+        "    bounce_wall()",
+        "  ",
+        "  wait_second(0.02)"
+      ],
+      "explanation": "bounce_wall을 사용하여 적이 자연스럽게 순찰하도록 구현합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "오브젝트가 벽에서 튕기게 하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'움직임' 카테고리에서 벽 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'벽에 닿으면 튕기기' 블록을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "이동 블록과 함께 반복문 안에서 사용하세요"
+        }
+      ]
+    },
+    {
+      "situation": "자연스러운 반사를 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "일정한 속도로 계속 이동시키세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "move 블록 다음에 bounce_wall을 배치하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "repeat_while_true 안에서 실행하세요"
+        }
+      ]
+    },
+    {
+      "situation": "반사 시 효과를 추가하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "touching_wall() 조건으로 벽 충돌을 감지하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "충돌 시 소리나 색상 효과를 추가하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "속도나 방향을 추가로 조정할 수 있어요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "반복문 없이 사용",
+      "why_it_happens": "한 번만 실행하면 될 것으로 생각",
+      "consequence": "계속 감지가 안 되어 벽을 통과",
+      "solution": "repeat 안에서 계속 확인",
+      "teaching_moment": "bounce_wall은 매 프레임마다 확인해야 해요."
+    },
+    {
+      "mistake": "이동 없이 bounce_wall만 사용",
+      "why_it_happens": "자동으로 움직일 것으로 기대",
+      "consequence": "아무 동작도 하지 않음",
+      "solution": "move 블록과 함께 사용",
+      "teaching_moment": "이 블록은 반사만 처리해요. 이동은 별도로 해야 해요."
+    },
+    {
+      "mistake": "너무 빠른 속도",
+      "why_it_happens": "큰 이동 값 사용",
+      "consequence": "벽을 뚫고 지나감",
+      "solution": "적절한 속도로 조정 (1-10)",
+      "teaching_moment": "속도가 너무 빠르면 충돌 감지를 놓칠 수 있어요."
+    },
+    {
+      "mistake": "방향 설정 없이 사용",
+      "why_it_happens": "초기 방향을 설정하지 않음",
+      "consequence": "예상과 다른 반사 각도",
+      "solution": "시작 시 방향 설정",
+      "teaching_moment": "반사는 현재 방향을 기준으로 계산돼요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "초기 위치와 방향 설정",
+      "instruction": "오브젝트의 시작 위치와 이동 방향을 설정하세요.",
+      "visual_hint": "locate_xy와 point_direction을 사용합니다."
+    },
+    {
+      "step": 2,
+      "title": "반복문 추가",
+      "instruction": "repeat_while_true 블록을 추가하세요.",
+      "visual_hint": "계속 실행되어야 벽 충돌을 감지합니다."
+    },
+    {
+      "step": 3,
+      "title": "이동 블록 추가",
+      "instruction": "반복문 안에 move 블록을 추가하세요.",
+      "visual_hint": "일정한 속도로 이동하도록 설정합니다."
+    },
+    {
+      "step": 4,
+      "title": "bounce_wall 추가",
+      "instruction": "move 블록 다음에 '벽에 닿으면 튕기기' 블록을 추가하세요.",
+      "visual_hint": "이동 직후 벽 충돌을 확인합니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트 및 조정",
+      "instruction": "실행하여 오브젝트가 벽에서 자연스럽게 튕기는지 확인하세요.",
+      "visual_hint": "속도나 방향을 조정하여 원하는 효과를 만듭니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "move",
+      "relationship": "이동",
+      "explanation": "bounce_wall과 함께 사용하여 이동 구현"
+    },
+    {
+      "block_id": "point_direction",
+      "relationship": "방향 설정",
+      "explanation": "초기 이동 방향 설정"
+    },
+    {
+      "block_id": "touching_wall",
+      "relationship": "벽 감지",
+      "explanation": "벽 충돌 여부 확인"
+    },
+    {
+      "block_id": "change_direction",
+      "relationship": "방향 조정",
+      "explanation": "반사 각도 미세 조정"
+    },
+    {
+      "block_id": "if_on_edge_bounce",
+      "relationship": "유사 기능",
+      "explanation": "비슷한 반사 기능"
+    },
+    {
+      "block_id": "repeat_while_true",
+      "relationship": "반복 실행",
+      "explanation": "지속적인 충돌 감지"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "벽을 통과해요",
+      "possible_causes": ["bounce_wall이 실행 안 됨", "속도가 너무 빠름", "반복문 없음"],
+      "solutions": ["반복문 안에 배치 확인", "속도 감소 (10 이하)", "매 프레임 실행 확인"]
+    },
+    {
+      "problem": "반사 각도가 이상해요",
+      "possible_causes": ["초기 방향 설정 오류", "다른 방향 변경 코드", "오브젝트 중심점 문제"],
+      "solutions": ["방향 초기값 확인", "다른 방향 코드 검토", "오브젝트 중심 확인"]
+    },
+    {
+      "problem": "멈추지 않고 계속 튕겨요",
+      "possible_causes": ["속도 감소 없음", "무한 에너지", "마찰 미구현"],
+      "solutions": ["충돌 시 속도 감소", "마찰력 추가", "정지 조건 설정"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "탁구공",
+      "explanation": "탁구대에서 공이 벽에 부딪혀 튕기는 것과 같은 원리입니다."
+    },
+    {
+      "analogy": "당구",
+      "explanation": "당구공이 쿠션에 부딪혀 반사되는 물리 법칙과 동일합니다."
+    },
+    {
+      "analogy": "빛의 반사",
+      "explanation": "거울에 빛이 반사될 때 입사각과 반사각이 같은 원리입니다."
+    },
+    {
+      "analogy": "고무공 놀이",
+      "explanation": "벽에 고무공을 던지면 튕겨 나오는 놀이와 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "탄성 계수",
+      "description": "벽의 재질에 따른 반사 강도 조절",
+      "use_case": "현실적인 물리 시뮬레이션"
+    },
+    {
+      "concept": "중력 추가",
+      "description": "Y축 가속도를 추가한 포물선 운동",
+      "use_case": "농구, 배구 게임"
+    },
+    {
+      "concept": "회전 효과",
+      "description": "스핀을 고려한 반사 각도 변화",
+      "use_case": "테니스, 탁구 시뮬레이션"
+    },
+    {
+      "concept": "다중 오브젝트 충돌",
+      "description": "여러 오브젝트 간 충돌과 반사",
+      "use_case": "당구, 에어하키 게임"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "bounce_wall을 사용하여 벽 반사를 구현할 수 있다",
+      "example": "단순 반사, 일정 속도 이동"
+    },
+    {
+      "level": "중급",
+      "criteria": "물리적 특성을 추가한 반사 시스템을 구현할 수 있다",
+      "example": "마찰력, 속도 변화, 충돌 효과"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 물리 시뮬레이션과 게임 메커니즘을 구현할 수 있다",
+      "example": "당구 게임, 벽돌깨기, 탄성 충돌"
+    }
+  ]
+}

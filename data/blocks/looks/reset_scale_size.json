@@ -1,0 +1,405 @@
+{
+  "id": "reset_scale_size",
+  "category": "looks",
+  "name": "크기 원래대로",
+  "description": "오브젝트의 크기를 원래 크기(100%)로 즉시 되돌리는 블록입니다. 확대하거나 축소된 오브젝트를 원본 크기로 초기화할 때 사용합니다. set_size(100)과 동일한 기능을 하는 편의 블록입니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "크기 초기화의 필요성과 방법 이해",
+      "원본 상태 복원의 중요성 학습",
+      "효율적인 크기 관리 시스템 구축",
+      "애니메이션 후 상태 정리 기법",
+      "일관된 크기 유지 방법 습득"
+    ],
+    "key_concepts": [
+      {
+        "concept": "크기 초기화",
+        "explanation": "변경된 크기를 원래의 100% 상태로 되돌리는 작업입니다."
+      },
+      {
+        "concept": "원본 크기",
+        "explanation": "오브젝트가 처음 생성되었을 때의 기본 크기로, 100%를 의미합니다."
+      },
+      {
+        "concept": "즉시 복원",
+        "explanation": "애니메이션 없이 바로 원래 크기로 변경되는 방식입니다."
+      },
+      {
+        "concept": "상태 리셋",
+        "explanation": "게임이나 애니메이션 후 오브젝트를 초기 상태로 되돌리는 과정입니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": ["크기 변경 개념 이해", "set_size 블록 경험", "기본 오브젝트 조작"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "클릭 애니메이션 복원",
+      "description": "클릭 효과 후 원래 크기로 복원",
+      "blocks": [
+        "when_object_click",
+        "// 클릭 시 확대 효과",
+        "repeat_basic(10)",
+        "  change_scale_size(5)",
+        "  wait_second(0.02)",
+        "",
+        "// 잠시 유지",
+        "wait_second(0.3)",
+        "",
+        "// 원래 크기로 복원",
+        "reset_scale_size()",
+        "speak_something('클릭!')"
+      ],
+      "explanation": "클릭 애니메이션 후 reset_scale_size로 원래 크기를 복원합니다."
+    },
+    {
+      "title": "파워업 종료",
+      "description": "파워업 효과가 끝나면 크기 초기화",
+      "blocks": [
+        "when_message_cast('파워업')",
+        "// 파워업 시작 - 크기 증가",
+        "set_size(150)",
+        "set_effect('color', 50)",
+        "set_variable('파워업시간', 5)",
+        "",
+        "// 파워업 지속",
+        "repeat_basic(50)",
+        "  change_variable('파워업시간', -0.1)",
+        "  set_text('파워업: ' + <get_variable('파워업시간')> + '초')",
+        "  wait_second(0.1)",
+        "",
+        "// 파워업 종료 - 모든 것 초기화",
+        "reset_scale_size()",
+        "clear_effect()",
+        "set_text('')",
+        "speak_something('파워업 종료!')"
+      ],
+      "explanation": "파워업이 끝나면 reset_scale_size로 캐릭터를 원래 크기로 되돌립니다."
+    },
+    {
+      "title": "스테이지 초기화",
+      "description": "새 스테이지 시작 시 모든 오브젝트 크기 리셋",
+      "blocks": [
+        "when_message_cast('새스테이지')",
+        "// 모든 상태 초기화",
+        "reset_scale_size()",
+        "clear_effect()",
+        "remove_dialog()",
+        "locate_xy(0, 0)",
+        "",
+        "// 스테이지별 설정",
+        "if_condition(<get_variable('스테이지') = 1>)",
+        "  set_background('숲')",
+        "else_if(<get_variable('스테이지') = 2>)",
+        "  set_background('사막')",
+        "  // 스테이지 2는 작은 크기로 시작",
+        "  set_size(80)",
+        "else_if(<get_variable('스테이지') = 3>)",
+        "  set_background('우주')",
+        "  // 스테이지 3은 큰 크기로 시작",
+        "  set_size(120)",
+        "",
+        "speak_something('스테이지 ' + <get_variable('스테이지')> + ' 시작!')"
+      ],
+      "explanation": "각 스테이지 시작 전 reset_scale_size로 기본 상태를 만든 후 스테이지별 설정을 적용합니다."
+    },
+    {
+      "title": "호흡 애니메이션 리셋",
+      "description": "주기적 애니메이션의 정확한 복원",
+      "blocks": [
+        "when_run_button_click",
+        "reset_scale_size()",
+        "set_variable('호흡중', true)",
+        "",
+        "// 호흡 애니메이션",
+        "repeat_while_true(<get_variable('호흡중')>)",
+        "  // 들숨",
+        "  repeat_basic(20)",
+        "    change_scale_size(0.5)",
+        "    wait_second(0.05)",
+        "  // 날숨",
+        "  repeat_basic(20)",
+        "    change_scale_size(-0.5)",
+        "    wait_second(0.05)",
+        "",
+        "when_some_key_pressed('r')",
+        "// R키로 리셋",
+        "set_variable('호흡중', false)",
+        "reset_scale_size()",
+        "speak_something('리셋!')",
+        "wait_second(1)",
+        "set_variable('호흡중', true)"
+      ],
+      "explanation": "애니메이션을 중단하고 reset_scale_size로 정확히 100%로 복원합니다."
+    },
+    {
+      "title": "미니게임 리셋",
+      "description": "게임 오버 시 모든 요소 초기화",
+      "blocks": [
+        "when_message_cast('게임오버')",
+        "// 게임 오버 효과",
+        "repeat_basic(5)",
+        "  set_size(<random_number(50, 150)>)",
+        "  set_effect('color', <random_number(0, 200)>)",
+        "  wait_second(0.1)",
+        "",
+        "speak_something('게임 오버!')",
+        "wait_second(2)",
+        "",
+        "// 모든 것 초기화",
+        "reset_scale_size()",
+        "clear_effect()",
+        "remove_dialog()",
+        "set_variable('점수', 0)",
+        "set_variable('생명', 3)",
+        "",
+        "// 시작 위치로",
+        "locate_xy(-200, 0)",
+        "speak_something('다시 시작!')",
+        "wait_second(1)",
+        "remove_dialog()"
+      ],
+      "explanation": "게임 오버 후 reset_scale_size를 포함한 완전한 초기화를 수행합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "크기를 원래대로 되돌리고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'생김새' 카테고리에서 크기 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'크기 원래대로' 블록을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "즉시 100% 크기로 돌아가요"
+        }
+      ]
+    },
+    {
+      "situation": "애니메이션 후 정확한 크기로 복원하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "상대적 변경은 오차가 누적될 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "reset_scale_size로 정확히 100%로 설정하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "set_size(100)과 같은 효과예요"
+        }
+      ]
+    },
+    {
+      "situation": "게임 리셋 시 모든 것을 초기화하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "크기, 효과, 위치를 모두 초기화하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "reset_scale_size와 clear_effect를 함께 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "위치는 locate_xy로 초기화하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "점진적 복원을 기대",
+      "why_it_happens": "애니메이션 효과를 기대",
+      "consequence": "즉시 변경되어 부자연스러움",
+      "solution": "애니메이션이 필요하면 change_scale_size 사용",
+      "teaching_moment": "reset_scale_size는 즉시 100%로 변경돼요. 애니메이션이 없어요."
+    },
+    {
+      "mistake": "다른 속성도 초기화될 것으로 기대",
+      "why_it_happens": "reset의 범위를 잘못 이해",
+      "consequence": "크기만 변경되고 다른 효과는 유지",
+      "solution": "효과는 clear_effect 별도 사용",
+      "teaching_moment": "이 블록은 크기만 초기화해요. 다른 효과는 별도로 처리해야 해요."
+    },
+    {
+      "mistake": "원본 크기가 100%가 아님",
+      "why_it_happens": "처음부터 다른 크기로 설정",
+      "consequence": "예상과 다른 크기로 변경",
+      "solution": "원본 크기 확인 후 사용",
+      "teaching_moment": "reset_scale_size는 항상 100%로 설정해요."
+    },
+    {
+      "mistake": "너무 자주 사용",
+      "why_it_happens": "모든 상황에서 리셋",
+      "consequence": "애니메이션이 끊김",
+      "solution": "필요한 시점에만 사용",
+      "teaching_moment": "애니메이션 중에는 사용하지 마세요. 완료 후에 사용하세요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "생김새 카테고리 열기",
+      "instruction": "블록 팔레트에서 보라색 '생김새' 카테고리를 클릭하세요.",
+      "visual_hint": "붓 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "reset_scale_size 블록 찾기",
+      "instruction": "'크기 원래대로' 블록을 찾으세요.",
+      "visual_hint": "단독으로 사용되는 실행 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "적절한 위치에 배치",
+      "instruction": "크기를 초기화할 시점에 블록을 배치하세요.",
+      "visual_hint": "보통 애니메이션 후나 리셋 시점에 사용합니다."
+    },
+    {
+      "step": 4,
+      "title": "다른 초기화와 조합",
+      "instruction": "필요시 효과 제거, 위치 초기화 블록도 함께 사용하세요.",
+      "visual_hint": "완전한 초기화를 위해 여러 리셋 블록을 조합합니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트",
+      "instruction": "실행하여 크기가 정확히 100%로 돌아가는지 확인하세요.",
+      "visual_hint": "원본 크기로 즉시 변경됩니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "set_size",
+      "relationship": "크기 설정",
+      "explanation": "특정 크기로 직접 설정 (reset_scale_size는 set_size(100)과 동일)"
+    },
+    {
+      "block_id": "change_scale_size",
+      "relationship": "크기 변경",
+      "explanation": "상대적으로 크기 증감"
+    },
+    {
+      "block_id": "get_size",
+      "relationship": "크기 확인",
+      "explanation": "현재 크기 값 가져오기"
+    },
+    {
+      "block_id": "clear_effect",
+      "relationship": "효과 초기화",
+      "explanation": "그래픽 효과 제거"
+    },
+    {
+      "block_id": "locate_xy",
+      "relationship": "위치 초기화",
+      "explanation": "특정 위치로 이동"
+    },
+    {
+      "block_id": "remove_dialog",
+      "relationship": "말풍선 제거",
+      "explanation": "대화 초기화"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "크기가 100%가 아니에요",
+      "possible_causes": ["블록이 실행되지 않음", "실행 후 다시 변경됨", "다른 스크립트에서 변경"],
+      "solutions": ["실행 경로 확인", "이후 코드 검토", "모든 스크립트 확인"]
+    },
+    {
+      "problem": "애니메이션이 끊겨요",
+      "possible_causes": ["애니메이션 중간에 사용", "너무 자주 리셋", "타이밍 문제"],
+      "solutions": ["애니메이션 완료 후 사용", "필요한 시점만 사용", "wait 추가로 타이밍 조정"]
+    },
+    {
+      "problem": "다른 효과가 남아있어요",
+      "possible_causes": ["크기만 초기화됨", "효과 제거 누락", "부분적 초기화"],
+      "solutions": ["clear_effect 추가", "완전 초기화 함수 작성", "모든 속성 개별 초기화"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "줌 리셋",
+      "explanation": "카메라나 화면 줌을 100%로 리셋하는 것과 같습니다."
+    },
+    {
+      "analogy": "원본 크기 복원",
+      "explanation": "이미지 편집 프로그램에서 원본 크기로 되돌리는 기능과 같습니다."
+    },
+    {
+      "analogy": "기본값 복원",
+      "explanation": "설정을 기본값으로 되돌리는 것과 비슷한 개념입니다."
+    },
+    {
+      "analogy": "풍선 공기 빼기",
+      "explanation": "부풀린 풍선을 원래 크기로 되돌리는 것과 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "애니메이션 리셋",
+      "description": "부드럽게 원래 크기로 돌아가는 효과",
+      "use_case": "자연스러운 전환, 탄성 효과"
+    },
+    {
+      "concept": "체크포인트 크기",
+      "description": "특정 시점의 크기로 복원",
+      "use_case": "저장 지점, 상태 관리"
+    },
+    {
+      "concept": "완전 초기화 시스템",
+      "description": "모든 속성을 한 번에 초기화",
+      "use_case": "게임 리셋, 스테이지 전환"
+    },
+    {
+      "concept": "크기 기록 시스템",
+      "description": "이전 크기들을 기록하고 복원",
+      "use_case": "언두 기능, 히스토리 관리"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "reset_scale_size를 사용하여 크기를 초기화할 수 있다",
+      "example": "단순 리셋, 클릭 후 복원"
+    },
+    {
+      "level": "중급",
+      "criteria": "적절한 시점에 크기를 초기화하여 깔끔한 상태 관리를 할 수 있다",
+      "example": "애니메이션 후 복원, 스테이지 초기화"
+    },
+    {
+      "level": "고급",
+      "criteria": "크기 초기화를 포함한 완전한 상태 관리 시스템을 구현할 수 있다",
+      "example": "게임 리셋 시스템, 체크포인트, 상태 머신"
+    }
+  ]
+}

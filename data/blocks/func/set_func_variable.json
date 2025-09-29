@@ -1,0 +1,411 @@
+{
+  "id": "set_func_variable",
+  "category": "function",
+  "name": "함수 지역 변수 설정",
+  "description": "함수 내부에서만 사용되는 지역 변수를 생성하거나 값을 설정하는 블록입니다. 함수 실행 중에만 존재하며, 함수가 끝나면 사라지는 임시 변수를 만들 때 사용합니다. 함수의 계산 과정이나 중간 결과를 저장하는 데 활용됩니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "지역 변수와 전역 변수의 차이 이해",
+      "함수 스코프와 변수 생명주기 학습",
+      "함수 내부 데이터 관리 방법 익히기",
+      "캡슐화와 정보 은닉 개념 습득",
+      "효율적인 메모리 관리 방법 이해"
+    ],
+    "key_concepts": [
+      {
+        "concept": "지역 변수",
+        "explanation": "함수 내부에서만 접근 가능하고, 함수 실행이 끝나면 자동으로 사라지는 변수입니다."
+      },
+      {
+        "concept": "함수 스코프",
+        "explanation": "변수가 유효한 범위로, 지역 변수는 정의된 함수 내부에서만 유효합니다."
+      },
+      {
+        "concept": "변수 생명주기",
+        "explanation": "변수가 생성되고 소멸되는 시점으로, 지역 변수는 함수 호출 시 생성되고 종료 시 소멸됩니다."
+      },
+      {
+        "concept": "캡슐화",
+        "explanation": "함수 내부의 데이터를 외부로부터 보호하고 독립적으로 관리하는 프로그래밍 원칙입니다."
+      }
+    ],
+    "difficulty_level": "중고급",
+    "prerequisites": ["함수 정의와 호출 방법", "변수 개념 이해", "전역 변수 사용 경험", "함수 매개변수 활용"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "계산 중간값 저장",
+      "description": "복잡한 계산의 중간 결과를 지역 변수에 저장",
+      "blocks": [
+        "function_create('원기둥부피', [number_param('반지름'), number_param('높이')])",
+        "  // 지역 변수로 중간 계산값 저장",
+        "  set_func_variable('파이', 3.14159)",
+        "  set_func_variable('반지름제곱', <calc_operation(<param('반지름')>, '*', <param('반지름')>)>)",
+        "  set_func_variable('밑넓이', <calc_operation(<get_func_variable('파이')>, '*', <get_func_variable('반지름제곱')>)>)",
+        "  set_func_variable('부피', <calc_operation(<get_func_variable('밑넓이')>, '*', <param('높이')>)>)",
+        "  ",
+        "  speak_something('밑넓이: ' + <get_func_variable('밑넓이')>)",
+        "  speak_something('부피: ' + <get_func_variable('부피')>)",
+        "  ",
+        "  return <get_func_variable('부피')>",
+        "",
+        "when_run_button_click",
+        "set_variable('결과', <function_value('원기둥부피', [5, 10])>)",
+        "speak_something('원기둥 부피: ' + <get_variable('결과')>)",
+        "// 함수 밖에서는 지역 변수에 접근 불가",
+        "// <get_func_variable('파이')> // 오류 발생!"
+      ],
+      "explanation": "함수 내부에서만 사용되는 지역 변수로 중간 계산값을 저장합니다."
+    },
+    {
+      "title": "임시 데이터 처리",
+      "description": "데이터 가공 시 임시 변수 활용",
+      "blocks": [
+        "function_create('텍스트정제', [string_param('원본')])",
+        "  // 지역 변수로 단계별 처리",
+        "  set_func_variable('임시텍스트', <param('원본')>)",
+        "  ",
+        "  // 공백 제거",
+        "  set_func_variable('임시텍스트', <trim(<get_func_variable('임시텍스트')>)>)",
+        "  ",
+        "  // 소문자 변환",
+        "  set_func_variable('임시텍스트', <lowercase(<get_func_variable('임시텍스트')>)>)",
+        "  ",
+        "  // 특수문자 제거",
+        "  set_func_variable('임시텍스트', <replace_string(<get_func_variable('임시텍스트')>, '!', '')>)",
+        "  set_func_variable('임시텍스트', <replace_string(<get_func_variable('임시텍스트')>, '?', '')>)",
+        "  set_func_variable('임시텍스트', <replace_string(<get_func_variable('임시텍스트')>, '.', '')>)",
+        "  ",
+        "  // 처리된 길이 저장",
+        "  set_func_variable('최종길이', <length_of_string(<get_func_variable('임시텍스트')>)>)",
+        "  ",
+        "  speak_something('정제 완료: ' + <get_func_variable('최종길이')> + '자')",
+        "  return <get_func_variable('임시텍스트')>",
+        "",
+        "when_run_button_click",
+        "ask_and_wait('텍스트를 입력하세요')",
+        "set_variable('정제결과', <function_value('텍스트정제', [<get_variable('답변')>])>)",
+        "speak_something('결과: ' + <get_variable('정제결과')>)"
+      ],
+      "explanation": "텍스트 처리 과정에서 지역 변수를 활용하여 단계별 변환을 수행합니다."
+    },
+    {
+      "title": "재귀 함수의 지역 상태",
+      "description": "재귀 호출 시 각 함수별 독립적인 지역 변수",
+      "blocks": [
+        "function_create('피보나치', [number_param('n')])",
+        "  // 각 재귀 호출마다 독립적인 지역 변수",
+        "  set_func_variable('현재값', <param('n')>)",
+        "  ",
+        "  if_condition(<get_func_variable('현재값')> <= 1)",
+        "    return <get_func_variable('현재값')>",
+        "  ",
+        "  // 이전 두 값 계산을 위한 지역 변수",
+        "  set_func_variable('n1', <calc_operation(<get_func_variable('현재값')>, '-', 1)>)",
+        "  set_func_variable('n2', <calc_operation(<get_func_variable('현재값')>, '-', 2)>)",
+        "  ",
+        "  // 재귀 호출 결과를 지역 변수에 저장",
+        "  set_func_variable('결과1', <function_value('피보나치', [<get_func_variable('n1')>])>)",
+        "  set_func_variable('결과2', <function_value('피보나치', [<get_func_variable('n2')>])>)",
+        "  ",
+        "  set_func_variable('합계', <calc_operation(<get_func_variable('결과1')>, '+', <get_func_variable('결과2')>)>)",
+        "  ",
+        "  return <get_func_variable('합계')>",
+        "",
+        "when_run_button_click",
+        "repeat_basic(10)",
+        "  set_variable('i', <get_repeat_index()>)",
+        "  set_variable('피보나치수', <function_value('피보나치', [<get_variable('i')>])>)",
+        "  speak_something('F(' + <get_variable('i')> + ') = ' + <get_variable('피보나치수')>)",
+        "  wait_second(0.5)"
+      ],
+      "explanation": "재귀 함수에서 각 호출마다 독립적인 지역 변수를 사용합니다."
+    },
+    {
+      "title": "상태 추적 함수",
+      "description": "함수 실행 중 상태를 지역 변수로 관리",
+      "blocks": [
+        "function_create('리스트분석', [list_param('데이터')])",
+        "  // 분석을 위한 지역 변수들",
+        "  set_func_variable('합계', 0)",
+        "  set_func_variable('개수', 0)",
+        "  set_func_variable('최대값', -99999)",
+        "  set_func_variable('최소값', 99999)",
+        "  set_func_variable('짝수개수', 0)",
+        "  set_func_variable('홀수개수', 0)",
+        "  ",
+        "  // 리스트 순회하며 지역 변수 업데이트",
+        "  foreach_list(<param('데이터')>, 'item')",
+        "    // 합계와 개수",
+        "    set_func_variable('합계', <calc_operation(<get_func_variable('합계')>, '+', <get_variable('item')>)>)",
+        "    set_func_variable('개수', <calc_operation(<get_func_variable('개수')>, '+', 1)>)",
+        "    ",
+        "    // 최대값 최소값",
+        "    if_condition(<get_variable('item') > <get_func_variable('최대값')>>)",
+        "      set_func_variable('최대값', <get_variable('item')>)",
+        "    if_condition(<get_variable('item') < <get_func_variable('최소값')>>)",
+        "      set_func_variable('최소값', <get_variable('item')>)",
+        "    ",
+        "    // 홀짝 구분",
+        "    if_condition(<calc_operation(<get_variable('item')>, '%', 2)> = 0)",
+        "      set_func_variable('짝수개수', <calc_operation(<get_func_variable('짝수개수')>, '+', 1)>)",
+        "    else",
+        "      set_func_variable('홀수개수', <calc_operation(<get_func_variable('홀수개수')>, '+', 1)>)",
+        "  ",
+        "  // 평균 계산",
+        "  set_func_variable('평균', <calc_operation(<get_func_variable('합계')>, '/', <get_func_variable('개수')>)>)",
+        "  ",
+        "  // 결과 출력",
+        "  speak_something('합계: ' + <get_func_variable('합계')>)",
+        "  speak_something('평균: ' + <get_func_variable('평균')>)",
+        "  speak_something('최대: ' + <get_func_variable('최대값')> + ', 최소: ' + <get_func_variable('최소값')>)",
+        "  speak_something('짝수: ' + <get_func_variable('짝수개수')> + '개, 홀수: ' + <get_func_variable('홀수개수')> + '개')",
+        "",
+        "when_run_button_click",
+        "set_list('숫자들', [12, 45, 23, 67, 34, 89, 56])",
+        "function_general('리스트분석', [<get_list('숫자들')>])"
+      ],
+      "explanation": "함수 실행 중 여러 상태를 지역 변수로 추적하고 관리합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "함수 내부에서만 사용할 변수를 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'함수' 카테고리에서 지역 변수 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'함수 지역 변수 설정' 블록을 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "이 변수는 함수 내부에서만 유효해요"
+        }
+      ]
+    },
+    {
+      "situation": "전역 변수와 지역 변수를 구분하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "set_variable은 전역, set_func_variable은 지역이에요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "함수 내부 계산은 지역 변수를 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "get_func_variable로 지역 변수 값을 가져오세요"
+        }
+      ]
+    },
+    {
+      "situation": "함수 호출마다 독립적인 변수를 원해요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "지역 변수는 각 함수 호출마다 새로 생성돼요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "set_func_variable로 각 호출의 독립적 상태를 만드세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "재귀 함수나 중첩 호출에 특히 유용해요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "함수 밖에서 지역 변수 접근 시도",
+      "why_it_happens": "지역 변수 스코프를 이해하지 못함",
+      "consequence": "변수를 찾을 수 없어 오류 발생",
+      "solution": "지역 변수는 함수 내부에서만 접근",
+      "teaching_moment": "지역 변수는 함수가 끝나면 사라져요. 밖에서는 접근할 수 없어요."
+    },
+    {
+      "mistake": "전역과 지역 변수 이름 중복",
+      "why_it_happens": "변수 스코프 개념 부족",
+      "consequence": "어떤 변수를 사용하는지 혼란",
+      "solution": "명확한 이름으로 구분",
+      "teaching_moment": "같은 이름이어도 전역과 지역은 다른 변수예요."
+    },
+    {
+      "mistake": "지역 변수 값이 유지될 것으로 기대",
+      "why_it_happens": "함수 호출 간 상태 유지를 원함",
+      "consequence": "매번 초기화되어 값이 사라짐",
+      "solution": "지속적인 값은 전역 변수 사용",
+      "teaching_moment": "지역 변수는 함수 호출마다 새로 생성돼요."
+    },
+    {
+      "mistake": "get_variable과 혼용",
+      "why_it_happens": "전역과 지역 변수 접근 방법 혼동",
+      "consequence": "잘못된 변수에 접근",
+      "solution": "지역은 get_func_variable 사용",
+      "teaching_moment": "지역 변수는 전용 블록으로 접근해야 해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "함수 내부에 위치",
+      "instruction": "함수 정의 블록 내부에서 작업하세요.",
+      "visual_hint": "function_create 블록 안쪽에서만 사용 가능합니다."
+    },
+    {
+      "step": 2,
+      "title": "지역 변수 설정 블록 추가",
+      "instruction": "'함수' 카테고리에서 '함수 지역 변수 설정' 블록을 선택하세요.",
+      "visual_hint": "set_variable과 비슷하지만 함수 전용입니다."
+    },
+    {
+      "step": 3,
+      "title": "변수 이름과 값 설정",
+      "instruction": "지역 변수의 이름을 입력하고 초기값을 설정하세요.",
+      "visual_hint": "의미 있는 이름으로 변수의 용도를 명확히 합니다."
+    },
+    {
+      "step": 4,
+      "title": "지역 변수 값 사용",
+      "instruction": "get_func_variable 블록으로 지역 변수 값을 가져와 사용하세요.",
+      "visual_hint": "같은 함수 내부에서만 접근 가능합니다."
+    },
+    {
+      "step": 5,
+      "title": "함수 테스트",
+      "instruction": "함수를 호출하여 지역 변수가 올바르게 작동하는지 확인하세요.",
+      "visual_hint": "각 호출마다 독립적으로 작동하는지 확인합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "get_func_variable",
+      "relationship": "지역 변수 읽기",
+      "explanation": "설정한 지역 변수 값을 가져올 때 사용"
+    },
+    {
+      "block_id": "set_variable",
+      "relationship": "전역 변수 설정",
+      "explanation": "프로그램 전체에서 사용하는 변수 설정"
+    },
+    {
+      "block_id": "get_variable",
+      "relationship": "전역 변수 읽기",
+      "explanation": "전역 변수 값을 가져올 때 사용"
+    },
+    {
+      "block_id": "function_create",
+      "relationship": "함수 정의",
+      "explanation": "지역 변수를 사용할 함수 정의"
+    },
+    {
+      "block_id": "function_param",
+      "relationship": "매개변수",
+      "explanation": "함수 입력값과 지역 변수의 차이"
+    },
+    {
+      "block_id": "function_return",
+      "relationship": "값 반환",
+      "explanation": "지역 변수 결과를 반환"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "지역 변수를 찾을 수 없어요",
+      "possible_causes": ["함수 밖에서 접근 시도", "변수 이름 오타", "get_variable 사용"],
+      "solutions": ["함수 내부에서만 사용", "변수 이름 확인", "get_func_variable 사용"]
+    },
+    {
+      "problem": "값이 계속 초기화돼요",
+      "possible_causes": ["함수 호출마다 새로 생성", "지역 변수의 특성", "잘못된 스코프 이해"],
+      "solutions": ["지속적인 값은 전역 변수 사용", "return으로 결과 반환", "매개변수로 이전 값 전달"]
+    },
+    {
+      "problem": "전역과 지역이 헷갈려요",
+      "possible_causes": ["같은 이름 사용", "스코프 개념 혼동", "접근 방법 혼용"],
+      "solutions": ["명확한 이름 구분", "접근 블록 구분 사용", "주석으로 구분 표시"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "임시 작업 공간",
+      "explanation": "작업대에서 임시로 도구를 놓고 사용하다가 작업이 끝나면 치우는 것과 같습니다."
+    },
+    {
+      "analogy": "계산기 메모리",
+      "explanation": "계산기의 임시 메모리처럼 계산 중에만 값을 저장하고 끝나면 사라집니다."
+    },
+    {
+      "analogy": "회의실 화이트보드",
+      "explanation": "회의 중에만 사용하고 회의가 끝나면 지워지는 화이트보드와 비슷합니다."
+    },
+    {
+      "analogy": "요리 중 임시 그릇",
+      "explanation": "요리할 때만 사용하고 다 만든 후엔 설거지하는 임시 그릇과 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "클로저",
+      "description": "지역 변수를 캡처하여 함수 외부에서도 접근",
+      "use_case": "상태 유지, 프라이빗 변수"
+    },
+    {
+      "concept": "메모이제이션",
+      "description": "지역 변수로 계산 결과 캐싱",
+      "use_case": "성능 최적화, 중복 계산 방지"
+    },
+    {
+      "concept": "상태 머신",
+      "description": "지역 변수로 함수 내부 상태 관리",
+      "use_case": "복잡한 로직, 단계별 처리"
+    },
+    {
+      "concept": "재귀 최적화",
+      "description": "지역 변수로 재귀 호출 최적화",
+      "use_case": "꼬리 재귀, 메모 패턴"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "지역 변수를 생성하고 간단한 값을 저장할 수 있다",
+      "example": "임시 계산값 저장, 기본 사용"
+    },
+    {
+      "level": "중급",
+      "criteria": "지역과 전역 변수를 구분하여 적절히 사용할 수 있다",
+      "example": "스코프 이해, 독립적 상태 관리"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 함수에서 지역 변수를 효과적으로 활용할 수 있다",
+      "example": "재귀 함수, 상태 추적, 메모이제이션"
+    }
+  ]
+}

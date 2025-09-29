@@ -1,0 +1,356 @@
+{
+  "id": "remove_all_clones",
+  "category": "clone",
+  "name": "모든 복제본 삭제하기",
+  "description": "현재 오브젝트의 모든 복제본을 한 번에 삭제하는 블록입니다. 원본 오브젝트는 남아있고 복제본들만 화면에서 사라집니다. 게임 초기화나 라운드 전환 시 복제본 정리에 사용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "복제본 관리와 메모리 정리 개념 이해",
+      "효율적인 오브젝트 관리 방법 학습",
+      "게임 상태 초기화와 리셋 기법 습득",
+      "리소스 관리와 성능 최적화 이해",
+      "복제 시스템의 생명주기 관리 방법 익히기"
+    ],
+    "key_concepts": [
+      {
+        "concept": "복제본 일괄 삭제",
+        "explanation": "생성된 모든 복제본을 한 번의 명령으로 제거하여 화면과 메모리를 정리하는 기능입니다."
+      },
+      {
+        "concept": "원본 보존",
+        "explanation": "복제본만 삭제되고 원본 오브젝트는 그대로 유지되어 다시 복제를 만들 수 있습니다."
+      },
+      {
+        "concept": "메모리 관리",
+        "explanation": "불필요한 복제본을 제거하여 프로그램의 메모리 사용량을 줄이고 성능을 향상시킵니다."
+      },
+      {
+        "concept": "게임 상태 리셋",
+        "explanation": "새로운 게임이나 라운드를 시작하기 전에 이전 복제본들을 정리하는 초기화 과정입니다."
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": [
+      "복제본 생성 블록 사용 경험",
+      "오브젝트와 복제본의 차이 이해",
+      "기본 게임 로직 구현 경험",
+      "조건 블록과 반복 블록 활용 능력"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "슈팅 게임 초기화",
+      "description": "새 라운드 시작 시 모든 총알 복제본 제거",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('라운드', 1)",
+        "repeat_while_true",
+        "  speak_something(<join_something('라운드 ', <get_variable('라운드')>, ' 시작!')>)",
+        "  broadcast_message('게임시작')",
+        "  wait_second(10)",
+        "  remove_all_clones",
+        "  speak_something('라운드 종료!')",
+        "  change_variable('라운드', 1)",
+        "  wait_second(2)"
+      ],
+      "explanation": "각 라운드가 끝날 때마다 모든 총알 복제본을 삭제하여 다음 라운드를 깨끗하게 시작합니다."
+    },
+    {
+      "title": "파티클 효과 정리",
+      "description": "폭발 효과 후 파티클 복제본 일괄 삭제",
+      "blocks": [
+        "when_object_click",
+        "speak_something('폭발!')",
+        "repeat_basic(30)",
+        "  create_clone",
+        "wait_second(2)",
+        "remove_all_clones",
+        "speak_something('효과 종료')",
+        "",
+        "when_clone_start",
+        "set_random_color",
+        "locate_xy(<calc_rand(-50, 50)>, <calc_rand(-50, 50)>)",
+        "repeat_basic(10)",
+        "  change_scale_size(-5)",
+        "  change_transparency(10)",
+        "  wait_second(0.1)"
+      ],
+      "explanation": "폭발 파티클 효과를 만든 후 2초 뒤에 모든 파티클을 한 번에 정리합니다."
+    },
+    {
+      "title": "적 캐릭터 리스폰",
+      "description": "게임 오버 시 모든 적 제거 후 재시작",
+      "blocks": [
+        "when_message_cast('게임오버')",
+        "remove_all_clones",
+        "set_variable('점수', 0)",
+        "set_variable('레벨', 1)",
+        "wait_second(2)",
+        "speak_something('다시 시작!')",
+        "broadcast_message('게임시작')",
+        "",
+        "when_message_cast('게임시작')",
+        "repeat_basic(5)",
+        "  create_clone",
+        "  wait_second(0.5)"
+      ],
+      "explanation": "게임 오버 시 모든 적 복제본을 제거하고 초기 상태로 되돌린 후 다시 시작합니다."
+    },
+    {
+      "title": "메모리 관리 시스템",
+      "description": "복제본 수 제한으로 성능 유지",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('최대_복제본', 20)",
+        "repeat_while_true",
+        "  if_condition(<get_clone_count> > <get_variable('최대_복제본')>)",
+        "    speak_something('복제본이 너무 많습니다!')",
+        "    remove_all_clones",
+        "    wait_second(1)",
+        "    speak_something('메모리 정리 완료')",
+        "  wait_second(0.5)"
+      ],
+      "explanation": "복제본 수가 제한을 넘으면 자동으로 모든 복제본을 삭제하여 성능을 유지합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "모든 복제본을 한 번에 삭제하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'복제' 카테고리에서 삭제 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'모든 복제본 삭제하기' 블록을 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "이 블록은 원본은 남기고 복제본만 모두 제거해요"
+        }
+      ]
+    },
+    {
+      "situation": "게임을 초기화하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "게임 시작이나 재시작 시 이전 복제본들을 정리해야 해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'복제' 카테고리의 삭제 블록과 변수 초기화를 함께 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "모든 복제본 삭제 → 변수 리셋 → 새로 시작 순서로 구성하세요"
+        }
+      ]
+    },
+    {
+      "situation": "복제본이 너무 많아서 느려져요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "정기적으로 불필요한 복제본을 정리하면 성능이 좋아져요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "일정 시간마다 또는 조건에 따라 모든 복제본을 삭제하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "타이머나 복제본 개수를 체크해서 자동 정리 시스템을 만드세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "원본도 삭제될 것으로 기대",
+      "why_it_happens": "복제본과 원본의 차이를 이해하지 못함",
+      "consequence": "원본이 남아있어서 예상과 다른 동작",
+      "solution": "원본은 별도로 숨기기나 삭제 처리 필요",
+      "teaching_moment": "이 블록은 복제본만 삭제해요. 원본은 그대로 남아있어요."
+    },
+    {
+      "mistake": "다른 오브젝트의 복제본도 삭제될 것으로 기대",
+      "why_it_happens": "모든 복제본이 삭제될 것으로 오해",
+      "consequence": "해당 오브젝트의 복제본만 삭제됨",
+      "solution": "각 오브젝트별로 별도로 복제본 삭제 실행",
+      "teaching_moment": "각 오브젝트는 자신의 복제본만 관리해요."
+    },
+    {
+      "mistake": "삭제 후 즉시 새 복제본 생성",
+      "why_it_happens": "삭제 완료를 기다리지 않음",
+      "consequence": "복제본 생성이 제대로 되지 않을 수 있음",
+      "solution": "삭제 후 짧은 대기 시간 추가",
+      "teaching_moment": "삭제가 완료되기를 기다린 후 새로 만드는 것이 안전해요."
+    },
+    {
+      "mistake": "복제본 삭제 시점을 잘못 설정",
+      "why_it_happens": "게임 로직의 흐름을 제대로 고려하지 않음",
+      "consequence": "필요한 복제본이 사라지거나 불필요한 복제본이 남음",
+      "solution": "적절한 타이밍에 삭제하도록 로직 재설계",
+      "teaching_moment": "언제 정리할지 타이밍이 중요해요. 라운드 끝이나 시작 전이 좋아요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "복제 카테고리 찾기",
+      "instruction": "블록 팔레트에서 '복제' 카테고리를 클릭하세요.",
+      "visual_hint": "복사 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "삭제 블록 선택",
+      "instruction": "'모든 복제본 삭제하기' 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "입력 자리가 없는 단순한 실행 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "적절한 위치에 배치",
+      "instruction": "게임 초기화, 라운드 전환, 정리가 필요한 시점에 블록을 배치하세요.",
+      "visual_hint": "보통 게임 시작 부분이나 라운드 종료 시점에 사용합니다."
+    },
+    {
+      "step": 4,
+      "title": "타이밍 조정",
+      "instruction": "필요하다면 기다리기 블록을 추가하여 적절한 타이밍을 만드세요.",
+      "visual_hint": "삭제 전후로 대기 시간을 두면 더 자연스러운 효과를 만들 수 있습니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트 및 확인",
+      "instruction": "프로그램을 실행하여 복제본들이 제대로 삭제되는지 확인하세요.",
+      "visual_hint": "원본은 남고 복제본만 사라지는지 확인합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "create_clone",
+      "relationship": "복제본 생성",
+      "explanation": "삭제할 복제본을 만드는 기본 블록"
+    },
+    {
+      "block_id": "delete_clone",
+      "relationship": "개별 삭제",
+      "explanation": "특정 복제본 하나만 삭제할 때 사용"
+    },
+    {
+      "block_id": "when_clone_start",
+      "relationship": "복제본 시작",
+      "explanation": "복제본이 생성될 때 실행되는 이벤트 블록"
+    },
+    {
+      "block_id": "get_clone_count",
+      "relationship": "복제본 개수",
+      "explanation": "현재 복제본 수를 확인하여 삭제 시점 결정"
+    },
+    {
+      "block_id": "broadcast_message",
+      "relationship": "이벤트 전달",
+      "explanation": "복제본 삭제 시점을 다른 오브젝트에 알릴 때 사용"
+    },
+    {
+      "block_id": "set_variable",
+      "relationship": "상태 초기화",
+      "explanation": "복제본 삭제와 함께 게임 변수를 초기화할 때 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "복제본이 삭제되지 않아요",
+      "possible_causes": ["블록이 실행되지 않음", "다른 오브젝트의 복제본", "복제본이 아닌 원본", "블록 연결 오류"],
+      "solutions": ["블록 실행 여부 확인", "해당 오브젝트에서 실행하는지 확인", "복제본 생성 여부 확인", "블록 연결 상태 점검"]
+    },
+    {
+      "problem": "원본도 사라져요",
+      "possible_causes": ["원본에 별도 삭제 코드 존재", "숨기기와 혼동", "다른 삭제 블록 사용"],
+      "solutions": ["원본 관련 코드 확인", "삭제와 숨기기 구분", "사용 중인 블록 재확인"]
+    },
+    {
+      "problem": "일부 복제본만 삭제돼요",
+      "possible_causes": ["여러 오브젝트의 복제본 혼재", "삭제 중 새 복제본 생성", "조건부 삭제 로직 존재"],
+      "solutions": ["각 오브젝트별로 삭제 실행", "삭제 타이밍 조정", "삭제 로직 단순화"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "청소 대작전",
+      "explanation": "방에 있는 모든 장난감을 한 번에 정리하는 것처럼 모든 복제본을 정리합니다."
+    },
+    {
+      "analogy": "컴퓨터 메모리 정리",
+      "explanation": "컴퓨터의 임시 파일을 모두 삭제하여 공간을 확보하는 것과 같습니다."
+    },
+    {
+      "analogy": "칠판 지우기",
+      "explanation": "수업이 끝나고 칠판을 깨끗이 지우는 것처럼 화면을 정리합니다."
+    },
+    {
+      "analogy": "게임 리셋 버튼",
+      "explanation": "아케이드 게임의 리셋 버튼처럼 모든 것을 초기 상태로 되돌립니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "선택적 복제본 삭제",
+      "description": "특정 조건을 만족하는 복제본만 삭제하는 시스템",
+      "use_case": "화면 밖 복제본만 삭제, 특정 색상 복제본만 삭제"
+    },
+    {
+      "concept": "단계적 삭제 애니메이션",
+      "description": "모든 복제본이 동시에 사라지는 효과 구현",
+      "use_case": "페이드 아웃 효과, 폭발 후 사라지기"
+    },
+    {
+      "concept": "복제본 풀 시스템",
+      "description": "미리 생성한 복제본을 재사용하는 효율적인 관리",
+      "use_case": "총알 풀, 파티클 풀, 적 캐릭터 풀"
+    },
+    {
+      "concept": "자동 정리 시스템",
+      "description": "일정 조건에서 자동으로 복제본을 정리하는 스마트 시스템",
+      "use_case": "메모리 관리, 성능 최적화, 자동 가비지 컬렉션"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "모든 복제본 삭제 블록을 사용해서 복제본을 정리할 수 있다",
+      "example": "게임 종료 시 복제본 삭제, 라운드 초기화"
+    },
+    {
+      "level": "중급",
+      "criteria": "적절한 타이밍에 복제본을 관리하여 효율적인 프로그램을 만들 수 있다",
+      "example": "파티클 효과 정리, 게임 상태 관리, 메모리 최적화"
+    },
+    {
+      "level": "고급",
+      "criteria": "복제본 생명주기를 체계적으로 관리하는 시스템을 구현할 수 있다",
+      "example": "복제본 풀 시스템, 자동 정리 시스템, 선택적 삭제 구현"
+    }
+  ]
+}

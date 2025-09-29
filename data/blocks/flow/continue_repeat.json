@@ -1,0 +1,356 @@
+{
+  "id": "continue_repeat",
+  "category": "flow",
+  "name": "다음 반복",
+  "description": "현재 반복을 즉시 중단하고 다음 반복으로 건너뛰는 제어 블록입니다. 반복문 안에서만 사용할 수 있으며, 특정 조건에서 나머지 코드를 실행하지 않고 다음 반복을 시작할 때 활용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "반복문의 흐름 제어 개념 이해",
+      "continue와 break의 차이점 학습",
+      "효율적인 반복 처리 방법 습득",
+      "조건부 반복 실행 패턴 익히기",
+      "프로그램 최적화와 성능 개선 방법 이해"
+    ],
+    "key_concepts": [
+      {
+        "concept": "반복 건너뛰기 (Continue)",
+        "explanation": "현재 반복 회차의 나머지 블록들을 실행하지 않고 바로 다음 반복으로 넘어가는 제어 방식입니다."
+      },
+      {
+        "concept": "조건부 실행",
+        "explanation": "특정 조건을 만족할 때만 반복의 일부를 건너뛰어 효율적인 처리가 가능합니다."
+      },
+      {
+        "concept": "반복문 내부 전용",
+        "explanation": "반복 블록 안에서만 사용 가능하며, 반복문 밖에서는 의미가 없습니다."
+      },
+      {
+        "concept": "흐름 제어",
+        "explanation": "프로그램의 실행 순서를 제어하여 불필요한 처리를 줄이고 효율성을 높입니다."
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": ["반복 블록 사용 경험", "조건 블록 활용 능력", "break 블록의 이해", "프로그램 흐름에 대한 기본 지식"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "짝수만 처리하기",
+      "description": "1부터 10까지 중 짝수만 출력",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('결과', '')",
+        "repeat_basic(10)",
+        "  set_variable('숫자', <get_variable('i')>)",
+        "  if_condition(<calc_operation(<get_variable('숫자')>, 'mod', 2) = 1>)",
+        "    continue_repeat",
+        "  set_variable('결과', <join_something(<get_variable('결과')>, <get_variable('숫자')>, ' ')>)",
+        "set_text(<join_something('짝수: ', <get_variable('결과')>)>)"
+      ],
+      "explanation": "홀수일 때는 continue로 건너뛰고 짝수만 처리하여 결과에 추가합니다."
+    },
+    {
+      "title": "금지어 필터링",
+      "description": "리스트에서 금지어를 제외하고 처리",
+      "blocks": [
+        "when_run_button_click",
+        "set_list('단어목록', ['안녕', '나쁜말', '반가워', '욕설', '좋아'])",
+        "set_list('금지어', ['나쁜말', '욕설'])",
+        "set_variable('깨끗한_문장', '')",
+        "repeat_basic(<length_of_list('단어목록')>)",
+        "  set_variable('현재단어', <get_list_item('단어목록', <get_variable('i')>)>)",
+        "  repeat_basic(<length_of_list('금지어')>)",
+        "    if_condition(<get_variable('현재단어')> = <get_list_item('금지어', <get_variable('j')>)>)",
+        "      continue_repeat",
+        "  set_variable('깨끗한_문장', <join_something(<get_variable('깨끗한_문장')>, <get_variable('현재단어')>, ' ')>)",
+        "speak_something(<get_variable('깨끗한_문장')>)"
+      ],
+      "explanation": "금지어와 일치하는 단어는 continue로 건너뛰고 깨끗한 단어만 처리합니다."
+    },
+    {
+      "title": "점수 유효성 검사",
+      "description": "0~100 범위의 점수만 평균 계산",
+      "blocks": [
+        "when_run_button_click",
+        "set_list('점수들', [85, 92, -10, 78, 150, 88, 95])",
+        "set_variable('합계', 0)",
+        "set_variable('유효개수', 0)",
+        "repeat_basic(<length_of_list('점수들')>)",
+        "  set_variable('점수', <get_list_item('점수들', <get_variable('i')>)>)",
+        "  if_condition(<get_variable('점수') < 0> or <get_variable('점수') > 100>)",
+        "    speak_something(<join_something('잘못된 점수: ', <get_variable('점수')>)>)",
+        "    continue_repeat",
+        "  change_variable('합계', <get_variable('점수')>)",
+        "  change_variable('유효개수', 1)",
+        "set_variable('평균', <calc_operation(<get_variable('합계')>, '/', <get_variable('유효개수')>)>)",
+        "set_text(<join_something('유효한 점수의 평균: ', <get_variable('평균')>)>)"
+      ],
+      "explanation": "범위를 벗어난 점수는 continue로 건너뛰고 유효한 점수만으로 평균을 계산합니다."
+    },
+    {
+      "title": "소수 찾기",
+      "description": "특정 범위에서 소수만 찾아 표시",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('소수목록', '')",
+        "repeat_basic(20)",
+        "  set_variable('숫자', <calc_operation(<get_variable('i')>, '+', 1)>)",
+        "  if_condition(<get_variable('숫자') < 2>)",
+        "    continue_repeat",
+        "  set_variable('소수여부', 1)",
+        "  set_variable('나누기', 2)",
+        "  repeat_while_true",
+        "    if_condition(<get_variable('나누기') >= <get_variable('숫자')>)",
+        "      break",
+        "    if_condition(<calc_operation(<get_variable('숫자')>, 'mod', <get_variable('나누기')>) = 0>)",
+        "      set_variable('소수여부', 0)",
+        "      break",
+        "    change_variable('나누기', 1)",
+        "  if_condition(<get_variable('소수여부') = 0>)",
+        "    continue_repeat",
+        "  set_variable('소수목록', <join_something(<get_variable('소수목록')>, <get_variable('숫자')>, ' ')>)",
+        "set_text(<join_something('소수: ', <get_variable('소수목록')>)>)"
+      ],
+      "explanation": "소수가 아닌 숫자는 continue로 건너뛰고 소수만 목록에 추가합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "반복 중 특정 경우를 건너뛰고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'흐름' 카테고리에서 반복 제어 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'다음 반복' 블록을 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "이 블록을 실행하면 바로 다음 반복으로 넘어가요"
+        }
+      ]
+    },
+    {
+      "situation": "조건에 따라 일부 코드를 실행하지 않으려고 해요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "조건 블록과 continue를 조합하면 선택적 실행이 가능해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'흐름' 카테고리의 조건 블록 안에 '다음 반복'을 넣으세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "건너뛸 조건일 때 continue_repeat를 실행하세요"
+        }
+      ]
+    },
+    {
+      "situation": "continue와 break의 차이를 모르겠어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "continue는 다음 반복으로, break는 반복 완전 종료예요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "이번만 건너뛰기: continue, 반복 끝내기: break"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "둘 다 '흐름' 카테고리의 반복 제어 블록이에요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "반복문 밖에서 사용",
+      "why_it_happens": "continue의 사용 조건을 모름",
+      "consequence": "블록이 작동하지 않거나 오류 발생",
+      "solution": "반드시 반복 블록 안에서만 사용하기",
+      "teaching_moment": "continue는 반복문 안에서만 의미가 있어요. 밖에서는 넘어갈 다음 반복이 없어요."
+    },
+    {
+      "mistake": "continue 후에도 코드가 실행될 것으로 기대",
+      "why_it_happens": "continue의 동작 방식을 잘못 이해",
+      "consequence": "continue 이후 코드가 실행되지 않음",
+      "solution": "continue 실행 시 바로 다음 반복으로 넘어감을 이해",
+      "teaching_moment": "continue를 만나면 그 아래 코드는 무시하고 바로 다음 반복으로 가요."
+    },
+    {
+      "mistake": "모든 경우에 continue 사용",
+      "why_it_happens": "조건 설정을 잘못함",
+      "consequence": "반복문이 아무 작업도 하지 않음",
+      "solution": "continue 조건을 정확히 설정하기",
+      "teaching_moment": "continue는 특별한 경우에만 사용해야 해요. 모든 경우에 건너뛰면 아무것도 안 돼요."
+    },
+    {
+      "mistake": "중첩 반복에서 잘못된 반복을 건너뜀",
+      "why_it_happens": "continue가 어느 반복에 영향을 주는지 모름",
+      "consequence": "의도하지 않은 반복이 건너뛰어짐",
+      "solution": "continue는 가장 가까운 반복문에만 영향을 줌을 이해",
+      "teaching_moment": "continue는 자신을 포함한 가장 가까운 반복문에만 영향을 줘요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "흐름 카테고리 찾기",
+      "instruction": "블록 팔레트에서 주황색 '흐름' 카테고리를 클릭하세요.",
+      "visual_hint": "화살표 모양의 아이콘이 있는 주황색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "다음 반복 블록 선택",
+      "instruction": "'다음 반복' 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "단독으로 사용되는 제어 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "반복문 안에 배치",
+      "instruction": "반복 블록 내부에 다음 반복 블록을 배치하세요.",
+      "visual_hint": "반드시 반복문 안에 있어야 작동합니다."
+    },
+    {
+      "step": 4,
+      "title": "조건 설정",
+      "instruction": "일반적으로 조건 블록과 함께 사용하여 특정 조건에서만 실행되도록 하세요.",
+      "visual_hint": "if 조건 안에 continue를 넣어 선택적으로 건너뛰기를 구현합니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트 및 확인",
+      "instruction": "프로그램을 실행하여 원하는 경우에만 건너뛰는지 확인하세요.",
+      "visual_hint": "건너뛴 경우와 실행된 경우를 구분하여 확인합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "break",
+      "relationship": "반복 종료",
+      "explanation": "continue는 다음 반복으로, break는 반복 완전 종료"
+    },
+    {
+      "block_id": "repeat_basic",
+      "relationship": "기본 반복",
+      "explanation": "continue를 사용할 수 있는 기본 반복문"
+    },
+    {
+      "block_id": "repeat_while_true",
+      "relationship": "조건 반복",
+      "explanation": "continue를 사용할 수 있는 조건 반복문"
+    },
+    {
+      "block_id": "if_condition",
+      "relationship": "조건 확인",
+      "explanation": "continue 실행 여부를 결정하는 조건 블록"
+    },
+    {
+      "block_id": "repeat_inf",
+      "relationship": "무한 반복",
+      "explanation": "continue를 사용할 수 있는 무한 반복문"
+    },
+    {
+      "block_id": "foreach_list",
+      "relationship": "리스트 반복",
+      "explanation": "리스트 항목을 처리할 때 continue로 특정 항목 건너뛰기"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "continue가 작동하지 않아요",
+      "possible_causes": ["반복문 밖에서 사용", "블록 연결이 잘못됨", "반복문 자체가 실행되지 않음"],
+      "solutions": ["반복 블록 안에 있는지 확인", "블록 연결 상태 점검", "반복문이 실행되는지 먼저 확인"]
+    },
+    {
+      "problem": "모든 반복이 건너뛰어져요",
+      "possible_causes": ["조건이 항상 참", "조건 설정 오류", "변수 값이 예상과 다름"],
+      "solutions": ["continue 조건 재검토", "변수 값을 출력해서 확인", "조건을 더 구체적으로 설정"]
+    },
+    {
+      "problem": "원하지 않는 코드가 실행돼요",
+      "possible_causes": ["continue 위치가 잘못됨", "조건문 구조 오류", "continue 이전에 코드가 실행됨"],
+      "solutions": ["continue를 더 앞쪽으로 이동", "조건문 구조 재설계", "실행 순서 재배치"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "줄넘기에서 실수",
+      "explanation": "줄넘기 중 한 번 걸려도 다시 시작하지 않고 다음 점프를 계속하는 것과 같습니다."
+    },
+    {
+      "analogy": "시험 문제 건너뛰기",
+      "explanation": "어려운 문제는 일단 건너뛰고 다음 문제를 푸는 것과 비슷합니다."
+    },
+    {
+      "analogy": "재생목록 스킵",
+      "explanation": "음악 재생목록에서 듣고 싶지 않은 곡을 건너뛰는 것과 같은 개념입니다."
+    },
+    {
+      "analogy": "요리 레시피 생략",
+      "explanation": "알레르기가 있는 재료는 건너뛰고 나머지 재료로 요리하는 것과 비슷합니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "조건부 처리 패턴",
+      "description": "복잡한 조건에 따라 선택적으로 처리하는 고급 패턴",
+      "use_case": "데이터 필터링, 유효성 검사, 조건부 집계"
+    },
+    {
+      "concept": "성능 최적화",
+      "description": "불필요한 처리를 건너뛰어 프로그램 속도 향상",
+      "use_case": "대용량 데이터 처리, 복잡한 계산 최적화"
+    },
+    {
+      "concept": "다중 continue 전략",
+      "description": "여러 조건에 따른 복합적인 건너뛰기 로직",
+      "use_case": "다단계 필터링, 복잡한 검증 시스템"
+    },
+    {
+      "concept": "중첩 반복 제어",
+      "description": "여러 겹의 반복문에서 continue 활용",
+      "use_case": "2차원 배열 처리, 트리 구조 탐색"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "continue 블록을 사용해서 간단한 조건에서 반복을 건너뛸 수 있다",
+      "example": "짝수/홀수 구분, 특정 값 제외하기"
+    },
+    {
+      "level": "중급",
+      "criteria": "continue를 활용해서 효율적인 데이터 처리를 구현할 수 있다",
+      "example": "유효성 검사, 필터링 시스템, 조건부 집계"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 로직에서 continue를 전략적으로 활용하여 최적화된 프로그램을 만들 수 있다",
+      "example": "다중 조건 필터링, 중첩 반복 제어, 성능 최적화"
+    }
+  ]
+}

@@ -1,0 +1,352 @@
+{
+  "id": "function_field_boolean",
+  "category": "function",
+  "name": "참/거짓 매개변수 추가",
+  "description": "함수에 참(true) 또는 거짓(false) 값을 받을 수 있는 불린 매개변수를 추가하는 블록입니다. 함수 정의 시 사용되며, 조건부 동작이나 스위치 역할을 하는 매개변수를 만들 때 활용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "불린(Boolean) 데이터 타입의 개념 이해",
+      "함수 매개변수의 다양한 타입 활용법 학습",
+      "조건부 매개변수를 통한 함수 동작 제어",
+      "참/거짓 논리를 활용한 프로그래밍 사고력 개발",
+      "함수의 유연성과 재사용성 향상 방법 익히기"
+    ],
+    "key_concepts": [
+      {
+        "concept": "불린 매개변수",
+        "explanation": "참 또는 거짓 두 가지 값만 가질 수 있는 매개변수로, 함수의 동작을 전환하는 스위치 역할을 합니다."
+      },
+      {
+        "concept": "이진 논리",
+        "explanation": "예/아니오, 켜짐/꺼짐, 활성/비활성 등 두 가지 상태를 표현하는 논리 체계입니다."
+      },
+      {
+        "concept": "조건부 실행",
+        "explanation": "불린 매개변수 값에 따라 함수 내부에서 다른 동작을 수행하도록 제어합니다."
+      },
+      {
+        "concept": "타입 명시",
+        "explanation": "매개변수가 받을 수 있는 값의 종류를 명확히 하여 함수 사용의 정확성을 높입니다."
+      }
+    ],
+    "difficulty_level": "고급",
+    "prerequisites": ["함수 만들기 기본 사용법", "조건 블록 활용 경험", "참/거짓 논리 이해", "매개변수 개념 숙지"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "애니메이션 방향 제어",
+      "description": "참/거짓으로 애니메이션 방향 결정",
+      "blocks": [
+        "function_create('이동애니메이션', [boolean_param('오른쪽으로'), number_param('거리')])",
+        "  if_condition(<param('오른쪽으로')>)",
+        "    point_direction(90)",
+        "    repeat_basic(10)",
+        "      move_direction(<calc_operation(<param('거리')>, '/', 10)>)",
+        "      wait_second(0.05)",
+        "  else",
+        "    point_direction(-90)",
+        "    repeat_basic(10)",
+        "      move_direction(<calc_operation(<param('거리')>, '/', 10)>)",
+        "      wait_second(0.05)",
+        "",
+        "when_run_button_click",
+        "function_call('이동애니메이션', [true, 100])",
+        "wait_second(1)",
+        "function_call('이동애니메이션', [false, 100])"
+      ],
+      "explanation": "불린 매개변수로 이동 방향을 결정하는 애니메이션 함수입니다."
+    },
+    {
+      "title": "디버그 모드 함수",
+      "description": "디버그 정보 표시 여부 제어",
+      "blocks": [
+        "function_create('게임실행', [boolean_param('디버그모드')])",
+        "  if_condition(<param('디버그모드')>)",
+        "    show_variable('점수')",
+        "    show_variable('레벨')",
+        "    show_variable('시간')",
+        "    speak_something('디버그 모드 활성화')",
+        "  else",
+        "    hide_variable('점수')",
+        "    hide_variable('레벨')",
+        "    hide_variable('시간')"
+      ],
+      "explanation": "불린 매개변수로 디버그 정보 표시를 제어하는 함수입니다."
+    },
+    {
+      "title": "소리 켜기/끄기",
+      "description": "게임 사운드 활성화 제어",
+      "blocks": [
+        "function_create('효과음재생', [string_param('소리이름'), boolean_param('소리켜짐')])",
+        "  if_condition(<param('소리켜짐')>)",
+        "    play_sound(<param('소리이름')>)",
+        "    set_variable('마지막소리', <param('소리이름')>)",
+        "  else",
+        "    set_text('♪ ' + <param('소리이름')>)",
+        "    wait_second(0.5)",
+        "    set_text('')"
+      ],
+      "explanation": "불린 매개변수로 사운드 재생 여부를 결정하는 함수입니다."
+    },
+    {
+      "title": "반복 방향 제어",
+      "description": "정방향/역방향 반복 처리",
+      "blocks": [
+        "function_create('리스트처리', [list_param('데이터'), boolean_param('역순')])",
+        "  if_condition(<param('역순')>)",
+        "    set_variable('i', <length_of_list(<param('데이터')>)>)",
+        "    repeat_basic(<length_of_list(<param('데이터')>)>)",
+        "      speak_something(<get_list_item(<param('데이터')>, <get_variable('i')>)>)",
+        "      change_variable('i', -1)",
+        "      wait_second(0.5)",
+        "  else",
+        "    set_variable('i', 1)",
+        "    repeat_basic(<length_of_list(<param('데이터')>)>)",
+        "      speak_something(<get_list_item(<param('데이터')>, <get_variable('i')>)>)",
+        "      change_variable('i', 1)",
+        "      wait_second(0.5)"
+      ],
+      "explanation": "불린 매개변수로 리스트 처리 순서를 제어하는 함수입니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "함수에 참/거짓 매개변수를 추가하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'함수' 카테고리에서 매개변수 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "함수 만들기에서 '불린 매개변수 추가'를 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "이 매개변수는 true 또는 false 값만 받을 수 있어요"
+        }
+      ]
+    },
+    {
+      "situation": "불린 매개변수로 동작을 전환하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "함수 내부에서 if 조건으로 매개변수 값을 확인하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'흐름' 카테고리의 조건 블록을 활용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "if (<param('불린매개변수')>) 형태로 분기 처리하세요"
+        }
+      ]
+    },
+    {
+      "situation": "여러 옵션을 불린으로 제어하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "각 옵션마다 별도의 불린 매개변수를 만들 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "여러 불린 매개변수를 추가하고 각각 처리하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "복잡한 조건은 AND/OR 연산자로 조합하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "불린이 아닌 값 전달",
+      "why_it_happens": "불린 타입의 제약을 이해하지 못함",
+      "consequence": "함수가 예상과 다르게 동작하거나 오류 발생",
+      "solution": "true 또는 false만 전달하거나 조건식 결과 사용",
+      "teaching_moment": "불린 매개변수는 참/거짓 두 가지 값만 받을 수 있어요."
+    },
+    {
+      "mistake": "문자열 'true'/'false' 사용",
+      "why_it_happens": "불린과 문자열을 혼동",
+      "consequence": "조건 확인이 제대로 작동하지 않음",
+      "solution": "실제 불린 값 true/false 사용",
+      "teaching_moment": "'true'(문자)와 true(불린)는 다른 타입이에요."
+    },
+    {
+      "mistake": "불린 매개변수 남용",
+      "why_it_happens": "모든 옵션을 불린으로 처리하려 함",
+      "consequence": "함수가 복잡해지고 이해하기 어려워짐",
+      "solution": "3개 이상 옵션은 숫자나 문자열 매개변수 고려",
+      "teaching_moment": "불린은 두 가지 선택지일 때만 적합해요. 여러 옵션은 다른 방법을 사용하세요."
+    },
+    {
+      "mistake": "불린 로직 실수",
+      "why_it_happens": "참/거짓 논리를 반대로 이해",
+      "consequence": "의도와 반대로 동작",
+      "solution": "참일 때와 거짓일 때 동작을 명확히 구분",
+      "teaching_moment": "true는 '예/켜짐', false는 '아니오/꺼짐'을 의미해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "함수 생성 시작",
+      "instruction": "함수 만들기 블록을 작업 영역에 배치하세요.",
+      "visual_hint": "함수 정의 블록이 준비됩니다."
+    },
+    {
+      "step": 2,
+      "title": "불린 매개변수 추가",
+      "instruction": "함수 블록에서 '매개변수 추가' → '불린' 선택하세요.",
+      "visual_hint": "참/거짓 값을 받을 수 있는 매개변수가 추가됩니다."
+    },
+    {
+      "step": 3,
+      "title": "매개변수 이름 설정",
+      "instruction": "불린 매개변수의 의미를 나타내는 명확한 이름을 지정하세요.",
+      "visual_hint": "예: '소리켜짐', '디버그모드', '역방향' 등"
+    },
+    {
+      "step": 4,
+      "title": "조건부 로직 구현",
+      "instruction": "함수 내부에서 if 조건으로 불린 값에 따른 분기 처리를 구현하세요.",
+      "visual_hint": "매개변수가 true일 때와 false일 때 각각 다른 동작을 정의합니다."
+    },
+    {
+      "step": 5,
+      "title": "함수 호출 시 불린 값 전달",
+      "instruction": "function_call에서 true 또는 false 값을 전달하세요.",
+      "visual_hint": "조건식의 결과나 변수도 불린 값으로 전달 가능합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "function_field_string",
+      "relationship": "문자열 매개변수",
+      "explanation": "텍스트를 받는 매개변수 타입"
+    },
+    {
+      "block_id": "function_field_number",
+      "relationship": "숫자 매개변수",
+      "explanation": "숫자 값을 받는 매개변수 타입"
+    },
+    {
+      "block_id": "if_condition",
+      "relationship": "조건 확인",
+      "explanation": "불린 매개변수 값에 따른 분기 처리"
+    },
+    {
+      "block_id": "not",
+      "relationship": "불린 반전",
+      "explanation": "참/거짓 값을 반대로 바꿀 때 사용"
+    },
+    {
+      "block_id": "and_or",
+      "relationship": "불린 연산",
+      "explanation": "여러 불린 값을 조합할 때 사용"
+    },
+    {
+      "block_id": "calc_operation",
+      "relationship": "비교 연산",
+      "explanation": "비교 결과로 불린 값 생성"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "불린 매개변수가 작동하지 않아요",
+      "possible_causes": ["불린이 아닌 값 전달", "문자열 'true'/'false' 사용", "매개변수 이름 오타", "조건문 로직 오류"],
+      "solutions": ["실제 불린 값 true/false 사용", "따옴표 없이 전달", "매개변수 이름 확인", "조건문 로직 재점검"]
+    },
+    {
+      "problem": "항상 한쪽으로만 실행돼요",
+      "possible_causes": ["항상 같은 값 전달", "조건문 작성 오류", "불린 값 설정 실수"],
+      "solutions": ["전달하는 값 변화 확인", "if-else 구조 점검", "true/false 모두 테스트"]
+    },
+    {
+      "problem": "복잡한 불린 조건이 혼란스러워요",
+      "possible_causes": ["너무 많은 불린 매개변수", "복잡한 논리 연산", "명확하지 않은 이름"],
+      "solutions": ["매개변수 수 줄이기", "논리 단순화", "명확한 이름 사용"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "전등 스위치",
+      "explanation": "켜짐/꺼짐 두 가지 상태만 있는 전등 스위치와 같습니다."
+    },
+    {
+      "analogy": "예/아니오 질문",
+      "explanation": "대답이 예 또는 아니오로만 가능한 질문과 같은 원리입니다."
+    },
+    {
+      "analogy": "설정 옵션",
+      "explanation": "앱의 알림 켜기/끄기 같은 설정 옵션과 동일한 개념입니다."
+    },
+    {
+      "analogy": "신호등",
+      "explanation": "통과 가능(true) 또는 정지(false) 두 가지 상태를 나타냅니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "플래그 패턴",
+      "description": "여러 불린 매개변수로 다양한 옵션 조합",
+      "use_case": "게임 설정, 디버그 옵션, 기능 토글"
+    },
+    {
+      "concept": "상태 머신",
+      "description": "불린 조합으로 복잡한 상태 관리",
+      "use_case": "캐릭터 상태, UI 모드, 게임 페이즈"
+    },
+    {
+      "concept": "조건부 컴파일",
+      "description": "개발/배포 모드 구분",
+      "use_case": "디버그 코드 제어, 테스트 모드"
+    },
+    {
+      "concept": "기능 플래그",
+      "description": "런타임에 기능 활성화/비활성화",
+      "use_case": "A/B 테스트, 점진적 배포, 실험적 기능"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "불린 매개변수를 추가하고 간단한 조건 분기를 구현할 수 있다",
+      "example": "소리 켜기/끄기, 방향 전환"
+    },
+    {
+      "level": "중급",
+      "criteria": "여러 불린 매개변수를 조합하여 복잡한 옵션을 제어할 수 있다",
+      "example": "디버그 모드, 게임 설정, 다중 옵션 제어"
+    },
+    {
+      "level": "고급",
+      "criteria": "불린 로직을 활용한 고급 패턴과 시스템을 설계할 수 있다",
+      "example": "상태 머신, 기능 플래그 시스템, 복잡한 조건 제어"
+    }
+  ]
+}

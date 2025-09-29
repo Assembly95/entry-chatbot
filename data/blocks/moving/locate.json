@@ -1,0 +1,462 @@
+{
+  "id": "locate",
+  "category": "movement",
+  "name": "이동하기",
+  "description": "오브젝트를 특정 위치나 대상으로 즉시 이동시키는 블록입니다. 마우스 포인터, 무작위 위치, 또는 다른 오브젝트의 위치로 순간이동할 수 있습니다. 드롭다운 메뉴에서 이동 대상을 선택하여 사용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "다양한 이동 대상 옵션 이해",
+      "즉시 이동과 목표 추적 방법 학습",
+      "동적 위치 이동 구현 기법",
+      "상황별 적절한 이동 방식 선택",
+      "인터랙티브 위치 제어 시스템 구축"
+    ],
+    "key_concepts": [
+      {
+        "concept": "즉시 이동",
+        "explanation": "애니메이션 없이 목표 위치로 바로 순간이동하는 방식입니다."
+      },
+      {
+        "concept": "동적 목표",
+        "explanation": "마우스나 다른 오브젝트처럼 계속 변하는 위치를 목표로 하는 이동입니다."
+      },
+      {
+        "concept": "무작위 위치",
+        "explanation": "화면 내 임의의 위치로 이동하여 예측 불가능한 움직임을 만듭니다."
+      },
+      {
+        "concept": "참조 이동",
+        "explanation": "다른 오브젝트의 현재 위치를 참조하여 그 위치로 이동하는 방식입니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": ["오브젝트 개념", "마우스 상호작용 기초", "기본 이동 개념"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "마우스 따라다니기",
+      "description": "커서를 따라다니는 오브젝트",
+      "blocks": [
+        "when_run_button_click",
+        "set_costume('십자선')",
+        "set_size(50)",
+        "",
+        "repeat_while_true",
+        "  // 마우스 위치로 즉시 이동",
+        "  locate('mouse')",
+        "  ",
+        "  // 클릭 효과",
+        "  if_condition(<mouse_clicked()>)",
+        "    set_effect('color', 100)",
+        "    change_scale_size(20)",
+        "    wait_second(0.1)",
+        "    change_scale_size(-20)",
+        "    clear_effect()",
+        "  ",
+        "  wait_second(0.01)"
+      ],
+      "explanation": "locate('mouse')를 사용하여 마우스 커서를 실시간으로 따라갑니다."
+    },
+    {
+      "title": "랜덤 텔레포트",
+      "description": "무작위 위치로 순간이동하는 적",
+      "blocks": [
+        "when_run_button_click",
+        "set_costume('텔레포터')",
+        "set_variable('텔레포트쿨다운', 0)",
+        "",
+        "repeat_while_true",
+        "  // 쿨다운 감소",
+        "  if_condition(<get_variable('텔레포트쿨다운') > 0>)",
+        "    change_variable('텔레포트쿨다운', -1)",
+        "  ",
+        "  // 플레이어가 가까이 오면",
+        "  if_condition(<distance_to('플레이어') < 80>)",
+        "    if_condition(<get_variable('텔레포트쿨다운') <= 0>)",
+        "      // 텔레포트 준비",
+        "      speak_something('!')",
+        "      set_effect('transparency', 50)",
+        "      wait_second(0.3)",
+        "      ",
+        "      // 무작위 위치로 텔레포트",
+        "      locate('random')",
+        "      ",
+        "      // 텔레포트 효과",
+        "      play_sound('워프')",
+        "      clear_effect()",
+        "      create_clone_of('텔레포트이펙트')",
+        "      set_variable('텔레포트쿨다운', 100)",
+        "      remove_dialog()",
+        "  ",
+        "  wait_second(0.02)"
+      ],
+      "explanation": "locate('random')으로 화면의 무작위 위치로 순간이동합니다."
+    },
+    {
+      "title": "팀 집결 시스템",
+      "description": "리더를 따라 모이는 팀원들",
+      "blocks": [
+        "// 리더 오브젝트",
+        "when_run_button_click",
+        "set_costume('리더')",
+        "set_size(120)",
+        "",
+        "// 키보드로 이동",
+        "when_key_pressed('arrow')",
+        "move_with_arrow_keys()",
+        "",
+        "when_some_key_pressed('q')",
+        "// 집결 명령",
+        "speak_something('모여!')",
+        "broadcast_message('집결')",
+        "wait_second(1)",
+        "remove_dialog()",
+        "",
+        "// 팀원 오브젝트",
+        "when_message_cast('집결')",
+        "// 리더 위치로 이동",
+        "locate('리더')",
+        "",
+        "// 약간 떨어진 위치로 조정",
+        "set_variable('오프셋X', <random_number(-50, 50)>)",
+        "set_variable('오프셋Y', <random_number(-50, 50)>)",
+        "change_x(<get_variable('오프셋X')>)",
+        "change_y(<get_variable('오프셋Y')>)",
+        "",
+        "// 도착 효과",
+        "speak_something('도착!')",
+        "play_sound('도착')",
+        "wait_second(1)",
+        "remove_dialog()"
+      ],
+      "explanation": "locate('리더')를 사용하여 팀원들이 리더 위치로 모입니다."
+    },
+    {
+      "title": "아이템 자석",
+      "description": "플레이어에게 끌려오는 아이템",
+      "blocks": [
+        "// 아이템 오브젝트",
+        "when_run_button_click",
+        "locate('random')",
+        "set_costume('코인')",
+        "set_size(30)",
+        "",
+        "repeat_while_true",
+        "  set_variable('거리', <distance_to('플레이어')>)",
+        "  ",
+        "  // 자석 범위 안에 들어오면",
+        "  if_condition(<get_variable('거리') < 100>)",
+        "    // 플레이어 위치로 끌림",
+        "    repeat_basic(10)",
+        "      locate('플레이어')",
+        "      // 약간의 오프셋으로 자연스럽게",
+        "      change_x(<random_number(-5, 5)>)",
+        "      change_y(<random_number(-5, 5)>)",
+        "      wait_second(0.02)",
+        "    ",
+        "    // 최종 수집",
+        "    locate('플레이어')",
+        "    broadcast_message('아이템획득')",
+        "    play_sound('코인')",
+        "    hide()",
+        "    wait_second(1)",
+        "    // 재생성",
+        "    locate('random')",
+        "    show()",
+        "  ",
+        "  wait_second(0.05)"
+      ],
+      "explanation": "locate를 반복 사용하여 아이템이 플레이어에게 끌려오는 효과를 만듭니다."
+    },
+    {
+      "title": "화면 전환 포탈",
+      "description": "특정 위치 간 이동 포탈",
+      "blocks": [
+        "// 포탈 설정",
+        "when_run_button_click",
+        "// 포탈 A",
+        "create_clone_of('포탈')",
+        "",
+        "when_clone_start",
+        "if_condition(<get_clone_number() = 1>)",
+        "  set_costume('포탈A')",
+        "  locate_xy(-200, 0)",
+        "  set_variable('대상포탈', '포탈B')",
+        "else_if(<get_clone_number() = 2>)",
+        "  set_costume('포탈B')",
+        "  locate_xy(200, 0)",
+        "  set_variable('대상포탈', '포탈A')",
+        "",
+        "// 포탈 애니메이션",
+        "set_variable('회전각', 0)",
+        "repeat_while_true",
+        "  change_variable('회전각', 5)",
+        "  turn_right(5)",
+        "  set_effect('color', <sin(<get_variable('회전각')>) * 50>)",
+        "  wait_second(0.02)",
+        "",
+        "// 플레이어 오브젝트",
+        "when_touching('포탈A')",
+        "if_condition(<get_variable('포탈쿨다운') <= 0>)",
+        "  // 포탈 B로 이동",
+        "  set_effect('brightness', 100)",
+        "  wait_second(0.1)",
+        "  locate('포탈B')",
+        "  change_x(50)",
+        "  clear_effect()",
+        "  set_variable('포탈쿨다운', 50)",
+        "",
+        "when_touching('포탈B')",
+        "if_condition(<get_variable('포탈쿨다운') <= 0>)",
+        "  // 포탈 A로 이동",
+        "  set_effect('brightness', 100)",
+        "  wait_second(0.1)",
+        "  locate('포탈A')",
+        "  change_x(-50)",
+        "  clear_effect()",
+        "  set_variable('포탈쿨다운', 50)"
+      ],
+      "explanation": "locate를 사용하여 포탈 간 즉시 이동을 구현합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "마우스 위치로 이동시키고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'움직임' 카테고리에서 이동 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'이동하기' 블록의 드롭다운에서 '마우스'를 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "반복문 안에서 사용하면 계속 따라가요"
+        }
+      ]
+    },
+    {
+      "situation": "무작위 위치로 이동하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "locate 블록은 여러 대상을 선택할 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "드롭다운에서 'random'을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "화면 내 임의의 위치로 이동해요"
+        }
+      ]
+    },
+    {
+      "situation": "다른 오브젝트 위치로 이동하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "오브젝트 이름을 대상으로 선택할 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "드롭다운에서 목표 오브젝트를 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "locate('오브젝트이름') 형태로 사용하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "부드러운 이동 기대",
+      "why_it_happens": "glide와 혼동",
+      "consequence": "순간이동처럼 보임",
+      "solution": "부드러운 이동은 glide 사용",
+      "teaching_moment": "locate는 즉시 이동, glide는 애니메이션 이동이에요."
+    },
+    {
+      "mistake": "오브젝트 이름 오류",
+      "why_it_happens": "이름을 잘못 입력",
+      "consequence": "이동하지 않음",
+      "solution": "정확한 오브젝트 이름 확인",
+      "teaching_moment": "오브젝트 이름은 정확히 일치해야 해요."
+    },
+    {
+      "mistake": "random이 항상 같은 위치",
+      "why_it_happens": "한 번만 실행",
+      "consequence": "무작위성이 없음",
+      "solution": "필요할 때마다 실행",
+      "teaching_moment": "locate('random')은 실행할 때마다 다른 위치예요."
+    },
+    {
+      "mistake": "마우스 추적이 끊김",
+      "why_it_happens": "대기 시간이 너무 김",
+      "consequence": "부자연스러운 움직임",
+      "solution": "짧은 대기 시간 사용",
+      "teaching_moment": "마우스 추적은 자주 업데이트해야 부드러워요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "움직임 카테고리 열기",
+      "instruction": "블록 팔레트에서 파란색 '움직임' 카테고리를 클릭하세요.",
+      "visual_hint": "화살표 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "locate 블록 찾기",
+      "instruction": "'이동하기' 블록을 찾아 드래그하세요.",
+      "visual_hint": "드롭다운 메뉴가 있는 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "대상 선택",
+      "instruction": "드롭다운을 클릭하여 이동 대상을 선택하세요.",
+      "visual_hint": "마우스, 무작위, 오브젝트 이름 등을 선택할 수 있습니다."
+    },
+    {
+      "step": 4,
+      "title": "실행 조건 설정",
+      "instruction": "언제 이동할지 이벤트나 조건과 연결하세요.",
+      "visual_hint": "클릭, 키 입력, 반복문 등과 함께 사용합니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트",
+      "instruction": "실행하여 선택한 대상으로 즉시 이동하는지 확인하세요.",
+      "visual_hint": "순간이동하듯 바로 이동합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "locate_xy",
+      "relationship": "좌표 이동",
+      "explanation": "특정 X, Y 좌표로 이동"
+    },
+    {
+      "block_id": "locate_object_time",
+      "relationship": "시간 이동",
+      "explanation": "오브젝트로 부드럽게 이동"
+    },
+    {
+      "block_id": "go_to_mouse",
+      "relationship": "마우스 이동",
+      "explanation": "locate('mouse')와 동일"
+    },
+    {
+      "block_id": "move_to_random_position",
+      "relationship": "무작위 이동",
+      "explanation": "locate('random')과 동일"
+    },
+    {
+      "block_id": "glide_to",
+      "relationship": "부드러운 이동",
+      "explanation": "애니메이션과 함께 이동"
+    },
+    {
+      "block_id": "distance_to",
+      "relationship": "거리 측정",
+      "explanation": "대상까지의 거리 확인"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "이동하지 않아요",
+      "possible_causes": ["블록이 실행되지 않음", "대상 이름 오류", "대상이 존재하지 않음"],
+      "solutions": ["이벤트 연결 확인", "대상 이름 정확히 입력", "대상 오브젝트 존재 확인"]
+    },
+    {
+      "problem": "엉뚱한 곳으로 가요",
+      "possible_causes": ["잘못된 대상 선택", "대상이 이동 중", "좌표 충돌"],
+      "solutions": ["드롭다운 선택 확인", "대상 위치 고정 확인", "실행 타이밍 조정"]
+    },
+    {
+      "problem": "마우스 추적이 어색해요",
+      "possible_causes": ["업데이트 주기가 느림", "다른 이동 명령 간섭", "마우스 이벤트 문제"],
+      "solutions": ["wait 시간 단축", "다른 이동 코드 제거", "반복문 확인"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "GPS 네비게이션",
+      "explanation": "목적지를 선택하면 그곳으로 안내하는 것과 같습니다."
+    },
+    {
+      "analogy": "텔레포트",
+      "explanation": "SF 영화의 순간이동 장치와 같은 개념입니다."
+    },
+    {
+      "analogy": "자석",
+      "explanation": "철이 자석에 끌려가듯 목표로 이동하는 것과 비슷합니다."
+    },
+    {
+      "analogy": "드론 리턴홈",
+      "explanation": "드론이 홈 위치로 자동 복귀하는 것과 같은 원리입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "추적 시스템",
+      "description": "목표를 지속적으로 추적하는 AI",
+      "use_case": "적 AI, 유도 미사일, 펫 시스템"
+    },
+    {
+      "concept": "랜덤 스폰",
+      "description": "무작위 위치에 오브젝트 생성",
+      "use_case": "아이템 드롭, 적 생성, 파티클"
+    },
+    {
+      "concept": "포메이션 이동",
+      "description": "리더를 중심으로 대형 유지",
+      "use_case": "전략 게임, 군집 이동"
+    },
+    {
+      "concept": "체크포인트 시스템",
+      "description": "저장된 위치로 즉시 이동",
+      "use_case": "리스폰, 빠른 이동, 텔레포트"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "locate로 다양한 대상으로 이동할 수 있다",
+      "example": "마우스 추적, 무작위 이동, 오브젝트 이동"
+    },
+    {
+      "level": "중급",
+      "criteria": "조건과 반복을 활용한 동적 이동을 구현할 수 있다",
+      "example": "조건부 추적, 자석 효과, 집결 시스템"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 이동 패턴과 상호작용을 설계할 수 있다",
+      "example": "AI 추적, 포탈 시스템, 포메이션"
+    }
+  ]
+}

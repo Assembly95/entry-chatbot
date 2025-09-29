@@ -1,0 +1,446 @@
+{
+  "id": "locate_x",
+  "category": "movement",
+  "name": "X 위치로 이동하기",
+  "description": "오브젝트의 X좌표(가로 위치)를 지정한 값으로 즉시 설정하는 블록입니다. Y좌표는 그대로 유지하면서 가로 위치만 변경합니다. 수평 이동, 정렬, 위치 초기화 등에 사용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "X좌표 개념과 수평 이동 이해",
+      "절대 위치 설정 방법 학습",
+      "좌표계에서 X축의 역할 파악",
+      "정확한 위치 제어 기법 습득",
+      "수평 정렬과 배치 시스템 구축"
+    ],
+    "key_concepts": [
+      {
+        "concept": "X좌표",
+        "explanation": "화면의 가로 위치를 나타내는 값으로, 왼쪽이 음수(-), 오른쪽이 양수(+)입니다."
+      },
+      {
+        "concept": "절대 위치",
+        "explanation": "현재 위치와 관계없이 지정한 좌표로 직접 이동하는 방식입니다."
+      },
+      {
+        "concept": "수평 이동",
+        "explanation": "Y좌표는 유지하면서 X좌표만 변경하여 좌우로만 이동하는 것입니다."
+      },
+      {
+        "concept": "즉시 이동",
+        "explanation": "애니메이션 없이 바로 해당 위치로 순간이동하는 방식입니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": ["좌표계 기본 이해", "X축과 Y축 구분", "숫자 입력"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "횡스크롤 게임 캐릭터",
+      "description": "좌우로만 이동하는 캐릭터 제어",
+      "blocks": [
+        "when_run_button_click",
+        "// 시작 위치",
+        "locate_x(-200)",
+        "locate_y(-100)",
+        "set_variable('점프중', false)",
+        "",
+        "// 좌우 이동",
+        "when_key_pressed('left')",
+        "if_condition(<coordinate_object('x') > -230>)",
+        "  change_x(-10)",
+        "  // 벽 체크",
+        "  if_condition(<touching('벽')>)",
+        "    locate_x(<calc_operation(<coordinate_object('x')>, '+', 10)>)",
+        "",
+        "when_key_pressed('right')",
+        "if_condition(<coordinate_object('x') < 230>)",
+        "  change_x(10)",
+        "  if_condition(<touching('벽')>)",
+        "    locate_x(<calc_operation(<coordinate_object('x')>, '-', 10)>)",
+        "",
+        "// 특정 위치로 워프",
+        "when_some_key_pressed('1')",
+        "locate_x(-200)",
+        "speak_something('시작 지점!')",
+        "",
+        "when_some_key_pressed('2')",
+        "locate_x(0)",
+        "speak_something('중간 지점!')",
+        "",
+        "when_some_key_pressed('3')",
+        "locate_x(200)",
+        "speak_something('끝 지점!')"
+      ],
+      "explanation": "locate_x를 사용하여 횡스크롤 게임의 캐릭터 이동과 워프를 구현합니다."
+    },
+    {
+      "title": "UI 메뉴 슬라이드",
+      "description": "화면 밖에서 슬라이드로 들어오는 메뉴",
+      "blocks": [
+        "when_run_button_click",
+        "// 메뉴 초기 위치 (화면 밖)",
+        "locate_x(350)",
+        "locate_y(0)",
+        "set_variable('메뉴열림', false)",
+        "",
+        "when_message_cast('메뉴토글')",
+        "if_condition(not <get_variable('메뉴열림')>)",
+        "  // 메뉴 열기",
+        "  set_variable('메뉴열림', true)",
+        "  repeat_basic(20)",
+        "    locate_x(<calc_operation(<coordinate_object('x')>, '-', 15)>)",
+        "    wait_second(0.02)",
+        "  // 정확한 위치로 보정",
+        "  locate_x(50)",
+        "else",
+        "  // 메뉴 닫기",
+        "  set_variable('메뉴열림', false)",
+        "  repeat_basic(20)",
+        "    locate_x(<calc_operation(<coordinate_object('x')>, '+', 15)>)",
+        "    wait_second(0.02)",
+        "  // 완전히 화면 밖으로",
+        "  locate_x(350)"
+      ],
+      "explanation": "locate_x를 반복 사용하여 메뉴가 슬라이드되는 애니메이션을 만듭니다."
+    },
+    {
+      "title": "리듬 게임 노트",
+      "description": "정해진 X위치에 떨어지는 노트",
+      "blocks": [
+        "when_clone_start",
+        "// 노트 레인 설정 (4개 레인)",
+        "set_variable('레인', <random_select([1, 2, 3, 4])>)",
+        "",
+        "// 레인별 X좌표 설정",
+        "if_condition(<get_variable('레인') = 1>)",
+        "  locate_x(-150)",
+        "else_if(<get_variable('레인') = 2>)",
+        "  locate_x(-50)",
+        "else_if(<get_variable('레인') = 3>)",
+        "  locate_x(50)",
+        "else_if(<get_variable('레인') = 4>)",
+        "  locate_x(150)",
+        "",
+        "// Y 시작 위치",
+        "locate_y(180)",
+        "",
+        "// 노트 떨어뜨리기",
+        "repeat_while_true(<coordinate_object('y') > -180>)",
+        "  change_y(-5)",
+        "  ",
+        "  // 판정 라인 체크",
+        "  if_condition(<coordinate_object('y') < -100 and <coordinate_object('y') > -120>)",
+        "    if_condition(<key_pressed(<get_variable('레인')>)>)",
+        "      broadcast_message('히트')",
+        "      play_sound('히트')",
+        "      delete_clone()",
+        "  ",
+        "  wait_second(0.02)",
+        "",
+        "// 놓친 노트",
+        "broadcast_message('미스')",
+        "delete_clone()"
+      ],
+      "explanation": "locate_x로 각 레인의 정확한 X위치에 노트를 배치합니다."
+    },
+    {
+      "title": "그리드 정렬 시스템",
+      "description": "오브젝트를 격자에 정렬",
+      "blocks": [
+        "when_dragging",
+        "// 마우스 따라가기",
+        "go_to_mouse()",
+        "",
+        "when_drag_end",
+        "// 그리드 크기",
+        "set_variable('그리드크기', 40)",
+        "",
+        "// 현재 X좌표를 그리드에 맞춤",
+        "set_variable('현재X', <coordinate_object('x')>)",
+        "set_variable('그리드X', <calc_operation(<round(<calc_operation(<get_variable('현재X')>, '/', <get_variable('그리드크기')>)>)>, '*', <get_variable('그리드크기')>)>)",
+        "",
+        "// 그리드 위치로 스냅",
+        "locate_x(<get_variable('그리드X')>)",
+        "",
+        "// Y도 같은 방식으로",
+        "set_variable('현재Y', <coordinate_object('y')>)",
+        "set_variable('그리드Y', <calc_operation(<round(<calc_operation(<get_variable('현재Y')>, '/', <get_variable('그리드크기')>)>)>, '*', <get_variable('그리드크기')>)>)",
+        "locate_y(<get_variable('그리드Y')>)",
+        "",
+        "// 스냅 효과",
+        "play_sound('딸깍')",
+        "set_effect('brightness', 30)",
+        "wait_second(0.1)",
+        "clear_effect()"
+      ],
+      "explanation": "locate_x와 locate_y를 사용하여 오브젝트를 그리드에 정확히 정렬합니다."
+    },
+    {
+      "title": "사인파 움직임",
+      "description": "Y는 사인파, X는 일정하게 이동",
+      "blocks": [
+        "when_run_button_click",
+        "locate_x(-240)",
+        "locate_y(0)",
+        "set_variable('각도', 0)",
+        "",
+        "repeat_while_true",
+        "  // X는 일정하게 증가",
+        "  change_x(2)",
+        "  ",
+        "  // 화면 끝에 도달하면 처음으로",
+        "  if_condition(<coordinate_object('x') > 240>)",
+        "    locate_x(-240)",
+        "  ",
+        "  // Y는 사인파로 움직임",
+        "  change_variable('각도', 5)",
+        "  set_y(<calc_operation(<sin(<get_variable('각도')>)>, '*', 100)>)",
+        "  ",
+        "  // 궤적 그리기",
+        "  stamp()",
+        "  ",
+        "  wait_second(0.02)"
+      ],
+      "explanation": "X는 일정하게 이동하고 Y는 사인파로 움직여 파동을 그립니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "X좌표만 변경하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'움직임' 카테고리에서 위치 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'X 위치로 이동하기' 블록을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "-240~240 사이의 값을 입력하세요"
+        }
+      ]
+    },
+    {
+      "situation": "좌우로만 움직이게 하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "locate_x는 Y를 유지하며 X만 변경해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "change_x와 locate_x를 적절히 조합하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "키 입력과 연결하여 제어하세요"
+        }
+      ]
+    },
+    {
+      "situation": "정확한 위치에 배치하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "locate_x는 즉시 해당 X좌표로 이동해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "locate_y와 함께 사용하면 정확한 위치 설정 가능"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "또는 locate_xy로 한 번에 설정할 수도 있어요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "Y좌표도 변경될 것으로 기대",
+      "why_it_happens": "locate_xy와 혼동",
+      "consequence": "Y는 그대로이고 X만 변경됨",
+      "solution": "Y도 변경하려면 locate_y 추가 사용",
+      "teaching_moment": "locate_x는 X좌표만 변경해요. 전체 위치는 locate_xy를 사용하세요."
+    },
+    {
+      "mistake": "화면 범위 초과",
+      "why_it_happens": "좌표 범위를 모름",
+      "consequence": "오브젝트가 화면 밖에 위치",
+      "solution": "-240~240 범위 내 사용",
+      "teaching_moment": "엔트리 화면 X좌표는 -240~240이에요."
+    },
+    {
+      "mistake": "상대 이동과 혼동",
+      "why_it_happens": "change_x와 혼동",
+      "consequence": "예상과 다른 위치로 이동",
+      "solution": "절대 위치임을 이해",
+      "teaching_moment": "locate_x는 절대 위치, change_x는 상대 이동이에요."
+    },
+    {
+      "mistake": "애니메이션 효과 기대",
+      "why_it_happens": "glide와 혼동",
+      "consequence": "순간이동처럼 보임",
+      "solution": "반복문으로 단계적 이동",
+      "teaching_moment": "부드러운 이동은 glide나 반복문을 사용하세요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "움직임 카테고리 열기",
+      "instruction": "블록 팔레트에서 파란색 '움직임' 카테고리를 클릭하세요.",
+      "visual_hint": "화살표 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "locate_x 블록 찾기",
+      "instruction": "'X 위치로 이동하기' 블록을 찾으세요.",
+      "visual_hint": "X: [  ] 형태의 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "X좌표 값 입력",
+      "instruction": "원하는 X좌표 값을 입력하세요 (-240~240).",
+      "visual_hint": "0은 중앙, 음수는 왼쪽, 양수는 오른쪽입니다."
+    },
+    {
+      "step": 4,
+      "title": "실행 시점 설정",
+      "instruction": "언제 이동할지 이벤트나 조건과 연결하세요.",
+      "visual_hint": "클릭, 키 입력, 메시지 등과 연결합니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트",
+      "instruction": "실행하여 오브젝트가 지정한 X위치로 이동하는지 확인하세요.",
+      "visual_hint": "Y좌표는 그대로 유지됩니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "locate_y",
+      "relationship": "Y좌표 설정",
+      "explanation": "Y좌표만 변경"
+    },
+    {
+      "block_id": "locate_xy",
+      "relationship": "전체 위치",
+      "explanation": "X와 Y를 동시에 설정"
+    },
+    {
+      "block_id": "change_x",
+      "relationship": "상대 이동",
+      "explanation": "현재 X에서 증감"
+    },
+    {
+      "block_id": "coordinate_object('x')",
+      "relationship": "X좌표 확인",
+      "explanation": "현재 X좌표 값 가져오기"
+    },
+    {
+      "block_id": "glide_to_x",
+      "relationship": "부드러운 이동",
+      "explanation": "X위치로 시간을 두고 이동"
+    },
+    {
+      "block_id": "mouse_x",
+      "relationship": "마우스 X",
+      "explanation": "마우스의 X좌표 가져오기"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "이동하지 않아요",
+      "possible_causes": ["블록이 실행되지 않음", "이미 같은 X위치", "다른 코드가 위치 변경"],
+      "solutions": ["이벤트 연결 확인", "다른 X값으로 테스트", "다른 이동 코드 확인"]
+    },
+    {
+      "problem": "화면 밖으로 사라져요",
+      "possible_causes": ["X값이 범위 초과", "계산 오류", "오브젝트 크기 미고려"],
+      "solutions": ["-240~240 범위 확인", "계산식 검토", "오브젝트 크기 고려"]
+    },
+    {
+      "problem": "Y좌표도 바뀌어요",
+      "possible_causes": ["locate_xy 사용", "다른 Y 변경 코드", "오브젝트 회전"],
+      "solutions": ["locate_x만 사용", "Y 변경 코드 제거", "회전 스타일 확인"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "엘리베이터",
+      "explanation": "같은 층(Y)에서 좌우(X)로만 이동하는 것과 같습니다."
+    },
+    {
+      "analogy": "체스 룩",
+      "explanation": "체스의 룩이 가로로만 이동하는 것과 비슷합니다."
+    },
+    {
+      "analogy": "수평자",
+      "explanation": "수평선을 따라 좌우로만 움직이는 것과 같은 원리입니다."
+    },
+    {
+      "analogy": "슬라이더",
+      "explanation": "UI의 가로 슬라이더가 좌우로만 움직이는 것과 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "수평 스크롤",
+      "description": "화면을 좌우로 스크롤하는 효과",
+      "use_case": "횡스크롤 게임, 파노라마 뷰"
+    },
+    {
+      "concept": "레인 시스템",
+      "description": "고정된 X위치들을 레인으로 활용",
+      "use_case": "리듬 게임, 레이싱 게임"
+    },
+    {
+      "concept": "수평 정렬",
+      "description": "여러 오브젝트를 X축으로 정렬",
+      "use_case": "메뉴 배치, UI 정렬"
+    },
+    {
+      "concept": "좌우 경계",
+      "description": "X좌표 제한으로 이동 범위 설정",
+      "use_case": "캐릭터 이동 제한, 카메라 범위"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "locate_x로 X좌표를 설정할 수 있다",
+      "example": "특정 위치로 이동, 초기 위치 설정"
+    },
+    {
+      "level": "중급",
+      "criteria": "조건과 계산을 활용한 X좌표 제어를 구현할 수 있다",
+      "example": "그리드 스냅, 범위 제한, 수평 이동"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 수평 이동 시스템을 설계할 수 있다",
+      "example": "레인 시스템, 수평 스크롤, UI 애니메이션"
+    }
+  ]
+}

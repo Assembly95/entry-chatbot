@@ -1,0 +1,360 @@
+{
+  "id": "replace_string",
+  "category": "calc",
+  "name": "[텍스트1]에서 [텍스트2]를 [텍스트3]으로 바꾸기",
+  "description": "첫 번째 텍스트에서 두 번째 텍스트를 찾아 세 번째 텍스트로 모두 바꾼 결과를 반환하는 값 블록입니다. 원본 텍스트는 변경되지 않고 새로운 텍스트가 생성됩니다. 찾는 텍스트가 여러 개 있으면 모두 바뀝니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "문자열 치환과 텍스트 편집 개념 이해",
+      "패턴 찾기와 바꾸기의 원리 학습",
+      "텍스트 정제와 데이터 클리닝 방법 익히기",
+      "자동화된 텍스트 처리 기법 습득",
+      "문서 편집과 필터링 시스템 구현 능력 개발"
+    ],
+    "key_concepts": [
+      {
+        "concept": "문자열 치환 (String Replace)",
+        "explanation": "텍스트에서 특정 부분을 찾아 다른 텍스트로 대체하는 작업으로, 텍스트 편집의 핵심 기능입니다."
+      },
+      {
+        "concept": "전체 치환",
+        "explanation": "찾는 텍스트가 여러 번 나타나면 모든 위치에서 한 번에 바꾸는 방식입니다."
+      },
+      {
+        "concept": "원본 보존",
+        "explanation": "원래 텍스트는 변경되지 않고 바뀐 결과만 새로 생성되므로 안전하게 처리할 수 있습니다."
+      },
+      {
+        "concept": "대소문자 구분",
+        "explanation": "정확히 일치하는 대소문자의 텍스트만 바뀌므로 정확한 매칭이 중요합니다."
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": ["문자열과 텍스트 개념 이해", "변수 사용 경험", "조건 블록 활용 능력", "텍스트 처리 블록 기본 지식"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "욕설 필터링 시스템",
+      "description": "부적절한 단어를 별표로 치환",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('메시지를 입력하세요')",
+        "set_variable('원본', <get_variable('답변')>)",
+        "set_variable('필터링', <replace_string(<get_variable('원본')>, '나쁜말', '***')>)",
+        "set_variable('필터링', <replace_string(<get_variable('필터링')>, '욕설', '***')>)",
+        "set_variable('필터링', <replace_string(<get_variable('필터링')>, '비속어', '***')>)",
+        "set_text(<join_something('필터링된 메시지: ', <get_variable('필터링')>)>)"
+      ],
+      "explanation": "부적절한 단어들을 자동으로 별표로 바꿔서 깨끗한 메시지로 만드는 필터링 시스템입니다."
+    },
+    {
+      "title": "텍스트 템플릿 시스템",
+      "description": "템플릿의 변수를 실제 값으로 치환",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('템플릿', '{이름}님 안녕하세요! 오늘은 {날짜}입니다.')",
+        "ask_and_wait('이름을 입력하세요')",
+        "set_variable('이름', <get_variable('답변')>)",
+        "set_variable('날짜', <get_date('월/일')>)",
+        "set_variable('결과', <replace_string(<get_variable('템플릿')>, '{이름}', <get_variable('이름')>)>)",
+        "set_variable('결과', <replace_string(<get_variable('결과')>, '{날짜}', <get_variable('날짜')>)>)",
+        "speak_something(<get_variable('결과')>)"
+      ],
+      "explanation": "템플릿 문자열의 플레이스홀더를 실제 값으로 바꿔서 개인화된 메시지를 생성합니다."
+    },
+    {
+      "title": "줄임말 변환기",
+      "description": "줄임말을 원래 단어로 변환",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('문장을 입력하세요')",
+        "set_variable('텍스트', <get_variable('답변')>)",
+        "set_variable('텍스트', <replace_string(<get_variable('텍스트')>, 'ㅋㅋ', '하하')>)",
+        "set_variable('텍스트', <replace_string(<get_variable('텍스트')>, 'ㅇㅇ', '응응')>)",
+        "set_variable('텍스트', <replace_string(<get_variable('텍스트')>, 'ㄱㅅ', '감사')>)",
+        "set_variable('텍스트', <replace_string(<get_variable('텍스트')>, 'ㅂㅂ', '바이바이')>)",
+        "set_text(<join_something('변환된 문장: ', <get_variable('텍스트')>)>)"
+      ],
+      "explanation": "인터넷 줄임말을 정식 단어로 자동 변환하는 텍스트 정제 시스템입니다."
+    },
+    {
+      "title": "암호화/복호화 시스템",
+      "description": "간단한 문자 치환 암호",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('암호화할 메시지를 입력하세요')",
+        "set_variable('원본', <get_variable('답변')>)",
+        "set_variable('암호문', <get_variable('원본')>)",
+        "set_variable('암호문', <replace_string(<get_variable('암호문')>, 'a', '@')>)",
+        "set_variable('암호문', <replace_string(<get_variable('암호문')>, 'e', '3')>)",
+        "set_variable('암호문', <replace_string(<get_variable('암호문')>, 'i', '!')>)",
+        "set_variable('암호문', <replace_string(<get_variable('암호문')>, 'o', '0')>)",
+        "set_variable('암호문', <replace_string(<get_variable('암호문')>, 'u', '#')>)",
+        "set_text(<join_something('암호화: ', <get_variable('암호문')>)>)",
+        "wait_second(2)",
+        "set_variable('복호화', <get_variable('암호문')>)",
+        "set_variable('복호화', <replace_string(<get_variable('복호화')>, '@', 'a')>)",
+        "set_variable('복호화', <replace_string(<get_variable('복호화')>, '3', 'e')>)",
+        "set_variable('복호화', <replace_string(<get_variable('복호화')>, '!', 'i')>)",
+        "set_variable('복호화', <replace_string(<get_variable('복호화')>, '0', 'o')>)",
+        "set_variable('복호화', <replace_string(<get_variable('복호화')>, '#', 'u')>)",
+        "set_text(<join_something('복호화: ', <get_variable('복호화')>)>)"
+      ],
+      "explanation": "모음을 특수문자로 바꾸는 간단한 치환 암호 시스템입니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "텍스트에서 특정 단어를 다른 단어로 바꾸고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'계산' 카테고리에서 문자열 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'[텍스트1]에서 [텍스트2]를 [텍스트3]으로 바꾸기' 블록을 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "원본 텍스트, 찾을 텍스트, 바꿀 텍스트 순서로 입력하세요"
+        }
+      ]
+    },
+    {
+      "situation": "여러 단어를 한 번에 바꾸고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "바꾸기 블록을 여러 번 연결해서 사용할 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "변수에 결과를 저장하고 다시 그 변수를 바꾸기에 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "첫 번째 바꾸기 결과를 다음 바꾸기의 입력으로 사용하세요"
+        }
+      ]
+    },
+    {
+      "situation": "바꾸기가 제대로 안 돼요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "대소문자가 정확히 일치해야 바뀌어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "찾을 텍스트가 원본에 정확히 있는지 확인하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "공백이나 특수문자도 정확히 일치해야 해요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "원본이 바뀔 것으로 기대",
+      "why_it_happens": "바꾸기가 원본을 직접 수정할 것으로 생각",
+      "consequence": "원본 변수를 확인해도 바뀌지 않음",
+      "solution": "바꾸기 결과를 새 변수에 저장하거나 같은 변수에 다시 저장",
+      "teaching_moment": "바꾸기는 새로운 텍스트를 만들어요. 원본은 그대로 남아있어요."
+    },
+    {
+      "mistake": "대소문자를 구분하지 못함",
+      "why_it_happens": "대소문자 구분의 중요성을 모름",
+      "consequence": "'Hello'에서 'hello'를 바꾸려고 해도 안 됨",
+      "solution": "정확한 대소문자로 찾기 텍스트 입력",
+      "teaching_moment": "컴퓨터는 'A'와 'a'를 다른 글자로 봐요. 정확히 입력해야 해요."
+    },
+    {
+      "mistake": "빈 텍스트로 바꾸기를 못함",
+      "why_it_happens": "세 번째 자리를 비워두면 안 될 것으로 생각",
+      "consequence": "텍스트 삭제가 필요한데 방법을 모름",
+      "solution": "세 번째 자리를 빈 텍스트('')로 설정하면 삭제 효과",
+      "teaching_moment": "빈 텍스트로 바꾸면 그 부분을 지우는 효과가 있어요."
+    },
+    {
+      "mistake": "순서대로 바꾸기를 하지 않음",
+      "why_it_happens": "여러 치환의 순서가 중요하다는 것을 모름",
+      "consequence": "의도하지 않은 중복 치환이나 누락 발생",
+      "solution": "바꾸기 순서를 신중하게 계획하기",
+      "teaching_moment": "A→B, B→C 순서로 바꾸면 A가 결국 C가 될 수 있어요. 순서가 중요해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "계산 카테고리 찾기",
+      "instruction": "블록 팔레트에서 초록색 '계산' 카테고리를 클릭하세요.",
+      "visual_hint": "계산기 모양의 아이콘이 있는 초록색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "바꾸기 블록 선택",
+      "instruction": "'[텍스트1]에서 [텍스트2]를 [텍스트3]으로 바꾸기' 블록을 찾아서 드래그하세요.",
+      "visual_hint": "세 개의 텍스트 입력 자리가 있는 둥근 값 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "텍스트 입력",
+      "instruction": "원본 텍스트, 찾을 텍스트, 바꿀 텍스트를 순서대로 입력하세요.",
+      "visual_hint": "첫 번째 = 원본, 두 번째 = 찾기, 세 번째 = 바꾸기입니다."
+    },
+    {
+      "step": 4,
+      "title": "결과 저장 또는 사용",
+      "instruction": "바뀐 결과를 변수에 저장하거나 다른 블록에서 직접 사용하세요.",
+      "visual_hint": "원본은 변경되지 않으므로 결과를 저장해야 합니다."
+    },
+    {
+      "step": 5,
+      "title": "추가 바꾸기 (선택)",
+      "instruction": "필요하면 여러 번 바꾸기를 연결해서 사용하세요.",
+      "visual_hint": "이전 바꾸기 결과를 다음 바꾸기의 입력으로 사용합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "index_of_string",
+      "relationship": "위치 찾기",
+      "explanation": "바꾸기 전에 텍스트가 있는지 확인할 때 사용"
+    },
+    {
+      "block_id": "substring",
+      "relationship": "부분 추출",
+      "explanation": "텍스트의 일부만 처리할 때 바꾸기와 함께 활용"
+    },
+    {
+      "block_id": "join_something",
+      "relationship": "텍스트 결합",
+      "explanation": "바꾸기 전후로 텍스트를 조합할 때 사용"
+    },
+    {
+      "block_id": "length_of_string",
+      "relationship": "길이 확인",
+      "explanation": "바꾸기 전후의 길이 변화를 확인할 때 사용"
+    },
+    {
+      "block_id": "set_variable",
+      "relationship": "결과 저장",
+      "explanation": "바뀐 텍스트를 변수에 저장하여 재사용"
+    },
+    {
+      "block_id": "repeat_basic",
+      "relationship": "반복 치환",
+      "explanation": "여러 항목을 순차적으로 바꿀 때 반복과 함께 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "텍스트가 바뀌지 않아요",
+      "possible_causes": [
+        "찾는 텍스트가 원본에 없음",
+        "대소문자가 정확히 일치하지 않음",
+        "공백이나 특수문자 차이",
+        "결과를 저장하지 않음"
+      ],
+      "solutions": [
+        "찾을 텍스트가 원본에 정확히 있는지 확인",
+        "대소문자를 정확히 맞추기",
+        "보이지 않는 공백 제거",
+        "바꾸기 결과를 변수에 저장하기"
+      ]
+    },
+    {
+      "problem": "원하지 않는 부분까지 바뀌어요",
+      "possible_causes": [
+        "찾는 텍스트가 너무 짧거나 일반적임",
+        "부분 문자열이 다른 곳에도 포함됨",
+        "정확한 패턴을 지정하지 않음"
+      ],
+      "solutions": ["더 구체적인 패턴으로 찾기", "앞뒤 문맥을 포함해서 찾기", "여러 단계로 나누어 처리"]
+    },
+    {
+      "problem": "여러 번 바꾸기가 꼬여요",
+      "possible_causes": ["바꾸기 순서가 잘못됨", "중간 결과를 덮어씀", "이전 바꾸기가 다음 바꾸기에 영향"],
+      "solutions": ["바꾸기 순서 재검토", "각 단계별 결과 확인", "임시 구분자 사용 후 최종 바꾸기"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "워드프로세서의 찾아 바꾸기",
+      "explanation": "MS Word나 한글의 Ctrl+H 기능처럼 문서 전체에서 단어를 일괄 변경하는 것과 같습니다."
+    },
+    {
+      "analogy": "자동 교정 기능",
+      "explanation": "스마트폰의 오타 자동 수정처럼 잘못된 텍스트를 올바른 텍스트로 바꿉니다."
+    },
+    {
+      "analogy": "번역과 치환",
+      "explanation": "한 언어의 단어를 다른 언어의 단어로 바꾸는 기계 번역과 비슷합니다."
+    },
+    {
+      "analogy": "검열과 필터링",
+      "explanation": "방송에서 욕설을 '삐-'소리로 바꾸는 것처럼 부적절한 내용을 필터링합니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "다중 치환 시스템",
+      "description": "리스트를 활용한 대량 치환 자동화",
+      "use_case": "사전 기반 번역, 대규모 텍스트 정제, 템플릿 엔진"
+    },
+    {
+      "concept": "조건부 치환",
+      "description": "특정 조건을 만족할 때만 치환하는 고급 시스템",
+      "use_case": "문맥 기반 치환, 스마트 필터링, 적응형 텍스트 처리"
+    },
+    {
+      "concept": "정규식 흉내내기",
+      "description": "패턴 매칭을 통한 고급 텍스트 처리",
+      "use_case": "이메일 마스킹, 전화번호 형식 변환, 데이터 정제"
+    },
+    {
+      "concept": "역방향 치환",
+      "description": "암호화-복호화처럼 양방향 치환 시스템",
+      "use_case": "간단한 암호 시스템, 인코딩-디코딩, 가역적 텍스트 변환"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "텍스트 바꾸기 블록을 사용해서 단순한 단어 치환을 할 수 있다",
+      "example": "단어 바꾸기, 특수문자 제거, 공백 처리"
+    },
+    {
+      "level": "중급",
+      "criteria": "여러 번의 치환을 조합해서 복잡한 텍스트 처리를 할 수 있다",
+      "example": "욕설 필터링, 템플릿 시스템, 줄임말 변환기"
+    },
+    {
+      "level": "고급",
+      "criteria": "치환을 활용한 고급 텍스트 처리 시스템을 구현할 수 있다",
+      "example": "암호화 시스템, 자동 번역기, 대규모 데이터 정제"
+    }
+  ]
+}

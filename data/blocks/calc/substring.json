@@ -1,0 +1,343 @@
+{
+  "id": "substring",
+  "category": "calc",
+  "name": "[텍스트]의 [시작]번째부터 [끝]번째까지의 글자",
+  "description": "텍스트에서 지정한 시작 위치부터 끝 위치까지의 부분 문자열을 추출하는 값 블록입니다. 위치는 1부터 시작하며, 텍스트의 특정 부분만 잘라내어 사용할 때 활용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "부분 문자열 추출과 텍스트 자르기 개념 이해",
+      "문자열 인덱스와 범위 지정 방법 학습",
+      "텍스트 파싱과 데이터 추출 기법 습득",
+      "문자 단위 처리와 정밀한 텍스트 조작 능력 개발",
+      "알고리즘적 문자열 처리 사고력 향상"
+    ],
+    "key_concepts": [
+      {
+        "concept": "부분 문자열 (Substring)",
+        "explanation": "전체 텍스트의 일부분을 잘라낸 작은 텍스트 조각으로, 원본은 변경되지 않습니다."
+      },
+      {
+        "concept": "시작과 끝 위치",
+        "explanation": "추출할 텍스트의 첫 글자와 마지막 글자의 위치를 지정하며, 둘 다 포함됩니다."
+      },
+      {
+        "concept": "1부터 시작하는 인덱스",
+        "explanation": "엔트리에서 문자 위치는 0이 아닌 1부터 시작하므로 첫 글자의 위치는 1입니다."
+      },
+      {
+        "concept": "범위 지정",
+        "explanation": "시작 위치와 끝 위치를 모두 포함하는 닫힌 구간으로 텍스트를 추출합니다."
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": ["문자열과 텍스트 개념 이해", "인덱스와 위치 개념 숙지", "변수 사용 경험", "length_of_string 블록 활용 경험"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "이름 이니셜 만들기",
+      "description": "이름의 첫 글자들로 이니셜 생성",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('성과 이름을 띄어쓰기로 구분해서 입력하세요 (예: 김 철수)')",
+        "set_variable('전체이름', <get_variable('답변')>)",
+        "set_variable('성_이니셜', <substring(<get_variable('전체이름')>, 1, 1)>)",
+        "set_variable('띄어쓰기_위치', <index_of_string(<get_variable('전체이름')>, ' ')>)",
+        "set_variable('이름_시작', <calc_operation(<get_variable('띄어쓰기_위치')>, '+', 1)>)",
+        "set_variable('이름_이니셜', <substring(<get_variable('전체이름')>, <get_variable('이름_시작')>, <get_variable('이름_시작')>)>)",
+        "speak_something(<join_something('당신의 이니셜은 ', <get_variable('성_이니셜')>, <get_variable('이름_이니셜')>, '입니다')>)"
+      ],
+      "explanation": "이름에서 성과 이름의 첫 글자만 추출하여 이니셜을 만드는 프로그램입니다."
+    },
+    {
+      "title": "타이핑 애니메이션",
+      "description": "텍스트가 한 글자씩 나타나는 효과",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('메시지', '안녕하세요 엔트리입니다!')",
+        "set_variable('길이', <length_of_string(<get_variable('메시지')>)>)",
+        "set_variable('현재', 1)",
+        "repeat_basic(<get_variable('길이')>)",
+        "  set_text(<substring(<get_variable('메시지')>, 1, <get_variable('현재')>)>)",
+        "  change_variable('현재', 1)",
+        "  wait_second(0.1)"
+      ],
+      "explanation": "처음부터 한 글자씩 늘려가며 텍스트를 표시하는 타이핑 효과를 구현합니다."
+    },
+    {
+      "title": "주민번호 마스킹",
+      "description": "개인정보 뒷자리를 별표로 처리",
+      "blocks": [
+        "when_run_button_click",
+        "ask_and_wait('주민번호를 입력하세요 (하이픈 포함)')",
+        "set_variable('주민번호', <get_variable('답변')>)",
+        "set_variable('하이픈_위치', <index_of_string(<get_variable('주민번호')>, '-')>)",
+        "if_condition(<get_variable('하이픈_위치') > 0>)",
+        "  set_variable('앞자리', <substring(<get_variable('주민번호')>, 1, <get_variable('하이픈_위치')>)>)",
+        "  set_variable('마스킹', <join_something(<get_variable('앞자리')>, '*******')>)",
+        "  set_text(<join_something('마스킹된 주민번호: ', <get_variable('마스킹')>)>)",
+        "else",
+        "  speak_something('올바른 형식이 아닙니다')"
+      ],
+      "explanation": "주민번호의 뒷자리를 별표로 대체하여 개인정보를 보호하는 마스킹 시스템입니다."
+    },
+    {
+      "title": "텍스트 스크롤 효과",
+      "description": "긴 텍스트가 흐르는 전광판 효과",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('전체텍스트', '★ 환영합니다! 엔트리 코딩의 세계로 오신 것을 환영합니다! ★ ')",
+        "set_variable('길이', <length_of_string(<get_variable('전체텍스트')>)>)",
+        "set_variable('표시길이', 10)",
+        "set_variable('위치', 1)",
+        "repeat_while_true",
+        "  if_condition(<calc_operation(<get_variable('위치')>, '+', <get_variable('표시길이')>, '>', <get_variable('길이')>)>)",
+        "    set_variable('위치', 1)",
+        "  set_variable('표시텍스트', <substring(<get_variable('전체텍스트')>, <get_variable('위치')>, <calc_operation(<get_variable('위치')>, '+', <get_variable('표시길이')>, '-', 1)>)>)",
+        "  set_text(<get_variable('표시텍스트')>)",
+        "  change_variable('위치', 1)",
+        "  wait_second(0.2)"
+      ],
+      "explanation": "긴 텍스트의 일부분을 계속 이동시켜 전광판처럼 흐르는 효과를 만듭니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "텍스트의 일부분만 잘라내고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'계산' 카테고리에서 문자열 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'[텍스트]의 [시작]번째부터 [끝]번째까지의 글자' 블록을 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "시작 위치와 끝 위치를 숫자로 지정하면 그 부분만 추출돼요"
+        }
+      ]
+    },
+    {
+      "situation": "첫 글자나 마지막 글자만 가져오고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "첫 글자는 위치 1, 마지막 글자는 텍스트 길이 위치예요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "첫 글자: substring(텍스트, 1, 1), 마지막: substring(텍스트, 길이, 길이)"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "'길이' 블록으로 마지막 위치를 구할 수 있어요"
+        }
+      ]
+    },
+    {
+      "situation": "텍스트를 여러 부분으로 나누고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "구분자의 위치를 찾고 그 전후로 나눌 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'위치 찾기' 블록으로 구분자 위치를 먼저 찾으세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "구분자 앞: 1부터 위치-1까지, 뒤: 위치+1부터 끝까지"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "위치가 0부터 시작한다고 생각",
+      "why_it_happens": "다른 프로그래밍 언어와 혼동",
+      "consequence": "원하는 것보다 한 글자 앞의 텍스트를 추출",
+      "solution": "엔트리는 1부터 시작한다는 것을 기억",
+      "teaching_moment": "엔트리에서 첫 번째 글자는 1번 위치에 있어요. 0번이 아니에요."
+    },
+    {
+      "mistake": "범위를 벗어난 위치 지정",
+      "why_it_happens": "텍스트 길이를 고려하지 않음",
+      "consequence": "빈 문자열이 반환되거나 오류 발생",
+      "solution": "텍스트 길이를 먼저 확인하고 범위 내에서 지정",
+      "teaching_moment": "'안녕'은 2글자이므로 1~2 범위만 가능해요. 3번 위치는 없어요."
+    },
+    {
+      "mistake": "시작이 끝보다 큰 값 입력",
+      "why_it_happens": "시작과 끝 순서를 반대로 입력",
+      "consequence": "빈 문자열이 반환됨",
+      "solution": "시작 <= 끝이 되도록 확인",
+      "teaching_moment": "시작 위치는 항상 끝 위치보다 작거나 같아야 해요."
+    },
+    {
+      "mistake": "공백을 글자로 세지 않음",
+      "why_it_happens": "공백이 보이지 않아서 무시",
+      "consequence": "위치 계산이 틀려짐",
+      "solution": "공백도 한 글자로 계산됨을 인식",
+      "teaching_moment": "'안녕 하세요'에서 띄어쓰기도 3번째 글자예요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "계산 카테고리 찾기",
+      "instruction": "블록 팔레트에서 초록색 '계산' 카테고리를 클릭하세요.",
+      "visual_hint": "계산기 모양의 아이콘이 있는 초록색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "substring 블록 선택",
+      "instruction": "'[텍스트]의 [시작]번째부터 [끝]번째까지의 글자' 블록을 찾아서 드래그하세요.",
+      "visual_hint": "세 개의 입력 자리가 있는 둥근 값 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "텍스트 입력",
+      "instruction": "첫 번째 자리에 원본 텍스트를 입력하거나 변수를 연결하세요.",
+      "visual_hint": "잘라낼 전체 텍스트를 넣는 자리입니다."
+    },
+    {
+      "step": 4,
+      "title": "범위 지정",
+      "instruction": "시작 위치와 끝 위치를 숫자로 입력하세요.",
+      "visual_hint": "1부터 시작하며, 끝 위치도 포함됩니다."
+    },
+    {
+      "step": 5,
+      "title": "결과 활용",
+      "instruction": "추출된 부분 텍스트를 변수에 저장하거나 직접 사용하세요.",
+      "visual_hint": "원본은 변경되지 않고 새로운 텍스트가 생성됩니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "length_of_string",
+      "relationship": "길이 확인",
+      "explanation": "텍스트의 전체 길이를 구해서 끝 위치를 계산할 때 사용"
+    },
+    {
+      "block_id": "index_of_string",
+      "relationship": "위치 찾기",
+      "explanation": "특정 문자나 구분자의 위치를 찾아서 자를 위치를 결정할 때 사용"
+    },
+    {
+      "block_id": "char_at",
+      "relationship": "한 글자 추출",
+      "explanation": "특정 위치의 한 글자만 필요할 때 더 간단한 대안"
+    },
+    {
+      "block_id": "join_something",
+      "relationship": "텍스트 결합",
+      "explanation": "추출한 부분들을 다시 합칠 때 사용"
+    },
+    {
+      "block_id": "replace_string",
+      "relationship": "텍스트 치환",
+      "explanation": "추출한 부분을 다른 텍스트로 바꿀 때 함께 활용"
+    },
+    {
+      "block_id": "repeat_basic",
+      "relationship": "반복 처리",
+      "explanation": "텍스트를 순차적으로 잘라가며 처리할 때 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "빈 텍스트가 반환돼요",
+      "possible_causes": ["시작이 끝보다 큼", "범위가 텍스트 길이를 벗어남", "원본 텍스트가 비어있음", "위치 값이 0 이하"],
+      "solutions": ["시작 <= 끝 확인", "텍스트 길이 먼저 확인", "원본 텍스트 존재 여부 확인", "위치는 1부터 시작함을 기억"]
+    },
+    {
+      "problem": "원하는 부분이 아닌 다른 부분이 추출돼요",
+      "possible_causes": ["위치 계산 오류", "공백을 세지 않음", "1부터 시작을 잊음", "끝 위치도 포함됨을 모름"],
+      "solutions": ["위치를 다시 계산", "공백도 글자로 포함", "첫 글자는 1번 위치", "끝 위치의 글자도 포함됨을 인식"]
+    },
+    {
+      "problem": "텍스트 분리가 제대로 안 돼요",
+      "possible_causes": ["구분자 위치 계산 오류", "구분자 자체를 포함/제외 처리 실수", "여러 구분자 처리 미흡"],
+      "solutions": ["구분자 위치 정확히 확인", "구분자 앞은 위치-1, 뒤는 위치+구분자길이", "각 구분자마다 개별 처리"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "가위로 종이 자르기",
+      "explanation": "종이의 특정 부분만 가위로 잘라내는 것처럼 텍스트의 일부를 추출합니다."
+    },
+    {
+      "analogy": "책의 특정 페이지",
+      "explanation": "책 전체가 아닌 특정 페이지 범위만 복사하는 것과 같습니다."
+    },
+    {
+      "analogy": "비디오 편집",
+      "explanation": "영상의 특정 구간만 잘라내는 트리밍 작업과 비슷합니다."
+    },
+    {
+      "analogy": "주소의 일부",
+      "explanation": "전체 주소에서 시/구/동만 따로 추출하는 것과 같은 개념입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "동적 텍스트 파싱",
+      "description": "구분자를 기준으로 텍스트를 여러 부분으로 자동 분리",
+      "use_case": "CSV 파싱, 주소 분리, 이메일 도메인 추출"
+    },
+    {
+      "concept": "텍스트 마스킹 시스템",
+      "description": "개인정보의 일부를 별표로 대체하는 보안 시스템",
+      "use_case": "전화번호 마스킹, 계좌번호 숨기기, 비밀번호 표시"
+    },
+    {
+      "concept": "스크롤 텍스트",
+      "description": "긴 텍스트를 부분적으로 이동시켜 표시하는 애니메이션",
+      "use_case": "전광판 효과, 뉴스 티커, 공지사항 스크롤"
+    },
+    {
+      "concept": "텍스트 페이지네이션",
+      "description": "긴 텍스트를 여러 페이지로 나누어 표시",
+      "use_case": "전자책 리더, 긴 문서 표시, 채팅 히스토리"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "substring 블록을 사용해서 텍스트의 특정 부분을 추출할 수 있다",
+      "example": "첫 글자 추출, 마지막 글자 추출, 특정 범위 추출"
+    },
+    {
+      "level": "중급",
+      "criteria": "위치 계산과 결합하여 동적으로 텍스트를 처리할 수 있다",
+      "example": "이니셜 만들기, 구분자 기준 분리, 타이핑 애니메이션"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 텍스트 파싱과 처리 시스템을 구현할 수 있다",
+      "example": "마스킹 시스템, 스크롤 효과, 텍스트 파서 구현"
+    }
+  ]
+}

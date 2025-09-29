@@ -1,0 +1,350 @@
+{
+  "id": "get_sound_duration",
+  "category": "sound",
+  "name": "[소리]의 길이",
+  "description": "선택한 소리 파일의 재생 시간을 초 단위로 반환하는 값 블록입니다. 소리와 애니메이션을 동기화하거나, 정확한 타이밍이 필요한 프로그램에서 활용됩니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "소리 파일의 속성 이해",
+      "시간 데이터를 활용한 프로그래밍 학습",
+      "소리와 동작의 동기화 원리 이해",
+      "값 블록의 활용과 변수 연동 방법 습득",
+      "멀티미디어 프로그래밍의 기초 개념 학습"
+    ],
+    "key_concepts": [
+      {
+        "concept": "재생 시간",
+        "explanation": "소리 파일이 처음부터 끝까지 재생되는 데 걸리는 시간을 초 단위로 나타낸 값입니다."
+      },
+      {
+        "concept": "값 블록",
+        "explanation": "직접 실행되지 않고 다른 블록의 입력값으로 사용되어 정보를 제공하는 블록입니다."
+      },
+      {
+        "concept": "동기화",
+        "explanation": "소리의 길이에 맞춰 다른 동작을 정확히 일치시키는 프로그래밍 기법입니다."
+      },
+      {
+        "concept": "동적 타이밍",
+        "explanation": "고정된 시간이 아닌 실제 소리 파일의 길이를 기반으로 유연하게 조절되는 타이밍 시스템입니다."
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": [
+      "소리 재생 블록 사용 경험",
+      "변수와 값 블록의 개념 이해",
+      "기다리기 블록 사용법 숙지",
+      "조건 블록과 비교 연산자 이해"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "소리와 애니메이션 동기화",
+      "description": "소리가 재생되는 동안 정확히 맞춰 움직이기",
+      "blocks": [
+        "when_run_button_click",
+        "play_sound_until_done('배경음악')",
+        "set_variable('소리길이', <get_sound_duration('배경음악')>)",
+        "broadcast_and_wait('애니메이션시작')",
+        "repeat_basic(<calc_basic(<get_variable('소리길이')>, '*', 10)>)",
+        "  move_direction(5)",
+        "  wait_second(0.1)"
+      ],
+      "explanation": "소리 파일의 길이를 구해서 그 시간 동안 정확히 애니메이션이 실행되도록 합니다."
+    },
+    {
+      "title": "음악 재생 진행바",
+      "description": "음악 재생 상태를 시각적으로 표시",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('총시간', <get_sound_duration('BGM')>)",
+        "play_sound('BGM')",
+        "set_variable('시작시간', <get_date('초')>)",
+        "repeat_while_true",
+        "  set_variable('경과시간', <calc_basic(<get_date('초')>, '-', <get_variable('시작시간')>)>)",
+        "  set_variable('진행률', <calc_basic(<get_variable('경과시간')>, '/', <get_variable('총시간')>, '*', 100)>)",
+        "  set_scale_x(<get_variable('진행률')>)",
+        "  if_condition(<get_variable('경과시간') >= <get_variable('총시간')>)",
+        "    break"
+      ],
+      "explanation": "소리 파일의 전체 길이를 기준으로 현재 재생 위치를 진행바로 표시합니다."
+    },
+    {
+      "title": "대사 자막 시스템",
+      "description": "음성에 맞춰 자막 표시",
+      "blocks": [
+        "when_message_cast('대사1')",
+        "play_sound('대사1_음성')",
+        "show_dialog('안녕하세요! 반갑습니다.')",
+        "wait_second(<get_sound_duration('대사1_음성')>)",
+        "hide_dialog",
+        "broadcast('대사2')"
+      ],
+      "explanation": "음성 파일의 길이만큼 정확히 자막을 표시한 후 자동으로 숨깁니다."
+    },
+    {
+      "title": "리듬 게임 비트 계산",
+      "description": "음악 길이를 이용한 비트 간격 계산",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('음악길이', <get_sound_duration('리듬음악')>)",
+        "set_variable('BPM', 120)",
+        "set_variable('총비트수', <calc_basic(<get_variable('음악길이')>, '*', <get_variable('BPM')>, '/', 60)>)",
+        "set_variable('비트간격', <calc_basic(<get_variable('음악길이')>, '/', <get_variable('총비트수')>)>)",
+        "play_sound('리듬음악')",
+        "repeat_basic(<get_variable('총비트수')>)",
+        "  broadcast('비트')",
+        "  wait_second(<get_variable('비트간격')>)"
+      ],
+      "explanation": "음악의 길이와 BPM을 이용해 정확한 비트 타이밍을 계산하고 실행합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "소리 파일의 재생 시간을 알고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'소리' 카테고리에서 소리 정보 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'[소리]의 길이' 블록을 찾아서 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "이 블록은 값을 반환하므로 변수에 저장하거나 다른 블록의 입력으로 사용해요"
+        }
+      ]
+    },
+    {
+      "situation": "소리가 끝날 때까지 기다리고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "소리의 길이를 구한 후 그 시간만큼 기다리면 돼요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'기다리기' 블록에 소리 길이 값을 넣어보세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "wait_second(<get_sound_duration('소리이름')>) 형태로 사용해요"
+        }
+      ]
+    },
+    {
+      "situation": "여러 소리의 총 재생 시간을 계산하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "각 소리의 길이를 구한 후 더하면 총 시간을 알 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'계산' 카테고리의 더하기 블록과 함께 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "변수에 각 소리 길이를 더해서 누적하면 됩니다"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "소리 길이 블록을 단독으로 실행하려고 함",
+      "why_it_happens": "값 블록과 실행 블록의 차이를 이해하지 못함",
+      "consequence": "블록이 실행되지 않거나 오류 발생",
+      "solution": "다른 블록의 입력 자리에 넣거나 변수에 저장해서 사용",
+      "teaching_moment": "둥근 모양의 블록은 값을 제공하는 블록이라 다른 블록과 함께 사용해야 해요."
+    },
+    {
+      "mistake": "존재하지 않는 소리 이름 입력",
+      "why_it_happens": "소리 파일 이름을 정확히 모르거나 오타",
+      "consequence": "0이나 오류값 반환",
+      "solution": "드롭다운 메뉴에서 정확한 소리 이름 선택",
+      "teaching_moment": "프로젝트에 추가된 소리만 사용할 수 있으니 목록에서 선택하세요."
+    },
+    {
+      "mistake": "소리 길이를 정수로만 사용하려고 함",
+      "why_it_happens": "소수점 값을 처리하지 못함",
+      "consequence": "정확한 타이밍이 맞지 않음",
+      "solution": "소수점을 포함한 정확한 값 그대로 사용",
+      "teaching_moment": "소리 길이는 3.5초처럼 소수점도 포함할 수 있어요."
+    },
+    {
+      "mistake": "재생 중인 소리의 남은 시간을 구하려고 함",
+      "why_it_happens": "이 블록이 남은 시간도 알려준다고 착각",
+      "consequence": "항상 전체 길이만 반환됨",
+      "solution": "시작 시간을 기록하고 경과 시간을 계산해서 남은 시간 구하기",
+      "teaching_moment": "이 블록은 소리 파일의 전체 길이만 알려줘요. 남은 시간은 직접 계산해야 해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "소리 카테고리 찾기",
+      "instruction": "블록 팔레트에서 분홍색 '소리' 카테고리를 클릭하세요.",
+      "visual_hint": "스피커 모양의 아이콘이 있는 분홍색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "소리 길이 블록 선택",
+      "instruction": "'[소리]의 길이' 블록을 찾으세요.",
+      "visual_hint": "둥근 모양의 값 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "소리 파일 선택",
+      "instruction": "드롭다운 메뉴에서 길이를 알고 싶은 소리를 선택하세요.",
+      "visual_hint": "프로젝트에 추가된 소리 목록이 표시됩니다."
+    },
+    {
+      "step": 4,
+      "title": "다른 블록과 연결",
+      "instruction": "이 블록을 변수에 저장하거나 다른 블록의 입력 자리에 끼워 넣으세요.",
+      "visual_hint": "둥근 모양끼리 맞는 자리에 연결합니다."
+    },
+    {
+      "step": 5,
+      "title": "활용하기",
+      "instruction": "저장한 값을 기다리기, 반복, 계산 등에 활용하세요.",
+      "visual_hint": "소리 길이를 이용해 정확한 타이밍 제어가 가능합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "play_sound",
+      "relationship": "소리 재생",
+      "explanation": "길이를 구한 소리를 실제로 재생할 때 사용"
+    },
+    {
+      "block_id": "play_sound_until_done",
+      "relationship": "완료 대기 재생",
+      "explanation": "소리가 끝날 때까지 기다리며 재생하는 대체 방법"
+    },
+    {
+      "block_id": "wait_second",
+      "relationship": "시간 대기",
+      "explanation": "소리 길이만큼 기다릴 때 함께 사용"
+    },
+    {
+      "block_id": "set_variable",
+      "relationship": "값 저장",
+      "explanation": "소리 길이를 변수에 저장하여 여러 곳에서 활용"
+    },
+    {
+      "block_id": "calc_basic",
+      "relationship": "시간 계산",
+      "explanation": "소리 길이를 이용한 각종 계산에 활용"
+    },
+    {
+      "block_id": "if_condition",
+      "relationship": "조건 판단",
+      "explanation": "소리 길이를 기준으로 조건부 실행"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "소리 길이가 0으로 나와요",
+      "possible_causes": ["소리 이름을 잘못 입력함", "소리 파일이 프로젝트에 없음", "소리 파일이 손상됨"],
+      "solutions": [
+        "드롭다운에서 정확한 소리 이름 선택",
+        "소리 탭에서 해당 소리가 있는지 확인",
+        "소리를 다시 업로드하거나 다른 소리로 테스트"
+      ]
+    },
+    {
+      "problem": "타이밍이 맞지 않아요",
+      "possible_causes": ["소리 재생과 타이밍 코드가 동시에 시작하지 않음", "다른 지연 요소가 있음", "소수점 값을 무시함"],
+      "solutions": ["소리 재생 직후 타이밍 코드 실행", "불필요한 기다리기나 지연 제거", "정확한 소수점 값 그대로 사용"]
+    },
+    {
+      "problem": "변수에 저장이 안 돼요",
+      "possible_causes": ["변수 블록을 잘못 사용함", "블록 연결이 제대로 안 됨", "변수를 먼저 만들지 않음"],
+      "solutions": [
+        "'변수 정하기' 블록의 값 자리에 정확히 연결",
+        "블록이 제대로 끼워졌는지 확인",
+        "변수 카테고리에서 먼저 변수 생성"
+      ]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "음악 플레이어의 재생 시간",
+      "explanation": "스마트폰 음악 앱에서 노래의 전체 시간을 보여주는 것과 같습니다."
+    },
+    {
+      "analogy": "동영상 길이 확인",
+      "explanation": "유튜브에서 영상의 총 재생 시간을 확인하는 것과 동일한 개념입니다."
+    },
+    {
+      "analogy": "요리 타이머",
+      "explanation": "요리에 필요한 시간을 미리 알고 타이머를 맞추는 것과 비슷합니다."
+    },
+    {
+      "analogy": "프레젠테이션 시간 관리",
+      "explanation": "발표 시간을 계산해서 슬라이드별 시간을 배분하는 것과 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "플레이리스트 시스템",
+      "description": "여러 소리의 길이를 합산하여 총 재생 시간 계산",
+      "use_case": "음악 재생 목록, 연속 재생, DJ 믹싱 시스템"
+    },
+    {
+      "concept": "동적 자막 시스템",
+      "description": "소리 길이에 맞춰 자동으로 자막 타이밍 조절",
+      "use_case": "교육 콘텐츠, 스토리텔링, 언어 학습 프로그램"
+    },
+    {
+      "concept": "리듬 분석기",
+      "description": "소리 길이와 BPM을 이용한 비트 패턴 생성",
+      "use_case": "리듬 게임, 음악 시각화, 댄스 안무 생성"
+    },
+    {
+      "concept": "사운드 믹서",
+      "description": "여러 소리의 길이를 비교하여 동기화된 믹싱",
+      "use_case": "오디오 편집, 효과음 레이어링, 음악 제작"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "소리 길이를 구해서 변수에 저장하거나 단순 활용할 수 있다",
+      "example": "소리 파일의 길이 확인, 소리 재생 시간만큼 기다리기"
+    },
+    {
+      "level": "중급",
+      "criteria": "소리 길이를 활용한 동기화와 타이밍 제어를 구현할 수 있다",
+      "example": "자막 시스템, 진행바 표시, 애니메이션 동기화"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 멀티미디어 시스템과 상호작용을 구현할 수 있다",
+      "example": "플레이리스트 관리, 리듬 게임, 동적 사운드 믹싱"
+    }
+  ]
+}

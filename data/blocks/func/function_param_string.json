@@ -1,0 +1,437 @@
+{
+  "id": "function_param_string",
+  "category": "function",
+  "name": "문자열 매개변수 값 가져오기",
+  "description": "함수 내부에서 전달받은 문자열(텍스트) 매개변수의 값을 가져오는 블록입니다. 함수 호출 시 전달된 텍스트를 함수 내부에서 사용할 때 활용합니다. 메시지 표시, 텍스트 처리, 문자열 연산 등에 사용됩니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "문자열 매개변수 값 접근 방법 이해",
+      "텍스트 데이터 처리와 활용 방법 학습",
+      "문자열 연산과 조작 기법 익히기",
+      "매개변수를 통한 동적 텍스트 처리",
+      "함수의 텍스트 기반 입출력 구현"
+    ],
+    "key_concepts": [
+      {
+        "concept": "문자열 매개변수 접근",
+        "explanation": "함수에 전달된 텍스트 값을 매개변수 이름으로 가져와 사용하는 방법입니다."
+      },
+      {
+        "concept": "텍스트 처리",
+        "explanation": "전달받은 문자열을 분석, 변환, 결합하여 원하는 형태로 가공합니다."
+      },
+      {
+        "concept": "문자열 연산",
+        "explanation": "텍스트의 길이 확인, 부분 추출, 검색, 치환 등의 작업을 수행합니다."
+      },
+      {
+        "concept": "동적 콘텐츠",
+        "explanation": "매개변수로 받은 텍스트를 활용하여 실행 시점에 내용이 결정되는 동적 콘텐츠를 생성합니다."
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": [
+      "함수 정의와 문자열 매개변수 추가",
+      "문자열 데이터 타입 이해",
+      "텍스트 처리 블록 사용 경험",
+      "함수 호출과 인자 전달"
+    ]
+  },
+
+  "usage_examples": [
+    {
+      "title": "메시지 포맷팅",
+      "description": "전달받은 텍스트를 포맷팅하여 출력",
+      "blocks": [
+        "function_create('메시지표시', [string_param('제목'), string_param('내용'), string_param('발신자')])",
+        "  // 문자열 매개변수 값 가져오기",
+        "  set_variable('전체메시지', '')",
+        "  ",
+        "  // 제목 처리",
+        "  set_variable('전체메시지', <join_something('【', <function_param_string('제목')>, '】')>)",
+        "  ",
+        "  // 내용 추가",
+        "  set_variable('전체메시지', <join_something(<get_variable('전체메시지')>, '\\n', <function_param_string('내용')>)>)",
+        "  ",
+        "  // 발신자 정보 추가",
+        "  set_variable('전체메시지', <join_something(<get_variable('전체메시지')>, '\\n- ', <function_param_string('발신자')>, ' -')>)",
+        "  ",
+        "  speak_something(<get_variable('전체메시지')>)",
+        "  set_text(<get_variable('전체메시지')>)",
+        "  ",
+        "  // 문자열 길이 확인",
+        "  if_condition(<length_of_string(<function_param_string('내용')>) > 50>)",
+        "    speak_something('긴 메시지입니다')",
+        "",
+        "when_run_button_click",
+        "function_general('메시지표시', ['공지사항', '오늘 점검이 있습니다.', '관리자'])",
+        "wait_second(2)",
+        "function_general('메시지표시', ['알림', '새로운 업데이트가 있습니다. 지금 확인해보세요!', '시스템'])"
+      ],
+      "explanation": "문자열 매개변수들을 조합하여 포맷된 메시지를 생성합니다."
+    },
+    {
+      "title": "명령어 파서",
+      "description": "텍스트 명령어를 분석하여 처리",
+      "blocks": [
+        "function_create('명령처리', [string_param('명령문')])",
+        "  // 명령어를 소문자로 변환",
+        "  set_variable('명령', <lowercase(<function_param_string('명령문')>)>)",
+        "  ",
+        "  // 이동 명령 확인",
+        "  if_condition(<index_of_string(<get_variable('명령')>, '이동')> >= 0>)",
+        "    // 방향 추출",
+        "    if_condition(<index_of_string(<function_param_string('명령문')>, '왼쪽')> >= 0>)",
+        "      move_x(-50)",
+        "    else_if(<index_of_string(<function_param_string('명령문')>, '오른쪽')> >= 0>)",
+        "      move_x(50)",
+        "    else_if(<index_of_string(<function_param_string('명령문')>, '위')> >= 0>)",
+        "      move_y(50)",
+        "    else_if(<index_of_string(<function_param_string('명령문')>, '아래')> >= 0>)",
+        "      move_y(-50)",
+        "    speak_something('이동: ' + <function_param_string('명령문')>)",
+        "  ",
+        "  // 색상 변경 명령",
+        "  else_if(<index_of_string(<get_variable('명령')>, '색')> >= 0>)",
+        "    if_condition(<index_of_string(<function_param_string('명령문')>, '빨강')> >= 0>)",
+        "      set_color('#FF0000')",
+        "    else_if(<index_of_string(<function_param_string('명령문')>, '파랑')> >= 0>)",
+        "      set_color('#0000FF')",
+        "    else_if(<index_of_string(<function_param_string('명령문')>, '초록')> >= 0>)",
+        "      set_color('#00FF00')",
+        "  ",
+        "  // 알 수 없는 명령",
+        "  else",
+        "    speak_something('모르는 명령: ' + <function_param_string('명령문')>)",
+        "",
+        "when_run_button_click",
+        "repeat_basic(3)",
+        "  ask_and_wait('명령을 입력하세요')",
+        "  function_general('명령처리', [<get_variable('답변')>])"
+      ],
+      "explanation": "문자열 매개변수를 분석하여 다양한 명령을 처리합니다."
+    },
+    {
+      "title": "텍스트 애니메이션",
+      "description": "문자열을 다양한 효과로 표시",
+      "blocks": [
+        "function_create('텍스트효과', [string_param('텍스트'), string_param('효과')])",
+        "  set_variable('길이', <length_of_string(<function_param_string('텍스트')>)>)",
+        "  ",
+        "  // 타이핑 효과",
+        "  if_condition(<function_param_string('효과')> = '타이핑'>)",
+        "    set_variable('i', 1)",
+        "    repeat_basic(<get_variable('길이')>)",
+        "      set_text(<substring(<function_param_string('텍스트')>, 1, <get_variable('i')>)>)",
+        "      change_variable('i', 1)",
+        "      wait_second(0.1)",
+        "  ",
+        "  // 반전 효과",
+        "  else_if(<function_param_string('효과')> = '반전'>)",
+        "    set_variable('반전텍스트', '')",
+        "    set_variable('i', <get_variable('길이')>)",
+        "    repeat_basic(<get_variable('길이')>)",
+        "      set_variable('반전텍스트', <join_something(<get_variable('반전텍스트')>, <substring(<function_param_string('텍스트')>, <get_variable('i')>, <get_variable('i')>)>)>)",
+        "      change_variable('i', -1)",
+        "    set_text(<get_variable('반전텍스트')>)",
+        "  ",
+        "  // 글자별 표시",
+        "  else_if(<function_param_string('효과')> = '글자별'>)",
+        "    set_variable('i', 1)",
+        "    repeat_basic(<get_variable('길이')>)",
+        "      set_text(<substring(<function_param_string('텍스트')>, <get_variable('i')>, <get_variable('i')>)>)",
+        "      wait_second(0.3)",
+        "      change_variable('i', 1)",
+        "  ",
+        "  // 기본 표시",
+        "  else",
+        "    set_text(<function_param_string('텍스트')>)",
+        "    speak_something('효과: ' + <function_param_string('효과')> + ' 적용')",
+        "",
+        "when_run_button_click",
+        "function_general('텍스트효과', ['안녕하세요', '타이핑'])",
+        "wait_second(2)",
+        "function_general('텍스트효과', ['엔트리', '반전'])"
+      ],
+      "explanation": "문자열 매개변수를 다양한 방식으로 처리하여 텍스트 효과를 구현합니다."
+    },
+    {
+      "title": "데이터 검증",
+      "description": "입력된 문자열 형식 검증",
+      "blocks": [
+        "function_create('입력검증', [string_param('타입'), string_param('값')])",
+        "  set_variable('유효', false)",
+        "  ",
+        "  // 이메일 검증",
+        "  if_condition(<function_param_string('타입')> = '이메일'>)",
+        "    if_condition(<index_of_string(<function_param_string('값')>, '@')> > 0>)",
+        "      if_condition(<index_of_string(<function_param_string('값')>, '.')> > <index_of_string(<function_param_string('값')>, '@')>>)",
+        "        set_variable('유효', true)",
+        "        speak_something('유효한 이메일')",
+        "      else",
+        "        speak_something('잘못된 이메일 형식')",
+        "  ",
+        "  // 전화번호 검증",
+        "  else_if(<function_param_string('타입')> = '전화번호'>)",
+        "    set_variable('숫자만', <replace_string(<function_param_string('값')>, '-', '')>)",
+        "    if_condition(<length_of_string(<get_variable('숫자만')>) = 11>)",
+        "      if_condition(<substring(<get_variable('숫자만')>, 1, 3)> = '010'>)",
+        "        set_variable('유효', true)",
+        "        speak_something('유효한 전화번호')",
+        "  ",
+        "  // 비어있는지 확인",
+        "  else_if(<function_param_string('타입')> = '필수'>)",
+        "    if_condition(<length_of_string(<function_param_string('값')>) > 0>)",
+        "      set_variable('유효', true)",
+        "    else",
+        "      speak_something('필수 입력 항목입니다')",
+        "  ",
+        "  return <get_variable('유효')>",
+        "",
+        "when_run_button_click",
+        "ask_and_wait('이메일을 입력하세요')",
+        "function_general('입력검증', ['이메일', <get_variable('답변')>])"
+      ],
+      "explanation": "문자열 매개변수를 검증하여 올바른 형식인지 확인합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "함수에서 문자열 매개변수 값을 사용하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'함수' 카테고리에서 매개변수 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'문자열 매개변수 값' 블록을 선택하고 매개변수 이름을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "이 블록은 텍스트 값을 반환하므로 문자열 연산에 사용할 수 있어요"
+        }
+      ]
+    },
+    {
+      "situation": "전달받은 텍스트를 가공하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "문자열 처리 블록들과 함께 사용할 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'계산' 카테고리의 문자열 블록들을 활용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "substring, join_something, length_of_string 등을 조합하세요"
+        }
+      ]
+    },
+    {
+      "situation": "문자열로 조건 분기를 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "문자열 비교나 검색으로 조건을 만들 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "if (<param('텍스트')> = '특정값') 형태로 비교하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "index_of_string으로 포함 여부도 확인할 수 있어요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "매개변수 이름 오타",
+      "why_it_happens": "정의한 매개변수 이름을 정확히 기억하지 못함",
+      "consequence": "값을 가져올 수 없거나 오류 발생",
+      "solution": "드롭다운에서 정확한 이름 선택",
+      "teaching_moment": "매개변수 이름은 함수 정의와 정확히 일치해야 해요."
+    },
+    {
+      "mistake": "빈 문자열 처리 누락",
+      "why_it_happens": "빈 텍스트가 전달될 경우를 고려하지 않음",
+      "consequence": "substring 등에서 오류 발생",
+      "solution": "길이 확인 후 처리",
+      "teaching_moment": "텍스트가 비어있을 수 있으니 항상 확인이 필요해요."
+    },
+    {
+      "mistake": "대소문자 구분 실수",
+      "why_it_happens": "문자열 비교 시 대소문자 민감성 간과",
+      "consequence": "'Hello'와 'hello'를 다르게 인식",
+      "solution": "lowercase/uppercase로 통일",
+      "teaching_moment": "텍스트 비교 시 대소문자를 통일하면 안전해요."
+    },
+    {
+      "mistake": "문자열이 아닌 타입에 사용",
+      "why_it_happens": "매개변수 타입을 혼동",
+      "consequence": "타입 불일치 오류",
+      "solution": "문자열 타입 매개변수에만 사용",
+      "teaching_moment": "이 블록은 문자열 매개변수 전용이에요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "함수 정의 확인",
+      "instruction": "사용할 문자열 매개변수가 함수에 정의되어 있는지 확인하세요.",
+      "visual_hint": "함수 정의에서 문자열 타입 매개변수를 찾습니다."
+    },
+    {
+      "step": 2,
+      "title": "매개변수 블록 추가",
+      "instruction": "'함수' 카테고리에서 '문자열 매개변수 값' 블록을 선택하세요.",
+      "visual_hint": "둥근 모서리의 텍스트 값 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "매개변수 이름 선택",
+      "instruction": "드롭다운 메뉴에서 사용할 문자열 매개변수 이름을 선택하세요.",
+      "visual_hint": "함수에 정의된 문자열 매개변수 목록이 표시됩니다."
+    },
+    {
+      "step": 4,
+      "title": "텍스트 처리에 활용",
+      "instruction": "문자열이 필요한 곳(텍스트 표시, 문자열 연산 등)에 배치하세요.",
+      "visual_hint": "speak, set_text, join_something 등과 함께 사용합니다."
+    },
+    {
+      "step": 5,
+      "title": "다양한 입력 테스트",
+      "instruction": "빈 문자열, 긴 텍스트, 특수문자 등으로 테스트하세요.",
+      "visual_hint": "다양한 케이스로 함수가 올바르게 작동하는지 확인합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "function_field_string",
+      "relationship": "매개변수 정의",
+      "explanation": "문자열 매개변수를 함수에 추가할 때 사용"
+    },
+    {
+      "block_id": "function_param_boolean",
+      "relationship": "불린 매개변수",
+      "explanation": "불린 타입 매개변수 값 가져오기"
+    },
+    {
+      "block_id": "function_param_number",
+      "relationship": "숫자 매개변수",
+      "explanation": "숫자 타입 매개변수 값 가져오기"
+    },
+    {
+      "block_id": "join_something",
+      "relationship": "문자열 결합",
+      "explanation": "매개변수 텍스트를 다른 문자열과 결합"
+    },
+    {
+      "block_id": "substring",
+      "relationship": "부분 문자열",
+      "explanation": "매개변수 텍스트의 일부 추출"
+    },
+    {
+      "block_id": "length_of_string",
+      "relationship": "문자열 길이",
+      "explanation": "매개변수 텍스트의 길이 확인"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "매개변수 값을 가져올 수 없어요",
+      "possible_causes": ["매개변수 이름 오타", "함수 외부에서 사용", "매개변수가 정의되지 않음", "잘못된 타입의 매개변수"],
+      "solutions": ["매개변수 이름 재확인", "함수 내부에서만 사용", "함수 정의 확인", "문자열 타입인지 확인"]
+    },
+    {
+      "problem": "빈 문자열에서 오류가 발생해요",
+      "possible_causes": ["길이 확인 없이 substring 사용", "빈 문자열 처리 누락", "null/undefined 처리 안 함"],
+      "solutions": ["사용 전 길이 확인", "빈 문자열 조건 추가", "기본값 설정"]
+    },
+    {
+      "problem": "텍스트 비교가 안 돼요",
+      "possible_causes": ["대소문자 차이", "앞뒤 공백", "보이지 않는 문자", "인코딩 문제"],
+      "solutions": ["lowercase/uppercase 사용", "trim으로 공백 제거", "정확한 문자 확인", "특수문자 처리"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "양식 입력 필드",
+      "explanation": "웹 양식에서 사용자가 입력한 텍스트를 받아 처리하는 것과 같습니다."
+    },
+    {
+      "analogy": "메시지 앱",
+      "explanation": "카톡이나 문자에서 받은 메시지를 읽고 처리하는 것과 비슷합니다."
+    },
+    {
+      "analogy": "검색 엔진",
+      "explanation": "검색어를 받아서 결과를 찾는 과정과 동일합니다."
+    },
+    {
+      "analogy": "주문서 처리",
+      "explanation": "고객이 작성한 주문 내용을 읽어 처리하는 것과 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "텍스트 파싱",
+      "description": "복잡한 문자열을 분석하고 구조화",
+      "use_case": "CSV 처리, JSON 파싱, 명령어 해석"
+    },
+    {
+      "concept": "템플릿 처리",
+      "description": "문자열 템플릿에 값을 대입하여 동적 생성",
+      "use_case": "메시지 템플릿, 보고서 생성, HTML 생성"
+    },
+    {
+      "concept": "정규식 패턴",
+      "description": "패턴 매칭을 통한 고급 문자열 처리",
+      "use_case": "형식 검증, 데이터 추출, 텍스트 치환"
+    },
+    {
+      "concept": "다국어 처리",
+      "description": "여러 언어의 텍스트를 처리하는 시스템",
+      "use_case": "번역, 언어 감지, 국제화"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "문자열 매개변수 값을 가져와 간단한 텍스트 처리를 할 수 있다",
+      "example": "메시지 표시, 텍스트 결합, 길이 확인"
+    },
+    {
+      "level": "중급",
+      "criteria": "문자열을 분석하고 조작하여 복잡한 처리를 구현할 수 있다",
+      "example": "텍스트 파싱, 형식 검증, 문자열 변환"
+    },
+    {
+      "level": "고급",
+      "criteria": "고급 문자열 처리 기법으로 복잡한 텍스트 시스템을 구현할 수 있다",
+      "example": "파서 구현, 템플릿 엔진, 명령어 인터프리터"
+    }
+  ]
+}

@@ -1,0 +1,428 @@
+{
+  "id": "function_value",
+  "category": "function",
+  "name": "함수 반환값",
+  "description": "반환값이 있는 함수를 호출하고 그 결과값을 받아오는 블록입니다. 계산 결과, 처리된 데이터, 상태 값 등을 함수에서 반환받아 사용할 수 있습니다. 일반 함수 호출과 달리 값을 반환받아 변수에 저장하거나 다른 연산에 사용할 수 있습니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "함수 반환값의 개념과 필요성 이해",
+      "값을 반환하는 함수 설계와 활용법 학습",
+      "함수를 통한 계산과 데이터 처리 방법 익히기",
+      "함수형 프로그래밍의 기초 개념 습득",
+      "복잡한 연산의 모듈화와 재사용성 향상"
+    ],
+    "key_concepts": [
+      {
+        "concept": "함수 반환값",
+        "explanation": "함수가 실행을 완료한 후 호출한 곳으로 돌려주는 결과값으로, 계산 결과나 처리된 데이터입니다."
+      },
+      {
+        "concept": "값 함수 (Value Function)",
+        "explanation": "단순히 동작만 수행하는 것이 아니라 결과값을 생성하여 반환하는 함수입니다."
+      },
+      {
+        "concept": "표현식으로서의 함수",
+        "explanation": "함수 호출이 값으로 평가되어 다른 연산이나 변수 할당에 직접 사용될 수 있습니다."
+      },
+      {
+        "concept": "함수 합성",
+        "explanation": "한 함수의 반환값을 다른 함수의 입력으로 사용하여 복잡한 연산을 구성합니다."
+      }
+    ],
+    "difficulty_level": "고급",
+    "prerequisites": ["함수 정의와 호출 방법", "return 블록 사용법", "변수 활용 능력", "데이터 타입 이해"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "수학 계산 함수",
+      "description": "복잡한 계산을 함수로 처리하고 결과 반환",
+      "blocks": [
+        "function_create('평균구하기', [list_param('숫자들')])",
+        "  set_variable('합계', 0)",
+        "  set_variable('개수', <length_of_list(<param('숫자들')>)>)",
+        "  foreach_list(<param('숫자들')>, 'num')",
+        "    change_variable('합계', <get_variable('num')>)",
+        "  set_variable('평균', <calc_operation(<get_variable('합계')>, '/', <get_variable('개수')>)>)",
+        "  return <get_variable('평균')>",
+        "",
+        "function_create('거리계산', [number_param('x1'), number_param('y1'), number_param('x2'), number_param('y2')])",
+        "  set_variable('dx', <calc_operation(<param('x2')>, '-', <param('x1')>)>)",
+        "  set_variable('dy', <calc_operation(<param('y2')>, '-', <param('y1')>)>)",
+        "  set_variable('거리제곱', <calc_operation(<calc_operation(<get_variable('dx')>, '*', <get_variable('dx')>)>, '+', <calc_operation(<get_variable('dy')>, '*', <get_variable('dy')>)>)>)",
+        "  return <calc_sqrt(<get_variable('거리제곱')>)>",
+        "",
+        "when_run_button_click",
+        "set_list('점수들', [85, 90, 78, 92, 88])",
+        "// 함수 반환값을 변수에 저장",
+        "set_variable('평균점수', <function_value('평균구하기', [<get_list('점수들')>])>)",
+        "speak_something('평균: ' + <get_variable('평균점수')>)",
+        "",
+        "// 함수 반환값을 직접 사용",
+        "set_variable('두점사이거리', <function_value('거리계산', [0, 0, 3, 4])>)",
+        "speak_something('거리: ' + <get_variable('두점사이거리')>)",
+        "",
+        "// 함수 반환값을 다른 계산에 사용",
+        "if_condition(<function_value('평균구하기', [<get_list('점수들')>])> >= 80>)",
+        "  speak_something('우수한 성적입니다!')"
+      ],
+      "explanation": "계산 함수의 반환값을 받아 변수에 저장하거나 직접 활용합니다."
+    },
+    {
+      "title": "데이터 변환 함수",
+      "description": "데이터를 가공하여 변환된 결과 반환",
+      "blocks": [
+        "function_create('텍스트정리', [string_param('원본')])",
+        "  // 앞뒤 공백 제거",
+        "  set_variable('정리된텍스트', <trim(<param('원본')>)>)",
+        "  // 소문자로 변환",
+        "  set_variable('정리된텍스트', <lowercase(<get_variable('정리된텍스트')>)>)",
+        "  // 특수문자 제거",
+        "  set_variable('정리된텍스트', <replace_string(<get_variable('정리된텍스트')>, '!', '')>)",
+        "  set_variable('정리된텍스트', <replace_string(<get_variable('정리된텍스트')>, '?', '')>)",
+        "  return <get_variable('정리된텍스트')>",
+        "",
+        "function_create('리스트필터링', [list_param('원본리스트'), number_param('최소값')])",
+        "  set_list('필터결과', [])",
+        "  foreach_list(<param('원본리스트')>, 'item')",
+        "    if_condition(<get_variable('item') >= <param('최소값')>>)",
+        "      add_to_list('필터결과', <get_variable('item')>)",
+        "  return <get_list('필터결과')>",
+        "",
+        "when_run_button_click",
+        "ask_and_wait('텍스트를 입력하세요')",
+        "// 텍스트 정리 함수 사용",
+        "set_variable('깨끗한텍스트', <function_value('텍스트정리', [<get_variable('답변')>])>)",
+        "speak_something('정리된 텍스트: ' + <get_variable('깨끗한텍스트')>)",
+        "",
+        "set_list('숫자들', [45, 67, 82, 55, 91, 73])",
+        "// 필터링 함수 사용",
+        "set_list('높은점수', <function_value('리스트필터링', [<get_list('숫자들')>, 70])>)",
+        "speak_something('70점 이상: ' + <get_list('높은점수')>)"
+      ],
+      "explanation": "데이터를 변환하거나 필터링한 결과를 반환받아 사용합니다."
+    },
+    {
+      "title": "상태 확인 함수",
+      "description": "조건을 검사하여 불린 값 반환",
+      "blocks": [
+        "function_create('충돌확인', [string_param('대상')])",
+        "  if_condition(<is_touched(<param('대상')>)>)",
+        "    speak_something(<param('대상')> + '과 충돌!')",
+        "    return true",
+        "  else",
+        "    return false",
+        "",
+        "function_create('범위확인', [number_param('값'), number_param('최소'), number_param('최대')])",
+        "  if_condition(<param('값') >= <param('최소')> and <param('값') <= <param('최대')>>)",
+        "    return true",
+        "  else",
+        "    return false",
+        "",
+        "function_create('유효성검사', [string_param('텍스트')])",
+        "  // 빈 문자열 확인",
+        "  if_condition(<length_of_string(<param('텍스트')>) = 0>)",
+        "    return false",
+        "  // 최소 길이 확인",
+        "  if_condition(<length_of_string(<param('텍스트')>) < 3>)",
+        "    return false",
+        "  // 특수문자 포함 확인",
+        "  if_condition(<index_of_string(<param('텍스트')>, '@')> > 0>)",
+        "    return true",
+        "  return false",
+        "",
+        "when_run_button_click",
+        "// 충돌 확인 함수 사용",
+        "if_condition(<function_value('충돌확인', ['벽'])>)",
+        "  speak_something('벽과 충돌했습니다!')",
+        "  move_direction(-50)",
+        "",
+        "// 범위 확인 함수 사용",
+        "set_variable('점수', 85)",
+        "if_condition(<function_value('범위확인', [<get_variable('점수')>, 80, 100])>)",
+        "  speak_something('A등급입니다!')",
+        "",
+        "// 유효성 검사 함수 사용",
+        "ask_and_wait('이메일을 입력하세요')",
+        "if_condition(<function_value('유효성검사', [<get_variable('답변')>])>)",
+        "  speak_something('유효한 이메일입니다')",
+        "else",
+        "  speak_something('잘못된 형식입니다')"
+      ],
+      "explanation": "조건을 검사하는 함수의 불린 반환값을 받아 조건문에 활용합니다."
+    },
+    {
+      "title": "함수 합성",
+      "description": "여러 함수의 반환값을 연쇄적으로 사용",
+      "blocks": [
+        "function_create('제곱', [number_param('수')])",
+        "  return <calc_operation(<param('수')>, '*', <param('수')>)>",
+        "",
+        "function_create('두배', [number_param('수')])",
+        "  return <calc_operation(<param('수')>, '*', 2)>",
+        "",
+        "function_create('더하기10', [number_param('수')])",
+        "  return <calc_operation(<param('수')>, '+', 10)>",
+        "",
+        "function_create('최대값찾기', [list_param('리스트')])",
+        "  set_variable('최대', <get_list_item(<param('리스트')>, 1)>)",
+        "  foreach_list(<param('리스트')>, 'item')",
+        "    if_condition(<get_variable('item') > <get_variable('최대')>>)",
+        "      set_variable('최대', <get_variable('item')>)",
+        "  return <get_variable('최대')>",
+        "",
+        "when_run_button_click",
+        "// 함수 합성 - 중첩 호출",
+        "set_variable('결과', <function_value('더하기10', [<function_value('두배', [<function_value('제곱', [3])>])>])>)",
+        "speak_something('(3²) × 2 + 10 = ' + <get_variable('결과')>)",
+        "",
+        "// 여러 단계 처리",
+        "set_list('숫자들', [5, 2, 8, 3])",
+        "set_variable('최대값', <function_value('최대값찾기', [<get_list('숫자들')>])>)",
+        "set_variable('최대값제곱', <function_value('제곱', [<get_variable('최대값')>])>)",
+        "set_variable('최종결과', <function_value('두배', [<get_variable('최대값제곱')>])>)",
+        "speak_something('최대값 ' + <get_variable('최대값')> + '의 제곱×2 = ' + <get_variable('최종결과')>)"
+      ],
+      "explanation": "여러 함수의 반환값을 연쇄적으로 사용하여 복잡한 연산을 수행합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "함수에서 값을 반환받고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'함수' 카테고리에서 반환값 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'함수 반환값' 블록을 선택하고 함수를 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "함수에서 return으로 반환한 값을 받을 수 있어요"
+        }
+      ]
+    },
+    {
+      "situation": "반환값을 변수에 저장하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "set_variable의 값 자리에 function_value를 넣을 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "set_variable('결과', <function_value('함수명', [인자])>)"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "저장된 값을 나중에 재사용할 수 있어요"
+        }
+      ]
+    },
+    {
+      "situation": "반환값을 직접 계산에 사용하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "function_value는 값이므로 연산에 직접 사용 가능해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "계산 블록의 입력으로 바로 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "if (<function_value()> > 10) 같은 형태로 활용하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "return 없는 함수에서 반환값 기대",
+      "why_it_happens": "함수가 값을 반환하지 않는데 반환값을 받으려 함",
+      "consequence": "undefined 또는 null 값 반환",
+      "solution": "함수에 return 블록 추가",
+      "teaching_moment": "값을 반환받으려면 함수에서 return을 사용해야 해요."
+    },
+    {
+      "mistake": "function_general과 혼동",
+      "why_it_happens": "두 블록의 차이를 이해하지 못함",
+      "consequence": "반환값을 받지 못하거나 사용 오류",
+      "solution": "값이 필요하면 function_value 사용",
+      "teaching_moment": "function_general은 실행만, function_value는 값을 받아요."
+    },
+    {
+      "mistake": "반환 타입 불일치",
+      "why_it_happens": "예상과 다른 타입의 값 반환",
+      "consequence": "타입 오류나 예상과 다른 동작",
+      "solution": "함수의 반환 타입 확인",
+      "teaching_moment": "함수가 어떤 타입을 반환하는지 확인이 필요해요."
+    },
+    {
+      "mistake": "중첩 호출 순서 혼동",
+      "why_it_happens": "함수 합성 시 실행 순서를 잘못 이해",
+      "consequence": "잘못된 계산 결과",
+      "solution": "안쪽부터 바깥쪽으로 실행됨을 이해",
+      "teaching_moment": "중첩된 함수는 가장 안쪽부터 실행돼요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "반환값 있는 함수 준비",
+      "instruction": "먼저 return 블록을 포함한 함수를 정의하세요.",
+      "visual_hint": "함수 내부에 return 블록이 있어야 합니다."
+    },
+    {
+      "step": 2,
+      "title": "함수 반환값 블록 선택",
+      "instruction": "'함수' 카테고리에서 '함수 반환값' 블록을 선택하세요.",
+      "visual_hint": "둥근 모서리의 값 블록 형태입니다."
+    },
+    {
+      "step": 3,
+      "title": "함수 이름 선택",
+      "instruction": "드롭다운에서 호출할 함수를 선택하세요.",
+      "visual_hint": "return이 있는 함수만 의미가 있습니다."
+    },
+    {
+      "step": 4,
+      "title": "매개변수 값 전달",
+      "instruction": "함수가 요구하는 매개변수 값들을 입력하세요.",
+      "visual_hint": "각 매개변수 자리에 적절한 값을 넣습니다."
+    },
+    {
+      "step": 5,
+      "title": "반환값 활용",
+      "instruction": "반환값을 변수에 저장하거나 직접 사용하세요.",
+      "visual_hint": "값이 필요한 모든 곳에서 사용 가능합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "function_general",
+      "relationship": "일반 함수 호출",
+      "explanation": "반환값 없이 함수를 실행만 할 때 사용"
+    },
+    {
+      "block_id": "function_return",
+      "relationship": "값 반환",
+      "explanation": "함수에서 값을 반환할 때 사용"
+    },
+    {
+      "block_id": "set_variable",
+      "relationship": "결과 저장",
+      "explanation": "반환값을 변수에 저장"
+    },
+    {
+      "block_id": "calc_operation",
+      "relationship": "연산에 활용",
+      "explanation": "반환값을 계산에 사용"
+    },
+    {
+      "block_id": "if_condition",
+      "relationship": "조건 확인",
+      "explanation": "반환값을 조건문에서 활용"
+    },
+    {
+      "block_id": "function_create",
+      "relationship": "함수 정의",
+      "explanation": "반환값을 만들 함수 정의"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "반환값이 없어요 (undefined)",
+      "possible_causes": ["함수에 return 블록이 없음", "조건에 따라 return하지 않는 경로 존재", "return 전에 오류 발생"],
+      "solutions": ["함수에 return 블록 추가", "모든 경로에서 return 확인", "함수 내부 오류 확인"]
+    },
+    {
+      "problem": "예상과 다른 값이 반환돼요",
+      "possible_causes": ["잘못된 값을 return", "계산 오류", "변수 혼동"],
+      "solutions": ["return하는 값 확인", "계산 로직 검토", "변수 이름과 값 확인"]
+    },
+    {
+      "problem": "타입 오류가 발생해요",
+      "possible_causes": ["예상과 다른 타입 반환", "null/undefined 반환", "타입 변환 필요"],
+      "solutions": ["반환 타입 일관성 확인", "기본값 설정", "필요시 타입 변환"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "계산기",
+      "explanation": "숫자를 입력하면 계산 결과를 돌려주는 계산기와 같습니다."
+    },
+    {
+      "analogy": "자판기",
+      "explanation": "돈과 선택을 입력하면 음료수를 반환하는 자판기와 비슷합니다."
+    },
+    {
+      "analogy": "검색 엔진",
+      "explanation": "검색어를 입력하면 결과 목록을 반환하는 것과 같습니다."
+    },
+    {
+      "analogy": "온도계",
+      "explanation": "측정을 요청하면 온도 값을 알려주는 것과 같은 원리입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "순수 함수",
+      "description": "입력만으로 결과가 결정되는 부작용 없는 함수",
+      "use_case": "수학 계산, 데이터 변환, 유틸리티 함수"
+    },
+    {
+      "concept": "함수 체이닝",
+      "description": "여러 함수의 반환값을 연속으로 연결",
+      "use_case": "데이터 파이프라인, 변환 체인"
+    },
+    {
+      "concept": "메모이제이션",
+      "description": "함수 반환값을 캐싱하여 재사용",
+      "use_case": "복잡한 계산 최적화, 중복 계산 방지"
+    },
+    {
+      "concept": "고차 함수",
+      "description": "함수를 반환하는 함수",
+      "use_case": "함수 팩토리, 커링, 부분 적용"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "간단한 함수의 반환값을 받아 사용할 수 있다",
+      "example": "계산 결과 받기, 변수에 저장, 조건문에 활용"
+    },
+    {
+      "level": "중급",
+      "criteria": "여러 함수의 반환값을 조합하여 복잡한 처리를 구현할 수 있다",
+      "example": "데이터 변환, 필터링, 함수 합성"
+    },
+    {
+      "level": "고급",
+      "criteria": "반환값을 활용한 고급 패턴과 함수형 프로그래밍을 구현할 수 있다",
+      "example": "함수 체이닝, 재귀 함수, 고차 함수 패턴"
+    }
+  ]
+}

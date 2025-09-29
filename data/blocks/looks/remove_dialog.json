@@ -1,0 +1,442 @@
+{
+  "id": "remove_dialog",
+  "category": "looks",
+  "name": "말풍선 지우기",
+  "description": "현재 오브젝트에 표시되고 있는 말풍선을 즉시 제거하는 블록입니다. speak 블록으로 표시한 메시지나 think 블록으로 표시한 생각 풍선을 화면에서 지웁니다. 대화를 종료하거나 화면을 정리할 때 사용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "말풍선 제어와 관리 방법 학습",
+      "대화 시스템의 시작과 종료 이해",
+      "화면 정리와 UI 관리 기법",
+      "타이밍 제어를 통한 대화 연출",
+      "효율적인 메시지 표시 시스템 구축"
+    ],
+    "key_concepts": [
+      {
+        "concept": "말풍선 제거",
+        "explanation": "화면에 표시된 대화나 생각 풍선을 즉시 사라지게 하는 작업입니다."
+      },
+      {
+        "concept": "UI 정리",
+        "explanation": "불필요한 인터페이스 요소를 제거하여 화면을 깔끔하게 유지하는 것입니다."
+      },
+      {
+        "concept": "대화 종료",
+        "explanation": "캐릭터의 대사나 생각 표시를 끝내고 다음 상태로 전환하는 과정입니다."
+      },
+      {
+        "concept": "즉시 제거",
+        "explanation": "시간 지연 없이 바로 말풍선을 화면에서 제거하는 방식입니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": ["speak 블록 사용 경험", "think 블록 이해", "기본 이벤트 처리"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "대화 시스템",
+      "description": "NPC와의 대화 시작과 종료",
+      "blocks": [
+        "when_object_click",
+        "// NPC 대화 시작",
+        "speak('안녕하세요! 무엇을 도와드릴까요?')",
+        "wait_second(3)",
+        "",
+        "speak('1. 상점 열기')",
+        "speak('2. 퀘스트 확인')",
+        "speak('3. 대화 종료')",
+        "wait_second(2)",
+        "",
+        "// 사용자 선택 대기",
+        "ask_and_wait('번호를 선택하세요')",
+        "",
+        "// 대화 종료",
+        "remove_dialog()",
+        "",
+        "if_condition(<get_variable('답변') = '3'>)",
+        "  speak('안녕히 가세요!')",
+        "  wait_second(2)",
+        "  remove_dialog()",
+        "else_if(<get_variable('답변') = '1'>)",
+        "  broadcast_message('상점열기')",
+        "  remove_dialog()",
+        "else_if(<get_variable('답변') = '2'>)",
+        "  broadcast_message('퀘스트')",
+        "  remove_dialog()"
+      ],
+      "explanation": "대화가 끝날 때마다 remove_dialog로 말풍선을 정리합니다."
+    },
+    {
+      "title": "타이밍 대화",
+      "description": "시간차를 둔 대화 연출",
+      "blocks": [
+        "when_message_cast('컷신시작')",
+        "// 첫 번째 캐릭터",
+        "speak('이게 뭐지?')",
+        "wait_second(2)",
+        "remove_dialog()",
+        "wait_second(0.5)",
+        "",
+        "// 두 번째 캐릭터로 전환",
+        "broadcast_message_to('캐릭터2', '대사2')",
+        "wait_second(2.5)",
+        "",
+        "// 다시 첫 번째 캐릭터",
+        "speak('신기한데!')",
+        "wait_second(2)",
+        "remove_dialog()",
+        "",
+        "// 생각 표현",
+        "think('이걸 어떻게 사용하지?')",
+        "wait_second(3)",
+        "remove_dialog()",
+        "",
+        "speak('아하! 알았다!')",
+        "wait_second(2)",
+        "remove_dialog()"
+      ],
+      "explanation": "각 대사 후 remove_dialog로 말풍선을 제거하여 깔끔한 대화를 연출합니다."
+    },
+    {
+      "title": "긴급 상황 인터럽트",
+      "description": "진행 중인 대화를 중단하고 긴급 메시지",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('대화중', false)",
+        "",
+        "when_some_key_pressed('t')",
+        "// 일반 대화 시작",
+        "set_variable('대화중', true)",
+        "speak('오늘 날씨가 정말 좋네요...')",
+        "wait_second(3)",
+        "speak('산책하기 딱 좋은 날이에요...')",
+        "wait_second(3)",
+        "if_condition(<get_variable('대화중')>)",
+        "  speak('그런데 갑자기 비가 올 것 같...')",
+        "  wait_second(3)",
+        "  remove_dialog()",
+        "",
+        "when_message_cast('위험!')",
+        "// 긴급 상황 - 진행 중인 대화 중단",
+        "set_variable('대화중', false)",
+        "remove_dialog()",
+        "set_effect('color', 100)",
+        "speak('위험! 즉시 대피하세요!')",
+        "repeat_basic(3)",
+        "  wait_second(0.5)",
+        "  remove_dialog()",
+        "  wait_second(0.2)",
+        "  speak('위험! 위험!')",
+        "clear_effect()",
+        "wait_second(2)",
+        "remove_dialog()"
+      ],
+      "explanation": "긴급 상황 시 remove_dialog로 진행 중인 대화를 즉시 중단합니다."
+    },
+    {
+      "title": "생각에서 말로 전환",
+      "description": "내적 독백에서 외적 대화로 전환",
+      "blocks": [
+        "when_run_button_click",
+        "// 혼자 생각",
+        "think('음... 어떻게 해야 할까?')",
+        "wait_second(2)",
+        "think('아무도 없는 것 같은데...')",
+        "wait_second(2)",
+        "remove_dialog()",
+        "",
+        "// 누군가 나타남",
+        "when_message_cast('누군가등장')",
+        "// 생각 즉시 중단",
+        "remove_dialog()",
+        "wait_second(0.5)",
+        "",
+        "// 말로 전환",
+        "speak('아! 안녕하세요!')",
+        "wait_second(2)",
+        "remove_dialog()",
+        "",
+        "speak('여기서 만나다니 반가워요!')",
+        "wait_second(2)",
+        "remove_dialog()"
+      ],
+      "explanation": "think에서 speak로 전환할 때 remove_dialog로 이전 풍선을 제거합니다."
+    },
+    {
+      "title": "대화 스킵 기능",
+      "description": "스페이스바로 대화 건너뛰기",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('스킵가능', false)",
+        "",
+        "// 긴 대화 시작",
+        "when_message_cast('스토리')",
+        "speak('옛날 옛적에...')",
+        "set_variable('스킵가능', true)",
+        "wait_second(3)",
+        "if_condition(<get_variable('스킵가능')>)",
+        "  speak('아주 먼 왕국에...')",
+        "  wait_second(3)",
+        "if_condition(<get_variable('스킵가능')>)",
+        "  speak('용감한 기사가 살고 있었습니다...')",
+        "  wait_second(3)",
+        "if_condition(<get_variable('스킵가능')>)",
+        "  speak('그는 모험을 떠나기로 했습니다...')",
+        "  wait_second(3)",
+        "remove_dialog()",
+        "set_variable('스킵가능', false)",
+        "",
+        "// 스킵 기능",
+        "when_some_key_pressed('space')",
+        "if_condition(<get_variable('스킵가능')>)",
+        "  remove_dialog()",
+        "  set_variable('스킵가능', false)",
+        "  speak('(스킵됨)')",
+        "  wait_second(0.5)",
+        "  remove_dialog()",
+        "  broadcast_message('스토리끝')"
+      ],
+      "explanation": "스페이스바를 누르면 remove_dialog로 대화를 즉시 건너뜁니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "말풍선을 지우고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'생김새' 카테고리에서 말풍선 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'말풍선 지우기' 블록을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "speak이나 think로 표시한 풍선이 즉시 사라져요"
+        }
+      ]
+    },
+    {
+      "situation": "대화 타이밍을 조절하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "speak 후 wait으로 표시 시간을 조절하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "wait 후 remove_dialog로 지우세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "다음 대사 전에 잠시 대기를 넣으면 자연스러워요"
+        }
+      ]
+    },
+    {
+      "situation": "여러 캐릭터의 대화를 관리하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "각 캐릭터가 말하기 전에 이전 대화를 지우세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "메시지로 캐릭터 간 대화 순서를 제어하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "각 캐릭터 오브젝트에서 remove_dialog를 사용하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "너무 빨리 지워짐",
+      "why_it_happens": "wait 시간이 부족",
+      "consequence": "대사를 읽기 전에 사라짐",
+      "solution": "충분한 wait_second 추가",
+      "teaching_moment": "대사 길이에 맞는 적절한 대기 시간이 필요해요."
+    },
+    {
+      "mistake": "다른 오브젝트 말풍선은 안 지워짐",
+      "why_it_happens": "각 오브젝트별로 관리됨",
+      "consequence": "다른 캐릭터 말풍선이 남아있음",
+      "solution": "각 오브젝트에서 개별적으로 제거",
+      "teaching_moment": "remove_dialog는 현재 오브젝트의 말풍선만 지워요."
+    },
+    {
+      "mistake": "speak_and_wait 후 사용",
+      "why_it_happens": "이미 사라진 말풍선 제거 시도",
+      "consequence": "아무 효과 없음",
+      "solution": "speak_and_wait는 자동으로 사라짐",
+      "teaching_moment": "시간 제한이 있는 speak은 자동으로 사라져요."
+    },
+    {
+      "mistake": "제거 후 바로 다시 표시",
+      "why_it_happens": "타이밍 조절 실수",
+      "consequence": "깜빡거리는 효과",
+      "solution": "적절한 대기 시간 추가",
+      "teaching_moment": "제거와 표시 사이에 약간의 간격을 두세요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "말풍선 표시",
+      "instruction": "먼저 speak이나 think 블록으로 메시지를 표시하세요.",
+      "visual_hint": "캐릭터에 말풍선이 나타납니다."
+    },
+    {
+      "step": 2,
+      "title": "대기 시간 설정",
+      "instruction": "wait_second로 말풍선 표시 시간을 설정하세요.",
+      "visual_hint": "사용자가 읽을 수 있는 충분한 시간을 줍니다."
+    },
+    {
+      "step": 3,
+      "title": "말풍선 제거",
+      "instruction": "'말풍선 지우기' 블록을 추가하세요.",
+      "visual_hint": "말풍선이 즉시 사라집니다."
+    },
+    {
+      "step": 4,
+      "title": "다음 동작 준비",
+      "instruction": "필요시 잠시 대기 후 다음 동작을 추가하세요.",
+      "visual_hint": "자연스러운 대화 흐름을 만듭니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트",
+      "instruction": "실행하여 대화가 자연스럽게 표시되고 사라지는지 확인하세요.",
+      "visual_hint": "타이밍이 적절한지 확인합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "speak",
+      "relationship": "말풍선 표시",
+      "explanation": "제거할 말풍선을 표시하는 블록"
+    },
+    {
+      "block_id": "speak_and_wait",
+      "relationship": "시간 제한 말풍선",
+      "explanation": "자동으로 사라지는 말풍선"
+    },
+    {
+      "block_id": "think",
+      "relationship": "생각 풍선",
+      "explanation": "제거할 생각 풍선을 표시"
+    },
+    {
+      "block_id": "think_and_wait",
+      "relationship": "시간 제한 생각",
+      "explanation": "자동으로 사라지는 생각 풍선"
+    },
+    {
+      "block_id": "wait_second",
+      "relationship": "대기",
+      "explanation": "말풍선 표시 시간 조절"
+    },
+    {
+      "block_id": "hide",
+      "relationship": "오브젝트 숨기기",
+      "explanation": "오브젝트와 말풍선 모두 숨기기"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "말풍선이 지워지지 않아요",
+      "possible_causes": ["블록이 실행되지 않음", "다른 오브젝트의 말풍선", "이미 지워진 상태"],
+      "solutions": ["실행 경로 확인", "해당 오브젝트에서 실행", "현재 상태 확인"]
+    },
+    {
+      "problem": "대화가 너무 빨라요",
+      "possible_causes": ["wait 시간 부족", "remove_dialog 너무 빠름", "연속 실행"],
+      "solutions": ["wait_second 시간 증가", "각 대사 간 간격 추가", "실행 순서 조정"]
+    },
+    {
+      "problem": "여러 말풍선이 겹쳐요",
+      "possible_causes": ["여러 오브젝트 동시 대화", "이전 대화 미제거", "타이밍 충돌"],
+      "solutions": ["순차적 대화 처리", "각각 remove_dialog 추가", "메시지로 동기화"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "대화 종료",
+      "explanation": "실제 대화에서 말을 끝내고 침묵하는 것과 같습니다."
+    },
+    {
+      "analogy": "채팅 메시지 삭제",
+      "explanation": "메신저에서 보낸 메시지를 삭제하는 것과 비슷합니다."
+    },
+    {
+      "analogy": "자막 제거",
+      "explanation": "영상에서 자막이 사라지는 것과 같은 효과입니다."
+    },
+    {
+      "analogy": "화이트보드 지우기",
+      "explanation": "칠판이나 화이트보드의 글씨를 지우는 것과 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "대화 큐 시스템",
+      "description": "여러 대사를 순서대로 관리",
+      "use_case": "RPG 대화, 스토리텔링, 튜토리얼"
+    },
+    {
+      "concept": "페이드 아웃",
+      "description": "말풍선이 서서히 사라지는 효과",
+      "use_case": "부드러운 전환, 감정 표현"
+    },
+    {
+      "concept": "대화 로그",
+      "description": "지운 대화를 기록으로 저장",
+      "use_case": "대화 기록 확인, 스토리 복습"
+    },
+    {
+      "concept": "자동 정리 시스템",
+      "description": "일정 시간 후 자동으로 말풍선 제거",
+      "use_case": "자동 진행 대화, 시간 제한 메시지"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "remove_dialog를 사용하여 말풍선을 제거할 수 있다",
+      "example": "단순 제거, speak 후 정리"
+    },
+    {
+      "level": "중급",
+      "criteria": "타이밍을 조절하여 자연스러운 대화를 연출할 수 있다",
+      "example": "대화 시스템, 순차 대화, 전환 효과"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 대화 시스템을 구현하고 관리할 수 있다",
+      "example": "다중 캐릭터 대화, 인터럽트 시스템, 대화 스킵"
+    }
+  ]
+}

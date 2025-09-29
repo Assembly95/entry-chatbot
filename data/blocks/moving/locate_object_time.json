@@ -1,0 +1,456 @@
+{
+  "id": "locate_object_time",
+  "category": "movement",
+  "name": "오브젝트로 이동하기 (시간)",
+  "description": "지정한 시간 동안 다른 오브젝트의 위치로 부드럽게 이동하는 블록입니다. 목표 오브젝트의 현재 위치를 자동으로 추적하여 해당 위치까지 일정한 속도로 이동합니다. 추격, 따라가기, 집합 등의 동작을 구현할 때 사용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "오브젝트 간 상호작용 구현 방법 학습",
+      "시간 기반 이동 제어 이해",
+      "목표 추적 시스템 구축",
+      "부드러운 이동 애니메이션 구현",
+      "동적 위치 추적 기법 습득"
+    ],
+    "key_concepts": [
+      {
+        "concept": "목표 추적",
+        "explanation": "다른 오브젝트의 위치를 실시간으로 파악하여 그 위치로 이동하는 방식입니다."
+      },
+      {
+        "concept": "시간 기반 이동",
+        "explanation": "정해진 시간 내에 목표 지점까지 도달하도록 속도를 자동 조절하는 이동 방식입니다."
+      },
+      {
+        "concept": "선형 보간",
+        "explanation": "시작점과 끝점 사이를 일정한 비율로 나누어 부드럽게 이동하는 기법입니다."
+      },
+      {
+        "concept": "동적 목표",
+        "explanation": "이동 중에도 변할 수 있는 목표 위치를 추적하는 시스템입니다."
+      }
+    ],
+    "difficulty_level": "중급",
+    "prerequisites": ["오브젝트 개념 이해", "좌표계 지식", "시간 개념", "기본 이동 블록 경험"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "펫 따라오기 시스템",
+      "description": "플레이어를 따라다니는 펫 구현",
+      "blocks": [
+        "when_run_button_click",
+        "// 펫 초기 설정",
+        "set_costume('강아지')",
+        "set_size(70)",
+        "locate_xy(-50, -50)",
+        "",
+        "repeat_while_true",
+        "  // 플레이어와의 거리 확인",
+        "  set_variable('거리', <distance_to('플레이어')>)",
+        "  ",
+        "  if_condition(<get_variable('거리') > 80>)",
+        "    // 거리가 멀면 따라가기",
+        "    locate_object_time('플레이어', 1)",
+        "    ",
+        "    // 이동 중 애니메이션",
+        "    repeat_basic(4)",
+        "      next_costume()",
+        "      wait_second(0.25)",
+        "  else_if(<get_variable('거리') > 50>)",
+        "    // 중간 거리는 천천히 접근",
+        "    locate_object_time('플레이어', 2)",
+        "  else",
+        "    // 가까우면 대기",
+        "    if_condition(<random_number(1, 100) > 95>)",
+        "      speak_something('멍멍!')",
+        "      wait_second(2)",
+        "      remove_dialog()",
+        "    wait_second(0.5)"
+      ],
+      "explanation": "locate_object_time을 사용하여 플레이어와의 거리에 따라 다른 속도로 따라갑니다."
+    },
+    {
+      "title": "유도 미사일",
+      "description": "목표물을 추적하는 미사일",
+      "blocks": [
+        "when_message_cast('미사일발사')",
+        "// 미사일 생성",
+        "clone_self()",
+        "",
+        "when_clone_start",
+        "set_costume('미사일')",
+        "set_size(50)",
+        "locate_xy(<get_object_x('발사대')>, <get_object_y('발사대')>)",
+        "set_variable('목표', '적')",
+        "set_variable('연료', 5)",
+        "",
+        "// 추적 시작",
+        "repeat_while_true(<get_variable('연료') > 0>)",
+        "  // 목표 추적",
+        "  point_to(<get_variable('목표')>)",
+        "  locate_object_time(<get_variable('목표')>, 0.5)",
+        "  ",
+        "  // 연료 소모",
+        "  change_variable('연료', -0.5)",
+        "  ",
+        "  // 연기 효과",
+        "  create_clone_of('연기')",
+        "  ",
+        "  // 충돌 체크",
+        "  if_condition(<touching(<get_variable('목표')>)>)",
+        "    broadcast_message_to(<get_variable('목표')>, '피격')",
+        "    play_sound('폭발')",
+        "    delete_clone()",
+        "  ",
+        "  wait_second(0.1)",
+        "",
+        "// 연료 소진",
+        "speak_something('연료 소진')",
+        "repeat_basic(10)",
+        "  change_y(-5)",
+        "  change_effect_amount('transparency', 10)",
+        "  wait_second(0.05)",
+        "delete_clone()"
+      ],
+      "explanation": "locate_object_time으로 목표물을 지속적으로 추적하는 유도 미사일을 구현합니다."
+    },
+    {
+      "title": "집합 명령",
+      "description": "여러 유닛이 지정 위치로 모이기",
+      "blocks": [
+        "// 유닛 오브젝트",
+        "when_message_cast('집합')",
+        "set_variable('집합지점', '깃발')",
+        "set_variable('도착', false)",
+        "",
+        "// 집합 지점으로 이동",
+        "set_variable('이동시간', <calc_operation(<distance_to(<get_variable('집합지점')>)>, '/', 50)>)",
+        "speak_something('이동 중!')",
+        "",
+        "// 거리에 비례한 시간으로 이동",
+        "locate_object_time(<get_variable('집합지점')>, <get_variable('이동시간')>)",
+        "",
+        "// 도착 확인",
+        "set_variable('도착', true)",
+        "speak_something('도착!')",
+        "wait_second(1)",
+        "remove_dialog()",
+        "",
+        "// 도착 후 대형 정렬",
+        "set_variable('내번호', <get_object_id()>)",
+        "set_variable('목표X', <calc_operation(<get_object_x('깃발')>, '+', <calc_operation(<get_variable('내번호')>, '*', 30)>)>)",
+        "set_variable('목표Y', <get_object_y('깃발')>)",
+        "glide_to_xy(<get_variable('목표X')>, <get_variable('목표Y')>, 0.5)"
+      ],
+      "explanation": "locate_object_time을 사용하여 여러 유닛이 집합 지점으로 모이도록 구현합니다."
+    },
+    {
+      "title": "카메라 팔로우",
+      "description": "플레이어를 부드럽게 따라가는 카메라",
+      "blocks": [
+        "// 카메라 오브젝트",
+        "when_run_button_click",
+        "set_variable('카메라모드', '추적')",
+        "set_variable('완충거리', 50)",
+        "",
+        "repeat_while_true",
+        "  if_condition(<get_variable('카메라모드') = '추적'>)",
+        "    // 플레이어 위치 확인",
+        "    set_variable('플레이어X', <get_object_x('플레이어')>)",
+        "    set_variable('플레이어Y', <get_object_y('플레이어')>)",
+        "    set_variable('카메라X', <coordinate_object('x')>)",
+        "    set_variable('카메라Y', <coordinate_object('y')>)",
+        "    ",
+        "    // 거리 계산",
+        "    set_variable('거리X', <abs(<calc_operation(<get_variable('플레이어X')>, '-', <get_variable('카메라X')>)>)>)",
+        "    set_variable('거리Y', <abs(<calc_operation(<get_variable('플레이어Y')>, '-', <get_variable('카메라Y')>)>)>)",
+        "    ",
+        "    // 완충 거리 벗어나면 따라가기",
+        "    if_condition(<get_variable('거리X') > <get_variable('완충거리')> or <get_variable('거리Y') > <get_variable('완충거리')>>)",
+        "      locate_object_time('플레이어', 0.3)",
+        "      // 배경도 함께 이동",
+        "      broadcast_message('배경스크롤')",
+        "    ",
+        "    wait_second(0.02)",
+        "  else",
+        "    // 고정 모드",
+        "    wait_second(0.1)"
+      ],
+      "explanation": "locate_object_time으로 플레이어를 부드럽게 추적하는 카메라 시스템을 구현합니다."
+    },
+    {
+      "title": "자석 효과",
+      "description": "아이템이 플레이어에게 끌려오는 효과",
+      "blocks": [
+        "// 아이템 오브젝트",
+        "when_run_button_click",
+        "set_variable('자석범위', 100)",
+        "set_variable('수집됨', false)",
+        "",
+        "repeat_while_true(not <get_variable('수집됨')>)",
+        "  set_variable('거리', <distance_to('플레이어')>)",
+        "  ",
+        "  // 자석 범위 안에 들어오면",
+        "  if_condition(<get_variable('거리') < <get_variable('자석범위')>>)",
+        "    // 거리에 반비례하는 속도로 끌려감",
+        "    set_variable('끌림속도', <calc_operation(2, '-', <calc_operation(<get_variable('거리')>, '/', 60)>)>)",
+        "    ",
+        "    // 플레이어에게 이동",
+        "    locate_object_time('플레이어', <get_variable('끌림속도')>)",
+        "    ",
+        "    // 회전하며 끌려감",
+        "    change_direction(20)",
+        "    change_scale_size(-1)",
+        "    ",
+        "    // 충분히 가까워지면 수집",
+        "    if_condition(<get_variable('거리') < 20>)",
+        "      set_variable('수집됨', true)",
+        "      broadcast_message('아이템획득')",
+        "      play_sound('수집')",
+        "      hide()",
+        "  ",
+        "  wait_second(0.02)"
+      ],
+      "explanation": "locate_object_time을 사용하여 자석에 끌리듯 아이템이 플레이어에게 이동합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "다른 오브젝트로 이동시키고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'움직임' 카테고리에서 이동 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'오브젝트로 이동하기' 블록을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "대상 오브젝트와 이동 시간을 설정하세요"
+        }
+      ]
+    },
+    {
+      "situation": "부드러운 추적을 구현하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "거리에 따라 이동 시간을 조절하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "반복문 안에서 지속적으로 실행하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "distance_to로 거리를 확인하고 조건부 이동하세요"
+        }
+      ]
+    },
+    {
+      "situation": "여러 오브젝트가 한 곳에 모이게 하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "모든 오브젝트에 같은 목표를 설정하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "메시지로 동시에 이동 명령을 전달하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "도착 후 위치를 조정하여 겹치지 않게 하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "목표 오브젝트 이름 오류",
+      "why_it_happens": "오브젝트 이름을 잘못 입력",
+      "consequence": "이동하지 않거나 오류 발생",
+      "solution": "정확한 오브젝트 이름 확인",
+      "teaching_moment": "오브젝트 이름은 대소문자를 정확히 입력해야 해요."
+    },
+    {
+      "mistake": "너무 짧은 시간 설정",
+      "why_it_happens": "즉시 이동을 원함",
+      "consequence": "순간이동처럼 보임",
+      "solution": "0.5초 이상 설정",
+      "teaching_moment": "너무 빠르면 부자연스러워요. 적절한 시간을 설정하세요."
+    },
+    {
+      "mistake": "이동 중 중복 실행",
+      "why_it_happens": "이동 완료를 기다리지 않음",
+      "consequence": "이동이 끊기거나 이상해짐",
+      "solution": "이동 완료 후 다음 동작",
+      "teaching_moment": "이 블록은 실행 시간동안 기다려요."
+    },
+    {
+      "mistake": "움직이는 목표 추적 실패",
+      "why_it_happens": "한 번만 실행",
+      "consequence": "목표가 이동하면 엉뚱한 곳으로 감",
+      "solution": "반복문으로 계속 추적",
+      "teaching_moment": "움직이는 목표는 계속 업데이트해야 해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "움직임 카테고리 열기",
+      "instruction": "블록 팔레트에서 파란색 '움직임' 카테고리를 클릭하세요.",
+      "visual_hint": "화살표 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "locate_object_time 블록 선택",
+      "instruction": "'오브젝트로 이동하기' 블록을 찾아 드래그하세요.",
+      "visual_hint": "오브젝트 이름과 시간을 입력하는 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "목표 오브젝트 설정",
+      "instruction": "이동할 대상 오브젝트의 이름을 입력하세요.",
+      "visual_hint": "드롭다운이나 텍스트로 입력합니다."
+    },
+    {
+      "step": 4,
+      "title": "이동 시간 설정",
+      "instruction": "목표까지 이동할 시간을 초 단위로 입력하세요.",
+      "visual_hint": "1은 1초, 0.5는 0.5초입니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트",
+      "instruction": "실행하여 오브젝트가 목표로 부드럽게 이동하는지 확인하세요.",
+      "visual_hint": "일정한 속도로 목표를 향해 이동합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "glide_to_xy",
+      "relationship": "좌표 이동",
+      "explanation": "특정 좌표로 시간 이동"
+    },
+    {
+      "block_id": "go_to_object",
+      "relationship": "즉시 이동",
+      "explanation": "오브젝트 위치로 즉시 이동"
+    },
+    {
+      "block_id": "distance_to",
+      "relationship": "거리 측정",
+      "explanation": "목표와의 거리 확인"
+    },
+    {
+      "block_id": "point_to",
+      "relationship": "방향 지정",
+      "explanation": "목표를 향해 방향 설정"
+    },
+    {
+      "block_id": "move",
+      "relationship": "단계 이동",
+      "explanation": "일정 거리씩 이동"
+    },
+    {
+      "block_id": "touching",
+      "relationship": "충돌 감지",
+      "explanation": "목표 도달 확인"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "이동하지 않아요",
+      "possible_causes": ["오브젝트 이름 오류", "블록이 실행되지 않음", "이미 같은 위치"],
+      "solutions": ["오브젝트 이름 확인", "실행 조건 확인", "시작 위치 변경"]
+    },
+    {
+      "problem": "너무 빠르거나 느려요",
+      "possible_causes": ["시간 설정 오류", "거리 대비 시간 부적절", "다른 이동 블록 간섭"],
+      "solutions": ["적절한 시간 조정", "거리 기반 시간 계산", "다른 이동 코드 제거"]
+    },
+    {
+      "problem": "엉뚱한 곳으로 가요",
+      "possible_causes": ["목표가 이동함", "잘못된 오브젝트 지정", "좌표 충돌"],
+      "solutions": ["목표 위치 고정 확인", "올바른 오브젝트 선택", "실행 타이밍 조정"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "택시 호출",
+      "explanation": "택시가 승객 위치로 이동하는 것과 같은 원리입니다."
+    },
+    {
+      "analogy": "드론 배송",
+      "explanation": "드론이 목적지를 향해 일정 속도로 날아가는 것과 비슷합니다."
+    },
+    {
+      "analogy": "자동 주차",
+      "explanation": "차량이 주차 공간으로 자동 이동하는 시스템과 같습니다."
+    },
+    {
+      "analogy": "GPS 네비게이션",
+      "explanation": "목적지까지 경로를 따라 이동하는 것과 유사한 개념입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "편대 이동",
+      "description": "여러 오브젝트가 대형을 유지하며 이동",
+      "use_case": "RTS 게임, 군집 이동"
+    },
+    {
+      "concept": "경로 우회",
+      "description": "장애물을 피해 목표로 이동",
+      "use_case": "AI 네비게이션, 미로 찾기"
+    },
+    {
+      "concept": "예측 추적",
+      "description": "목표의 미래 위치를 예측하여 이동",
+      "use_case": "스포츠 게임, 전략적 추격"
+    },
+    {
+      "concept": "다단계 이동",
+      "description": "여러 경유지를 거쳐 최종 목표로 이동",
+      "use_case": "퀘스트 시스템, 순찰 경로"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "locate_object_time으로 다른 오브젝트로 이동할 수 있다",
+      "example": "단순 이동, 고정 목표 추적"
+    },
+    {
+      "level": "중급",
+      "criteria": "조건과 거리를 고려한 추적 시스템을 구현할 수 있다",
+      "example": "펫 시스템, 조건부 추적, 거리별 속도 조절"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 추적과 군집 이동 시스템을 설계할 수 있다",
+      "example": "유도 미사일, AI 추격, 편대 이동"
+    }
+  ]
+}

@@ -1,0 +1,335 @@
+{
+  "id": "get_user_name",
+  "category": "calc",
+  "name": "사용자 이름",
+  "description": "현재 엔트리에 로그인한 사용자의 이름을 반환하는 값 블록입니다. 로그인하지 않은 경우 '엔트리' 또는 빈 값을 반환합니다. 사용자별 맞춤 콘텐츠나 개인화된 메시지를 만들 때 활용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "사용자 정보와 개인화의 개념 이해",
+      "동적 텍스트와 맞춤형 콘텐츠 제작 방법 학습",
+      "프로그램과 사용자 간의 상호작용 설계 방법 익히기",
+      "개인정보 활용과 보안의 중요성 인식",
+      "조건 블록을 활용한 사용자별 분기 처리 이해"
+    ],
+    "key_concepts": [
+      {
+        "concept": "사용자 식별",
+        "explanation": "프로그램이 현재 사용자가 누구인지 인식하여 개별적인 경험을 제공할 수 있게 하는 기능입니다."
+      },
+      {
+        "concept": "개인화 (Personalization)",
+        "explanation": "사용자의 이름이나 정보를 활용해서 각 사용자에게 맞춤형 경험을 제공하는 프로그래밍 기법입니다."
+      },
+      {
+        "concept": "동적 값",
+        "explanation": "실행하는 사용자에 따라 자동으로 다른 값을 반환하는 변화하는 데이터입니다."
+      },
+      {
+        "concept": "로그인 상태 확인",
+        "explanation": "사용자가 로그인했는지 확인하고 그에 따라 다른 동작을 하도록 프로그램을 설계하는 방법입니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": ["텍스트 출력 블록 사용 경험", "변수와 값의 개념 이해", "조건 블록 기본 사용법", "문자열 결합 개념 이해"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "환영 메시지 만들기",
+      "description": "사용자 이름으로 개인화된 인사말 표시",
+      "blocks": [
+        "when_run_button_click",
+        "set_text(<join_something('안녕하세요, ', <join_something(<get_user_name>, '님!')>)>)",
+        "speak_something(<join_something(<get_user_name>, '님, 반갑습니다!')>)"
+      ],
+      "explanation": "사용자 이름을 가져와서 '안녕하세요, [이름]님!'과 같은 개인화된 인사말을 화면에 표시하고 말합니다."
+    },
+    {
+      "title": "개인 점수판 만들기",
+      "description": "사용자별 최고 점수 기록 시스템",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('플레이어_이름', <get_user_name>)",
+        "set_variable('점수_키', <join_something(<get_user_name>, '_최고점수')>)",
+        "if_condition(<get_variable(<get_variable('점수_키')>) = ''>)",
+        "  set_variable(<get_variable('점수_키')>, 0)",
+        "set_text(<join_something(<get_variable('플레이어_이름')>, '님의 최고 점수: ')>, <get_variable(<get_variable('점수_키')>))"
+      ],
+      "explanation": "사용자 이름을 활용해서 각 사용자별로 개별적인 최고 점수를 저장하고 표시하는 시스템입니다."
+    },
+    {
+      "title": "로그인 확인 시스템",
+      "description": "로그인 여부에 따른 다른 메시지 표시",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('사용자', <get_user_name>)",
+        "if_condition(<get_variable('사용자') = '엔트리'>)",
+        "  set_text('로그인해주세요!')",
+        "  speak_something('게임을 시작하려면 로그인이 필요해요')",
+        "else",
+        "  set_text(<join_something('환영합니다, ', <join_something(<get_variable('사용자')>, '님!')>)>)",
+        "  start_scene('게임_시작')"
+      ],
+      "explanation": "사용자가 로그인했는지 확인하고, 로그인하지 않았으면 안내 메시지를, 로그인했으면 환영 메시지와 함께 게임을 시작합니다."
+    },
+    {
+      "title": "사용자별 캐릭터 설정",
+      "description": "사용자 이름에 따라 다른 캐릭터 모양 적용",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('이름_길이', <length_of_string(<get_user_name>)>)",
+        "set_variable('캐릭터_번호', <calc_operation(<get_variable('이름_길이')>, 'mod', 5)>)",
+        "change_to_some_shape(<join_something('캐릭터', <get_variable('캐릭터_번호')>)>)",
+        "speak_something(<join_something(<get_user_name>, '님을 위한 특별한 캐릭터예요!')>)"
+      ],
+      "explanation": "사용자 이름의 길이를 기반으로 자동으로 다른 캐릭터를 배정하는 개인화 시스템입니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "사용자 이름을 프로그램에서 사용하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'계산' 카테고리에서 사용자 정보 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'사용자 이름' 값 블록을 찾아서 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "이 블록은 현재 로그인한 사용자의 이름을 자동으로 가져와요"
+        }
+      ]
+    },
+    {
+      "situation": "사용자 이름을 포함한 메시지를 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "문자열 결합 블록을 사용해서 사용자 이름과 다른 텍스트를 합칠 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'계산' 카테고리의 '결합하기' 블록과 함께 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "'안녕' + 사용자 이름 + '님!' 순서로 결합해보세요"
+        }
+      ]
+    },
+    {
+      "situation": "로그인하지 않은 사용자를 확인하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "로그인하지 않은 경우 '엔트리'라는 기본값이 반환돼요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "'흐름' 카테고리의 조건 블록으로 사용자 이름을 확인하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "사용자 이름이 '엔트리'인지 확인하는 조건 블록을 만들어보세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "사용자 이름이 항상 있을 것으로 가정",
+      "why_it_happens": "로그인하지 않은 사용자의 경우를 고려하지 않음",
+      "consequence": "'엔트리' 또는 빈 값이 표시되어 어색한 메시지가 나타남",
+      "solution": "조건 블록으로 로그인 여부를 먼저 확인하고 적절한 메시지 표시",
+      "teaching_moment": "모든 사용자가 로그인하지 않을 수 있으니 여러 경우를 생각해야 해요."
+    },
+    {
+      "mistake": "사용자 이름을 변수에 저장하지 않고 반복 사용",
+      "why_it_happens": "값 블록을 매번 직접 사용함",
+      "consequence": "코드가 복잡해지고 관리가 어려워짐",
+      "solution": "프로그램 시작 시 변수에 저장하고 변수를 활용",
+      "teaching_moment": "자주 사용하는 값은 변수에 저장해두면 편리해요."
+    },
+    {
+      "mistake": "사용자 이름에 특수문자가 있을 때 오류",
+      "why_it_happens": "사용자 이름의 다양한 형태를 고려하지 않음",
+      "consequence": "일부 사용자에서 프로그램이 예상과 다르게 동작",
+      "solution": "사용자 이름을 그대로 사용하고 추가 처리는 신중하게 설계",
+      "teaching_moment": "사용자 이름은 다양한 형태가 있을 수 있으니 유연하게 처리해야 해요."
+    },
+    {
+      "mistake": "개인정보를 부적절하게 공유",
+      "why_it_happens": "사용자 이름을 공개 메시지나 공유 변수에 저장",
+      "consequence": "개인정보 노출 위험",
+      "solution": "사용자 이름은 해당 사용자에게만 표시하도록 주의",
+      "teaching_moment": "개인정보는 소중하니까 안전하게 다뤄야 해요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "계산 카테고리 찾기",
+      "instruction": "블록 팔레트에서 초록색 '계산' 카테고리를 클릭하세요.",
+      "visual_hint": "계산기 모양의 아이콘이 있는 초록색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "사용자 이름 블록 선택",
+      "instruction": "'사용자 이름' 값 블록을 찾아서 작업 영역으로 드래그하세요.",
+      "visual_hint": "둥근 모양의 값 블록으로, 다른 블록의 입력 자리에 넣을 수 있습니다."
+    },
+    {
+      "step": 3,
+      "title": "출력 방법 선택",
+      "instruction": "사용자 이름을 어떻게 사용할지 결정하고 적절한 블록과 연결하세요.",
+      "visual_hint": "말하기, 텍스트 표시, 변수 저장 등 다양한 방법으로 활용할 수 있습니다."
+    },
+    {
+      "step": 4,
+      "title": "문자열 결합 (선택)",
+      "instruction": "필요하다면 '결합하기' 블록으로 다른 텍스트와 합쳐서 완성된 문장을 만드세요.",
+      "visual_hint": "'안녕' + 사용자 이름 + '님' 형태로 결합합니다."
+    },
+    {
+      "step": 5,
+      "title": "로그인 확인 (선택)",
+      "instruction": "조건 블록으로 로그인 여부를 확인하고 적절한 처리를 추가하세요.",
+      "visual_hint": "사용자 이름이 '엔트리'인지 확인하여 로그인 상태를 판단합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "join_something",
+      "relationship": "문자열 결합",
+      "explanation": "사용자 이름과 다른 텍스트를 합쳐서 완성된 메시지를 만들 때 사용"
+    },
+    {
+      "block_id": "set_text",
+      "relationship": "화면 표시",
+      "explanation": "사용자 이름을 포함한 텍스트를 화면에 표시할 때 사용"
+    },
+    {
+      "block_id": "speak_something",
+      "relationship": "음성 출력",
+      "explanation": "사용자 이름을 포함한 메시지를 소리로 출력할 때 사용"
+    },
+    {
+      "block_id": "set_variable",
+      "relationship": "값 저장",
+      "explanation": "사용자 이름을 변수에 저장하여 여러 곳에서 활용할 때 사용"
+    },
+    {
+      "block_id": "if_condition",
+      "relationship": "조건 확인",
+      "explanation": "로그인 여부나 특정 사용자인지 확인할 때 사용"
+    },
+    {
+      "block_id": "length_of_string",
+      "relationship": "이름 길이",
+      "explanation": "사용자 이름의 길이를 구해서 활용할 때 함께 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "사용자 이름이 '엔트리'로 나와요",
+      "possible_causes": ["사용자가 로그인하지 않은 상태", "오프라인 모드로 실행 중", "엔트리 계정 연결이 해제됨"],
+      "solutions": [
+        "엔트리에 로그인했는지 확인하기",
+        "조건 블록으로 '엔트리'인 경우 다른 메시지 표시",
+        "로그인 안내 메시지 추가하기"
+      ]
+    },
+    {
+      "problem": "사용자 이름이 제대로 표시되지 않아요",
+      "possible_causes": ["문자열 결합을 잘못함", "사용자 이름에 특수문자가 포함됨", "텍스트 표시 블록을 잘못 사용함"],
+      "solutions": [
+        "결합하기 블록의 순서와 내용 확인",
+        "사용자 이름을 변수에 먼저 저장하고 확인",
+        "간단한 테스트로 블록이 제대로 작동하는지 확인"
+      ]
+    },
+    {
+      "problem": "다른 사용자의 이름이 보여요",
+      "possible_causes": ["공유 변수를 사용함", "이전 실행의 데이터가 남아있음", "멀티플레이 환경에서의 혼선"],
+      "solutions": ["지역 변수 사용하여 개별 관리", "프로그램 시작 시 변수 초기화", "사용자별 고유 변수명 사용"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "웹사이트 로그인",
+      "explanation": "웹사이트에 로그인하면 '안녕하세요, [이름]님'처럼 개인화된 인사말이 나타나는 것과 같습니다."
+    },
+    {
+      "analogy": "회원 카드",
+      "explanation": "가게에서 회원 카드를 제시하면 직원이 이름을 부르며 맞춤 서비스를 제공하는 것과 비슷합니다."
+    },
+    {
+      "analogy": "학교 출석부",
+      "explanation": "선생님이 출석부를 보고 학생 이름을 부르는 것처럼 프로그램이 사용자를 인식합니다."
+    },
+    {
+      "analogy": "개인 사물함",
+      "explanation": "각자의 이름이 적힌 사물함처럼 사용자별로 다른 정보나 설정을 저장할 수 있습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "사용자별 설정 저장",
+      "description": "사용자 이름을 키로 사용해서 개인별 게임 설정이나 진행 상황 저장",
+      "use_case": "난이도 설정, 캐릭터 커스터마이징, 게임 진행도 저장"
+    },
+    {
+      "concept": "멀티플레이어 시스템",
+      "description": "여러 사용자를 구분하고 각자의 점수나 상태를 관리하는 시스템",
+      "use_case": "순위표, 팀 구성, 개인별 통계"
+    },
+    {
+      "concept": "사용자 권한 관리",
+      "description": "특정 사용자에게만 특별한 기능이나 콘텐츠 제공",
+      "use_case": "관리자 모드, VIP 기능, 개발자 도구"
+    },
+    {
+      "concept": "개인화된 학습 경험",
+      "description": "사용자별 학습 진도와 성취도를 추적하고 맞춤형 콘텐츠 제공",
+      "use_case": "학습 진도 저장, 개인별 난이도 조절, 맞춤형 피드백"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "사용자 이름 값 블록을 사용해서 간단한 환영 메시지를 만들 수 있다",
+      "example": "화면에 '안녕하세요, [사용자 이름]님!' 표시하기"
+    },
+    {
+      "level": "중급",
+      "criteria": "로그인 여부를 확인하고 사용자별로 다른 콘텐츠를 제공할 수 있다",
+      "example": "로그인 확인 후 개인별 점수 저장, 사용자별 캐릭터 설정"
+    },
+    {
+      "level": "고급",
+      "criteria": "사용자 이름을 활용한 복잡한 개인화 시스템을 구현할 수 있다",
+      "example": "멀티플레이어 순위 시스템, 개인별 진도 관리, 맞춤형 학습 경험 제공"
+    }
+  ]
+}

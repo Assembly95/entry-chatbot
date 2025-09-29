@@ -1,0 +1,428 @@
+{
+  "id": "flip_x",
+  "category": "looks",
+  "name": "좌우 뒤집기",
+  "description": "오브젝트를 좌우로 뒤집는 블록입니다. 거울에 비친 것처럼 오브젝트의 좌우가 반대로 바뀝니다. 캐릭터의 방향 전환, 대칭 효과, 거울 반사 등을 구현할 때 사용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "좌우 대칭과 반전 개념 이해",
+      "캐릭터 방향 전환 기법 학습",
+      "거울 효과와 반사 구현 방법",
+      "효율적인 스프라이트 활용법 습득",
+      "대칭을 활용한 시각 효과 구현"
+    ],
+    "key_concepts": [
+      {
+        "concept": "수평 반전",
+        "explanation": "Y축을 기준으로 좌우를 뒤집는 변환으로, 거울상을 만드는 효과입니다."
+      },
+      {
+        "concept": "좌우 대칭",
+        "explanation": "중심선을 기준으로 왼쪽과 오른쪽이 거울처럼 대칭되는 상태입니다."
+      },
+      {
+        "concept": "방향성",
+        "explanation": "캐릭터나 오브젝트가 향하는 방향을 나타내는 시각적 표현입니다."
+      },
+      {
+        "concept": "토글 효과",
+        "explanation": "flip_x를 반복하면 원래 상태와 뒤집힌 상태를 번갈아 전환할 수 있습니다."
+      }
+    ],
+    "difficulty_level": "초중급",
+    "prerequisites": ["오브젝트 조작 기초", "좌표계 이해", "스프라이트 개념", "기본 애니메이션 지식"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "캐릭터 이동 방향",
+      "description": "이동 방향에 따라 캐릭터 뒤집기",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('방향', '오른쪽')",
+        "",
+        "when_some_key_pressed('right')",
+        "// 오른쪽 이동",
+        "if_condition(<get_variable('방향') = '왼쪽'>)",
+        "  flip_x()",
+        "  set_variable('방향', '오른쪽')",
+        "repeat_basic(10)",
+        "  change_x(5)",
+        "  wait_second(0.05)",
+        "",
+        "when_some_key_pressed('left')",
+        "// 왼쪽 이동",
+        "if_condition(<get_variable('방향') = '오른쪽'>)",
+        "  flip_x()",
+        "  set_variable('방향', '왼쪽')",
+        "repeat_basic(10)",
+        "  change_x(-5)",
+        "  wait_second(0.05)"
+      ],
+      "explanation": "캐릭터가 이동 방향을 바라보도록 좌우를 뒤집습니다."
+    },
+    {
+      "title": "거울 효과",
+      "description": "거울에 비친 복제본 생성",
+      "blocks": [
+        "when_run_button_click",
+        "// 원본 위치",
+        "locate_xy(-100, 0)",
+        "",
+        "// 거울 복제본 생성",
+        "clone_self()",
+        "",
+        "when_clone_start",
+        "// 거울상 설정",
+        "flip_x()",
+        "locate_xy(100, 0)",
+        "set_effect('transparency', 30)",
+        "set_effect('brightness', -20)",
+        "",
+        "// 원본 움직임 따라하기",
+        "repeat_while_true",
+        "  // 원본의 Y좌표 복사",
+        "  set_y(<get_object_y('원본')>)",
+        "  // X는 반대편에 위치",
+        "  set_x(<calc_operation(-1, '*', <get_object_x('원본')>)>)",
+        "  wait_second(0.01)"
+      ],
+      "explanation": "flip_x를 사용하여 거울에 비친 듯한 복제본을 만듭니다."
+    },
+    {
+      "title": "적 AI 방향 전환",
+      "description": "플레이어를 향해 방향 전환하는 적",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('현재방향', 'right')",
+        "",
+        "repeat_while_true",
+        "  // 플레이어와의 X 위치 비교",
+        "  set_variable('플레이어X', <get_object_x('플레이어')>)",
+        "  set_variable('내X', <coordinate_object('x')>)",
+        "  ",
+        "  // 플레이어가 오른쪽에 있을 때",
+        "  if_condition(<get_variable('플레이어X') > <get_variable('내X')>>)",
+        "    if_condition(<get_variable('현재방향') = 'left'>)",
+        "      flip_x()",
+        "      set_variable('현재방향', 'right')",
+        "      speak_something('→')",
+        "    // 플레이어 쪽으로 이동",
+        "    change_x(2)",
+        "  ",
+        "  // 플레이어가 왼쪽에 있을 때",
+        "  else",
+        "    if_condition(<get_variable('현재방향') = 'right'>)",
+        "      flip_x()",
+        "      set_variable('현재방향', 'left')",
+        "      speak_something('←')",
+        "    // 플레이어 쪽으로 이동",
+        "    change_x(-2)",
+        "  ",
+        "  wait_second(0.05)"
+      ],
+      "explanation": "적이 플레이어를 추적하며 적절히 방향을 전환합니다."
+    },
+    {
+      "title": "댄스 애니메이션",
+      "description": "리듬에 맞춰 좌우 반전",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('비트', 0)",
+        "",
+        "repeat_while_true",
+        "  // 4비트마다 방향 전환",
+        "  change_variable('비트', 1)",
+        "  ",
+        "  if_condition(<calc_operation(<get_variable('비트')>, '%', 4)> = 0)",
+        "    flip_x()",
+        "    // 방향 전환 효과",
+        "    repeat_basic(5)",
+        "      change_size(2)",
+        "      wait_second(0.02)",
+        "    repeat_basic(5)",
+        "      change_size(-2)",
+        "      wait_second(0.02)",
+        "  ",
+        "  // 기본 댄스 동작",
+        "  change_y(10)",
+        "  wait_second(0.25)",
+        "  change_y(-10)",
+        "  wait_second(0.25)"
+      ],
+      "explanation": "음악의 비트에 맞춰 좌우를 반전시키며 댄스 효과를 만듭니다."
+    },
+    {
+      "title": "카드 뒤집기 게임",
+      "description": "클릭하면 카드가 뒤집히는 효과",
+      "blocks": [
+        "when_run_button_click",
+        "set_variable('앞면', false)",
+        "set_costume('카드뒷면')",
+        "",
+        "when_object_click",
+        "// 카드 뒤집기 애니메이션",
+        "// 축소하며 뒤집기",
+        "repeat_basic(10)",
+        "  change_effect_amount('fisheye', 10)",
+        "  change_scale_size(-8)",
+        "  wait_second(0.02)",
+        "",
+        "// 중간 지점에서 뒤집기",
+        "flip_x()",
+        "if_condition(<get_variable('앞면')>)",
+        "  set_costume('카드뒷면')",
+        "  set_variable('앞면', false)",
+        "else",
+        "  set_costume('카드앞면')",
+        "  set_variable('앞면', true)",
+        "",
+        "// 확대하며 복원",
+        "repeat_basic(10)",
+        "  change_effect_amount('fisheye', -10)",
+        "  change_scale_size(8)",
+        "  wait_second(0.02)"
+      ],
+      "explanation": "flip_x와 크기 변화를 조합하여 카드 뒤집기 효과를 구현합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "오브젝트를 좌우로 뒤집고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'생김새' 카테고리에서 뒤집기 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'좌우 뒤집기' 블록을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "실행할 때마다 좌우가 반대로 바뀌어요"
+        }
+      ]
+    },
+    {
+      "situation": "이동 방향에 따라 캐릭터를 돌리고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "현재 방향을 변수에 저장하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "방향이 바뀔 때만 flip_x를 실행하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "if 조건으로 중복 뒤집기를 방지하세요"
+        }
+      ]
+    },
+    {
+      "situation": "거울 효과를 만들고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "복제본을 만들고 flip_x를 적용하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "투명도나 밝기 효과를 추가하면 더 실감나요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "원본과 반대편에 위치시키세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "계속 뒤집어서 깜빡거림",
+      "why_it_happens": "조건 없이 반복해서 실행",
+      "consequence": "오브젝트가 빠르게 깜빡거림",
+      "solution": "현재 방향을 체크하고 필요할 때만 뒤집기",
+      "teaching_moment": "flip_x는 토글이에요. 한 번 실행하면 뒤집히고, 다시 실행하면 원래대로 돌아와요."
+    },
+    {
+      "mistake": "위아래도 바뀔 것으로 기대",
+      "why_it_happens": "flip의 범위를 잘못 이해",
+      "consequence": "좌우만 바뀌고 위아래는 그대로",
+      "solution": "위아래는 flip_y 사용",
+      "teaching_moment": "flip_x는 좌우만, flip_y는 위아래만 뒤집어요."
+    },
+    {
+      "mistake": "회전과 혼동",
+      "why_it_happens": "뒤집기와 회전의 차이를 모름",
+      "consequence": "원하는 효과가 나오지 않음",
+      "solution": "회전은 direction 블록 사용",
+      "teaching_moment": "뒤집기는 거울상, 회전은 각도 변경이에요."
+    },
+    {
+      "mistake": "텍스트도 뒤집힘",
+      "why_it_happens": "오브젝트 전체가 뒤집힌다는 것을 모름",
+      "consequence": "글자가 거꾸로 보임",
+      "solution": "텍스트는 별도 오브젝트로 분리",
+      "teaching_moment": "flip_x는 오브젝트 전체를 뒤집어요. 텍스트도 포함돼요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "생김새 카테고리 열기",
+      "instruction": "블록 팔레트에서 보라색 '생김새' 카테고리를 클릭하세요.",
+      "visual_hint": "붓 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "flip_x 블록 찾기",
+      "instruction": "'좌우 뒤집기' 블록을 찾으세요.",
+      "visual_hint": "단독으로 사용되는 실행 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "이벤트와 연결",
+      "instruction": "언제 뒤집을지 결정하는 이벤트나 조건과 연결하세요.",
+      "visual_hint": "키 입력, 클릭, 또는 조건문과 함께 사용합니다."
+    },
+    {
+      "step": 4,
+      "title": "방향 상태 관리",
+      "instruction": "필요하다면 현재 방향을 변수에 저장하세요.",
+      "visual_hint": "중복 뒤집기를 방지할 수 있습니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트",
+      "instruction": "실행하여 좌우가 올바르게 뒤집히는지 확인하세요.",
+      "visual_hint": "캐릭터나 오브젝트가 거울상처럼 뒤집힙니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "flip_y",
+      "relationship": "상하 뒤집기",
+      "explanation": "위아래로 뒤집는 블록"
+    },
+    {
+      "block_id": "rotate",
+      "relationship": "회전",
+      "explanation": "각도를 변경하여 회전"
+    },
+    {
+      "block_id": "point_direction",
+      "relationship": "방향 지정",
+      "explanation": "특정 각도로 방향 설정"
+    },
+    {
+      "block_id": "set_rotation_style",
+      "relationship": "회전 스타일",
+      "explanation": "회전 방식 설정"
+    },
+    {
+      "block_id": "clone_self",
+      "relationship": "복제 생성",
+      "explanation": "거울상 복제본 만들기"
+    },
+    {
+      "block_id": "change_x",
+      "relationship": "이동",
+      "explanation": "방향 전환과 함께 사용"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "뒤집기가 안 돼요",
+      "possible_causes": ["블록이 실행되지 않음", "오브젝트가 대칭형", "이미 뒤집혀 있음"],
+      "solutions": ["이벤트 연결 확인", "비대칭 이미지 사용", "초기 상태 확인"]
+    },
+    {
+      "problem": "계속 깜빡거려요",
+      "possible_causes": ["반복문에서 계속 실행", "조건 없이 토글", "여러 곳에서 동시 실행"],
+      "solutions": ["실행 조건 추가", "상태 변수 사용", "실행 위치 통합"]
+    },
+    {
+      "problem": "방향과 이동이 맞지 않아요",
+      "possible_causes": ["뒤집기와 이동 방향 불일치", "좌표계 혼동", "타이밍 문제"],
+      "solutions": ["방향과 이동 값 확인", "X축 이동 방향 조정", "순서 재조정"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "거울",
+      "explanation": "거울에 비친 모습처럼 좌우가 반대로 보이는 것과 같습니다."
+    },
+    {
+      "analogy": "책 페이지",
+      "explanation": "책 페이지를 넘기면 좌우가 바뀌는 것과 비슷합니다."
+    },
+    {
+      "analogy": "팬케이크 뒤집기",
+      "explanation": "프라이팬에서 팬케이크를 뒤집는 것과 같은 개념입니다."
+    },
+    {
+      "analogy": "좌우 대칭",
+      "explanation": "나비의 날개처럼 중심선을 기준으로 좌우가 대칭인 것과 같습니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "방향 시스템",
+      "description": "8방향 또는 360도 방향 시스템 구현",
+      "use_case": "복잡한 캐릭터 움직임, 탑뷰 게임"
+    },
+    {
+      "concept": "거울 월드",
+      "description": "전체 화면이 거울처럼 반전된 세계",
+      "use_case": "퍼즐 게임, 거울 스테이지"
+    },
+    {
+      "concept": "플립 애니메이션",
+      "description": "뒤집기를 애니메이션화",
+      "use_case": "카드 게임, 코인 던지기, 변신 효과"
+    },
+    {
+      "concept": "대칭 패턴",
+      "description": "뒤집기를 활용한 대칭 패턴 생성",
+      "use_case": "만화경 효과, 패턴 디자인, 아트워크"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "flip_x를 사용하여 오브젝트를 뒤집을 수 있다",
+      "example": "클릭 시 뒤집기, 단순 토글"
+    },
+    {
+      "level": "중급",
+      "criteria": "방향 전환 시스템을 구현하고 상태를 관리할 수 있다",
+      "example": "캐릭터 이동 방향, 적 AI, 중복 방지"
+    },
+    {
+      "level": "고급",
+      "criteria": "flip_x를 활용한 복잡한 시각 효과를 구현할 수 있다",
+      "example": "거울 시스템, 카드 애니메이션, 대칭 패턴"
+    }
+  ]
+}

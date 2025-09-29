@@ -1,0 +1,478 @@
+{
+  "id": "locate_xy",
+  "category": "movement",
+  "name": "X, Y 위치로 이동하기",
+  "description": "오브젝트를 지정한 X, Y 좌표로 즉시 이동시키는 블록입니다. 애니메이션 없이 순간이동하듯 해당 위치로 바로 이동합니다. 오브젝트의 초기 위치 설정, 순간이동, 정확한 위치 배치 등에 사용합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "2차원 좌표계 이해와 활용",
+      "절대 위치 지정 방법 학습",
+      "즉시 이동과 애니메이션 이동의 차이 이해",
+      "정확한 위치 제어 기법 습득",
+      "공간 배치와 레이아웃 설계 능력"
+    ],
+    "key_concepts": [
+      {
+        "concept": "2차원 좌표",
+        "explanation": "X(가로)와 Y(세로) 두 개의 값으로 평면상의 위치를 정확히 나타내는 방법입니다."
+      },
+      {
+        "concept": "절대 위치",
+        "explanation": "현재 위치와 관계없이 화면의 고정된 좌표로 직접 이동하는 방식입니다."
+      },
+      {
+        "concept": "즉시 이동",
+        "explanation": "중간 과정 없이 바로 목표 위치에 나타나는 순간이동 방식입니다."
+      },
+      {
+        "concept": "원점 (0, 0)",
+        "explanation": "화면의 정중앙을 기준점으로 하는 좌표계의 중심입니다."
+      }
+    ],
+    "difficulty_level": "초급",
+    "prerequisites": ["좌표계 기본 개념", "X축과 Y축 이해", "음수와 양수 구분"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "체스 게임",
+      "description": "체스 말을 정확한 칸으로 이동",
+      "blocks": [
+        "when_run_button_click",
+        "// 체스판 초기 설정 (8x8)",
+        "set_variable('칸크기', 50)",
+        "set_variable('시작X', -175)",
+        "set_variable('시작Y', -175)",
+        "",
+        "// 말 초기 위치 (e2)",
+        "set_costume('폰')",
+        "set_variable('행', 2)",
+        "set_variable('열', 5)",
+        "call_function('칸으로이동')",
+        "",
+        "// 칸 좌표 계산 함수",
+        "define_function('칸으로이동')",
+        "  set_variable('X좌표', <calc_operation(<get_variable('시작X')>, '+', <calc_operation(<calc_operation(<get_variable('열')>, '-', 1)>, '*', <get_variable('칸크기')>)>)>)",
+        "  set_variable('Y좌표', <calc_operation(<get_variable('시작Y')>, '+', <calc_operation(<calc_operation(<get_variable('행')>, '-', 1)>, '*', <get_variable('칸크기')>)>)>)",
+        "  locate_xy(<get_variable('X좌표')>, <get_variable('Y좌표')>)",
+        "",
+        "// 이동 명령 (e2 -> e4)",
+        "when_message_cast('e2-e4')",
+        "set_variable('행', 4)",
+        "set_variable('열', 5)",
+        "// 애니메이션 이동",
+        "glide_to_xy(<get_variable('X좌표')>, <get_variable('Y좌표')>, 0.5)",
+        "// 정확한 위치 보정",
+        "call_function('칸으로이동')",
+        "play_sound('체스이동')"
+      ],
+      "explanation": "locate_xy로 체스 말을 정확한 칸 위치에 배치합니다."
+    },
+    {
+      "title": "텔레포트 시스템",
+      "description": "포털을 통한 순간이동",
+      "blocks": [
+        "when_run_button_click",
+        "// 포털 위치 설정",
+        "set_list('포털X', [-200, 200, 0, -100])",
+        "set_list('포털Y', [100, 100, -150, 0])",
+        "set_variable('현재포털', 1)",
+        "",
+        "// 시작 위치",
+        "locate_xy(<get_list_item('포털X', 1)>, <get_list_item('포털Y', 1)>)",
+        "",
+        "when_some_key_pressed('space')",
+        "// 텔레포트 효과",
+        "set_effect('brightness', 100)",
+        "set_effect('transparency', 50)",
+        "play_sound('텔레포트시작')",
+        "repeat_basic(10)",
+        "  change_scale_size(-8)",
+        "  turn_right(36)",
+        "  wait_second(0.02)",
+        "",
+        "// 다음 포털로 이동",
+        "change_variable('현재포털', 1)",
+        "if_condition(<get_variable('현재포털') > 4>)",
+        "  set_variable('현재포털', 1)",
+        "",
+        "// 순간이동",
+        "locate_xy(<get_list_item('포털X', <get_variable('현재포털')>)>, <get_list_item('포털Y', <get_variable('현재포털')>)>)",
+        "",
+        "// 나타나기 효과",
+        "repeat_basic(10)",
+        "  change_scale_size(8)",
+        "  turn_left(36)",
+        "  wait_second(0.02)",
+        "clear_effect()",
+        "reset_scale_size()",
+        "play_sound('텔레포트도착')",
+        "speak_something('포털 ' + <get_variable('현재포털')>)"
+      ],
+      "explanation": "locate_xy를 사용하여 포털 간 순간이동을 구현합니다."
+    },
+    {
+      "title": "미니맵 시스템",
+      "description": "미니맵 클릭으로 즉시 이동",
+      "blocks": [
+        "// 미니맵 오브젝트",
+        "when_object_click",
+        "// 클릭 위치를 실제 맵 좌표로 변환",
+        "set_variable('미니맵X', <mouse_x()>)",
+        "set_variable('미니맵Y', <mouse_y()>)",
+        "",
+        "// 미니맵 범위 체크 (우상단 100x75)",
+        "if_condition(<get_variable('미니맵X') > 140 and <get_variable('미니맵Y') > 105>)",
+        "  // 스케일 변환 (미니맵은 1/4 크기)",
+        "  set_variable('실제X', <calc_operation(<calc_operation(<get_variable('미니맵X')>, '-', 190)>, '*', 4)>)",
+        "  set_variable('실제Y', <calc_operation(<calc_operation(<get_variable('미니맵Y')>, '-', 142.5)>, '*', 4)>)",
+        "  ",
+        "  // 플레이어 즉시 이동",
+        "  broadcast_message_to('플레이어', '텔레포트')",
+        "",
+        "// 플레이어 오브젝트",
+        "when_message_cast('텔레포트')",
+        "// 텔레포트 효과",
+        "create_clone_of('잔상')",
+        "set_effect('color', 100)",
+        "",
+        "// 즉시 이동",
+        "locate_xy(<get_global_variable('실제X')>, <get_global_variable('실제Y')>)",
+        "",
+        "// 도착 효과",
+        "repeat_basic(5)",
+        "  change_effect_amount('color', -20)",
+        "  wait_second(0.05)",
+        "clear_effect()",
+        "speak_something('이동 완료!')"
+      ],
+      "explanation": "미니맵 클릭 위치를 계산하여 locate_xy로 플레이어를 즉시 이동시킵니다."
+    },
+    {
+      "title": "스폰 포인트 시스템",
+      "description": "게임 시작 및 리스폰 위치",
+      "blocks": [
+        "when_run_button_click",
+        "// 스테이지별 스폰 포인트",
+        "define_function('스폰위치설정', '스테이지')",
+        "  if_condition(<get_parameter('스테이지') = 1>)",
+        "    locate_xy(-200, -100)",
+        "  else_if(<get_parameter('스테이지') = 2>)",
+        "    locate_xy(-150, 50)",
+        "  else_if(<get_parameter('스테이지') = 3>)",
+        "    locate_xy(0, 150)",
+        "  else_if(<get_parameter('스테이지') = 'boss'>)",
+        "    locate_xy(0, -150)",
+        "",
+        "// 게임 시작",
+        "set_variable('현재스테이지', 1)",
+        "set_variable('생명', 3)",
+        "call_function('스폰위치설정', <get_variable('현재스테이지')>)",
+        "",
+        "// 죽었을 때",
+        "when_message_cast('플레이어사망')",
+        "change_variable('생명', -1)",
+        "if_condition(<get_variable('생명') > 0>)",
+        "  // 리스폰 애니메이션",
+        "  set_effect('transparency', 100)",
+        "  call_function('스폰위치설정', <get_variable('현재스테이지')>)",
+        "  ",
+        "  repeat_basic(20)",
+        "    change_effect_amount('transparency', -5)",
+        "    wait_second(0.05)",
+        "  speak_something('생명: ' + <get_variable('생명')>)",
+        "else",
+        "  broadcast_message('게임오버')",
+        "",
+        "// 체크포인트 도달",
+        "when_touching('체크포인트')",
+        "set_global_variable('체크포인트X', <coordinate_object('x')>)",
+        "set_global_variable('체크포인트Y', <coordinate_object('y')>)",
+        "speak_something('체크포인트 저장!')"
+      ],
+      "explanation": "locate_xy를 사용하여 정확한 스폰 위치로 캐릭터를 배치합니다."
+    },
+    {
+      "title": "화면 분할 UI",
+      "description": "화면 영역별 UI 요소 배치",
+      "blocks": [
+        "when_run_button_click",
+        "// UI 요소들 초기 배치",
+        "",
+        "// 체력바 (좌상단)",
+        "create_clone_of('UI체력바')",
+        "locate_xy(-180, 150)",
+        "",
+        "// 점수 (우상단)",
+        "create_clone_of('UI점수')",
+        "locate_xy(180, 150)",
+        "",
+        "// 인벤토리 (하단)",
+        "repeat_basic(5)",
+        "  create_clone_of('UI슬롯')",
+        "  locate_xy(<calc_operation(-100, '+', <calc_operation(<get_repeat_index()>, '*', 50)>)>, -150)",
+        "",
+        "// 미니맵 (우상단 모서리)",
+        "create_clone_of('UI미니맵')",
+        "locate_xy(190, 120)",
+        "",
+        "// 대화창 (중앙 하단)",
+        "when_message_cast('대화시작')",
+        "show()",
+        "locate_xy(0, -100)",
+        "set_size_x(300)",
+        "set_size_y(80)",
+        "",
+        "// 메뉴 (중앙)",
+        "when_some_key_pressed('esc')",
+        "if_condition(not <get_variable('메뉴열림')>)",
+        "  show()",
+        "  locate_xy(0, 0)",
+        "  set_variable('메뉴열림', true)",
+        "else",
+        "  hide()",
+        "  set_variable('메뉴열림', false)"
+      ],
+      "explanation": "locate_xy로 각 UI 요소를 화면의 정확한 위치에 배치합니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "특정 위치로 즉시 이동시키고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'움직임' 카테고리에서 위치 관련 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'X, Y 위치로 이동하기' 블록을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "X는 가로(-240~240), Y는 세로(-180~180) 좌표예요"
+        }
+      ]
+    },
+    {
+      "situation": "오브젝트를 초기 위치에 배치하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "when_run_button_click 다음에 locate_xy를 사용하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "locate_xy(0, 0)은 화면 중앙이에요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "다른 초기 설정과 함께 배치하세요"
+        }
+      ]
+    },
+    {
+      "situation": "격자나 패턴으로 배치하고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "수식으로 좌표를 계산하세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "반복문과 함께 사용하여 여러 개를 배치하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "locate_xy(간격 * 인덱스, Y좌표) 형태로 사용하세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "좌표 범위 초과",
+      "why_it_happens": "화면 크기를 모름",
+      "consequence": "오브젝트가 화면 밖에 위치",
+      "solution": "X: -240~240, Y: -180~180 사용",
+      "teaching_moment": "엔트리 화면 크기는 480x360이에요."
+    },
+    {
+      "mistake": "X와 Y 순서 바꿈",
+      "why_it_happens": "순서 혼동",
+      "consequence": "엉뚱한 위치로 이동",
+      "solution": "X(가로), Y(세로) 순서 확인",
+      "teaching_moment": "항상 X가 먼저, Y가 나중이에요."
+    },
+    {
+      "mistake": "애니메이션 효과 기대",
+      "why_it_happens": "glide와 혼동",
+      "consequence": "순간이동처럼 보임",
+      "solution": "부드러운 이동은 glide 사용",
+      "teaching_moment": "locate_xy는 즉시 이동, glide는 애니메이션 이동이에요."
+    },
+    {
+      "mistake": "상대 이동으로 착각",
+      "why_it_happens": "change_x/y와 혼동",
+      "consequence": "현재 위치 무시됨",
+      "solution": "절대 위치임을 이해",
+      "teaching_moment": "locate는 절대 위치, change는 상대 이동이에요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "움직임 카테고리 열기",
+      "instruction": "블록 팔레트에서 파란색 '움직임' 카테고리를 클릭하세요.",
+      "visual_hint": "화살표 아이콘이 있는 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "locate_xy 블록 찾기",
+      "instruction": "'X, Y 위치로 이동하기' 블록을 찾으세요.",
+      "visual_hint": "X: [  ] Y: [  ] 형태의 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "X좌표 입력",
+      "instruction": "첫 번째 칸에 X좌표(가로 위치)를 입력하세요.",
+      "visual_hint": "왼쪽은 음수, 오른쪽은 양수입니다."
+    },
+    {
+      "step": 4,
+      "title": "Y좌표 입력",
+      "instruction": "두 번째 칸에 Y좌표(세로 위치)를 입력하세요.",
+      "visual_hint": "아래는 음수, 위는 양수입니다."
+    },
+    {
+      "step": 5,
+      "title": "테스트",
+      "instruction": "실행하여 오브젝트가 지정한 위치로 즉시 이동하는지 확인하세요.",
+      "visual_hint": "순간이동하듯 바로 나타납니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "locate_x",
+      "relationship": "X만 설정",
+      "explanation": "X좌표만 변경"
+    },
+    {
+      "block_id": "locate_y",
+      "relationship": "Y만 설정",
+      "explanation": "Y좌표만 변경"
+    },
+    {
+      "block_id": "locate_xy_time",
+      "relationship": "시간 이동",
+      "explanation": "부드럽게 이동"
+    },
+    {
+      "block_id": "change_x/y",
+      "relationship": "상대 이동",
+      "explanation": "현재 위치에서 증감"
+    },
+    {
+      "block_id": "go_to_mouse",
+      "relationship": "마우스 위치",
+      "explanation": "마우스 위치로 즉시 이동"
+    },
+    {
+      "block_id": "coordinate_object",
+      "relationship": "위치 확인",
+      "explanation": "현재 좌표 가져오기"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "오브젝트가 보이지 않아요",
+      "possible_causes": ["화면 밖 좌표", "숨김 상태", "다른 오브젝트 뒤"],
+      "solutions": ["좌표 범위 확인", "show() 추가", "go_to_front() 사용"]
+    },
+    {
+      "problem": "위치가 이상해요",
+      "possible_causes": ["X, Y 순서 바뀜", "좌표 계산 오류", "변수 값 문제"],
+      "solutions": ["입력 순서 확인", "계산식 검토", "변수 값 출력해보기"]
+    },
+    {
+      "problem": "이동하지 않아요",
+      "possible_causes": ["블록이 실행 안 됨", "이미 같은 위치", "다른 코드가 덮어씀"],
+      "solutions": ["이벤트 연결 확인", "다른 좌표로 테스트", "코드 실행 순서 확인"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "GPS 좌표",
+      "explanation": "위도와 경도로 지구상의 정확한 위치를 나타내는 것과 같습니다."
+    },
+    {
+      "analogy": "체스판",
+      "explanation": "체스판의 각 칸이 고유한 좌표(a1, e4 등)를 가진 것과 비슷합니다."
+    },
+    {
+      "analogy": "엑셀 셀",
+      "explanation": "스프레드시트의 셀 주소(A1, B2)와 같은 좌표 체계입니다."
+    },
+    {
+      "analogy": "좌석 번호",
+      "explanation": "극장이나 비행기의 좌석 위치(열과 번호)와 같은 개념입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "그리드 시스템",
+      "description": "일정한 간격의 격자에 오브젝트 배치",
+      "use_case": "퍼즐 게임, 체스, 인벤토리"
+    },
+    {
+      "concept": "랜덤 스폰",
+      "description": "무작위 위치에 오브젝트 생성",
+      "use_case": "아이템 드롭, 적 생성"
+    },
+    {
+      "concept": "포메이션 시스템",
+      "description": "여러 오브젝트를 특정 형태로 배치",
+      "use_case": "전략 게임, 군집 이동"
+    },
+    {
+      "concept": "화면 분할",
+      "description": "화면을 영역으로 나누어 관리",
+      "use_case": "UI 레이아웃, 멀티뷰"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "locate_xy로 오브젝트를 원하는 위치에 배치할 수 있다",
+      "example": "초기 위치 설정, 단순 이동"
+    },
+    {
+      "level": "중급",
+      "criteria": "계산과 조건을 활용한 동적 위치 지정을 구현할 수 있다",
+      "example": "격자 배치, 패턴 생성, 조건부 위치"
+    },
+    {
+      "level": "고급",
+      "criteria": "복잡한 공간 배치와 위치 관리 시스템을 설계할 수 있다",
+      "example": "미니맵, 포메이션, 동적 레이아웃"
+    }
+  ]
+}

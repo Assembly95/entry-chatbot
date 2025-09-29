@@ -1,0 +1,396 @@
+{
+  "id": "add_effect_amount",
+  "category": "looks",
+  "name": "효과 값 더하기",
+  "description": "오브젝트의 특정 그래픽 효과 값을 현재 값에서 더하거나 빼는 블록입니다. 색깔, 밝기, 투명도 등의 효과를 점진적으로 변화시킬 때 사용합니다. 양수를 더하면 효과가 증가하고, 음수를 더하면 감소합니다.",
+
+  "educational_context": {
+    "learning_objectives": [
+      "그래픽 효과의 점진적 변화 방법 학습",
+      "상대적 값 변경과 절대적 값 설정의 차이 이해",
+      "시각적 효과를 통한 애니메이션 구현",
+      "효과 값의 누적과 범위 제한 이해",
+      "동적 시각 효과 프로그래밍 기법 습득"
+    ],
+    "key_concepts": [
+      {
+        "concept": "상대적 변경",
+        "explanation": "현재 값을 기준으로 더하거나 빼서 변경하는 방식으로, 점진적인 변화를 만듭니다."
+      },
+      {
+        "concept": "효과 누적",
+        "explanation": "반복적으로 효과 값을 더하면 누적되어 점점 강해지거나 약해집니다."
+      },
+      {
+        "concept": "효과 범위",
+        "explanation": "각 효과는 최소값과 최대값의 범위가 있으며, 범위를 벗어나면 제한됩니다."
+      },
+      {
+        "concept": "점진적 애니메이션",
+        "explanation": "작은 값을 연속적으로 더해 부드러운 시각적 전환을 만드는 기법입니다."
+      }
+    ],
+    "difficulty_level": "초중급",
+    "prerequisites": ["기본 그래픽 효과 이해", "변수 값 변경 개념", "반복문 사용 경험", "애니메이션 기초"]
+  },
+
+  "usage_examples": [
+    {
+      "title": "페이드 인/아웃 효과",
+      "description": "투명도를 점진적으로 변경하여 페이드 효과 구현",
+      "blocks": [
+        "when_run_button_click",
+        "// 페이드 아웃 (서서히 사라지기)",
+        "set_effect('transparency', 0)",
+        "repeat_basic(10)",
+        "  add_effect_amount('transparency', 10)",
+        "  wait_second(0.1)",
+        "speak_something('사라졌어요!')",
+        "",
+        "wait_second(1)",
+        "",
+        "// 페이드 인 (서서히 나타나기)",
+        "repeat_basic(10)",
+        "  add_effect_amount('transparency', -10)",
+        "  wait_second(0.1)",
+        "speak_something('다시 나타났어요!')"
+      ],
+      "explanation": "투명도를 10씩 더하고 빼서 부드러운 페이드 효과를 만듭니다."
+    },
+    {
+      "title": "색상 변화 애니메이션",
+      "description": "색깔 효과를 변경하여 무지개 효과 구현",
+      "blocks": [
+        "when_run_button_click",
+        "set_effect('color', 0)",
+        "// 무지개 색상 순환",
+        "repeat_while_true",
+        "  repeat_basic(36)",
+        "    add_effect_amount('color', 10)",
+        "    wait_second(0.05)",
+        "  // 360도 순환 후 리셋",
+        "  set_effect('color', 0)"
+      ],
+      "explanation": "색깔 값을 계속 더해 색상환을 순환하는 무지개 효과를 만듭니다."
+    },
+    {
+      "title": "밝기 조절 시스템",
+      "description": "키보드로 밝기를 단계적으로 조절",
+      "blocks": [
+        "when_run_button_click",
+        "set_effect('brightness', 0)",
+        "set_variable('현재밝기', 0)",
+        "",
+        "when_some_key_pressed('up')",
+        "// 밝기 증가 (최대 100)",
+        "if_condition(<get_variable('현재밝기') < 100>)",
+        "  add_effect_amount('brightness', 10)",
+        "  change_variable('현재밝기', 10)",
+        "  set_text('밝기: ' + <get_variable('현재밝기')>)",
+        "",
+        "when_some_key_pressed('down')",
+        "// 밝기 감소 (최소 -100)",
+        "if_condition(<get_variable('현재밝기') > -100>)",
+        "  add_effect_amount('brightness', -10)",
+        "  change_variable('현재밝기', -10)",
+        "  set_text('밝기: ' + <get_variable('현재밝기')>)"
+      ],
+      "explanation": "위/아래 화살표 키로 밝기를 10씩 증가/감소시킵니다."
+    },
+    {
+      "title": "피격 효과",
+      "description": "충돌 시 깜빡임과 색상 변화 효과",
+      "blocks": [
+        "when_run_button_click",
+        "clear_effect()",
+        "",
+        "when_message_cast('피격')",
+        "// 빨간색 깜빡임 효과",
+        "repeat_basic(3)",
+        "  add_effect_amount('color', 100)",
+        "  add_effect_amount('brightness', 50)",
+        "  wait_second(0.1)",
+        "  add_effect_amount('color', -100)",
+        "  add_effect_amount('brightness', -50)",
+        "  wait_second(0.1)",
+        "",
+        "// 일시적 투명 효과 (무적 시간)",
+        "repeat_basic(5)",
+        "  add_effect_amount('transparency', 50)",
+        "  wait_second(0.2)",
+        "  add_effect_amount('transparency', -50)",
+        "  wait_second(0.2)",
+        "",
+        "clear_effect()"
+      ],
+      "explanation": "피격 시 색상과 투명도를 빠르게 변경하여 시각적 피드백을 제공합니다."
+    },
+    {
+      "title": "동적 그림자 효과",
+      "description": "시간에 따라 변하는 그림자 효과",
+      "blocks": [
+        "when_run_button_click",
+        "// 복제본을 그림자로 활용",
+        "clone_self()",
+        "",
+        "when_clone_start",
+        "// 그림자 설정",
+        "go_to_back()",
+        "set_effect('brightness', -50)",
+        "set_effect('transparency', 50)",
+        "change_xy(10, -10)",
+        "",
+        "// 그림자 움직임",
+        "repeat_while_true",
+        "  // 시간에 따라 그림자 길이 변화",
+        "  repeat_basic(20)",
+        "    add_effect_amount('transparency', 2)",
+        "    change_x(1)",
+        "    wait_second(0.1)",
+        "  repeat_basic(20)",
+        "    add_effect_amount('transparency', -2)",
+        "    change_x(-1)",
+        "    wait_second(0.1)"
+      ],
+      "explanation": "복제본의 밝기와 투명도를 조절하여 동적인 그림자 효과를 만듭니다."
+    }
+  ],
+
+  "progressive_hints": [
+    {
+      "situation": "효과를 점진적으로 변화시키고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "category",
+          "content": "'생김새' 카테고리에서 효과 블록을 찾아보세요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "'효과 값 더하기' 블록을 선택하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "concept",
+          "content": "작은 값을 반복해서 더하면 부드러운 변화가 만들어져요"
+        }
+      ]
+    },
+    {
+      "situation": "효과를 감소시키고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "음수 값을 더하면 효과가 감소해요"
+        },
+        {
+          "step": 2,
+          "hint_type": "specific_block",
+          "content": "add_effect_amount('효과', -10) 형태로 사용하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "category",
+          "content": "반복문과 함께 사용하면 점진적 감소가 가능해요"
+        }
+      ]
+    },
+    {
+      "situation": "여러 효과를 동시에 변화시키고 싶어요",
+      "steps": [
+        {
+          "step": 1,
+          "hint_type": "concept",
+          "content": "여러 add_effect_amount 블록을 연속으로 사용할 수 있어요"
+        },
+        {
+          "step": 2,
+          "hint_type": "category",
+          "content": "각 효과별로 다른 변화량을 설정하세요"
+        },
+        {
+          "step": 3,
+          "hint_type": "specific_block",
+          "content": "색상, 밝기, 투명도를 함께 변경해 복합 효과를 만드세요"
+        }
+      ]
+    }
+  ],
+
+  "common_mistakes": [
+    {
+      "mistake": "효과 값이 범위를 벗어남",
+      "why_it_happens": "계속 더하기만 해서 최대값 초과",
+      "consequence": "더 이상 변화가 없거나 예상과 다른 결과",
+      "solution": "효과 범위를 확인하고 제한 설정",
+      "teaching_moment": "대부분의 효과는 -100~100 또는 0~100 범위를 가져요."
+    },
+    {
+      "mistake": "너무 큰 값을 한 번에 더함",
+      "why_it_happens": "부드러운 변화 대신 급격한 변경",
+      "consequence": "애니메이션이 끊겨 보임",
+      "solution": "작은 값을 여러 번 더하기",
+      "teaching_moment": "5~10 정도의 작은 값을 반복해서 더하면 부드러워요."
+    },
+    {
+      "mistake": "효과 초기화를 잊음",
+      "why_it_happens": "이전 효과가 남아있는 상태에서 시작",
+      "consequence": "의도하지 않은 시작 상태",
+      "solution": "시작 전 clear_effect() 또는 set_effect() 사용",
+      "teaching_moment": "새로운 효과를 시작하기 전에 초기 상태를 설정하세요."
+    },
+    {
+      "mistake": "음수와 양수 혼동",
+      "why_it_happens": "증가/감소 방향을 반대로 이해",
+      "consequence": "원하는 것과 반대로 변화",
+      "solution": "양수는 증가, 음수는 감소 확인",
+      "teaching_moment": "더하기 블록이지만 음수를 더하면 빼기가 돼요."
+    }
+  ],
+
+  "step_by_step_guide": [
+    {
+      "step": 1,
+      "title": "생김새 카테고리 열기",
+      "instruction": "블록 팔레트에서 보라색 '생김새' 카테고리를 클릭하세요.",
+      "visual_hint": "붓 아이콘이 있는 보라색 카테고리입니다."
+    },
+    {
+      "step": 2,
+      "title": "효과 더하기 블록 선택",
+      "instruction": "'효과 값 더하기' 블록을 작업 영역으로 드래그하세요.",
+      "visual_hint": "효과 이름과 숫자 입력란이 있는 블록입니다."
+    },
+    {
+      "step": 3,
+      "title": "효과 종류 선택",
+      "instruction": "드롭다운에서 변경할 효과를 선택하세요.",
+      "visual_hint": "색깔, 밝기, 투명도 등을 선택할 수 있습니다."
+    },
+    {
+      "step": 4,
+      "title": "변화량 입력",
+      "instruction": "더하거나 뺄 값을 입력하세요. 음수는 감소를 의미합니다.",
+      "visual_hint": "작은 값(5~20)을 사용하면 부드러운 변화가 됩니다."
+    },
+    {
+      "step": 5,
+      "title": "반복과 대기 추가",
+      "instruction": "반복문과 대기 블록을 함께 사용하여 애니메이션을 만드세요.",
+      "visual_hint": "repeat와 wait을 조합하여 점진적 변화를 구현합니다."
+    }
+  ],
+
+  "related_blocks": [
+    {
+      "block_id": "set_effect",
+      "relationship": "절대값 설정",
+      "explanation": "효과를 특정 값으로 직접 설정"
+    },
+    {
+      "block_id": "clear_effect",
+      "relationship": "효과 초기화",
+      "explanation": "모든 효과를 제거하고 원래 상태로"
+    },
+    {
+      "block_id": "change_transparency",
+      "relationship": "투명도 전용",
+      "explanation": "투명도만 변경하는 전용 블록"
+    },
+    {
+      "block_id": "set_transparency",
+      "relationship": "투명도 설정",
+      "explanation": "투명도를 특정 값으로 설정"
+    },
+    {
+      "block_id": "repeat_basic",
+      "relationship": "반복 실행",
+      "explanation": "효과를 점진적으로 변화시킬 때 사용"
+    },
+    {
+      "block_id": "wait_second",
+      "relationship": "시간 지연",
+      "explanation": "효과 변화 속도를 조절"
+    }
+  ],
+
+  "debugging_tips": [
+    {
+      "problem": "효과가 변하지 않아요",
+      "possible_causes": ["효과가 이미 최대/최소값", "너무 작은 값 더하기", "효과 이름 오타"],
+      "solutions": ["clear_effect()로 초기화 후 재시도", "더 큰 변화량 사용", "효과 이름 확인"]
+    },
+    {
+      "problem": "효과가 너무 빠르거나 느려요",
+      "possible_causes": ["대기 시간이 부적절", "변화량이 너무 크거나 작음", "반복 횟수 문제"],
+      "solutions": ["wait_second 값 조정", "변화량 조정", "반복 횟수 변경"]
+    },
+    {
+      "problem": "효과가 이상하게 보여요",
+      "possible_causes": ["여러 효과가 충돌", "범위를 벗어난 값", "초기화하지 않음"],
+      "solutions": ["효과별로 개별 테스트", "값 범위 확인", "시작 전 clear_effect() 사용"]
+    }
+  ],
+
+  "real_world_connections": [
+    {
+      "analogy": "조명 디머",
+      "explanation": "조명의 밝기를 점진적으로 조절하는 디머 스위치와 같습니다."
+    },
+    {
+      "analogy": "볼륨 조절",
+      "explanation": "음량을 한 칸씩 올리거나 내리는 것과 같은 원리입니다."
+    },
+    {
+      "analogy": "일출/일몰",
+      "explanation": "하늘의 밝기가 서서히 변하는 자연 현상과 비슷합니다."
+    },
+    {
+      "analogy": "온도 조절",
+      "explanation": "에어컨 온도를 1도씩 올리거나 내리는 것과 같은 개념입니다."
+    }
+  ],
+
+  "extensions_and_variations": [
+    {
+      "concept": "사인파 애니메이션",
+      "description": "삼각함수를 이용한 부드러운 효과 변화",
+      "use_case": "호흡 효과, 파도 움직임, 맥동 효과"
+    },
+    {
+      "concept": "다중 효과 조합",
+      "description": "여러 효과를 동시에 변화시켜 복합 효과 생성",
+      "use_case": "홀로그램 효과, 네온 효과, 마법 효과"
+    },
+    {
+      "concept": "조건부 효과 변화",
+      "description": "특정 조건에 따라 효과 변화 방향 전환",
+      "use_case": "체력 기반 색상, 속도 기반 블러, 거리 기반 투명도"
+    },
+    {
+      "concept": "효과 체인",
+      "description": "연속적인 효과 변화를 연결한 시퀀스",
+      "use_case": "변신 애니메이션, 스킬 이펙트, 전환 효과"
+    }
+  ],
+
+  "assessment_criteria": [
+    {
+      "level": "기초",
+      "criteria": "add_effect_amount를 사용하여 간단한 효과 변화를 만들 수 있다",
+      "example": "투명도 증감, 밝기 조절, 기본 페이드"
+    },
+    {
+      "level": "중급",
+      "criteria": "반복문과 조합하여 부드러운 애니메이션을 구현할 수 있다",
+      "example": "페이드 인/아웃, 색상 순환, 깜빡임 효과"
+    },
+    {
+      "level": "고급",
+      "criteria": "여러 효과를 조합한 복잡한 시각 효과를 설계할 수 있다",
+      "example": "복합 피격 효과, 동적 그림자, 환경 효과"
+    }
+  ]
+}
