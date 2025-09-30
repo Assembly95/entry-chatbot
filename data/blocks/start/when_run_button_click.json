@@ -3,6 +3,9 @@
   "category": "start",
   "name": "시작하기 버튼을 클릭했을 때",
   "description": "녹색 시작 버튼을 클릭했을 때 실행되는 이벤트 블록입니다. 모든 Entry 프로그램의 시작점이 되는 가장 기본적인 블록입니다.",
+  "keywords": ["시작", "실행", "처음", "게임시작", "프로그램시작", "초기화", "런", "run", "start", "begin", "초록깃발"],
+  "usage_context": ["게임이나 프로그램을 처음 시작할 때", "초기 설정이 필요할 때", "메인 실행 지점을 정의할 때"],
+  "common_questions": ["게임을 시작하려면", "처음 실행될 때", "시작 버튼을 누르면"],
 
   "educational_context": {
     "learning_objectives": [

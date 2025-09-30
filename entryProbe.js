@@ -107,24 +107,24 @@
         }
 
         // 컨텍스트 변화 감지 및 전송
-        const currentContext = gatherDetailedContext();
-        if (currentContext) {
-          const contextString = JSON.stringify(currentContext);
+        // const currentContext = gatherDetailedContext();
+        // if (currentContext) {
+        //   const contextString = JSON.stringify(currentContext);
 
-          // 이전과 다른 경우에만 전송 (너무 자주 전송 방지)
-          if (contextString !== lastContextSent) {
-            window.postMessage(
-              {
-                __ENTRY_HELPER__: true,
-                type: "CONTEXT_UPDATE",
-                context: currentContext,
-              },
-              "*"
-            );
-            lastContextSent = contextString;
-            console.log("📝 Entry Helper: 컨텍스트 업데이트됨");
-          }
-        }
+        //   // 이전과 다른 경우에만 전송 (너무 자주 전송 방지)
+        //   if (contextString !== lastContextSent) {
+        //     window.postMessage(
+        //       {
+        //         __ENTRY_HELPER__: true,
+        //         type: "CONTEXT_UPDATE",
+        //         context: currentContext,
+        //       },
+        //       "*"
+        //     );
+        //     lastContextSent = contextString;
+        //     console.log("📝 Entry Helper: 컨텍스트 업데이트됨");
+        //   }
+        // }
       }
     } catch (e) {
       console.log("Entry Helper tick 오류:", e);
