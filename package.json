@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "form-data": "^4.0.4",
-    "node-fetch": "^2.7.0",
-    "papaparse": "^5.5.3"
-  }
-}

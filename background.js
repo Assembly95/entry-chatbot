@@ -470,9 +470,10 @@ async function callOpenAI(messages, apiKey = null) {
         model: "gpt-4o-mini",
         messages: messages,
         max_tokens: 200,
-        temperature: 0.3, // 더 일관된 답변을 위해 낮춤
-        presence_penalty: 0.2,
-        frequency_penalty: 0.2,
+        temperature: 0.05, // 0.1 → 0.05로 더 낮춤
+        top_p: 0.5, // 추가: 더 예측 가능한 답변
+        presence_penalty: 0.3,
+        frequency_penalty: 0.3,
       }),
     });
 
@@ -494,7 +495,7 @@ async function callOpenAI(messages, apiKey = null) {
 
 // ===== 개선된 교육적 응답 생성 =====
 // ===== 개선된 교육적 응답 생성 (단계별 힌트) =====
-async function generateEducationalResponse(userMessage, mode, projectContext, conversationHistory = []) {
+async function generateEducationalResponse(userMessage, mode, conversationHistory = []) {
   try {
     const settings = await chrome.storage.sync.get(["openai_api_key"]);
     const apiKey = settings.openai_api_key;
@@ -529,13 +530,10 @@ async function generateEducationalResponse(userMessage, mode, projectContext, co
 
         systemPrompt = `당신은 Entry 블록코딩 튜터입니다.
 
-사용자 질문: "${userMessage}"
-정답 정보:
-- 블록명: "${blockName}"
-- 카테고리: "${categoryKorean}"
-- 설명: ${topBlock.description || ""}
+학생 메시지: "${userMessage}"
+정답: ${categoryKorean} 카테고리의 '${blockName}' 블록
 
-현재 힌트 레벨: ${hintLevel.level} (${hintLevel.description})
+현재 단계: ${hintLevel.level}단계
 
 응답 규칙:
 ${hintLevel.instruction}
@@ -643,61 +641,47 @@ function extractMainKeywords(message) {
 
 // ===== 힌트 레벨 결정 =====
 function determineHintLevel(helpAttempts, userMessage) {
+  // 명확한 도움 요청 키워드
+  const directHelpKeywords = ["못찾겠", "모르겠", "어디", "알려줘", "정답", "도와"];
+  const needsDirectHelp = directHelpKeywords.some((keyword) => userMessage.includes(keyword));
+
   const levels = [
     {
       level: 1,
       description: "카테고리만 힌트",
-      condition: (attempts) => attempts <= 1,
+      condition: (attempts) => attempts === 0 && !needsDirectHelp,
       instruction: `
-반드시 따라야 할 규칙:
-1. Entry에 "이벤트" 카테고리는 없습니다. 절대 언급하지 마세요.
-2. 제공된 정답 카테고리만 사용하세요.
-3. 카테고리 이름만 알려주고 블록 이름은 숨기세요.
-
-금지 단어: "이벤트", "컨트롤", "Event", "Control"
-필수 사용: 제공된 정확한 카테고리명
-
-틀린 예시:
-❌ "이벤트 카테고리에서..."
-❌ "컨트롤 카테고리를..."
-
-올바른 예시:
-✅ "시작 카테고리를 살펴보세요"
-✅ "시작 카테고리에 관련 블록들이 있어요"`,
-      example: "시작 카테고리에 있는 블록들을 살펴보세요. 버튼과 관련된 블록이 있을 거예요.",
+1단계: 카테고리만 알려주기
+"시작 카테고리를 살펴보세요."`,
     },
     {
       level: 2,
-      description: "카테고리 + 힌트",
-      condition: (attempts) => attempts === 2,
+      description: "정확한 블록명 제공",
+      condition: (attempts) => attempts >= 1 || needsDirectHelp,
       instruction: `
-반드시 따라야 할 규칙:
-1. Entry에 "이벤트" 카테고리는 없습니다.
-2. 정확한 카테고리명과 블록 특징을 설명하세요.
-3. 블록 이름의 키워드만 힌트로 주세요.
+2단계: 정확한 답 제공
+"시작 카테고리에서 '시작하기 버튼을 클릭했을 때' 블록을 사용하세요."
 
-금지: "이벤트" 카테고리 언급
-필수: "시작" 카테고리 명시`,
-      example: "시작 카테고리에서 '버튼'과 '클릭'이 들어간 블록을 찾아보세요. 초록색 깃발 모양이 있어요.",
-    },
-    {
-      level: 3,
-      description: "정확한 답변",
-      condition: (attempts) => attempts >= 3,
-      instruction: `
-정확한 블록명과 카테고리를 알려주세요.
-절대 "이벤트" 카테고리라고 하지 마세요.`,
-      example: "시작 카테고리에서 '시작하기 버튼을 클릭했을 때' 블록을 사용하세요.",
+반드시:
+- 정확한 카테고리명 (시작)
+- 정확한 블록명 (시작하기 버튼을 클릭했을 때)
+- 간단한 사용법
+
+돌려 말하지 마세요.`,
     },
   ];
 
-  for (const level of levels) {
-    if (level.condition(helpAttempts)) {
-      return level;
-    }
+  // "모르겠어" 등이 포함되면 바로 2단계로
+  if (needsDirectHelp) {
+    return levels[1];
   }
 
-  return levels[levels.length - 1];
+  // 두 번째 시도부터는 무조건 정답
+  if (helpAttempts >= 1) {
+    return levels[1];
+  }
+
+  return levels[0];
 }
 
 // ===== 대화 기록에 힌트 레벨 저장 =====
@@ -745,7 +729,7 @@ function getFallbackResponse(errorMessage) {
 
 // ===== 메인 AI 요청 처리 함수 =====
 async function handleAIRequest(request) {
-  const { message, mode, projectContext, conversationHistory = [] } = request;
+  const { message, mode, conversationHistory = [] } = request;
 
   console.log("🚀 AI 요청 처리 시작:", { message, mode, ragEnabled: USE_RAG });
 
@@ -769,7 +753,7 @@ async function handleAIRequest(request) {
     }
 
     // 4. 응답 생성
-    const response = await generateEducationalResponse(message, mode, projectContext, conversationHistory);
+    const response = await generateEducationalResponse(message, mode, conversationHistory);
 
     // 5. 사용량 통계 기록
     await logUsageStats(message.length, response.length, classification.type, USE_RAG);

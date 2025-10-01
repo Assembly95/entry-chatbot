@@ -22,16 +22,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": [
-        "entryProbe.js",
-        "icon.png",
-        "icon.jpg",
-        "icon.jpeg",
-        "icon.gif",
-        "icon.svg",
-        "data/blocks/*/*.json",
-        "data/block_icon/*.svg"
-      ],
+      "resources": ["icon.png", "icon.jpg", "icon.jpeg", "icon.gif", "icon.svg", "data/blocks/*/*.json", "data/block_icon/*.svg"],
       "matches": ["*://playentry.org/*", "*://*.playentry.org/*", "<all_urls>"]
     }
   ],

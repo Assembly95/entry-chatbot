@@ -185,13 +185,6 @@ window.showModalMessage = function (message, type) {
     return [[blockJson.fileName, [], []]];
   }
 
-  function injectEntryProbe() {
-    const s = document.createElement("script");
-    s.src = chrome.runtime.getURL("entryProbe.js");
-    (document.head || document.documentElement).appendChild(s);
-    s.onload = () => s.remove();
-  }
-
   // ===== 카테고리별 색상 반환 =====
   function getCategoryColor(category) {
     const colors = {
@@ -701,43 +694,6 @@ window.showModalMessage = function (message, type) {
     }
   }
 
-  // ===== Entry 프로젝트 컨텍스트 수집 =====
-  function gatherProjectContext() {
-    try {
-      if (!isEntryReady || typeof Entry === "undefined" || !Entry.playground || !Entry.container) {
-        return "Entry가 아직 준비되지 않았습니다.";
-      }
-
-      const context = [];
-      const currentObject = Entry.playground.object;
-      if (currentObject) {
-        context.push(`현재 오브젝트: ${currentObject.name || "이름없음"}`);
-
-        const getList = currentObject.script?.getBlockList;
-        if (typeof getList === "function") {
-          const blockList = getList.call(currentObject.script);
-          const blockCount = blockList.length;
-          context.push(`사용된 블록 수: ${blockCount}개`);
-
-          if (blockCount > 0) {
-            const blockTypes = blockList.slice(0, 3).map((block) => block?.type || "알 수 없는 블록");
-            context.push(`주요 블록들: ${blockTypes.join(", ")}`);
-          }
-
-          const complexity = blockCount > 10 ? "복잡함" : blockCount > 3 ? "보통" : "간단함";
-          context.push(`복잡도: ${complexity}`);
-        }
-      }
-
-      const objects = Entry.container.getAllObjects?.() || [];
-      context.push(`전체 오브젝트 수: ${objects.length}개`);
-
-      return context.join(" | ");
-    } catch (e) {
-      return `컨텍스트 수집 오류: ${e.message}`;
-    }
-  }
-
   // ===== RAG 토글 함수 =====
   async function toggleRAGMode() {
     try {
@@ -1004,7 +960,60 @@ window.showModalMessage = function (message, type) {
     if (closeBtn) {
       closeBtn.addEventListener("click", () => toggleSidebarOpen(false));
     }
+    function createSingleCategoryCard(block) {
+      const categoryName = getCategoryKorean(block.category);
+      const color = getCategoryColor(block.category);
+      const iconPath = getCategoryIconPath(block.category);
+      const emoji = getEmojiFallback(block.category);
 
+      return `
+    <div style="
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 16px 0;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      text-align: center;
+    ">
+      <div style="
+        font-size: 14px;
+        color: #495057;
+        margin-bottom: 16px;
+        font-weight: 700;
+      ">
+        💡 이 카테고리를 확인하세요!
+      </div>
+      
+      <div style="
+        background: white;
+        border: 2px solid ${color};
+        border-radius: 12px;
+        padding: 20px;
+        display: inline-block;
+      ">
+        <div style="margin-bottom: 10px;">
+          <img src="${iconPath}" 
+               style="width: 48px; height: 48px;"
+               onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=font-size:36px>${emoji}</span>';"
+               alt="${categoryName}">
+        </div>
+        <div style="
+          font-weight: 700;
+          color: ${color};
+          font-size: 18px;
+        ">${categoryName}</div>
+      </div>
+      
+      <div style="
+        margin-top: 16px;
+        font-size: 13px;
+        color: #6c757d;
+      ">
+        여기서 관련 블록을 찾아보세요!
+      </div>
+    </div>
+  `;
+    }
     // 학습 진행상황 모달 표시 함수
     function showLearnerProgressModal() {
       chrome.runtime.sendMessage({ action: "getLearnerProgress" }, (response) => {
@@ -1172,8 +1181,6 @@ window.showModalMessage = function (message, type) {
 
         // AI 응답 요청 (모드 자동 설정)
         const mode = "auto"; // 모드 선택 버튼이 제거되었으므로 자동 모드로 고정
-        const projectContext = gatherProjectContext();
-
         chrome.runtime.sendMessage(
           {
             action: "generateAIResponse",
@@ -1219,18 +1226,15 @@ window.showModalMessage = function (message, type) {
                 ).length;
 
                 if (attemptCount <= 1) {
-                  // createCategoryCards가 정의되었는지 확인
-                  if (typeof createCategoryCards === "function") {
-                    const categoryCards = createCategoryCards(response.rawBlocks);
-                    addChatMessage(categoryCards, true, "block-with-image");
-                  } else {
-                    console.error("createCategoryCards 함수가 정의되지 않았습니다");
-                    // 폴백: 블록 리스트 표시
-                    const blockListHtml = createBlockListWithImages(response.rawBlocks);
-                    addChatMessage(blockListHtml, true, "block-with-image");
-                  }
+                  // 가장 관련성 높은 첫 번째 블록만 사용
+                  const topBlock = response.rawBlocks[0];
+
+                  // 해당 블록의 카테고리만 표시
+                  const singleCategoryCard = createSingleCategoryCard(topBlock);
+                  addChatMessage(singleCategoryCard, true, "block-with-image");
                 } else {
-                  const blockListHtml = createBlockListWithImages(response.rawBlocks);
+                  // 구체적인 블록 표시
+                  const blockListHtml = createBlockListWithImages(response.rawBlocks.slice(0, 1));
                   addChatMessage(blockListHtml, true, "block-with-image");
                 }
               }
@@ -2020,13 +2024,9 @@ window.showModalMessage = function (message, type) {
     setTimeout(initializeChatbot, 100);
   }
 
-  // Entry 프로브 주입
-  injectEntryProbe();
-
   // 전역 함수로 노출 (디버깅용)
   window.entryHelper = {
     toggleSidebar: toggleSidebarOpen,
-    gatherContext: gatherProjectContext,
     isReady: () => isEntryReady,
     reinitialize: () => {
       isInitialized = false;
