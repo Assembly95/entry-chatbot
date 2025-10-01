@@ -1,50 +1,26 @@
-// Entry Block Helper - Background Service Worker (개선된 RAG 시스템)
+// Entry Block Helper - Background Service Worker (Quick & CoT 통합 버전)
 
-// ===== RAG 설정 =====
+// ===== 전역 설정 =====
 let USE_RAG = true;
-
-// ===== Entry 블록 데이터 로드 및 캐싱 =====
 let entryBlockData = null;
 let dataLoadPromise = null;
 
-// ===== questionClassifier.js 로드 =====
+// ===== 모듈 임포트 =====
 importScripts("questionClassifier.js");
+importScripts("quickResponse.js");
+importScripts("cotResponse.js");
+
+// 핸들러 인스턴스
 let questionClassifier = new EntryQuestionClassifier();
+let quickResponseHandler = new QuickResponseHandler();
+let cotResponseHandler = new CoTResponseHandler();
 
-// ===== API 키 설정 =====
-const OPENAI_API_KEY = "";
-
-// ===== 블록 검색 가중치 테이블 (개선) =====
-const SEARCH_WEIGHTS = {
-  name_exact: 15, // 블록명 정확 매칭 (증가)
-  name_partial: 8, // 블록명 부분 매칭 (증가)
-  description: 3, // 설명 매칭
-  category: 2, // 카테고리 매칭
-  keywords: 6, // 키워드 매칭 (증가)
-  usage_examples: 2, // 사용예시 매칭
-  pattern_match: 20, // 패턴 직접 매칭 (새로 추가)
-};
-
-// ===== 질문 분류 함수 =====
-function classifyQuestion(message) {
-  if (!questionClassifier) {
-    questionClassifier = new EntryQuestionClassifier();
-  }
-
-  const result = questionClassifier.classify(message);
-  console.log("🎯 질문 분류: " + result.type + " (신뢰도: " + (result.confidence * 100).toFixed(1) + "%)");
-  return result;
-}
-
+// ===== Chrome Extension 초기화 =====
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("📊 질문 분류기 초기화 완료");
-  console.log("Entry Block Helper 설치 완료 - RAG 시스템 초기화 중...");
+  console.log("🚀 Entry Block Helper 설치 완료");
   chrome.storage.sync.set({
     enabled: true,
-    autoAnalysis: true,
-    sidebarMode: "auto",
     openai_api_key: "",
-    useDevKey: false,
     rag_enabled: true,
   });
 
@@ -52,26 +28,14 @@ chrome.runtime.onInstalled.addListener(() => {
   loadEntryBlockData();
 });
 
-// ===== 블록 데이터 로드 함수 =====
+// ===== Entry 블록 데이터 로드 =====
 async function loadEntryBlockData() {
   if (entryBlockData) return entryBlockData;
   if (dataLoadPromise) return dataLoadPromise;
 
   dataLoadPromise = (async () => {
     try {
-      const blockCategories = [
-        "start",
-        "moving",
-        "looks",
-        "sound",
-        "judgement",
-        "repeat",
-        "variable",
-        "func",
-        "calc",
-        "brush",
-        "flow",
-      ];
+      const blockCategories = ["start", "moving", "looks", "sound", "judgement", "flow", "variable", "func", "calc", "brush"];
       const allBlocks = [];
 
       for (const category of blockCategories) {
@@ -81,9 +45,9 @@ async function loadEntryBlockData() {
           for (const fileName of knownFiles) {
             try {
               const response = await fetch(chrome.runtime.getURL(`data/blocks/${category}/${fileName}`));
+
               if (response.ok) {
                 const blockData = await response.json();
-
                 const imagePath = `data/block-images/${category}/${fileName.replace(".json", ".png")}`;
                 const imageUrl = chrome.runtime.getURL(imagePath);
 
@@ -113,7 +77,7 @@ async function loadEntryBlockData() {
       }
 
       entryBlockData = allBlocks;
-      console.log(`📚 Entry 블록 데이터 로드 완료: ${allBlocks.length}개 블록`);
+      console.log(`📚 Entry 블록 데이터 로드 완료: ${allBlocks.length}개`);
       return allBlocks;
     } catch (error) {
       console.error("Entry 데이터 로드 실패:", error);
@@ -125,210 +89,61 @@ async function loadEntryBlockData() {
   return dataLoadPromise;
 }
 
-// ===== 카테고리 한국어 변환 (Entry 공식 용어) =====
-function getCategoryKorean(category) {
-  const categoryMap = {
-    start: "시작",
-    moving: "움직임",
-    looks: "생김새",
-    sound: "소리",
-    judgement: "판단",
-    repeat: "반복",
-    variable: "자료",
-    func: "함수",
-    calc: "계산",
-    brush: "붓",
-    flow: "흐름",
+// ===== 질문 분류 (향상된 로깅) =====
+async function classifyQuestion(message) {
+  // 메시지 타입 검증 추가
+  if (!message || typeof message !== "string") {
+    console.warn("잘못된 메시지 형식:", message);
+    return {
+      type: "simple",
+      confidence: 0.5,
+      method: "default",
+      keywords: [],
+      scores: {},
+    };
+  }
+  if (!questionClassifier) {
+    questionClassifier = new EntryQuestionClassifier();
+  }
+
+  console.log("\n" + "=".repeat(60));
+  console.log("🔍 질문 분석 시작");
+  console.log("=".repeat(60));
+  console.log("📝 원본 질문:", message);
+
+  const result = await questionClassifier.classify(message);
+
+  const typeInfo = {
+    simple: { emoji: "📦", desc: "단순 블록 위치/사용법" },
+    complex: { emoji: "🎮", desc: "복합 프로젝트/게임 제작" },
+    debug: { emoji: "🐛", desc: "오류/문제 해결" },
+    conceptual: { emoji: "💡", desc: "개념/원리 설명" },
   };
 
-  return categoryMap[category] || category;
+  const info = typeInfo[result.type] || { emoji: "❓", desc: "알 수 없음" };
+
+  console.log("\n📊 분석 결과:");
+  console.log(`  • 타입: ${info.emoji} ${(result.type || "unknown").toUpperCase()} - ${info.desc}`);
+  console.log(`  • 신뢰도: ${(result.confidence * 100).toFixed(1)}% ${getConfidenceBar(result.confidence)}`);
+  console.log(`  • 분류 방법: ${result.method === "ai" ? "🤖 AI" : "📏 규칙기반"}`);
+
+  if (result.keywords && result.keywords.length > 0) {
+    console.log(`  • 감지된 키워드: [${result.keywords.join(", ")}]`);
+  }
+
+  console.log("=".repeat(60) + "\n");
+
+  return result;
 }
 
-function getKnownBlockFiles(category) {
-  const fileMap = {
-    brush: [
-      "brush_erase_all.json",
-      "brush_stamp.json",
-      "change_brush_transparency.json",
-      "change_thickness.json",
-      "set_brush_transparency.json",
-      "set_color.json",
-      "set_fill_color.json",
-      "set_random_color.json",
-      "set_thickness.json",
-      "start_drawing.json",
-      "start_fill.json",
-      "stop_drawing.json",
-      "stop_fill.json",
-    ],
-    calc: [
-      "calc_basic.json",
-      "calc_operation.json",
-      "calc_rand.json",
-      "change_hex_to_rgb.json",
-      "change_rgb_to_hex.json",
-      "change_string_case.json",
-      "char_at.json",
-      "choose_project_timer_action.json",
-      "combine_something.json",
-      "coordinate_mouse.json",
-      "coordinate_object.json",
-      "count_match_string.json",
-      "distance_something.json",
-      "get_block_count.json",
-      "get_boolean_value.json",
-      "get_date.json",
-      "get_nickname.json",
-      "get_project_timer_value.json",
-      "get_user_name.json",
-      "index_of_string.json",
-      "length_of_string.json",
-      "quotient_and_mod.json",
-      "replace_string.json",
-      "reverse_of_string.json",
-      "set_visible_project_timer.json",
-      "substring.json",
-    ],
-    flow: [
-      "_if.json",
-      "continue_repeat.json",
-      "create_clone.json",
-      "delete_clone.json",
-      "if_else.json",
-      "remove_all_clones.json",
-      "repeat_basic.json",
-      "repeat_inf.json",
-      "repeat_while_true.json",
-      "restart_project.json",
-      "stop_object.json",
-      "stop_repeat.json",
-      "wait_second.json",
-      "wait_until_true.json",
-      "when_clone_start.json",
-    ],
-    func: [
-      "function_create.json",
-      "function_field_boolean.json",
-      "function_field_label.json",
-      "function_field_string.json",
-      "function_general.json",
-      "function_param_boolean.json",
-      "function_param_string.json",
-      "function_value.json",
-      "get_func_variable.json",
-      "set_func_variable.json",
-      "showFunctionPropsButton.json",
-    ],
-    judgement: [
-      "boolean_and_or.json",
-      "boolean_basic_operator.json",
-      "boolean_not.json",
-      "is_clicked.json",
-      "is_object_clicked.json",
-      "is_press_some_key.json",
-      "is_type.json",
-      "reach_something.json",
-    ],
-    looks: [
-      "add_effect_amount.json",
-      "change_effect_amount.json",
-      "change_object_index.json",
-      "change_scale_size.json",
-      "change_to_next_shape.json",
-      "change_to_some_shape.json",
-      "dialog.json",
-      "dialog_time.json",
-      "erase_all_effects.json",
-      "flip_x.json",
-      "flip_y.json",
-      "hide.json",
-      "remove_dialog.json",
-      "reset_scale_size.json",
-      "set_scale_size.json",
-      "show.json",
-      "stretch_scale_size.json",
-    ],
-    moving: [
-      "bounce_wall.json",
-      "direction_absolute.json",
-      "direction_relative.json",
-      "direction_relative_duration.json",
-      "locate.json",
-      "locate_object_time.json",
-      "locate_x.json",
-      "locate_xy.json",
-      "locate_xy_time.json",
-      "locate_y.json",
-      "move_direction.json",
-      "move_to_angle.json",
-      "move_x.json",
-      "move_xy_time.json",
-      "move_y.json",
-      "rotate_absolute.json",
-      "rotate_by_time.json",
-      "rotate_relative.json",
-      "see_angle_object.json",
-    ],
-    sound: [
-      "get_sound_duration.json",
-      "get_sound_speed.json",
-      "get_sound_volume.json",
-      "play_bgm.json",
-      "sound_from_to.json",
-      "sound_from_to_and_wait.json",
-      "sound_silent_all.json",
-      "sound_something_second_wait_with_block.json",
-      "sound_something_second_with_block.json",
-      "sound_something_wait_with_block.json",
-      "sound_something_with_block.json",
-      "sound_speed_change.json",
-      "sound_speed_set.json",
-      "sound_volume_change.json",
-      "sound_volume_set.json",
-      "stop_bgm.json",
-    ],
-    start: [
-      "message_cast.json",
-      "message_cast_wait.json",
-      "mouse_click_cancled.json",
-      "mouse_clicked.json",
-      "start_neighbor_scene.json",
-      "start_scene.json",
-      "when_message_cast.json",
-      "when_object_click.json",
-      "when_object_click_canceled.json",
-      "when_run_button_click.json",
-      "when_scene_start.json",
-      "when_some_key_pressed.json",
-    ],
-    variable: [
-      "add_value_to_list.json",
-      "ask_and_wait.json",
-      "change_variable.json",
-      "change_value_list_index.json",
-      "get_canvas_input_value.json",
-      "get_variable.json",
-      "hide_list.json",
-      "hide_variable.json",
-      "insert_value_to_list.json",
-      "is_included_in_list.json",
-      "length_of_list.json",
-      "listAddButton.json",
-      "remove_value_from_list.json",
-      "set_variable.json",
-      "set_visible_answer.json",
-      "show_list.json",
-      "show_variable.json",
-      "value_of_index_from_list.json",
-      "variableAddButton.json",
-    ],
-  };
-
-  return fileMap[category] || [];
+// 신뢰도 시각화
+function getConfidenceBar(confidence) {
+  const filled = Math.round(confidence * 10);
+  const empty = 10 - filled;
+  return "█".repeat(filled) + "░".repeat(empty);
 }
 
-// ===== 개선된 RAG 검색 함수 =====
-async function searchEntryBlocks(userMessage, topK = 3) {
+async function searchEntryBlocks(userMessage, topK = 5) {
   const blockData = await loadEntryBlockData();
 
   if (!blockData || blockData.length === 0) {
@@ -336,127 +151,303 @@ async function searchEntryBlocks(userMessage, topK = 3) {
     return [];
   }
 
-  // 특별 패턴 직접 매칭 (최우선)
-  const directPatterns = [
-    { pattern: /시작.*버튼.*클릭|시작하기.*버튼|실행.*버튼/, blockFile: "when_run_button_click", category: "start" },
-    { pattern: /스페이스.*키/, blockFile: "when_some_key_pressed", category: "start" },
-    { pattern: /다음.*장면/, blockFile: "start_neighbor_scene", category: "start" },
-    { pattern: /만약.*라면/, blockFile: "_if", category: "flow" },
-    { pattern: /반복.*하기/, blockFile: "repeat_basic", category: "flow" },
-    { pattern: /변수.*정하기/, blockFile: "set_variable", category: "variable" },
-  ];
+  console.log(`🔍 RAG: ${blockData.length}개 블록에서 검색 중...`);
 
-  // 직접 패턴 매칭 검사
-  for (const { pattern, blockFile, category } of directPatterns) {
-    if (pattern.test(userMessage)) {
-      const matchedBlock = blockData.find((block) => block.fileName === blockFile && block.category === category);
-      if (matchedBlock) {
-        console.log(`🎯 RAG 직접 매칭: ${matchedBlock.name || matchedBlock.fileName}`);
-        return [
-          {
-            ...matchedBlock,
-            _searchScore: 100,
-            _matchedBy: "직접 패턴 매칭",
-          },
-        ];
-      }
-    }
-  }
-
-  // questionClassifier의 tokenizeKorean 사용
   if (!questionClassifier) {
     questionClassifier = new EntryQuestionClassifier();
   }
 
-  const tokens = questionClassifier.tokenizeKorean(userMessage);
-  console.log("🔍 RAG 검색 토큰:", tokens);
+  // 정규화 및 토큰화
+  const normalized = questionClassifier.normalizeText(userMessage);
+  const tokens = questionClassifier.tokenizeKorean(normalized);
+  const { keywords } = questionClassifier.extractKeywords(tokens, normalized);
 
+  console.log("🔤 검색 토큰:", tokens);
+  console.log("🔑 추출 키워드:", keywords);
+
+  // 점수 계산
   const scored = blockData.map((block) => {
     let score = 0;
+    let matchedBy = [];
 
-    const blockName = (block.name || block.fileName || "").toLowerCase();
-    const blockDescription = (block.description || "").toLowerCase();
-    const blockKeywords = JSON.stringify(block.keywords || []).toLowerCase();
-    const blockUsageExamples = JSON.stringify(block.usage_examples || []).toLowerCase();
-    const categoryName = getCategoryKorean(block.category).toLowerCase();
+    // 1. 블록 이름 매칭
+    if (block.name && typeof block.name === "string") {
+      const lowerName = block.name.toLowerCase();
 
-    // 정규화된 토큰으로 매칭
-    for (const token of tokens) {
-      // 블록명 정확 매칭
-      if (blockName === token || blockName.includes(token)) {
-        score += SEARCH_WEIGHTS.name_exact;
+      const coreKeywords = {
+        반복: 80,
+        이동: 80,
+        시작: 80,
+        만약: 80,
+        변수: 80,
+      };
+
+      for (const [keyword, points] of Object.entries(coreKeywords)) {
+        if (tokens.includes(keyword) && lowerName.includes(keyword)) {
+          score += points;
+          matchedBy.push(`core: ${keyword}`);
+          break;
+        }
       }
 
-      // 블록명 부분 매칭
-      if (token.length >= 3 && blockName.includes(token.substring(0, 3))) {
-        score += SEARCH_WEIGHTS.name_partial;
-      }
-
-      // 설명 매칭
-      if (blockDescription.includes(token)) {
-        score += SEARCH_WEIGHTS.description;
-      }
-
-      // 카테고리 매칭
-      if (categoryName.includes(token)) {
-        score += SEARCH_WEIGHTS.category;
-      }
-
-      // 키워드 매칭
-      if (blockKeywords.includes(token)) {
-        score += SEARCH_WEIGHTS.keywords;
-      }
-
-      // 사용 예시 매칭
-      if (blockUsageExamples.includes(token)) {
-        score += SEARCH_WEIGHTS.usage_examples;
+      for (const token of tokens) {
+        if (token.length > 2 && lowerName.includes(token)) {
+          score += 30;
+          matchedBy.push(`partial: ${token}`);
+          break;
+        }
       }
     }
 
-    return { block, score };
+    // 2. common_questions 매칭 - 타입 체크 추가
+    if (block.common_questions && Array.isArray(block.common_questions)) {
+      for (const question of block.common_questions) {
+        // 문자열인지 확인
+        if (typeof question === "string") {
+          const lowerQuestion = question.toLowerCase();
+          const commonWords = tokens.filter((token) => token && lowerQuestion.includes(token) && token.length > 1);
+          if (commonWords.length >= 2) {
+            score += 20;
+            matchedBy.push(`question: ${question.substring(0, 30)}...`);
+          }
+        }
+      }
+    }
+
+    // 3. description 매칭 - 타입 체크 추가
+    if (block.description && typeof block.description === "string") {
+      const lowerDesc = block.description.toLowerCase();
+      for (const token of tokens) {
+        if (token && token.length > 2 && lowerDesc.includes(token)) {
+          score += 5;
+          matchedBy.push(`desc: ${token}`);
+        }
+      }
+    }
+
+    // 4. usage_context 매칭 - 타입 체크 추가
+    if (block.usage_context && Array.isArray(block.usage_context)) {
+      for (const context of block.usage_context) {
+        if (typeof context === "string") {
+          const lowerContext = context.toLowerCase();
+          const contextMatch = tokens.filter((token) => token && lowerContext.includes(token) && token.length > 1).length;
+          if (contextMatch >= 2) {
+            score += 15;
+            matchedBy.push(`context: ${context.substring(0, 20)}...`);
+          }
+        }
+      }
+    }
+
+    return {
+      block,
+      score,
+      matchedBy: matchedBy.length > 0 ? matchedBy.join(", ") : null,
+    };
   });
 
-  console.log(`📊 RAG 점수 계산 완료: 최고점 ${Math.max(...scored.map((s) => s.score))}점`);
-
+  // 결과 필터링 및 정렬
   const results = scored
     .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score)
-    .slice(0, topK);
-
-  // 최고 점수의 50% 이하는 제외
-  const maxScore = results[0]?.score || 0;
-  const threshold = maxScore * 0.5;
-
-  const filteredResults = results
-    .filter((item) => item.score >= threshold)
+    .slice(0, topK)
     .map((item) => ({
       ...item.block,
       _searchScore: item.score,
-      _matchedBy: item.score > 8 ? "강한 매칭" : "일반 매칭",
+      _matchedBy: item.matchedBy,
     }));
 
-  console.log(`🔍 RAG 결과: ${filteredResults.length}개 블록 발견`);
-
-  if (filteredResults.length > 0) {
-    console.log(
-      "📋 검색된 블록:",
-      filteredResults.map((b) => ({
-        name: b.name || b.fileName,
-        category: getCategoryKorean(b.category),
-        score: b._searchScore,
-      }))
-    );
+  if (results.length > 0) {
+    console.log(`✅ RAG 검색 완료: ${results.length}개 블록 발견`);
+  } else {
+    console.log("❌ RAG 검색 결과 없음");
   }
 
-  return filteredResults;
+  return results;
 }
 
-// ===== OpenAI API 호출 함수 =====
-async function callOpenAI(messages, apiKey = null) {
-  const key = apiKey || OPENAI_API_KEY;
+// ===== 메인 AI 요청 처리 (수정) =====
+// background.js의 handleAIRequest 함수 수정
+async function handleAIRequest(request) {
+  const { message, conversationHistory = [] } = request;
 
-  if (!key || key === "") {
-    throw new Error("API 키가 설정되지 않았습니다. 설정에서 OpenAI API 키를 입력해주세요.");
+  console.log("\n🚀 AI 요청 처리 시작");
+  console.log("━".repeat(60));
+  console.log("👤 사용자:", message);
+  console.log("💬 대화 기록:", conversationHistory.length + "개");
+
+  try {
+    // 1. 질문 분류
+    const classification = await classifyQuestion(message);
+
+    // classification이 null/undefined인 경우 기본값 설정
+    const finalClassification = classification || {
+      type: "simple",
+      confidence: 0.5,
+      method: "default",
+      keywords: [],
+      scores: {},
+    };
+
+    console.log("📊 분류 결과:", finalClassification);
+
+    // 2. API 키 확인
+    const settings = await chrome.storage.sync.get(["openai_api_key"]);
+    if (!settings.openai_api_key?.trim()) {
+      throw new Error("API 키가 설정되지 않았습니다");
+    }
+
+    let response;
+    let responseType = "text";
+    let ragUsed = false;
+    let ragResults = [];
+
+    // 3. 질문 타입별 처리
+    if (finalClassification.type === "simple") {
+      console.log("📦 단순 질문 → Quick Response 처리");
+
+      if (USE_RAG) {
+        ragResults = await searchEntryBlocks(message, 7);
+        ragUsed = ragResults.length > 0;
+      }
+
+      response = await quickResponseHandler.generateResponse(
+        message,
+        ragResults,
+        finalClassification // classification 전달
+      );
+    } else if (finalClassification.type === "complex") {
+      console.log("🎮 복합 질문 → CoT Response 처리");
+
+      const cotResult = cotResponseHandler.generateResponse(message, finalClassification);
+
+      if (cotResult && cotResult.template) {
+        responseType = "cot";
+        response = formatCoTForUser(cotResult);
+
+        return {
+          success: true,
+          response: response,
+          responseType: "cot",
+          cotSequence: cotResult.sequence,
+          rawBlocks: [],
+          classification: finalClassification, // 분류 정보 포함
+          ragUsed: false,
+        };
+      } else {
+        response = await generateBasicResponse(message, finalClassification, settings.openai_api_key);
+      }
+    } else if (finalClassification.type === "debug") {
+      console.log("🐛 디버깅 질문 → 문제 해결 가이드");
+      response = await generateDebugResponse(message, finalClassification, settings.openai_api_key);
+    } else if (finalClassification.type === "conceptual") {
+      console.log("💡 개념 질문 → 개념 설명");
+      response = await generateConceptualResponse(message, finalClassification, settings.openai_api_key);
+    } else {
+      response = await generateBasicResponse(message, finalClassification, settings.openai_api_key);
+    }
+
+    // 4. 결과 반환
+    console.log("\n✨ 처리 완료");
+    console.log("━".repeat(60));
+    console.log("📋 요약:");
+    console.log(`  • 질문 타입: ${finalClassification.type}`);
+    console.log(`  • 응답 타입: ${responseType}`);
+    console.log(`  • RAG 사용: ${ragUsed ? "예" : "아니오"}`);
+    console.log("━".repeat(60) + "\n");
+
+    return {
+      success: true,
+      response: response,
+      responseType: responseType,
+      rawBlocks: ragResults,
+      classification: finalClassification, // 분류 정보 반드시 포함
+      ragUsed: ragUsed,
+    };
+  } catch (error) {
+    console.error("\n❌ AI 요청 처리 실패:", error);
+    return {
+      success: false,
+      response: getFallbackResponse(error.message || "오류 발생"),
+      rawBlocks: [],
+      classification: {
+        type: "unknown",
+        confidence: 0,
+        method: "error",
+      },
+    };
+  }
+}
+
+// ===== CoT 응답 포맷팅 =====
+function formatCoTForUser(cotResult) {
+  const firstStep = cotResult.sequence.steps[0];
+  return (
+    `${cotResult.template.title}\n\n` +
+    `📋 총 ${cotResult.sequence.totalSteps}단계로 진행됩니다.\n\n` +
+    `**Step 1: ${firstStep.title}**\n` +
+    `${firstStep.content}`
+  );
+}
+
+// ===== 기본 응답 생성 함수들 =====
+async function generateBasicResponse(message, classification, apiKey) {
+  // OpenAI API 사용하여 기본 응답 생성
+  const response = await callOpenAI(
+    [
+      {
+        role: "system",
+        content: "당신은 Entry 블록코딩 도우미입니다. 간단명료하게 답변하세요.",
+      },
+      {
+        role: "user",
+        content: message,
+      },
+    ],
+    apiKey
+  );
+
+  return response;
+}
+
+async function generateDebugResponse(message, classification, apiKey) {
+  return (
+    `문제가 발생했나요? 함께 해결해봐요!\n\n` +
+    `1. 먼저 블록이 올바르게 연결되었는지 확인해보세요.\n` +
+    `2. 실행 버튼을 다시 눌러보세요.\n` +
+    `3. 변수 값이 올바른지 확인해보세요.\n\n` +
+    `구체적으로 어떤 문제가 있는지 알려주시면 더 자세히 도와드릴게요!`
+  );
+}
+
+async function generateConceptualResponse(message, classification, apiKey) {
+  // 개념 설명을 위한 기본 템플릿
+  const concepts = {
+    반복: "같은 동작을 여러 번 실행하는 것",
+    조건: "특정 상황에서만 실행되도록 하는 것",
+    변수: "값을 저장하고 사용하는 상자",
+    함수: "여러 블록을 하나로 묶어 재사용하는 것",
+  };
+
+  for (const [concept, explanation] of Object.entries(concepts)) {
+    if (message.includes(concept)) {
+      return (
+        `${concept}이란 ${explanation}입니다.\n\n` +
+        `Entry에서는 이를 위한 전용 블록들이 있어요.\n` +
+        `실제로 사용해보면서 익혀보는 것이 좋습니다!`
+      );
+    }
+  }
+
+  return "어떤 개념에 대해 궁금하신가요? 더 자세히 설명해주시면 도와드릴게요!";
+}
+
+// ===== OpenAI API 호출 =====
+async function callOpenAI(messages, apiKey = null) {
+  const key = apiKey || "";
+
+  if (!key) {
+    throw new Error("API 키가 설정되지 않았습니다");
   }
 
   try {
@@ -470,19 +461,13 @@ async function callOpenAI(messages, apiKey = null) {
         model: "gpt-4o-mini",
         messages: messages,
         max_tokens: 200,
-        temperature: 0.05, // 0.1 → 0.05로 더 낮춤
-        top_p: 0.5, // 추가: 더 예측 가능한 답변
-        presence_penalty: 0.3,
-        frequency_penalty: 0.3,
+        temperature: 0.3,
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      if (response.status === 401) {
-        throw new Error("API 키가 유효하지 않습니다. 설정에서 확인해주세요.");
-      }
-      throw new Error(`OpenAI API 오류: ${errorData.error?.message || response.statusText}`);
+      throw new Error(errorData.error?.message || response.statusText);
     }
 
     const data = await response.json();
@@ -493,322 +478,75 @@ async function callOpenAI(messages, apiKey = null) {
   }
 }
 
-// ===== 개선된 교육적 응답 생성 =====
-// ===== 개선된 교육적 응답 생성 (단계별 힌트) =====
-async function generateEducationalResponse(userMessage, mode, conversationHistory = []) {
-  try {
-    const settings = await chrome.storage.sync.get(["openai_api_key"]);
-    const apiKey = settings.openai_api_key;
-
-    if (!apiKey || apiKey.trim() === "") {
-      return "API 키를 설정해주세요. 확장 프로그램 아이콘 → 설정에서 OpenAI API 키를 입력하세요.";
-    }
-
-    // 질문 분류
-    const classification = classifyQuestion(userMessage);
-
-    // 이전 대화에서 같은 주제로 도움 요청한 횟수 계산
-    const helpAttempts = countHelpAttempts(conversationHistory, userMessage);
-
-    console.log(`🎯 도움 요청 횟수: ${helpAttempts}`);
-
-    let systemPrompt = `당신은 Entry 블록코딩 교육 전문 튜터입니다.
-단계별로 힌트를 제공하는 소크라테스식 교육 방법을 사용합니다.`;
-
-    // RAG 검색
-    let relevantBlocks = [];
-    if (USE_RAG) {
-      relevantBlocks = await searchEntryBlocks(userMessage);
-
-      if (relevantBlocks.length > 0) {
-        const topBlock = relevantBlocks[0];
-        const categoryKorean = getCategoryKorean(topBlock.category);
-        const blockName = topBlock.name || topBlock.fileName;
-
-        // 단계별 힌트 전략
-        let hintLevel = determineHintLevel(helpAttempts, userMessage);
-
-        systemPrompt = `당신은 Entry 블록코딩 튜터입니다.
-
-학생 메시지: "${userMessage}"
-정답: ${categoryKorean} 카테고리의 '${blockName}' 블록
-
-현재 단계: ${hintLevel.level}단계
-
-응답 규칙:
-${hintLevel.instruction}
-
-예시 응답:
-${hintLevel.example}`;
-      }
-    }
-
-    const messages = [
-      { role: "system", content: systemPrompt },
-      ...conversationHistory.slice(-4),
-      { role: "user", content: userMessage },
-    ];
-
-    const response = await callOpenAI(messages, apiKey);
-
-    if (relevantBlocks.length > 0) {
-      const correctCategory = getCategoryKorean(relevantBlocks[0].category);
-
-      // "이벤트" 관련 모든 변형 제거
-      const wrongPatterns = [
-        /이벤트\s*카테고리/gi,
-        /Event\s*카테고리/gi,
-        /이벤트\s*탭/gi,
-        /이벤트\s*블록/gi,
-        /컨트롤\s*카테고리/gi,
-      ];
-
-      for (const pattern of wrongPatterns) {
-        if (pattern.test(response)) {
-          console.warn(`⚠️ AI가 잘못된 카테고리 사용: "이벤트" → "${correctCategory}"`);
-          response = response.replace(pattern, `${correctCategory} 카테고리`);
-        }
-      }
-
-      // 응답에 올바른 카테고리가 없으면 강제 삽입
-      if (!response.includes(correctCategory)) {
-        console.warn("⚠️ AI가 올바른 카테고리를 언급하지 않음. 강제 수정.");
-        response = response.replace(/카테고리/g, `${correctCategory} 카테고리`);
-      }
-    }
-
-    return response;
-  } catch (error) {
-    console.error("AI 응답 생성 실패:", error);
-    return `죄송합니다. 오류가 발생했습니다: ${error.message}`;
-  }
-}
-
-// ===== 도움 요청 횟수 계산 =====
-// background.js의 countHelpAttempts 함수 개선
-function countHelpAttempts(conversationHistory, currentMessage) {
-  let count = 0;
-
-  // 같은 주제인지 확인 (블록 찾기 관련)
-  const topicKeywords = ["시작", "버튼", "실행", "클릭"];
-  let isSameTopic = true;
-
-  // 역순으로 순회하면서 같은 주제의 도움 요청 카운트
-  for (let i = conversationHistory.length - 1; i >= 0; i -= 2) {
-    if (i - 1 >= 0) {
-      const userMsg = conversationHistory[i - 1].content;
-      const botMsg = conversationHistory[i].content;
-
-      // 주제가 같은지 확인
-      const hasTopic = topicKeywords.some((k) => userMsg.includes(k));
-      if (!hasTopic) {
-        break; // 주제가 바뀌면 중단
-      }
-
-      // 도움 요청인지 확인
-      const helpKeywords = ["못찾", "모르겠", "어디", "알려줘"];
-      if (helpKeywords.some((k) => userMsg.includes(k))) {
-        count++;
-      }
-    }
-  }
-
-  // 현재 메시지도 도움 요청이면 추가
-  if (["못찾", "모르겠", "어디"].some((k) => currentMessage.includes(k))) {
-    count++;
-  }
-
-  console.log(`📊 같은 주제 도움 요청 횟수: ${count}`);
-  return count;
-}
-
-// ===== 주제 변경 감지 =====
-function isTopicChanged(previousMessage, currentMessage) {
-  // 간단한 주제 변경 감지 (키워드 기반)
-  const prevKeywords = extractMainKeywords(previousMessage);
-  const currKeywords = extractMainKeywords(currentMessage);
-
-  // 공통 키워드가 없으면 주제 변경
-  const commonKeywords = prevKeywords.filter((k) => currKeywords.includes(k));
-  return commonKeywords.length === 0;
-}
-
-// ===== 주요 키워드 추출 =====
-function extractMainKeywords(message) {
-  const importantWords = ["시작", "이동", "반복", "조건", "변수", "소리", "블록", "게임", "프로그램"];
-  return importantWords.filter((word) => message.includes(word));
-}
-
-// ===== 힌트 레벨 결정 =====
-function determineHintLevel(helpAttempts, userMessage) {
-  // 명확한 도움 요청 키워드
-  const directHelpKeywords = ["못찾겠", "모르겠", "어디", "알려줘", "정답", "도와"];
-  const needsDirectHelp = directHelpKeywords.some((keyword) => userMessage.includes(keyword));
-
-  const levels = [
-    {
-      level: 1,
-      description: "카테고리만 힌트",
-      condition: (attempts) => attempts === 0 && !needsDirectHelp,
-      instruction: `
-1단계: 카테고리만 알려주기
-"시작 카테고리를 살펴보세요."`,
-    },
-    {
-      level: 2,
-      description: "정확한 블록명 제공",
-      condition: (attempts) => attempts >= 1 || needsDirectHelp,
-      instruction: `
-2단계: 정확한 답 제공
-"시작 카테고리에서 '시작하기 버튼을 클릭했을 때' 블록을 사용하세요."
-
-반드시:
-- 정확한 카테고리명 (시작)
-- 정확한 블록명 (시작하기 버튼을 클릭했을 때)
-- 간단한 사용법
-
-돌려 말하지 마세요.`,
-    },
-  ];
-
-  // "모르겠어" 등이 포함되면 바로 2단계로
-  if (needsDirectHelp) {
-    return levels[1];
-  }
-
-  // 두 번째 시도부터는 무조건 정답
-  if (helpAttempts >= 1) {
-    return levels[1];
-  }
-
-  return levels[0];
-}
-
-// ===== 대화 기록에 힌트 레벨 저장 =====
-function addHintLevelToHistory(conversationHistory, level) {
-  // 메타데이터로 힌트 레벨 추가
-  const metadata = {
-    hintLevel: level,
-    timestamp: Date.now(),
-  };
-
-  return {
-    ...conversationHistory,
-    metadata,
-  };
-}
-
-// ===== 모드별 설명 =====
-function getModeDescription(mode) {
-  const modes = {
-    auto: "자동 모드 - 상황에 맞는 최적의 도움 제공",
-    blocks: "블록 도움 모드 - 블록 사용법과 조합에 집중",
-    general: "일반 질문 모드 - 프로그래밍 개념 설명",
-    debug: "디버깅 모드 - 문제 해결과 오류 분석",
-  };
-  return modes[mode] || modes["auto"];
-}
-
-// ===== 폴백 응답 (API 실패 시) =====
+// background.js의 getFallbackResponse 함수 수정
 function getFallbackResponse(errorMessage) {
-  const fallbackResponses = [
-    "어떤 부분이 어려우신가요?",
-    "어떤 결과를 만들고 싶으세요?",
-    "첫 번째 단계는 뭘까요?",
-    "어떤 블록을 써보셨나요?",
-  ];
+  // errorMessage가 undefined일 수 있으므로 체크
+  const message = errorMessage || "알 수 없는 오류가 발생했습니다";
 
-  const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-
-  if (errorMessage.includes("API 키")) {
-    return `${randomResponse}\n\n⚠️ ${errorMessage}\n\n확장 프로그램 아이콘을 클릭하여 API 키를 설정해주세요.`;
+  if (message.includes("API 키")) {
+    return "API 키를 설정해주세요. 확장 프로그램 아이콘을 클릭하여 설정할 수 있어요!";
   }
-
-  return `${randomResponse}\n\n(연결 상태가 불안정해서 간단한 응답을 드렸어요. 다시 시도해주세요!)`;
+  return "죄송해요, 일시적인 문제가 발생했어요. 다시 시도해주세요!";
 }
 
-// ===== 메인 AI 요청 처리 함수 =====
-async function handleAIRequest(request) {
-  const { message, mode, conversationHistory = [] } = request;
-
-  console.log("🚀 AI 요청 처리 시작:", { message, mode, ragEnabled: USE_RAG });
-
-  try {
-    // 1. 질문 분류
-    const classification = classifyQuestion(message);
-    console.log("📊 분류 결과:", classification);
-
-    // 2. API 키 확인
-    const settings = await chrome.storage.sync.get(["openai_api_key"]);
-    if (!settings.openai_api_key?.trim()) {
-      throw new Error("API 키가 설정되지 않았습니다");
-    }
-
-    // 3. RAG 검색 수행
-    let relevantBlocks = [];
-    if (USE_RAG) {
-      console.log("🧠 RAG 검색 시작...");
-      relevantBlocks = await searchEntryBlocks(message, 5);
-      console.log(`🎯 RAG 검색 완료: ${relevantBlocks.length}개 블록 발견`);
-    }
-
-    // 4. 응답 생성
-    const response = await generateEducationalResponse(message, mode, conversationHistory);
-
-    // 5. 사용량 통계 기록
-    await logUsageStats(message.length, response.length, classification.type, USE_RAG);
-
-    // 6. 응답 반환
-    return {
-      success: true,
-      response: response,
-      rawBlocks: relevantBlocks,
-      classification: classification,
-      ragUsed: USE_RAG && relevantBlocks.length > 0,
-    };
-  } catch (error) {
-    console.error("❌ AI 요청 처리 실패:", error);
-    return {
-      success: false,
-      response: getFallbackResponse(error.message),
-      rawBlocks: [],
-      classification: null,
-    };
-  }
+// ===== 카테고리 한국어 변환 =====
+function getCategoryKorean(category) {
+  const categoryMap = {
+    start: "시작",
+    moving: "움직임",
+    looks: "생김새",
+    sound: "소리",
+    judgement: "판단",
+    flow: "흐름",
+    variable: "자료",
+    func: "함수",
+    calc: "계산",
+    brush: "붓",
+  };
+  return categoryMap[category] || category;
 }
 
-// ===== 사용량 통계 =====
-async function logUsageStats(messageLength, responseLength, mode, ragUsed) {
-  const today = new Date().toISOString().split("T")[0];
-  const stats = await chrome.storage.local.get([`stats_${today}`]);
-
-  const todayStats = stats[`stats_${today}`] || {
-    totalRequests: 0,
-    totalTokens: 0,
-    modeUsage: {},
-    ragUsage: {
-      withRAG: 0,
-      withoutRAG: 0,
-      ragSearches: 0,
-    },
+// ===== 블록 파일 목록 =====
+function getKnownBlockFiles(category) {
+  const fileMap = {
+    start: [
+      "message_cast.json",
+      "message_cast_wait.json",
+      "when_message_cast.json",
+      "when_object_click.json",
+      "when_run_button_click.json",
+      "when_scene_start.json",
+      "when_some_key_pressed.json",
+    ],
+    moving: [
+      "bounce_wall.json",
+      "locate.json",
+      "locate_xy.json",
+      "move_direction.json",
+      "move_x.json",
+      "move_y.json",
+      "rotate_relative.json",
+    ],
+    looks: ["change_to_next_shape.json", "dialog.json", "hide.json", "show.json"],
+    sound: ["play_sound.json", "sound_volume_change.json"],
+    judgement: ["boolean_and_or.json", "boolean_basic_operator.json", "is_clicked.json", "reach_something.json"],
+    flow: [
+      "_if.json",
+      "if_else.json",
+      "repeat_basic.json",
+      "repeat_inf.json",
+      "wait_second.json",
+      "create_clone.json",
+      "delete_clone.json",
+      "when_clone_start.json",
+    ],
+    variable: ["set_variable.json", "get_variable.json", "change_variable.json", "ask_and_wait.json"],
+    func: ["function_create.json", "function_general.json"],
+    calc: ["calc_basic.json", "calc_operation.json", "calc_rand.json"],
+    brush: ["brush_erase_all.json", "brush_stamp.json", "start_drawing.json"],
   };
 
-  todayStats.totalRequests++;
-  todayStats.totalTokens += Math.ceil((messageLength + responseLength) / 4);
-  todayStats.modeUsage[mode] = (todayStats.modeUsage[mode] || 0) + 1;
-
-  if (ragUsed) {
-    todayStats.ragUsage.withRAG++;
-    todayStats.ragUsage.ragSearches++;
-  } else {
-    todayStats.ragUsage.withoutRAG++;
-  }
-
-  await chrome.storage.local.set({
-    [`stats_${today}`]: todayStats,
-  });
-
-  console.log(`📊 사용량 기록: RAG ${ragUsed ? "ON" : "OFF"}, 모드: ${mode}`);
+  return fileMap[category] || [];
 }
 
 // ===== Chrome Extension 메시지 처리 =====
@@ -816,25 +554,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.action) {
     case "generateAIResponse":
       handleAIRequest(request)
-        .then((result) => {
-          sendResponse(result);
-        })
-        .catch((error) => {
+        .then((result) => sendResponse(result))
+        .catch((error) =>
           sendResponse({
             success: false,
             response: getFallbackResponse(error.message),
             error: error.message,
-          });
-        });
+          })
+        );
       return true; // 비동기 응답
 
     case "getSettings":
-      chrome.storage.sync.get(["enabled", "autoAnalysis", "sidebarMode", "openai_api_key", "rag_enabled"], (data) => {
+      chrome.storage.sync.get(["openai_api_key", "rag_enabled"], (data) => {
         sendResponse({
           ...data,
           hasApiKey: !!data.openai_api_key,
           ragEnabled: data.rag_enabled !== false,
-          openai_api_key: undefined, // 보안상 키 자체는 전송하지 않음
         });
       });
       return true;
@@ -854,15 +589,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const newState = !(data.rag_enabled !== false);
         chrome.storage.sync.set({ rag_enabled: newState }, () => {
           USE_RAG = newState;
-          console.log(`🔄 RAG 토글: ${USE_RAG ? "ON" : "OFF"}`);
           sendResponse({ success: true, ragEnabled: newState });
         });
       });
-      return true;
-
-    case "openSettings":
-      chrome.tabs.create({ url: chrome.runtime.getURL("settings.html") });
-      sendResponse({ success: true });
       return true;
 
     default:
@@ -870,7 +599,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// ===== Entry URL 처리 =====
+// ===== Entry 탭 관리 =====
 const ENTRY_URL = "https://playentry.org/";
 const ENTRY_MATCH = /^https?:\/\/([a-z0-9-]+\.)?playentry\.org/i;
 
@@ -878,36 +607,6 @@ function sendToggle(tabId) {
   if (!tabId) return;
   chrome.tabs.sendMessage(tabId, { type: "TOGGLE_SIDEBAR" }, () => {
     void chrome.runtime.lastError;
-  });
-}
-
-function waitTabComplete(tabId, timeoutMs = 15000) {
-  return new Promise((resolve) => {
-    let settled = false;
-
-    const timer = setTimeout(async () => {
-      if (settled) return;
-      settled = true;
-      try {
-        const t = await chrome.tabs.get(tabId);
-        resolve(t || null);
-      } catch {
-        resolve(null);
-      }
-    }, timeoutMs);
-
-    const listener = (id, info, tab) => {
-      if (id !== tabId) return;
-      if (info.status === "complete") {
-        chrome.tabs.onUpdated.removeListener(listener);
-        if (settled) return;
-        settled = true;
-        clearTimeout(timer);
-        resolve(tab || null);
-      }
-    };
-
-    chrome.tabs.onUpdated.addListener(listener);
   });
 }
 
@@ -919,13 +618,12 @@ async function openOrFocusEntryAndToggle(fromTab) {
 
   const all = await chrome.tabs.query({});
   const existing = all.find((t) => ENTRY_MATCH.test(t.url || ""));
+
   if (existing) {
     await chrome.tabs.update(existing.id, { active: true });
     setTimeout(() => sendToggle(existing.id), 200);
-    return;
+  } else {
+    const created = await chrome.tabs.create({ url: ENTRY_URL, active: true });
+    setTimeout(() => sendToggle(created.id), 3000);
   }
-
-  const created = await chrome.tabs.create({ url: ENTRY_URL, active: true });
-  const loaded = await waitTabComplete(created.id);
-  setTimeout(() => sendToggle((loaded || created).id), 300);
 }

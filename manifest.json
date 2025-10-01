@@ -14,7 +14,7 @@
   "content_scripts": [
     {
       "matches": ["*://playentry.org/*", "*://*.playentry.org/*"],
-      "js": ["questionClassifier.js", "blockRenderer.js", "content.js"],
+      "js": ["content.js"],
       "css": ["style.css"],
       "run_at": "document_idle",
       "all_frames": true
@@ -22,10 +22,9 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["icon.png", "icon.jpg", "icon.jpeg", "icon.gif", "icon.svg", "data/blocks/*/*.json", "data/block_icon/*.svg"],
-      "matches": ["*://playentry.org/*", "*://*.playentry.org/*", "<all_urls>"]
+      "resources": ["icon.png", "data/blocks/*/*.json", "data/block_icon/*.svg"],
+      "matches": ["*://playentry.org/*", "*://*.playentry.org/*"]
     }
   ],
-
   "host_permissions": ["https://api.openai.com/*"]
 }

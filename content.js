@@ -140,10 +140,151 @@ window.showModalMessage = function (message, type) {
   }
 };
 
+// createSingleCategoryCard 함수를 전역으로 정의
+window.createSingleCategoryCard = function (block) {
+  const getCategoryKorean =
+    window.entryHelper?.getCategoryKorean ||
+    function (cat) {
+      const map = {
+        start: "시작",
+        moving: "움직임",
+        looks: "생김새",
+        sound: "소리",
+        judgement: "판단",
+        flow: "흐름",
+        variable: "자료",
+        func: "함수",
+        calc: "계산",
+        brush: "붓",
+        text: "글상자",
+      };
+      return map[cat] || cat;
+    };
+
+  const getCategoryColor = function (cat) {
+    const colors = {
+      start: "#4CAF50",
+      moving: "#2196F3",
+      looks: "#9C27B0",
+      sound: "#FF9800",
+      judgement: "#F44336",
+      flow: "#FF5722",
+      variable: "#795548",
+      func: "#607D8B",
+      calc: "#009688",
+      brush: "#E91E63",
+      text: "#3F51B5",
+    };
+    return colors[cat] || "#757575";
+  };
+
+  const categoryName = getCategoryKorean(block.category);
+  const color = getCategoryColor(block.category);
+  const iconPath = chrome.runtime.getURL(`data/block_icon/${block.category}_icon.svg`);
+
+  return `
+    <div style="
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 16px 0;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      text-align: center;
+    ">
+      <div style="font-size: 14px; color: #495057; margin-bottom: 16px; font-weight: 700;">
+        💡 이 카테고리를 확인하세요!
+      </div>
+      <div style="
+        background: white;
+        border: 2px solid ${color};
+        border-radius: 12px;
+        padding: 20px;
+        display: inline-block;
+      ">
+        <div style="margin-bottom: 10px;">
+          <img src="${iconPath}" 
+               style="width: 48px; height: 48px;"
+               onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=font-size:36px>📦</span>';"
+               alt="${categoryName}">
+        </div>
+        <div style="font-weight: 700; color: ${color}; font-size: 18px;">${categoryName}</div>
+      </div>
+      <div style="margin-top: 16px; font-size: 13px; color: #6c757d;">
+        여기서 관련 블록을 찾아보세요!
+      </div>
+    </div>
+  `;
+};
+
+// createBlockListWithImages 함수도 전역으로 (필요한 경우)
+window.createBlockListWithImages = function (blocks) {
+  if (!blocks || blocks.length === 0) return "";
+
+  let html = '<div style="margin: 10px 0;">';
+  blocks.forEach((block) => {
+    html += `
+      <div style="
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 8px;
+      ">
+        <div style="font-weight: 600; margin-bottom: 6px;">
+          ${block.name || block.fileName}
+        </div>
+        ${block.description ? `<div style="color: #666; font-size: 13px;">${block.description}</div>` : ""}
+      </div>
+    `;
+  });
+  html += "</div>";
+  return html;
+};
+
+// displayLearnerProgress 함수를 전역으로
+window.displayLearnerProgress = function (progress) {
+  if (Math.random() < 0.3 && progress.progress >= 25) {
+    const progressHtml = `
+      <div style="
+        background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+        border-left: 4px solid #4caf50;
+        border-radius: 8px;
+        padding: 12px;
+        margin: 8px 0;
+        font-size: 12px;
+      ">
+        <div style="font-weight: bold; color: #2e7d32; margin-bottom: 6px;">
+          📈 학습 진행상황
+        </div>
+        <div style="color: #388e3c;">
+          전체 진행도: ${progress.progress}% 
+          ${
+            progress.completedConcepts && progress.completedConcepts.length > 0
+              ? `| 완료한 개념: ${progress.completedConcepts.slice(0, 2).join(", ")}`
+              : ""
+          }
+        </div>
+        ${
+          progress.recommendations && progress.recommendations.length > 0
+            ? `<div style="margin-top: 6px; font-style: italic; color: #558b2f;">
+            💡 ${progress.recommendations[0]}
+          </div>`
+            : ""
+        }
+      </div>
+    `;
+
+    if (window.entryHelper && window.entryHelper.addChatMessage) {
+      window.entryHelper.addChatMessage(progressHtml, true, "system");
+    }
+  }
+};
+
 // 그 다음에 IIFE 시작
 (function () {
   "use strict";
-  // 기존 코드...
+
+  // 기본 변수들
   let isInitialized = false;
   let sidebar = null;
   let conversationHistory = [];
@@ -154,38 +295,30 @@ window.showModalMessage = function (message, type) {
   // 카테고리 세부사항 표시 함수
   window.showCategoryDetails = function (category) {
     console.log(`${category} 카테고리 세부사항 표시`);
-    const categoryName = getCategoryKorean ? getCategoryKorean(category) : category;
-    // addChatMessage 함수를 직접 호출할 수 없으므로 이벤트를 통해 처리
+    const categoryName = getCategoryKorean(category);
     setTimeout(() => {
       const chatMessages = document.getElementById("chat-messages");
       if (chatMessages) {
-        // 직접 DOM에 메시지 추가
         const messageDiv = document.createElement("div");
         messageDiv.className = "message bot-message";
         messageDiv.innerHTML = `
-        <div class="message-avatar">
-          <img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">
-        </div>
-        <div class="message-content">
-          <div class="message-text">
-            ${categoryName} 카테고리의 블록들에 대해 더 자세히 알고 싶으시군요! 어떤 부분이 궁금하신가요?
+          <div class="message-avatar">
+            <img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">
           </div>
-          <div class="message-time">${new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</div>
-        </div>
-      `;
+          <div class="message-content">
+            <div class="message-text">
+              ${categoryName} 카테고리의 블록들에 대해 더 자세히 알고 싶으시군요! 어떤 부분이 궁금하신가요?
+            </div>
+            <div class="message-time">${new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</div>
+          </div>
+        `;
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
     }, 100);
   };
 
-  // ===== 블록 JSON -> Entry Script Array 변환 함수 =====
-  function blockJsonToScriptArray(blockJson) {
-    if (!blockJson || !blockJson.fileName) return [];
-    return [[blockJson.fileName, [], []]];
-  }
-
-  // ===== 카테고리별 색상 반환 =====
+  // ===== 유틸리티 함수들 =====
   function getCategoryColor(category) {
     const colors = {
       start: "#4CAF50",
@@ -203,7 +336,45 @@ window.showModalMessage = function (message, type) {
     return colors[category] || "#757575";
   }
 
-  // ===== 현재 키 상태 로드 =====
+  function getCategoryKorean(category) {
+    const categoryMap = {
+      start: "시작",
+      moving: "움직임",
+      looks: "생김새",
+      sound: "소리",
+      judgement: "판단",
+      flow: "흐름",
+      variable: "자료",
+      func: "함수",
+      calc: "계산",
+      brush: "붓",
+      text: "글상자",
+    };
+    return categoryMap[category] || category;
+  }
+
+  function getEmojiFallback(category) {
+    const emojiMap = {
+      start: "🚀",
+      moving: "🏃",
+      looks: "🎨",
+      sound: "🔊",
+      judgement: "🤔",
+      flow: "🔄",
+      variable: "📊",
+      func: "⚙️",
+      calc: "🔢",
+      brush: "🖌️",
+      text: "📝",
+      repeat: "🔁",
+    };
+    return emojiMap[category] || "📦";
+  }
+
+  function getCategoryIconPath(category) {
+    return chrome.runtime.getURL(`data/block_icon/${category}_icon.svg`);
+  }
+
   async function loadCurrentKeyStatus() {
     try {
       const result = await chrome.storage.sync.get(["openai_api_key"]);
@@ -224,257 +395,7 @@ window.showModalMessage = function (message, type) {
     }
   }
 
-  // ===== 카테고리 한국어 변환 (엔트리 용어로 수정) =====
-  function getCategoryKorean(category) {
-    const categoryMap = {
-      start: "시작",
-      moving: "움직임",
-      looks: "생김새",
-      sound: "소리",
-      judgement: "판단",
-      flow: "흐름",
-      variable: "자료",
-      func: "함수",
-      calc: "계산",
-      brush: "붓",
-      text: "글상자",
-    };
-    return categoryMap[category] || category;
-  }
-  // ===== 이모지 폴백 함수 (카테고리별 이모지) =====
-  function getEmojiFallback(category) {
-    const emojiMap = {
-      start: "🚀", // 시작
-      moving: "🏃", // 움직임
-      looks: "🎨", // 생김새
-      sound: "🔊", // 소리
-      judgement: "🤔", // 판단
-      flow: "🔄", // 흐름
-      variable: "📊", // 자료
-      func: "⚙️", // 함수
-      calc: "🔢", // 계산
-      brush: "🖌️", // 붓
-      text: "📝", // 글상자
-      repeat: "🔁", // 반복
-    };
-    return emojiMap[category] || "📦";
-  }
-  // ===== 카테고리 아이콘 경로 매핑 =====
-  function getCategoryIconPath(category) {
-    // data/block_icon 폴더의 SVG 파일 경로
-    return chrome.runtime.getURL(`data/block_icon/${category}_icon.svg`);
-  }
-
-  // ===== 카테고리 아이콘 가져오기 =====
-  async function getCategoryIconElement(category) {
-    const iconPath = getCategoryIconPath(category);
-
-    try {
-      const response = await fetch(iconPath);
-      if (response.ok) {
-        return `<img src="${iconPath}" style="width: 24px; height: 24px; vertical-align: middle;" alt="${category}">`;
-      }
-    } catch (error) {
-      console.log(`아이콘 로드 실패 (${category}):`, error);
-    }
-
-    // 폴백: 이모지 사용
-    const emojiIcons = {
-      start: "🚩",
-      flow: "🔄",
-      moving: "🏃",
-      looks: "🎨",
-      brush: "🖌️",
-      sound: "🔊",
-      judgement: "❓",
-      calc: "🔢",
-      variable: "📦",
-      func: "⚙️",
-      text: "📝",
-    };
-
-    return `<span style="font-size: 24px;">${emojiIcons[category] || "📦"}</span>`;
-  }
-
-  function createCategoryCards(blocks) {
-    if (!blocks || blocks.length === 0) return "";
-
-    // 카테고리별로 그룹화
-    const blocksByCategory = {};
-    blocks.forEach((block) => {
-      const category = block.category;
-      if (!blocksByCategory[category]) {
-        blocksByCategory[category] = [];
-      }
-      blocksByCategory[category].push(block);
-    });
-
-    let html = `
-    <div style="
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      border-radius: 16px;
-      padding: 20px;
-      margin: 16px 0;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-      border: 1px solid rgba(0,0,0,0.05);
-    ">
-      <div style="
-        font-size: 14px;
-        color: #495057;
-        margin-bottom: 16px;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      ">
-        <span style="font-size: 18px;">📚</span>
-        <span>이런 카테고리를 살펴보세요!</span>
-      </div>
-      <div style="
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 12px;
-      ">
-  `;
-
-    // 각 카테고리 카드 생성
-    for (const [category, categoryBlocks] of Object.entries(blocksByCategory)) {
-      const categoryName = getCategoryKorean(category);
-      const color = getCategoryColor(category);
-      const iconPath = getCategoryIconPath(category);
-      const emojiFallback = getEmojiFallback(category);
-
-      html += `
-      <div style="
-        background: white;
-        border: 2px solid ${color}30;
-        border-radius: 12px;
-        padding: 16px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-      "
-      onmouseover="
-        this.style.transform='translateY(-4px) scale(1.02)';
-        this.style.boxShadow='0 8px 24px rgba(0,0,0,0.12)';
-        this.style.borderColor='${color}';
-        this.style.background='linear-gradient(135deg, ${color}08, ${color}15)';
-      "
-      onmouseout="
-        this.style.transform='translateY(0) scale(1)';
-        this.style.boxShadow='none';
-        this.style.borderColor='${color}30';
-        this.style.background='white';
-      "
-      onclick="window.showCategoryDetails && window.showCategoryDetails('${category}')"
-      >
-        <!-- 배경 장식 -->
-        <div style="
-          position: absolute;
-          top: -20px;
-          right: -20px;
-          width: 60px;
-          height: 60px;
-          background: ${color}10;
-          border-radius: 50%;
-          pointer-events: none;
-        "></div>
-        
-        <!-- SVG 아이콘 우선, 실패시 이모지 -->
-        <div style="
-          margin-bottom: 10px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 36px;
-        ">
-          <img src="${iconPath}" 
-               style="width: 32px; height: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));"
-               onerror="this.parentElement.innerHTML='<span style=font-size:28px>${emojiFallback}</span>';"
-               alt="${categoryName}">
-        </div>
-        
-        <!-- 카테고리 이름 -->
-        <div style="
-          font-weight: 700;
-          color: ${color};
-          font-size: 14px;
-          margin-bottom: 4px;
-          letter-spacing: -0.3px;
-        ">${categoryName}</div>
-        
-        <!-- 블록 개수 -->
-        <div style="
-          font-size: 11px;
-          color: #868e96;
-          font-weight: 500;
-        ">블록 ${categoryBlocks.length}개</div>
-        
-        <!-- 개수 뱃지 -->
-        <div style="
-          position: absolute;
-          top: 8px;
-          right: 8px;
-          background: ${color};
-          color: white;
-          width: 22px;
-          height: 22px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 10px;
-          font-weight: bold;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        ">${categoryBlocks.length}</div>
-      </div>
-    `;
-    }
-
-    html += `
-      </div>
-      <div style="
-        margin-top: 16px;
-        padding-top: 16px;
-        border-top: 1px solid #e9ecef;
-        font-size: 11px;
-        color: #868e96;
-        text-align: center;
-        font-style: italic;
-      ">
-        💡 카테고리를 클릭하면 해당 블록들을 자세히 볼 수 있어요!
-      </div>
-    </div>
-  `;
-
-    return html;
-  }
-
-  // ===== 아이콘 사전 로드 함수 =====
-  async function preloadCategoryIcons() {
-    const categories = ["start", "flow", "moving", "looks", "brush", "sound", "judgement", "calc", "variable", "func", "text"];
-    const loadedIcons = {};
-
-    for (const category of categories) {
-      try {
-        const iconPath = getCategoryIconPath(category);
-        const response = await fetch(iconPath);
-        if (response.ok) {
-          loadedIcons[category] = iconPath;
-          console.log(`✅ ${category} 아이콘 로드 성공`);
-        }
-      } catch (error) {
-        console.log(`❌ ${category} 아이콘 로드 실패`);
-      }
-    }
-
-    console.log("로드된 아이콘:", loadedIcons);
-    return loadedIcons;
-  }
-
-  // ===== 간단한 사이드바 생성 =====
+  // ===== 사이드바 생성 =====
   function createSidebar() {
     const EXIST = document.getElementById("entry-helper-sidebar");
     if (EXIST) return EXIST;
@@ -534,9 +455,6 @@ window.showModalMessage = function (message, type) {
       </div>
     </div>
 
-    <!-- Block Renderer (hidden) -->
-    <div id="entry-hidden-renderer" style="position:fixed; left:-9999px; top:-9999px; width:800px; height:600px;"></div>
-
     <!-- 사이드바 토글 트리거 버튼 -->
     <div id="sidebar-trigger" class="sidebar-trigger" title="AI 도우미 열기">
       <img src="${chrome.runtime.getURL("icon.png")}" class="trigger-icon" style="width: 28px; height: 28px;">
@@ -546,6 +464,61 @@ window.showModalMessage = function (message, type) {
 
     document.body.insertAdjacentHTML("beforeend", html);
     return document.getElementById("entry-helper-sidebar");
+  }
+
+  // ===== 채팅 메시지 추가 함수 =====
+  function addChatMessage(content, isBot = false, type = "text") {
+    const messagesContainer = document.getElementById("chat-messages");
+    if (!messagesContainer) return;
+
+    const messageDiv = document.createElement("div");
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+
+    if (type === "cot") {
+      messageDiv.className = "message bot-message cot-message";
+      messageDiv.innerHTML = `
+        <div class="message-avatar">
+          <img src="${chrome.runtime.getURL("icon.png")}" style="width:20px;height:20px;">
+        </div>
+        <div class="message-content" style="max-width: 100%;">
+          ${content}
+          <div class="message-time">${timeStr}</div>
+        </div>
+      `;
+    } else if (type === "block-with-image") {
+      messageDiv.className = "message bot-message";
+      messageDiv.innerHTML = `
+        <div class="message-avatar">
+          <img src="${chrome.runtime.getURL("icon.png")}" style="width:20px;height:20px;">
+        </div>
+        <div class="message-content">
+          ${content}
+          <div class="message-time">${timeStr}</div>
+        </div>
+      `;
+    } else if (type === "system") {
+      messageDiv.className = "message system-message";
+      messageDiv.innerHTML = `
+        <div class="message-content system-message-content">
+          <div class="message-text">${content}</div>
+        </div>
+      `;
+    } else {
+      messageDiv.className = `message ${isBot ? "bot-message" : "user-message"}`;
+      messageDiv.innerHTML = `
+        <div class="message-avatar">${
+          isBot ? `<img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">` : "👤"
+        }</div>
+        <div class="message-content">
+          <div class="message-text">${content}</div>
+          <div class="message-time">${timeStr}</div>
+        </div>
+      `;
+    }
+
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
 
   // ===== CoT 응답 표시 함수 =====
@@ -671,144 +644,14 @@ window.showModalMessage = function (message, type) {
     </div>
   `;
 
-    // HTML 추가
     addChatMessage(cotHtml, true, "cot");
 
-    // 이벤트 리스너 설정 (DOM에 추가된 후 바로 실행)
     setTimeout(() => {
       setupCoTEventListeners(cotId, cotSequence);
     }, 100);
   }
 
-  // ===== 열기/닫기 =====
-  function toggleSidebarOpen(forceOpen = null) {
-    if (!isInitialized || !sidebar) {
-      pendingOpenRequest = forceOpen === null ? true : !!forceOpen;
-      return;
-    }
-    const open = forceOpen === null ? !sidebar.classList.contains("sidebar-open") : !!forceOpen;
-    if (open) {
-      sidebar.classList.add("sidebar-open");
-    } else {
-      sidebar.classList.remove("sidebar-open");
-    }
-  }
-
-  // ===== RAG 토글 함수 =====
-  async function toggleRAGMode() {
-    try {
-      console.log("RAG 모드 토글 시작");
-
-      chrome.runtime.sendMessage({ action: "toggleRAG" }, (response) => {
-        if (chrome.runtime.lastError) {
-          console.error("RAG 토글 Chrome runtime 오류:", chrome.runtime.lastError);
-          addChatMessage("RAG 모드 변경 중 오류가 발생했어요.", true, "system");
-          return;
-        }
-
-        console.log("RAG 토글 응답:", response);
-
-        if (response && response.success) {
-          updateRAGStatus(response.ragEnabled);
-          const modeText = response.ragEnabled ? "Entry 전문 지식" : "일반 AI 지식";
-          addChatMessage(`🔄 모드가 변경되었습니다: ${modeText}`, true, "system");
-        } else {
-          console.error("RAG 토글 실패:", response);
-          addChatMessage("RAG 모드 변경에 실패했어요.", true, "system");
-        }
-      });
-    } catch (error) {
-      console.error("RAG 토글 오류:", error);
-      addChatMessage("RAG 모드 변경 중 예상치 못한 오류가 발생했어요.", true, "system");
-    }
-  }
-
-  function updateRAGStatus(isEnabled) {
-    const toggleBtn = document.getElementById("rag-toggle");
-    const statusText = document.getElementById("rag-status-text");
-    const statusDot = document.getElementById("rag-status-dot");
-
-    if (toggleBtn && statusText && statusDot) {
-      if (isEnabled) {
-        toggleBtn.style.background = "rgba(16, 185, 129, 0.2)";
-        toggleBtn.style.color = "#065f46";
-        toggleBtn.title = "RAG 끄기 (현재: Entry 전문 지식)";
-        statusText.textContent = "Entry 전문 지식";
-        statusDot.className = "status-dot valid";
-      } else {
-        toggleBtn.style.background = "rgba(239, 68, 68, 0.2)";
-        toggleBtn.style.color = "#991b1b";
-        toggleBtn.title = "RAG 켜기 (현재: 일반 AI 지식)";
-        statusText.textContent = "일반 AI 지식";
-        statusDot.className = "status-dot";
-      }
-    }
-  }
-
-  function loadRAGStatus() {
-    chrome.runtime.sendMessage({ action: "getSettings" }, (response) => {
-      if (response) {
-        updateRAGStatus(response.ragEnabled);
-      }
-    });
-  }
-
-  // ===== 채팅 메시지 추가 함수 =====
-  function addChatMessage(content, isBot = false, type = "text") {
-    const messagesContainer = document.getElementById("chat-messages");
-    if (!messagesContainer) return;
-
-    const messageDiv = document.createElement("div");
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
-
-    if (type === "cot") {
-      messageDiv.className = "message bot-message cot-message";
-      messageDiv.innerHTML = `
-      <div class="message-avatar">
-        <img src="${chrome.runtime.getURL("icon.png")}" style="width:20px;height:20px;">
-      </div>
-      <div class="message-content" style="max-width: 100%;">
-        ${content}
-        <div class="message-time">${timeStr}</div>
-      </div>
-    `;
-    } else if (type === "block-with-image") {
-      messageDiv.className = "message bot-message";
-      messageDiv.innerHTML = `
-      <div class="message-avatar">
-        <img src="${chrome.runtime.getURL("icon.png")}" style="width:20px;height:20px;">
-      </div>
-      <div class="message-content">
-        ${content}
-        <div class="message-time">${timeStr}</div>
-      </div>
-    `;
-    } else if (type === "system") {
-      messageDiv.className = "message system-message";
-      messageDiv.innerHTML = `
-      <div class="message-content system-message-content">
-        <div class="message-text">${content}</div>
-      </div>
-    `;
-    } else {
-      messageDiv.className = `message ${isBot ? "bot-message" : "user-message"}`;
-      messageDiv.innerHTML = `
-      <div class="message-avatar">${
-        isBot ? `<img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">` : "👤"
-      }</div>
-      <div class="message-content">
-        <div class="message-text">${content}</div>
-        <div class="message-time">${timeStr}</div>
-      </div>
-    `;
-    }
-
-    messagesContainer.appendChild(messageDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-  }
-
-  // ===== CoT 이벤트 리스너 설정 함수 =====
+  // ===== CoT 이벤트 리스너 설정 =====
   function setupCoTEventListeners(cotId, cotSequence) {
     const cotElement = document.getElementById(cotId);
     if (!cotElement) {
@@ -816,10 +659,8 @@ window.showModalMessage = function (message, type) {
       return;
     }
 
-    // 현재 상태 관리
     let currentStep = 1;
 
-    // 1. 단계 토글 이벤트
     const stepHeaders = cotElement.querySelectorAll(".cot-step-toggle");
     stepHeaders.forEach((header) => {
       header.addEventListener("click", function () {
@@ -828,7 +669,6 @@ window.showModalMessage = function (message, type) {
       });
     });
 
-    // 2. 이전/다음 버튼 이벤트
     const prevBtn = cotElement.querySelector(".cot-nav-prev");
     const nextBtn = cotElement.querySelector(".cot-nav-next");
 
@@ -850,12 +690,10 @@ window.showModalMessage = function (message, type) {
       });
     }
 
-    // 3. 완료 버튼 이벤트
     const completeBtn = cotElement.querySelector(".cot-complete-step");
     if (completeBtn) {
       completeBtn.addEventListener("click", function () {
         markStepComplete(cotElement, currentStep);
-        // 자동으로 다음 단계로 이동
         if (currentStep < cotSequence.totalSteps) {
           setTimeout(() => {
             currentStep++;
@@ -866,21 +704,17 @@ window.showModalMessage = function (message, type) {
     }
   }
 
-  // ===== 단계 토글 함수 =====
   function toggleStepContent(cotElement, stepNum) {
     const allContents = cotElement.querySelectorAll(".step-content");
     const allHeaders = cotElement.querySelectorAll(".cot-step-toggle");
 
-    // 클릭한 단계 찾기
     const targetContent = cotElement.querySelector(`[data-step-content="${stepNum}"]`);
     const targetHeader = cotElement.querySelector(`[data-step-num="${stepNum}"]`);
 
     if (!targetContent || !targetHeader) return;
 
-    // 현재 상태 확인
     const isExpanded = targetContent.classList.contains("expanded");
 
-    // 모든 단계 닫기
     allContents.forEach((content) => {
       content.style.maxHeight = "0";
       content.style.padding = "0 12px";
@@ -894,7 +728,6 @@ window.showModalMessage = function (message, type) {
       if (icon) icon.textContent = "▶";
     });
 
-    // 클릭한 단계가 닫혀있었다면 열기
     if (!isExpanded) {
       targetContent.style.maxHeight = "500px";
       targetContent.style.padding = "12px";
@@ -906,18 +739,14 @@ window.showModalMessage = function (message, type) {
     }
   }
 
-  // ===== 단계 네비게이션 함수 =====
   function navigateToStep(cotElement, stepNum, totalSteps) {
-    // 해당 단계 열기
     toggleStepContent(cotElement, stepNum);
 
-    // 진행 상황 업데이트
     const progressText = cotElement.querySelector(".current-step-text");
     if (progressText) {
       progressText.textContent = stepNum;
     }
 
-    // 버튼 상태 업데이트
     const prevBtn = cotElement.querySelector(".cot-nav-prev");
     const nextBtn = cotElement.querySelector(".cot-nav-next");
 
@@ -925,7 +754,6 @@ window.showModalMessage = function (message, type) {
     if (nextBtn) nextBtn.disabled = stepNum === totalSteps;
   }
 
-  // ===== 단계 완료 표시 함수 =====
   function markStepComplete(cotElement, stepNum) {
     const stepContent = cotElement.querySelector(`[data-step-content="${stepNum}"]`);
     if (stepContent && !stepContent.innerHTML.includes("✓ 완료됨")) {
@@ -936,383 +764,146 @@ window.showModalMessage = function (message, type) {
     }
   }
 
-  // ===== 이벤트 설정 =====
-  function setupEventListeners() {
-    const chatInput = document.getElementById("chat-input");
-    const chatSend = document.getElementById("chat-send");
-
-    let isComposing = false;
-
-    // API 키 설정 버튼 이벤트
-    const apiKeyBtn = document.getElementById("api-key-btn");
-    if (apiKeyBtn) {
-      apiKeyBtn.addEventListener("click", showApiKeyModal);
+  // ===== 사이드바 토글 =====
+  function toggleSidebarOpen(forceOpen = null) {
+    if (!isInitialized || !sidebar) {
+      pendingOpenRequest = forceOpen === null ? true : !!forceOpen;
+      return;
     }
-
-    // 사이드바 컨트롤
-    const triggerBtn = document.getElementById("sidebar-trigger");
-    const closeBtn = document.getElementById("sidebar-close");
-
-    if (triggerBtn) {
-      triggerBtn.addEventListener("click", () => toggleSidebarOpen());
+    const open = forceOpen === null ? !sidebar.classList.contains("sidebar-open") : !!forceOpen;
+    if (open) {
+      sidebar.classList.add("sidebar-open");
+    } else {
+      sidebar.classList.remove("sidebar-open");
     }
+  }
 
-    if (closeBtn) {
-      closeBtn.addEventListener("click", () => toggleSidebarOpen(false));
-    }
-    function createSingleCategoryCard(block) {
-      const categoryName = getCategoryKorean(block.category);
-      const color = getCategoryColor(block.category);
-      const iconPath = getCategoryIconPath(block.category);
-      const emoji = getEmojiFallback(block.category);
+  // ===== 메시지 전송 함수 (수정됨) =====
+  async function sendMessage() {
+    try {
+      const chatInput = document.getElementById("chat-input");
+      const message = chatInput.value.trim();
+      if (!message) return;
 
-      return `
-    <div style="
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      border-radius: 16px;
-      padding: 20px;
-      margin: 16px 0;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-      text-align: center;
-    ">
-      <div style="
-        font-size: 14px;
-        color: #495057;
-        margin-bottom: 16px;
-        font-weight: 700;
-      ">
-        💡 이 카테고리를 확인하세요!
-      </div>
-      
-      <div style="
-        background: white;
-        border: 2px solid ${color};
-        border-radius: 12px;
-        padding: 20px;
-        display: inline-block;
-      ">
-        <div style="margin-bottom: 10px;">
-          <img src="${iconPath}" 
-               style="width: 48px; height: 48px;"
-               onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=font-size:36px>${emoji}</span>';"
-               alt="${categoryName}">
-        </div>
-        <div style="
-          font-weight: 700;
-          color: ${color};
-          font-size: 18px;
-        ">${categoryName}</div>
-      </div>
-      
-      <div style="
-        margin-top: 16px;
-        font-size: 13px;
-        color: #6c757d;
-      ">
-        여기서 관련 블록을 찾아보세요!
-      </div>
-    </div>
-  `;
-    }
-    // 학습 진행상황 모달 표시 함수
-    function showLearnerProgressModal() {
-      chrome.runtime.sendMessage({ action: "getLearnerProgress" }, (response) => {
-        if (response && response.success) {
-          const progress = response.progress;
+      // 사용자 메시지 표시
+      addChatMessage(message, false);
+      conversationHistory.push({ role: "user", content: message });
 
-          const modalHtml = `
-        <div style="
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          background: rgba(0,0,0,0.5);
-          z-index: 10001;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        " id="progress-modal">
-          <div style="
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            max-width: 400px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-          ">
-            <div style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-bottom: 16px;
-            ">
-              <h3 style="margin: 0; color: #333;">📊 학습 진행상황</h3>
-              <button onclick="this.closest('#progress-modal').remove()" 
-                      style="border: none; background: none; font-size: 18px; cursor: pointer;">✕</button>
-            </div>
-            
-            <div style="margin-bottom: 16px;">
-              <div style="color: #666; font-size: 14px; margin-bottom: 8px;">전체 진행도</div>
-              <div style="
-                background: #f0f0f0;
-                border-radius: 10px;
-                height: 20px;
-                position: relative;
-              ">
-                <div style="
-                  background: #4caf50;
-                  height: 100%;
-                  border-radius: 10px;
-                  width: ${progress.progress}%;
-                  transition: width 0.5s ease;
-                "></div>
-                <div style="
-                  position: absolute;
-                  top: 50%;
-                  left: 50%;
-                  transform: translate(-50%, -50%);
-                  font-size: 12px;
-                  font-weight: bold;
-                  color: ${progress.progress > 50 ? "white" : "#333"};
-                ">${progress.progress}%</div>
-              </div>
-            </div>
-            
-            ${
-              progress.completedConcepts && progress.completedConcepts.length > 0
-                ? `
-              <div style="margin-bottom: 16px;">
-                <div style="color: #666; font-size: 14px; margin-bottom: 8px;">완료한 개념</div>
-                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-                  ${progress.completedConcepts
-                    .map(
-                      (concept) =>
-                        `<span style="
-                      background: #e8f5e9;
-                      color: #2e7d32;
-                      padding: 4px 8px;
-                      border-radius: 12px;
-                      font-size: 11px;
-                    ">${concept}</span>`
-                    )
-                    .join("")}
-                </div>
-              </div>
-            `
-                : ""
-            }
-            
-            ${
-              progress.recommendations && progress.recommendations.length > 0
-                ? `
-              <div>
-                <div style="color: #666; font-size: 14px; margin-bottom: 8px;">추천사항</div>
-                <ul style="margin: 0; padding-left: 16px;">
-                  ${progress.recommendations
-                    .map((rec) => `<li style="font-size: 13px; margin-bottom: 4px;">${rec}</li>`)
-                    .join("")}
-                </ul>
-              </div>
-            `
-                : ""
-            }
-            
-            <div style="margin-top: 16px; text-align: right;">
-              <button onclick="resetProgress()" style="
-                background: #f44336;
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                border-radius: 4px;
-                font-size: 12px;
-                cursor: pointer;
-                margin-right: 8px;
-              ">진행상황 초기화</button>
-              <button onclick="this.closest('#progress-modal').remove()" style="
-                background: #2196f3;
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                border-radius: 4px;
-                cursor: pointer;
-              ">닫기</button>
-            </div>
-          </div>
-        </div>
-      `;
+      // 입력창 초기화
+      chatInput.value = "";
+      chatInput.style.height = "auto";
 
-          document.body.insertAdjacentHTML("beforeend", modalHtml);
-        }
-      });
-    }
-
-    // 진행상황 초기화 함수
-    window.resetProgress = function () {
-      if (confirm("정말로 학습 진행상황을 초기화하시겠어요?")) {
-        chrome.runtime.sendMessage({ action: "resetLearnerProgress" }, (response) => {
-          if (response && response.success) {
-            document.getElementById("progress-modal")?.remove();
-            addChatMessage("학습 진행상황이 초기화되었어요! 새로운 마음으로 시작해볼까요?", true, "system");
-          }
-        });
+      // 타이핑 표시기
+      const typingIndicator = document.getElementById("typing-indicator");
+      if (typingIndicator) {
+        typingIndicator.classList.remove("hidden");
       }
-    };
 
-    // 메시지 전송 함수
-    async function sendMessage() {
-      try {
-        const message = chatInput.value.trim();
-        if (!message) return;
-
-        // 사용자 메시지 표시
-        addChatMessage(message, false);
-        conversationHistory.push({ role: "user", content: message });
-
-        chatInput.value = "";
-        chatInput.style.height = "auto";
-
-        // 타이핑 표시기
-        const typingIndicator = document.getElementById("typing-indicator");
-        if (typingIndicator) {
-          typingIndicator.classList.remove("hidden");
-        }
-
-        // AI 응답 요청 (모드 자동 설정)
-        const mode = "auto"; // 모드 선택 버튼이 제거되었으므로 자동 모드로 고정
-        chrome.runtime.sendMessage(
-          {
-            action: "generateAIResponse",
-            message: message,
-            mode: mode,
-            projectContext: projectContext,
-            conversationHistory: conversationHistory.slice(),
-          },
-          async (response) => {
-            console.log("AI 응답 수신:", response);
-
+      // AI 응답 요청
+      chrome.runtime.sendMessage(
+        {
+          action: "generateAIResponse",
+          message: message,
+          conversationHistory: conversationHistory.slice(),
+        },
+        async (response) => {
+          // Chrome runtime 에러를 가장 먼저 체크
+          if (chrome.runtime.lastError) {
+            console.error("Chrome runtime 오류:", chrome.runtime.lastError);
             if (typingIndicator) {
               typingIndicator.classList.add("hidden");
             }
+            addChatMessage("연결 오류가 발생했어요. 확장 프로그램을 다시 로드해주세요!", true);
+            return;
+          }
 
-            if (chrome.runtime.lastError) {
-              console.error("Chrome runtime 오류:", chrome.runtime.lastError);
-              addChatMessage("연결 오류가 발생했어요. 확장 프로그램을 다시 로드해주세요!", true);
-              return;
+          console.log("AI 응답 수신:", response);
+
+          if (typingIndicator) {
+            typingIndicator.classList.add("hidden");
+          }
+
+          if (response && response.success) {
+            // 분류 타입 확인
+            const classification = response.classification;
+            console.log(`📊 응답 타입: ${classification?.type || "unknown"}`);
+
+            // CoT 응답인 경우 특별 처리
+            if (response.responseType === "cot" && response.cotSequence) {
+              displayCoTResponse(response.cotSequence, response.response);
+            } else {
+              addChatMessage(response.response, true);
             }
 
-            if (response && response.success) {
-              // 분류 타입 확인
-              const classification = response.classification;
-              console.log(`📊 응답 타입: ${classification?.type || "unknown"}`);
+            // 대화 기록 추가
+            conversationHistory.push({ role: "assistant", content: response.response });
 
-              // CoT 응답인 경우 특별 처리
-              if (classification?.type === "complex" && response.blockSequence) {
-                displayCoTResponse(response.blockSequence, response.response);
-              } else {
-                addChatMessage(response.response, true);
-              }
+            // RAG 블록 표시 부분
+            if (response.rawBlocks && response.rawBlocks.length > 0) {
+              const attemptCount = conversationHistory.filter(
+                (msg) =>
+                  msg.role === "user" &&
+                  (msg.content.includes("모르겠") || msg.content.includes("막혔") || msg.content.includes("도와"))
+              ).length;
 
-              // 대화 기록 추가
-              conversationHistory.push({ role: "assistant", content: response.response });
+              if (attemptCount <= 1) {
+                const topBlock = response.rawBlocks[0];
 
-              // RAG 블록 표시 부분 수정
-              if (response.rawBlocks && response.rawBlocks.length > 0) {
-                const attemptCount = conversationHistory.filter(
-                  (msg) =>
-                    msg.role === "user" &&
-                    (msg.content.includes("모르겠") || msg.content.includes("막혔") || msg.content.includes("도와"))
-                ).length;
-
-                if (attemptCount <= 1) {
-                  // 가장 관련성 높은 첫 번째 블록만 사용
-                  const topBlock = response.rawBlocks[0];
-
-                  // 해당 블록의 카테고리만 표시
-                  const singleCategoryCard = createSingleCategoryCard(topBlock);
+                // window 접두사 추가
+                if (typeof window.createSingleCategoryCard === "function") {
+                  const singleCategoryCard = window.createSingleCategoryCard(topBlock);
                   addChatMessage(singleCategoryCard, true, "block-with-image");
-                } else {
-                  // 구체적인 블록 표시
-                  const blockListHtml = createBlockListWithImages(response.rawBlocks.slice(0, 1));
+                } else if (typeof window.createBlockListWithImages === "function") {
+                  const blockListHtml = window.createBlockListWithImages([topBlock]);
+                  addChatMessage(blockListHtml, true, "block-with-image");
+                }
+              } else {
+                if (typeof window.createBlockListWithImages === "function") {
+                  const blockListHtml = window.createBlockListWithImages(response.rawBlocks.slice(0, 1));
                   addChatMessage(blockListHtml, true, "block-with-image");
                 }
               }
-
-              // 학습 진행상황 표시
-              if (response.learnerProgress && response.learnerProgress.progress > 0) {
-                displayLearnerProgress(response.learnerProgress);
-              }
-
-              // 대화 기록 관리
-              if (conversationHistory.length > 10) {
-                conversationHistory = conversationHistory.slice(-10);
-              }
-            } else {
-              const errorMessage = response?.error || "연결에 문제가 있어요. 다시 시도해주세요!";
-              console.error("AI 응답 오류:", errorMessage);
-              addChatMessage(`죄송해요, ${errorMessage}`, true);
             }
-          }
-        );
-      } catch (error) {
-        console.error("sendMessage 함수 오류:", error);
-        addChatMessage("메시지 전송 중 오류가 발생했어요.", true);
 
-        const typingIndicator = document.getElementById("typing-indicator");
-        if (typingIndicator) {
-          typingIndicator.classList.add("hidden");
+            // 학습 진행상황 표시
+            if (
+              response.learnerProgress &&
+              response.learnerProgress.progress > 0 &&
+              typeof window.displayLearnerProgress === "function"
+            ) {
+              window.displayLearnerProgress(response.learnerProgress);
+            }
+
+            // 대화 기록 관리 - splice 사용
+            if (conversationHistory.length > 10) {
+              conversationHistory.splice(0, conversationHistory.length - 10);
+            }
+          } else {
+            const errorMsg = response?.error || "연결에 문제가 있어요. 다시 시도해주세요!";
+            console.error("AI 응답 오류:", errorMsg);
+            addChatMessage(`죄송해요, ${errorMsg}`, true);
+          }
         }
+      );
+    } catch (error) {
+      console.error("sendMessage 함수 오류:", error);
+      addChatMessage("메시지 전송 중 오류가 발생했어요.", true);
+
+      const typingIndicator = document.getElementById("typing-indicator");
+      if (typingIndicator) {
+        typingIndicator.classList.add("hidden");
       }
     }
+  }
 
-    function displayLearnerProgress(progress) {
-      // 너무 자주 표시되지 않도록 조건 체크
-      if (Math.random() < 0.3 && progress.progress >= 25) {
-        // 30% 확률로, 25% 이상 진행시에만
-        const progressHtml = `
-      <div style="
-        background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
-        border-left: 4px solid #4caf50;
-        border-radius: 8px;
-        padding: 12px;
-        margin: 8px 0;
-        font-size: 12px;
-      ">
-        <div style="font-weight: bold; color: #2e7d32; margin-bottom: 6px;">
-          📈 학습 진행상황
-        </div>
-        <div style="color: #388e3c;">
-          전체 진행도: ${progress.progress}% 
-          ${
-            progress.completedConcepts && progress.completedConcepts.length > 0
-              ? `| 완료한 개념: ${progress.completedConcepts.slice(0, 2).join(", ")}`
-              : ""
-          }
-        </div>
-        ${
-          progress.recommendations && progress.recommendations.length > 0
-            ? `<div style="margin-top: 6px; font-style: italic; color: #558b2f;">
-            💡 ${progress.recommendations[0]}
-          </div>`
-            : ""
-        }
-      </div>
-    `;
-
-        addChatMessage(progressHtml, true, "system");
-      }
+  // ===== API 키 모달 표시 =====
+  function showApiKeyModal() {
+    const existingModal = document.getElementById("api-key-modal");
+    if (existingModal) {
+      existingModal.remove();
     }
 
-    // API 키 모달 표시 함수
-    function showApiKeyModal() {
-      // 기존 모달이 있으면 제거
-      const existingModal = document.getElementById("api-key-modal");
-      if (existingModal) {
-        existingModal.remove();
-      }
-
-      const modalHtml = `
+    const modalHtml = `
     <div style="
       position: fixed;
       top: 0;
@@ -1429,58 +1020,76 @@ window.showModalMessage = function (message, type) {
     </div>
   `;
 
-      document.body.insertAdjacentHTML("beforeend", modalHtml);
+    document.body.insertAdjacentHTML("beforeend", modalHtml);
 
-      // 이벤트 리스너 설정
-      const closeBtn = document.getElementById("modal-close-btn");
-      const testBtn = document.getElementById("modal-test-btn");
-      const saveBtn = document.getElementById("modal-save-btn");
-      const keyInput = document.getElementById("modal-api-key");
+    const closeBtn = document.getElementById("modal-close-btn");
+    const testBtn = document.getElementById("modal-test-btn");
+    const saveBtn = document.getElementById("modal-save-btn");
+    const keyInput = document.getElementById("modal-api-key");
 
-      // 닫기 버튼
-      if (closeBtn) {
-        closeBtn.addEventListener("click", function () {
-          document.getElementById("api-key-modal").remove();
-        });
-      }
-
-      // 테스트 버튼
-      if (testBtn) {
-        testBtn.addEventListener("click", function () {
-          window.testApiKeyFromModal();
-        });
-      }
-
-      // 저장 버튼
-      if (saveBtn) {
-        saveBtn.addEventListener("click", function () {
-          window.saveApiKeyFromModal();
-        });
-      }
-
-      // 입력 필드 포커스/블러 효과
-      if (keyInput) {
-        keyInput.addEventListener("focus", function () {
-          this.style.borderColor = "#3b82f6";
-        });
-
-        keyInput.addEventListener("blur", function () {
-          this.style.borderColor = "#e1e5e9";
-        });
-
-        // Enter 키로 저장
-        keyInput.addEventListener("keypress", function (e) {
-          if (e.key === "Enter") {
-            window.saveApiKeyFromModal();
-          }
-        });
-      }
-
-      // 현재 저장된 키 상태 확인
-      loadCurrentKeyStatus();
+    if (closeBtn) {
+      closeBtn.addEventListener("click", function () {
+        document.getElementById("api-key-modal").remove();
+      });
     }
 
-    // 한국어 입력 조합 이벤트 처리
+    if (testBtn) {
+      testBtn.addEventListener("click", function () {
+        window.testApiKeyFromModal();
+      });
+    }
+
+    if (saveBtn) {
+      saveBtn.addEventListener("click", function () {
+        window.saveApiKeyFromModal();
+      });
+    }
+
+    if (keyInput) {
+      keyInput.addEventListener("focus", function () {
+        this.style.borderColor = "#3b82f6";
+      });
+
+      keyInput.addEventListener("blur", function () {
+        this.style.borderColor = "#e1e5e9";
+      });
+
+      keyInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+          window.saveApiKeyFromModal();
+        }
+      });
+    }
+
+    loadCurrentKeyStatus();
+  }
+
+  // ===== 이벤트 리스너 설정 =====
+  function setupEventListeners() {
+    const chatInput = document.getElementById("chat-input");
+    const chatSend = document.getElementById("chat-send");
+
+    let isComposing = false;
+
+    // API 키 설정 버튼
+    const apiKeyBtn = document.getElementById("api-key-btn");
+    if (apiKeyBtn) {
+      apiKeyBtn.addEventListener("click", showApiKeyModal);
+    }
+
+    // 사이드바 컨트롤
+    const triggerBtn = document.getElementById("sidebar-trigger");
+    const closeBtn = document.getElementById("sidebar-close");
+
+    if (triggerBtn) {
+      triggerBtn.addEventListener("click", () => toggleSidebarOpen());
+    }
+
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => toggleSidebarOpen(false));
+    }
+
+    // 한국어 입력 조합 이벤트
     if (chatInput) {
       chatInput.addEventListener("compositionstart", () => {
         isComposing = true;
@@ -1490,71 +1099,23 @@ window.showModalMessage = function (message, type) {
         isComposing = false;
       });
 
-      // 키보드 이벤트
       chatInput.addEventListener("keydown", async (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
-          console.log("Enter 키 눌림, isComposing:", isComposing);
-
           if (!isComposing) {
             await sendMessage();
           }
         }
       });
 
-      // 자동 높이 조절
       chatInput.addEventListener("input", () => {
         chatInput.style.height = "auto";
         chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + "px";
       });
     }
 
-    // 전송 버튼 이벤트
     if (chatSend) {
       chatSend.addEventListener("click", sendMessage);
-    }
-  }
-
-  // ===== 초기화 함수 =====
-  function initializeChatbot() {
-    if (isInitialized) return;
-
-    try {
-      console.log("챗봇 초기화 시작...");
-
-      // CSS 스타일 삽입
-      injectStyles();
-
-      // 사이드바 생성
-      sidebar = createSidebar();
-
-      if (!sidebar) {
-        console.error("사이드바 생성 실패");
-        return;
-      }
-
-      // 이벤트 리스너 설정
-      setupEventListeners();
-
-      // 아이콘 사전 로드
-      preloadCategoryIcons();
-
-      // Entry 준비 상태 확인
-      checkEntryReadiness();
-
-      // RAG 상태 로드
-      loadRAGStatus();
-
-      isInitialized = true;
-      console.log("✅ 챗봇 초기화 완료");
-
-      // 대기 중인 열기 요청 처리
-      if (pendingOpenRequest) {
-        toggleSidebarOpen(true);
-        pendingOpenRequest = false;
-      }
-    } catch (error) {
-      console.error("❌ 챗봇 초기화 실패:", error);
     }
   }
 
@@ -1569,7 +1130,6 @@ window.showModalMessage = function (message, type) {
       }
     }, 1000);
 
-    // 30초 후 타임아웃
     setTimeout(() => {
       if (!isEntryReady) {
         clearInterval(checkInterval);
@@ -1579,7 +1139,6 @@ window.showModalMessage = function (message, type) {
     }, 30000);
   }
 
-  // ===== Entry 상태 업데이트 =====
   function updateEntryStatus(ready) {
     const statusElement = document.getElementById("entry-status");
     if (!statusElement) return;
@@ -1603,424 +1162,47 @@ window.showModalMessage = function (message, type) {
     const styleId = "entry-helper-styles";
     if (document.getElementById(styleId)) return;
 
-    const styles = `
-      <style id="${styleId}">
-        /* 사이드바 기본 스타일 */
-        .entry-helper-sidebar {
-          position: fixed;
-          top: 0;
-          right: -420px;
-          width: 400px;
-          height: 100vh;
-          background: white;
-          box-shadow: -2px 0 20px rgba(0,0,0,0.15);
-          z-index: 10000;
-          transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          display: flex;
-          flex-direction: column;
-        }
+    const linkElement = document.createElement("link");
+    linkElement.id = styleId;
+    linkElement.rel = "stylesheet";
+    linkElement.href = chrome.runtime.getURL("style.css");
+    document.head.appendChild(linkElement);
+  }
 
-        .entry-helper-sidebar.sidebar-open {
-          right: 0;
-        }
+  // ===== 초기화 함수 =====
+  function initializeChatbot() {
+    if (isInitialized) return;
 
-        /* 헤더 스타일 */
-        .sidebar-header {
-          padding: 16px;
-          border-bottom: 1px solid #e9ecef;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-        }
+    try {
+      console.log("챗봇 초기화 시작...");
 
-        .header-title h3 {
-          margin: 0 0 8px 0;
-          font-size: 16px;
-          font-weight: 700;
-          display: flex;
-          align-items: center;
-        }
+      injectStyles();
+      sidebar = createSidebar();
 
-        .status-indicator, .rag-status {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 11px;
-          opacity: 0.9;
-          margin-bottom: 4px;
-        }
+      if (!sidebar) {
+        console.error("사이드바 생성 실패");
+        return;
+      }
 
-        .status-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: #fbbf24;
-          animation: pulse 2s infinite;
-        }
+      setupEventListeners();
+      checkEntryReadiness();
 
-        .status-dot.valid {
-          background: #10b981;
-          animation: none;
-        }
+      isInitialized = true;
+      console.log("✅ 챗봇 초기화 완료");
 
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-
-        .sidebar-controls {
-          display: flex;
-          gap: 8px;
-        }
-
-        .control-btn {
-          width: 32px;
-          height: 32px;
-          border: none;
-          background: rgba(255,255,255,0.2);
-          color: white;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: background 0.2s;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 14px;
-        }
-
-        .control-btn:hover {
-          background: rgba(255,255,255,0.3);
-        }
-
-        /* 채팅 영역 스타일 */
-        .chat-section {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-        }
-
-        .chat-container {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-        }
-
-        .chat-messages {
-          flex: 1;
-          overflow-y: auto;
-          padding: 16px;
-          scroll-behavior: smooth;
-        }
-
-        .message {
-          display: flex;
-          gap: 10px;
-          margin-bottom: 16px;
-          opacity: 0;
-          animation: fadeInUp 0.3s ease forwards;
-        }
-
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .message-avatar {
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-          font-size: 14px;
-        }
-
-        .bot-message .message-avatar {
-          background: linear-gradient(135deg, #667eea, #764ba2);
-        }
-
-        .user-message .message-avatar {
-          background: #f1f3f4;
-        }
-
-        .message-content {
-          flex: 1;
-          min-width: 0;
-        }
-
-        .message-text {
-          background: #f8f9fa;
-          padding: 10px 14px;
-          border-radius: 16px;
-          line-height: 1.5;
-          font-size: 14px;
-          word-wrap: break-word;
-        }
-
-        .bot-message .message-text {
-          background: #e3f2fd;
-          border-bottom-left-radius: 6px;
-        }
-
-        .user-message .message-text {
-          background: #667eea;
-          color: white;
-          border-bottom-right-radius: 6px;
-        }
-
-        .message-time {
-          font-size: 11px;
-          color: #6c757d;
-          margin-top: 4px;
-          padding: 0 4px;
-        }
-
-        .system-message {
-          justify-content: center;
-          margin: 8px 0;
-        }
-
-        .system-message-content {
-          background: rgba(16, 185, 129, 0.1);
-          border-radius: 8px;
-          padding: 8px 12px;
-          font-size: 12px;
-          text-align: center;
-          color: #065f46;
-        }
-
-        /* 입력 영역 스타일 */
-        .chat-input-container {
-          padding: 16px;
-          border-top: 1px solid #e9ecef;
-          background: #fafbfc;
-        }
-
-        .input-header {
-          margin-bottom: 8px;
-        }
-
-        .typing-indicator {
-          font-size: 12px;
-          color: #6c757d;
-          font-style: italic;
-        }
-
-        .typing-indicator.hidden {
-          visibility: hidden;
-        }
-
-        .input-wrapper {
-          display: flex;
-          gap: 8px;
-          align-items: flex-end;
-        }
-
-        #chat-input {
-          flex: 1;
-          padding: 10px 14px;
-          border: 2px solid #e9ecef;
-          border-radius: 20px;
-          font-size: 14px;
-          font-family: inherit;
-          resize: none;
-          outline: none;
-          transition: border-color 0.2s;
-          min-height: 20px;
-          max-height: 100px;
-        }
-
-        #chat-input:focus {
-          border-color: #667eea;
-        }
-
-        .send-button {
-          width: 40px;
-          height: 40px;
-          border: none;
-          background: #667eea;
-          color: white;
-          border-radius: 50%;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s;
-          flex-shrink: 0;
-        }
-
-        .send-button:hover {
-          background: #5a6fd8;
-          transform: scale(1.05);
-        }
-
-        /* 트리거 버튼 스타일 */
-        .sidebar-trigger {
-          position: fixed;
-          top: 50%;
-          right: 20px;
-          width: 56px;
-          height: 56px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 50%;
-          cursor: pointer;
-          box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
-          z-index: 9999;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-6px); }
-        }
-
-        .sidebar-trigger:hover {
-          transform: scale(1.1) translateY(-2px);
-          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
-
-        .trigger-icon {
-          transition: transform 0.3s;
-        }
-
-        .sidebar-trigger:hover .trigger-icon {
-          transform: rotate(10deg);
-        }
-
-        .trigger-badge {
-          position: absolute;
-          top: -2px;
-          right: -2px;
-          width: 20px;
-          height: 20px;
-          background: #ff4757;
-          color: white;
-          border-radius: 50%;
-          font-size: 12px;
-          font-weight: bold;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(-6px); }
-          60% { transform: translateY(-3px); }
-        }
-
-        /* CoT 스타일 */
-        .cot-response {
-          border: 1px solid #e3f2fd;
-          border-radius: 12px;
-          overflow: hidden;
-          margin: 8px 0;
-        }
-
-        .cot-header {
-          background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
-          padding: 12px 16px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          border-bottom: 1px solid #e0e0e0;
-        }
-
-        .cot-badge {
-          background: #2196f3;
-          color: white;
-          padding: 4px 12px;
-          border-radius: 16px;
-          font-size: 12px;
-          font-weight: 600;
-          display: flex;
-          align-items: center;
-        }
-
-        .cot-progress {
-          font-size: 12px;
-          color: #666;
-          font-weight: 500;
-        }
-
-        .cot-steps {
-          padding: 16px;
-        }
-
-        .cot-navigation button {
-          transition: all 0.2s;
-        }
-
-        .cot-navigation button:hover:not(:disabled) {
-          transform: translateY(-1px);
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .cot-navigation button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        /* 스크롤바 스타일 */
-        .chat-messages::-webkit-scrollbar {
-          width: 6px;
-        }
-
-        .chat-messages::-webkit-scrollbar-track {
-          background: transparent;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb {
-          background: #d1d5db;
-          border-radius: 3px;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb:hover {
-          background: #9ca3af;
-        }
-
-        /* 반응형 스타일 */
-        @media (max-width: 480px) {
-          .entry-helper-sidebar {
-            width: 100vw;
-            right: -100vw;
-          }
-          
-          .sidebar-trigger {
-            top: 10px;
-            right: 10px;
-            width: 48px;
-            height: 48px;
-          }
-        }
-      </style>
-    `;
-
-    document.head.insertAdjacentHTML("beforeend", styles);
+      if (pendingOpenRequest) {
+        toggleSidebarOpen(true);
+        pendingOpenRequest = false;
+      }
+    } catch (error) {
+      console.error("❌ 챗봇 초기화 실패:", error);
+    }
   }
 
   // ===== 페이지 로드 완료 후 초기화 =====
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initializeChatbot);
   } else {
-    // 이미 로드된 경우 약간의 지연 후 초기화
     setTimeout(initializeChatbot, 100);
   }
 
@@ -2032,7 +1214,10 @@ window.showModalMessage = function (message, type) {
       isInitialized = false;
       initializeChatbot();
     },
+    addChatMessage: addChatMessage,
+    getCategoryKorean: getCategoryKorean,
   };
+
   // Chrome extension 메시지 리스너
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === "TOGGLE_SIDEBAR") {

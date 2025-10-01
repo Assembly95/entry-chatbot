@@ -1,4 +1,4 @@
-// questionClassifier.js - Entry 블록코딩 질문 분류기 (완성본)
+// questionClassifier.js - Entry 블록코딩 질문 분류기 (오류 수정 버전)
 
 /**
  * Entry 블록코딩 질문 분류기
@@ -34,7 +34,6 @@ class EntryQuestionClassifier {
       "네요",
       "어요",
       "아요",
-      "에서",
       "에는",
       "에도",
       "으로도",
@@ -146,10 +145,28 @@ class EntryQuestionClassifier {
       },
     };
 
-    // 분류 패턴 정의 (기존 + 개선)
+    // 분류 패턴 정의
     this.patterns = {
       simple: {
-        keywords: ["블록", "어떻게", "어떤", "무엇을", "추가", "사용법", "위치", "방법", "찾기", "연결", "어디", "쓰는", "사용"],
+        keywords: [
+          "블록",
+          "어떻게",
+          "어떤",
+          "무엇을",
+          "추가",
+          "사용법",
+          "위치",
+          "방법",
+          "찾기",
+          "연결",
+          "어디",
+          "쓰는",
+          "사용",
+          "누르면",
+          "눌렀을때",
+          "실행",
+          "시작",
+        ],
         negativeKeywords: ["게임", "프로그램", "프로젝트", "시스템", "애니메이션", "작품"],
         patterns: [
           /.*블록.*사용/,
@@ -160,10 +177,12 @@ class EntryQuestionClassifier {
           /.*연결/,
           /.*키.*누르/,
           /.*이동.*블록/,
+          /.*누르면.*실행/,
+          /.*눌렀을.*때/,
+          /스페이스.*실행/,
         ],
         weight: 1.0,
       },
-
       complex: {
         keywords: [
           "게임",
@@ -196,7 +215,6 @@ class EntryQuestionClassifier {
         ],
         weight: 1.2,
       },
-
       debug: {
         keywords: [
           "오류",
@@ -234,7 +252,6 @@ class EntryQuestionClassifier {
         ],
         weight: 1.5,
       },
-
       conceptual: {
         keywords: [
           "무엇",
@@ -286,14 +303,46 @@ class EntryQuestionClassifier {
   }
 
   /**
-   * 한국어 형태소 분석 (간소화 버전)
+   * 안전한 문자열 변환
+   */
+  safeToString(value) {
+    if (value === null || value === undefined) {
+      return "";
+    }
+    return String(value);
+  }
+
+  /**
+   * 텍스트 정규화
+   */
+  normalizeText(text) {
+    // 안전한 문자열 변환
+    const safeText = this.safeToString(text);
+    if (!safeText) return "";
+
+    let normalized = safeText.toLowerCase().trim();
+
+    // 특수문자 제거 (한글, 영문, 숫자, 공백만 남김)
+    normalized = normalized.replace(/[^가-힣a-z0-9\s]/g, " ");
+
+    // 중복 공백 제거
+    normalized = normalized.replace(/\s+/g, " ");
+
+    return normalized;
+  }
+
+  /**
+   * 한국어 형태소 분석
    */
   tokenizeKorean(text) {
-    let tokens = text.split(" ");
+    const safeText = this.safeToString(text);
+    if (!safeText) return [];
+
+    let tokens = safeText.split(" ");
     let processed = [];
 
     for (let token of tokens) {
-      let originalToken = token;
+      if (!token) continue;
 
       // 조사 제거
       for (let josa of this.josaPatterns) {
@@ -331,8 +380,19 @@ class EntryQuestionClassifier {
     const keywords = [];
     const blockRecommendations = [];
 
+    // tokens가 배열이 아닌 경우 처리
+    if (!Array.isArray(tokens)) {
+      console.warn("Tokens is not an array:", tokens);
+      tokens = [];
+    }
+
+    // originalText 안전한 변환
+    const safeOriginalText = this.safeToString(originalText);
+
     // 토큰별 키워드 매칭
     for (let token of tokens) {
+      if (!token) continue;
+
       // 정확한 매칭
       if (this.keywordToBlocks[token]) {
         keywords.push(token);
@@ -357,13 +417,15 @@ class EntryQuestionClassifier {
     }
 
     // 원본 텍스트에서 추가 키워드 추출
-    for (let [keyword, mapping] of Object.entries(this.keywordToBlocks)) {
-      if (originalText.includes(keyword) && !keywords.includes(keyword)) {
-        keywords.push(keyword);
-        blockRecommendations.push({
-          keyword: keyword,
-          ...mapping,
-        });
+    if (safeOriginalText) {
+      for (let [keyword, mapping] of Object.entries(this.keywordToBlocks)) {
+        if (safeOriginalText.includes(keyword) && !keywords.includes(keyword)) {
+          keywords.push(keyword);
+          blockRecommendations.push({
+            keyword: keyword,
+            ...mapping,
+          });
+        }
       }
     }
 
@@ -371,80 +433,107 @@ class EntryQuestionClassifier {
   }
 
   /**
-   * 텍스트 정규화 (개선된 버전)
-   */
-  normalizeText(text) {
-    let normalized = text.toLowerCase().trim();
-
-    // 특수문자 제거 (한글, 영문, 숫자, 공백만 남김)
-    normalized = normalized.replace(/[^가-힣a-z0-9\s]/g, " ");
-
-    // 중복 공백 제거
-    normalized = normalized.replace(/\s+/g, " ");
-
-    return normalized;
-  }
-
-  /**
-   * 메인 분류 함수 - 하이브리드 방식 (개선)
+   * 메인 분류 함수
    */
   async classify(message) {
-    if (!message || typeof message !== "string") {
+    // 입력 검증
+    if (message === undefined || message === null) {
+      console.warn("Message is null or undefined");
       return {
         type: "simple",
-        confidence: 0,
-        scores: {},
-        method: "default",
+        confidence: 0.5,
+        method: "error",
         keywords: [],
+        scores: {},
         blockRecommendations: [],
       };
     }
 
-    // 1단계: 텍스트 전처리
-    const normalized = this.normalizeText(message);
-    const tokens = this.tokenizeKorean(normalized);
-    const { keywords, blockRecommendations } = this.extractKeywords(tokens, normalized);
+    // 안전한 문자열 변환
+    const messageStr = this.safeToString(message).trim();
 
-    console.log("📝 원본:", message);
-    console.log("🔤 정규화:", normalized);
-    console.log("📦 토큰:", tokens);
-    console.log("🔑 키워드:", keywords);
-    console.log("🎯 추천 블록:", blockRecommendations);
-
-    // 2단계: 규칙 기반 분류 (토큰 활용)
-    const ruleResult = this.classifyByRulesWithTokens(normalized, tokens, keywords);
-    ruleResult.keywords = keywords;
-    ruleResult.blockRecommendations = blockRecommendations;
-
-    console.log("📏 규칙 기반 결과:", ruleResult);
-
-    // 3단계: 신뢰도 체크
-    if (ruleResult.confidence >= this.CONFIDENCE_THRESHOLD) {
-      this.updateStatistics(ruleResult.type, "rules");
-      return ruleResult;
+    if (!messageStr) {
+      console.warn("Empty message after conversion");
+      return {
+        type: "simple",
+        confidence: 0.5,
+        method: "empty",
+        keywords: [],
+        scores: {},
+        blockRecommendations: [],
+      };
     }
 
-    // 4단계: 신뢰도가 낮으면 AI 분류 시도
-    console.log("🤖 신뢰도 부족, AI 분류 시도...");
-    const aiResult = await this.classifyWithAI(message);
+    try {
+      const normalized = this.normalizeText(messageStr);
+      const tokens = this.tokenizeKorean(normalized);
+      const { keywords, blockRecommendations } = this.extractKeywords(tokens, normalized);
 
-    if (aiResult) {
-      aiResult.keywords = keywords;
-      aiResult.blockRecommendations = blockRecommendations;
-      this.updateStatistics(aiResult.type, "ai");
-      return aiResult;
+      console.log("📝 원본:", messageStr);
+      console.log("🔤 정규화:", normalized);
+      console.log("📦 토큰:", tokens);
+      console.log("🔑 키워드:", keywords);
+      console.log("🎯 추천 블록:", blockRecommendations);
+
+      // 규칙 기반 분류
+      const ruleResult = this.classifyByRulesWithTokens(normalized, tokens, keywords);
+      ruleResult.keywords = keywords;
+      ruleResult.blockRecommendations = blockRecommendations;
+
+      console.log("📏 규칙 기반 결과:", ruleResult);
+
+      // 신뢰도 체크
+      if (ruleResult.confidence >= this.CONFIDENCE_THRESHOLD) {
+        this.updateStatistics(ruleResult.type, "rules");
+        return ruleResult;
+      }
+
+      // 신뢰도가 낮으면 AI 분류 시도
+      console.log("🤖 신뢰도 부족, AI 분류 시도...");
+      const aiResult = await this.classifyWithAI(messageStr);
+
+      if (aiResult) {
+        aiResult.keywords = keywords;
+        aiResult.blockRecommendations = blockRecommendations;
+        this.updateStatistics(aiResult.type, "ai");
+        return aiResult;
+      }
+
+      // AI도 실패하면 규칙 기반 결과 사용
+      this.updateStatistics(ruleResult.type, "rules-fallback");
+      return { ...ruleResult, method: "rules-fallback" };
+    } catch (error) {
+      console.error("Classification error:", error);
+      return {
+        type: "simple",
+        confidence: 0.5,
+        method: "error",
+        keywords: [],
+        scores: {},
+        blockRecommendations: [],
+        error: error.message,
+      };
     }
-
-    // 5단계: AI도 실패하면 규칙 기반 결과 사용
-    this.updateStatistics(ruleResult.type, "rules-fallback");
-    return { ...ruleResult, method: "rules-fallback" };
   }
 
   /**
-   * 규칙 기반 분류 (토큰 활용 버전)
+   * 규칙 기반 분류
    */
   classifyByRulesWithTokens(normalized, tokens, keywords) {
     const scores = {};
+
+    // normalized가 문자열이 아닌 경우 처리
+    const safeNormalized = this.safeToString(normalized);
+
+    // tokens가 배열이 아닌 경우 처리
+    if (!Array.isArray(tokens)) {
+      tokens = [];
+    }
+
+    // keywords가 배열이 아닌 경우 처리
+    if (!Array.isArray(keywords)) {
+      keywords = [];
+    }
 
     // 각 타입별 점수 계산
     for (const [type, config] of Object.entries(this.patterns)) {
@@ -453,23 +542,23 @@ class EntryQuestionClassifier {
       // 부정 키워드 체크
       if (config.negativeKeywords) {
         for (const negKeyword of config.negativeKeywords) {
-          if (normalized.includes(negKeyword)) {
+          if (safeNormalized.includes(negKeyword)) {
             score -= config.weight * 2;
             break;
           }
         }
       }
 
-      // 긍정 키워드 매칭 (정규화된 텍스트와 토큰 모두 체크)
+      // 긍정 키워드 매칭
       for (const keyword of config.keywords) {
-        if (normalized.includes(keyword) || tokens.includes(keyword)) {
+        if (safeNormalized.includes(keyword) || tokens.includes(keyword)) {
           score += config.weight;
         }
       }
 
       // 정규식 패턴 매칭
       for (const pattern of config.patterns) {
-        if (pattern.test(normalized)) {
+        if (pattern.test(safeNormalized)) {
           score += config.weight * 1.5;
         }
       }
@@ -485,8 +574,8 @@ class EntryQuestionClassifier {
       scores.complex = (scores.complex || 0) + 1;
     }
 
-    // 특별 케이스 처리
-    this.applySpecialRules(normalized, scores);
+    // 특별 규칙 적용
+    this.applySpecialRules(safeNormalized, scores);
 
     // 최종 타입 결정
     const maxScore = Math.max(...Object.values(scores));
@@ -504,17 +593,77 @@ class EntryQuestionClassifier {
   }
 
   /**
-   * 규칙 기반 분류 (기존 호환용)
+   * 특별 규칙 적용
    */
-  classifyByRules(message) {
-    const normalized = this.normalizeText(message);
-    const tokens = this.tokenizeKorean(normalized);
-    const { keywords } = this.extractKeywords(tokens, normalized);
-    return this.classifyByRulesWithTokens(normalized, tokens, keywords);
+  applySpecialRules(normalized, scores) {
+    const safeNormalized = this.safeToString(normalized);
+
+    // "만들고 싶" 패턴 강화
+    if (safeNormalized.includes("만들고 싶") || safeNormalized.includes("만들고싶")) {
+      scores.complex = (scores.complex || 0) + 2;
+      scores.simple = Math.max(0, (scores.simple || 0) - 1);
+    }
+
+    // "왜...안" 패턴 강화
+    if (safeNormalized.includes("왜") && (safeNormalized.includes("안") || safeNormalized.includes("않"))) {
+      scores.debug = (scores.debug || 0) + 2;
+      scores.simple = Math.max(0, (scores.simple || 0) - 1);
+    }
+
+    // 비교/차이 패턴 강화
+    if (safeNormalized.includes("비교") || safeNormalized.includes("차이")) {
+      scores.conceptual = (scores.conceptual || 0) + 2;
+      scores.simple = Math.max(0, (scores.simple || 0) - 1);
+    }
+
+    // 게임/프로그램 + 만들기 조합
+    if (
+      (safeNormalized.includes("게임") || safeNormalized.includes("프로그램")) &&
+      (safeNormalized.includes("만들") || safeNormalized.includes("제작"))
+    ) {
+      scores.complex = (scores.complex || 0) + 3;
+      scores.simple = 0;
+    }
+
+    // 오류/에러 강화
+    if (safeNormalized.includes("오류") || safeNormalized.includes("에러")) {
+      scores.debug = (scores.debug || 0) + 2;
+    }
+
+    // "~란?" 패턴
+    if (safeNormalized.endsWith("란?") || safeNormalized.endsWith("란")) {
+      scores.conceptual = (scores.conceptual || 0) + 2;
+    }
+
+    // 스페이스/키 + 이동 조합
+    if (
+      (safeNormalized.includes("스페이스") || safeNormalized.includes("키")) &&
+      (safeNormalized.includes("이동") || safeNormalized.includes("움직"))
+    ) {
+      scores.simple = (scores.simple || 0) + 2;
+    }
   }
 
   /**
-   * AI 기반 분류 - OpenAI API 사용
+   * 신뢰도 계산
+   */
+  calculateConfidence(maxScore, scores) {
+    if (maxScore === 0) return 0.3;
+
+    const sortedScores = Object.values(scores).sort((a, b) => b - a);
+    const gap = sortedScores.length > 1 ? sortedScores[0] - sortedScores[1] : sortedScores[0];
+
+    let confidence = Math.min(maxScore / 3, 1);
+
+    if (gap > 2) {
+      confidence = Math.min(confidence * 1.2, 1);
+    }
+
+    return Number(confidence.toFixed(3));
+  }
+
+  /**
+   * AI 기반 분류
    */
   async classifyWithAI(message) {
     try {
@@ -524,6 +673,8 @@ class EntryQuestionClassifier {
         console.log("⚠️ API 키 없음, AI 분류 건너뜀");
         return null;
       }
+
+      const safeMessage = this.safeToString(message);
 
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
@@ -547,7 +698,7 @@ class EntryQuestionClassifier {
             },
             {
               role: "user",
-              content: `질문: "${message}"`,
+              content: `질문: "${safeMessage}"`,
             },
           ],
           max_tokens: 10,
@@ -581,74 +732,6 @@ class EntryQuestionClassifier {
       console.error("❌ AI 분류 실패:", error);
       return null;
     }
-  }
-
-  /**
-   * 특별 규칙 적용
-   */
-  applySpecialRules(normalized, scores) {
-    // "만들고 싶" 패턴 강화
-    if (normalized.includes("만들고 싶") || normalized.includes("만들고싶")) {
-      scores.complex = (scores.complex || 0) + 2;
-      scores.simple = Math.max(0, (scores.simple || 0) - 1);
-    }
-
-    // "왜...안" 패턴 강화
-    if (normalized.includes("왜") && (normalized.includes("안") || normalized.includes("않"))) {
-      scores.debug = (scores.debug || 0) + 2;
-      scores.simple = Math.max(0, (scores.simple || 0) - 1);
-    }
-
-    // 비교/차이 패턴 강화
-    if (normalized.includes("비교") || normalized.includes("차이")) {
-      scores.conceptual = (scores.conceptual || 0) + 2;
-      scores.simple = Math.max(0, (scores.simple || 0) - 1);
-    }
-
-    // 게임/프로그램 + 만들기 조합
-    if (
-      (normalized.includes("게임") || normalized.includes("프로그램")) &&
-      (normalized.includes("만들") || normalized.includes("제작"))
-    ) {
-      scores.complex = (scores.complex || 0) + 3;
-      scores.simple = 0;
-    }
-
-    // 오류/에러 강화
-    if (normalized.includes("오류") || normalized.includes("에러")) {
-      scores.debug = (scores.debug || 0) + 2;
-    }
-
-    // "~란?" 패턴
-    if (normalized.endsWith("란?") || normalized.endsWith("란")) {
-      scores.conceptual = (scores.conceptual || 0) + 2;
-    }
-
-    // 스페이스/키 + 이동 조합
-    if (
-      (normalized.includes("스페이스") || normalized.includes("키")) &&
-      (normalized.includes("이동") || normalized.includes("움직"))
-    ) {
-      scores.simple = (scores.simple || 0) + 2;
-    }
-  }
-
-  /**
-   * 신뢰도 계산
-   */
-  calculateConfidence(maxScore, scores) {
-    if (maxScore === 0) return 0.3;
-
-    const sortedScores = Object.values(scores).sort((a, b) => b - a);
-    const gap = sortedScores.length > 1 ? sortedScores[0] - sortedScores[1] : sortedScores[0];
-
-    let confidence = Math.min(maxScore / 3, 1);
-
-    if (gap > 2) {
-      confidence = Math.min(confidence * 1.2, 1);
-    }
-
-    return Number(confidence.toFixed(3));
   }
 
   /**
@@ -698,6 +781,16 @@ class EntryQuestionClassifier {
         conceptual: 0,
       },
     };
+  }
+
+  /**
+   * 호환성을 위한 이전 메서드
+   */
+  classifyByRules(message) {
+    const normalized = this.normalizeText(message);
+    const tokens = this.tokenizeKorean(normalized);
+    const { keywords } = this.extractKeywords(tokens, normalized);
+    return this.classifyByRulesWithTokens(normalized, tokens, keywords);
   }
 }
 
