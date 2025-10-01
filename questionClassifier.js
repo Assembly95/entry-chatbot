@@ -1,11 +1,25 @@
-// questionClassifier.js - Entry 블록코딩 질문 분류기 (오류 수정 버전)
+// questionClassifier.js - Entry 블록코딩 질문 분류기
+// BlockMappings를 활용한 개선된 버전
+
+// BlockMappings 임포트
+importScripts("blockMappings.js");
 
 /**
  * Entry 블록코딩 질문 분류기
  * 한국어 형태소 분석 + 하이브리드 방식 (규칙 기반 + AI)
+ * BlockMappings 통합 버전
  */
 class EntryQuestionClassifier {
   constructor() {
+    // BlockMappings 인스턴스 생성 (try-catch로 안전하게)
+    try {
+      this.blockMappings = new BlockMappings();
+      console.log("✅ BlockMappings 로드 성공");
+    } catch (error) {
+      console.error("❌ BlockMappings 로드 실패:", error);
+      this.blockMappings = null;
+    }
+
     // 한국어 전처리를 위한 조사/어미 패턴
     this.josaPatterns = [
       "을",
@@ -56,93 +70,19 @@ class EntryQuestionClassifier {
       누르면: "누를때",
       닿으면: "닿을때",
       하면: "할때",
-    };
-
-    // 동의어 매핑
-    this.synonymMap = {
-      스페이스바: "스페이스키",
-      스페이스: "스페이스키",
-      엔터: "엔터키",
-      앞으로: "전진",
-      뒤로: "후진",
-      위로: "상승",
-      아래로: "하강",
-      쏘기: "발사",
-      쏘다: "발사",
-      맞추기: "충돌",
-      부딪치기: "충돌",
-      닿기: "충돌",
-      만들기: "제작",
-      움직이기: "이동",
-      움직임: "이동",
-    };
-
-    // 블록 매핑 테이블 (키워드 → 블록 파일명)
-    this.keywordToBlocks = {
-      스페이스키: {
-        blocks: ["when_some_key_pressed"],
-        category: "start",
-      },
-      키: {
-        blocks: ["when_some_key_pressed", "is_press_some_key"],
-        category: "start",
-      },
-      이동: {
-        blocks: ["move_direction", "move_x", "move_y", "locate_xy"],
-        category: "moving",
-      },
-      전진: {
-        blocks: ["move_direction", "move_x"],
-        category: "moving",
-      },
-      후진: {
-        blocks: ["move_direction", "move_x"],
-        category: "moving",
-      },
-      상승: {
-        blocks: ["move_y"],
-        category: "moving",
-      },
-      하강: {
-        blocks: ["move_y"],
-        category: "moving",
-      },
-      반복: {
-        blocks: ["repeat_basic", "repeat_inf", "repeat_while_true"],
-        category: "flow",
-      },
-      조건: {
-        blocks: ["_if", "if_else"],
-        category: "flow",
-      },
-      만약: {
-        blocks: ["_if", "if_else"],
-        category: "flow",
-      },
-      충돌: {
-        blocks: ["is_touched", "reach_something"],
-        category: "judgement",
-      },
-      발사: {
-        blocks: ["create_clone", "when_clone_start"],
-        category: "flow",
-      },
-      복제: {
-        blocks: ["create_clone", "delete_clone", "when_clone_start"],
-        category: "flow",
-      },
-      변수: {
-        blocks: ["set_variable", "get_variable", "change_variable"],
-        category: "variable",
-      },
-      점수: {
-        blocks: ["set_variable", "change_variable", "show_variable"],
-        category: "variable",
-      },
-      총알: {
-        blocks: ["create_clone", "when_clone_start", "delete_clone"],
-        category: "flow",
-      },
+      어딨: "어디있",
+      어딨어: "어디있어",
+      뭐야: "무엇이야",
+      뭐하: "무엇하",
+      어케: "어떻게",
+      어캐: "어떻게",
+      왜안돼: "왜 안돼",
+      왜않돼: "왜 안돼",
+      만드는: "만들기",
+      바꾸는: "바꾸기",
+      움직이는: "움직이기",
+      하고싶은: "하기",
+      쓰는: "사용",
     };
 
     // 분류 패턴 정의
@@ -166,20 +106,23 @@ class EntryQuestionClassifier {
           "눌렀을때",
           "실행",
           "시작",
+          "있어",
+          "있나",
+          "찾아",
+          "알려",
+          "설명",
         ],
         negativeKeywords: ["게임", "프로그램", "프로젝트", "시스템", "애니메이션", "작품"],
         patterns: [
-          /.*블록.*사용/,
+          /.*블록.*(?:사용|위치|어디|찾)/,
           /어떻게.*(?!만들|제작|개발)/,
           /.*방법(?!.*만들)/,
-          /.*어디.*있/,
+          /.*어디.*(?:있|위치)/,
           /.*찾/,
           /.*연결/,
           /.*키.*누르/,
-          /.*이동.*블록/,
-          /.*누르면.*실행/,
-          /.*눌렀을.*때/,
-          /스페이스.*실행/,
+          /.*블록.*어디/,
+          /.*위치/,
         ],
         weight: 1.0,
       },
@@ -313,19 +256,154 @@ class EntryQuestionClassifier {
   }
 
   /**
+   * 자모 단위 유사도 계산
+   */
+  calculateJamoSimilarity(str1, str2) {
+    if (!str1 || !str2) return 0;
+
+    try {
+      if (typeof Hangul === "undefined") {
+        const longer = str1.length > str2.length ? str1 : str2;
+        const shorter = str1.length > str2.length ? str2 : str1;
+        const longerLength = longer.length;
+        if (longerLength === 0) return 1.0;
+        const editDistance = this.calculateEditDistance(longer, shorter);
+        return (longerLength - editDistance) / longerLength;
+      }
+
+      const jamo1 = Hangul.disassemble(str1);
+      const jamo2 = Hangul.disassemble(str2);
+      const maxLen = Math.max(jamo1.length, jamo2.length);
+      if (maxLen === 0) return 1;
+
+      let matches = 0;
+      const minLen = Math.min(jamo1.length, jamo2.length);
+      for (let i = 0; i < minLen; i++) {
+        if (jamo1[i] === jamo2[i]) matches++;
+      }
+
+      return matches / maxLen;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  /**
+   * 편집 거리 계산
+   */
+  calculateEditDistance(str1, str2) {
+    const matrix = [];
+    for (let i = 0; i <= str2.length; i++) {
+      matrix[i] = [i];
+    }
+    for (let j = 0; j <= str1.length; j++) {
+      matrix[0][j] = j;
+    }
+    for (let i = 1; i <= str2.length; i++) {
+      for (let j = 1; j <= str1.length; j++) {
+        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
+        }
+      }
+    }
+    return matrix[str2.length][str1.length];
+  }
+
+  /**
+   * 오타 교정 함수 (BlockMappings 활용)
+   */
+  correctTypos(text) {
+    if (!text) return text;
+
+    let corrected = text;
+
+    // 1. BlockMappings의 오타 사전 활용 (null 체크 추가)
+    if (this.blockMappings && this.blockMappings.commonTypos) {
+      for (const [typo, correct] of Object.entries(this.blockMappings.commonTypos)) {
+        const regex = new RegExp(typo, "gi");
+        corrected = corrected.replace(regex, correct);
+      }
+    }
+
+    // 2. 주요 키워드와 자모 유사도 비교
+    const words = corrected.split(" ");
+
+    // BlockMappings에서 모든 키워드 가져오기
+    let allKeywords = [];
+    if (this.blockMappings && this.blockMappings.keywordToBlocks) {
+      allKeywords = Object.keys(this.blockMappings.keywordToBlocks);
+    }
+
+    const correctedWords = words.map((word) => {
+      for (const keyword of allKeywords) {
+        const similarity = this.calculateJamoSimilarity(word, keyword);
+        if (similarity > 0.7 && similarity < 1) {
+          console.log(`오타 교정: ${word} → ${keyword} (유사도: ${(similarity * 100).toFixed(1)}%)`);
+          return keyword;
+        }
+      }
+      return word;
+    });
+
+    return correctedWords.join(" ");
+  }
+
+  /**
+   * 초성 검색 지원
+   */
+  detectChosung(text) {
+    if (typeof Hangul === "undefined") {
+      return [];
+    }
+
+    const chosungPattern = /^[ㄱ-ㅎ]+$/;
+    const words = text.split(" ");
+    const results = [];
+
+    for (const word of words) {
+      if (chosungPattern.test(word)) {
+        // BlockMappings의 키워드로 검색
+        if (this.blockMappings && this.blockMappings.keywordToBlocks) {
+          for (const keyword of Object.keys(this.blockMappings.keywordToBlocks)) {
+            if (Hangul.search(keyword, word)) {
+              results.push(keyword);
+            }
+          }
+        }
+      }
+    }
+
+    return results;
+  }
+
+  /**
    * 텍스트 정규화
    */
   normalizeText(text) {
-    // 안전한 문자열 변환
     const safeText = this.safeToString(text);
     if (!safeText) return "";
 
-    let normalized = safeText.toLowerCase().trim();
+    // 1. 오타 교정
+    let normalized = this.correctTypos(safeText);
 
-    // 특수문자 제거 (한글, 영문, 숫자, 공백만 남김)
-    normalized = normalized.replace(/[^가-힣a-z0-9\s]/g, " ");
+    // 2. 초성 검색 결과 반영
+    const chosungResults = this.detectChosung(normalized);
+    if (chosungResults.length > 0) {
+      console.log("초성 검색 결과:", chosungResults);
+    }
 
-    // 중복 공백 제거
+    // 3. 띄어쓰기 교정
+    const blockPatterns = ["반복하기", "이동하기", "시작하기", "만들기", "바꾸기"];
+    blockPatterns.forEach((pattern) => {
+      normalized = normalized.replace(new RegExp(pattern + "(?=\\S)", "g"), pattern + " ");
+      normalized = normalized.replace(new RegExp("(?<=\\S)" + pattern, "g"), " " + pattern);
+    });
+
+    // 4. 소문자 변환 및 정리
+    normalized = normalized.toLowerCase().trim();
+    normalized = normalized.replace(/[^가-힣a-z0-9\sㄱ-ㅎㅏ-ㅣ]/g, " ");
     normalized = normalized.replace(/\s+/g, " ");
 
     return normalized;
@@ -344,6 +422,12 @@ class EntryQuestionClassifier {
     for (let token of tokens) {
       if (!token) continue;
 
+      // 초성만 있는 경우 그대로 유지
+      if (/^[ㄱ-ㅎ]+$/.test(token)) {
+        processed.push(token);
+        continue;
+      }
+
       // 조사 제거
       for (let josa of this.josaPatterns) {
         const regex = new RegExp(josa + "$");
@@ -355,14 +439,18 @@ class EntryQuestionClassifier {
 
       // 어미 정규화
       for (let [ending, normalized] of Object.entries(this.verbEndings)) {
-        if (token.includes(ending)) {
+        if (token === ending || token.includes(ending)) {
           token = token.replace(ending, normalized);
+          break;
         }
       }
 
-      // 동의어 변환
-      if (this.synonymMap[token]) {
-        token = this.synonymMap[token];
+      // BlockMappings의 동의어 변환 (null 체크 추가)
+      if (this.blockMappings && this.blockMappings.synonymMap) {
+        const synonym = this.blockMappings.synonymMap[token];
+        if (synonym) {
+          token = synonym;
+        }
       }
 
       if (token.length > 0) {
@@ -374,59 +462,86 @@ class EntryQuestionClassifier {
   }
 
   /**
-   * 키워드 추출 및 블록 매핑
+   * 키워드 추출 (BlockMappings 활용 또는 폴백)
    */
   extractKeywords(tokens, originalText) {
     const keywords = [];
     const blockRecommendations = [];
+    const foundKeywords = new Set();
 
-    // tokens가 배열이 아닌 경우 처리
     if (!Array.isArray(tokens)) {
-      console.warn("Tokens is not an array:", tokens);
       tokens = [];
     }
 
-    // originalText 안전한 변환
     const safeOriginalText = this.safeToString(originalText);
 
-    // 토큰별 키워드 매칭
+    // BlockMappings 사용 가능 여부 확인
+    const useBlockMappings = this.blockMappings && typeof this.blockMappings.getBlocksByKeyword === "function";
+
+    // 1. 토큰에서 키워드 추출
     for (let token of tokens) {
-      if (!token) continue;
+      if (!token || token === "블록") continue;
 
-      // 정확한 매칭
-      if (this.keywordToBlocks[token]) {
-        keywords.push(token);
-        blockRecommendations.push({
-          keyword: token,
-          ...this.keywordToBlocks[token],
-        });
+      if (useBlockMappings) {
+        // BlockMappings 사용
+        const blockInfo = this.blockMappings.getBlocksByKeyword(token);
+        if (blockInfo && !foundKeywords.has(token)) {
+          keywords.push(token);
+          blockRecommendations.push({
+            keyword: token,
+            ...blockInfo,
+          });
+          foundKeywords.add(token);
+        }
+
+        // 부분 매칭 (메서드가 있는 경우만)
+        if (typeof this.blockMappings.findKeywordsByPartialMatch === "function") {
+          const partialMatches = this.blockMappings.findKeywordsByPartialMatch(token);
+          for (const match of partialMatches) {
+            if (!foundKeywords.has(match)) {
+              const info = this.blockMappings.getBlocksByKeyword(match);
+              if (info) {
+                keywords.push(match);
+                blockRecommendations.push({
+                  keyword: match,
+                  ...info,
+                });
+                foundKeywords.add(match);
+              }
+            }
+          }
+        }
+      } else {
+        // BlockMappings 없이 기본 처리
+        // 의미있는 토큰을 키워드로 사용
+        if (token.length > 1 && !this.josaPatterns.includes(token)) {
+          keywords.push(token);
+        }
       }
+    }
 
-      // 부분 매칭
-      for (let [keyword, mapping] of Object.entries(this.keywordToBlocks)) {
-        if (token.includes(keyword) || keyword.includes(token)) {
-          if (!keywords.includes(keyword)) {
+    // 2. 원본 텍스트에서 추가 키워드 추출
+    if (safeOriginalText && useBlockMappings && this.blockMappings.keywordToBlocks) {
+      const allKeywords = Object.keys(this.blockMappings.keywordToBlocks);
+      for (const keyword of allKeywords) {
+        if (safeOriginalText.includes(keyword) && !foundKeywords.has(keyword)) {
+          const info = this.blockMappings.getBlocksByKeyword(keyword);
+          if (info) {
             keywords.push(keyword);
             blockRecommendations.push({
               keyword: keyword,
-              ...mapping,
+              ...info,
             });
+            foundKeywords.add(keyword);
           }
         }
       }
     }
 
-    // 원본 텍스트에서 추가 키워드 추출
-    if (safeOriginalText) {
-      for (let [keyword, mapping] of Object.entries(this.keywordToBlocks)) {
-        if (safeOriginalText.includes(keyword) && !keywords.includes(keyword)) {
-          keywords.push(keyword);
-          blockRecommendations.push({
-            keyword: keyword,
-            ...mapping,
-          });
-        }
-      }
+    // 3. 키워드가 없으면 의미있는 토큰을 키워드로 사용
+    if (keywords.length === 0) {
+      const meaningfulTokens = tokens.filter((t) => t !== "블록" && t.length > 1 && !this.josaPatterns.includes(t));
+      keywords.push(...meaningfulTokens);
     }
 
     return { keywords, blockRecommendations };
@@ -436,7 +551,6 @@ class EntryQuestionClassifier {
    * 메인 분류 함수
    */
   async classify(message) {
-    // 입력 검증
     if (message === undefined || message === null) {
       console.warn("Message is null or undefined");
       return {
@@ -449,9 +563,7 @@ class EntryQuestionClassifier {
       };
     }
 
-    // 안전한 문자열 변환
     const messageStr = this.safeToString(message).trim();
-
     if (!messageStr) {
       console.warn("Empty message after conversion");
       return {
@@ -521,19 +633,10 @@ class EntryQuestionClassifier {
    */
   classifyByRulesWithTokens(normalized, tokens, keywords) {
     const scores = {};
-
-    // normalized가 문자열이 아닌 경우 처리
     const safeNormalized = this.safeToString(normalized);
 
-    // tokens가 배열이 아닌 경우 처리
-    if (!Array.isArray(tokens)) {
-      tokens = [];
-    }
-
-    // keywords가 배열이 아닌 경우 처리
-    if (!Array.isArray(keywords)) {
-      keywords = [];
-    }
+    if (!Array.isArray(tokens)) tokens = [];
+    if (!Array.isArray(keywords)) keywords = [];
 
     // 각 타입별 점수 계산
     for (const [type, config] of Object.entries(this.patterns)) {
@@ -566,13 +669,8 @@ class EntryQuestionClassifier {
       scores[type] = Math.max(0, score);
     }
 
-    // 키워드 기반 추가 점수 부여
-    if (keywords.includes("스페이스키") || keywords.includes("키")) {
-      scores.simple = (scores.simple || 0) + 1;
-    }
-    if (keywords.includes("발사") || keywords.includes("총알")) {
-      scores.complex = (scores.complex || 0) + 1;
-    }
+    // 키워드 기반 추가 점수
+    this.applyKeywordBonus(keywords, scores);
 
     // 특별 규칙 적용
     this.applySpecialRules(safeNormalized, scores);
@@ -593,30 +691,77 @@ class EntryQuestionClassifier {
   }
 
   /**
+   * 키워드 기반 추가 점수 부여
+   */
+  applyKeywordBonus(keywords, scores) {
+    // BlockMappings 사용 가능 여부 확인
+    if (!this.blockMappings || typeof this.blockMappings.getBlocksByKeyword !== "function") {
+      // BlockMappings 없으면 기본 처리
+      for (const keyword of keywords) {
+        if (keyword.includes("반복") || keyword.includes("조건")) {
+          scores.simple = (scores.simple || 0) + 0.5;
+        }
+        if (keyword.includes("게임") || keyword.includes("발사")) {
+          scores.complex = (scores.complex || 0) + 0.5;
+        }
+      }
+      return;
+    }
+
+    // BlockMappings 사용
+    for (const keyword of keywords) {
+      const blockInfo = this.blockMappings.getBlocksByKeyword(keyword);
+      if (!blockInfo) continue;
+
+      // 카테고리에 따른 점수 조정
+      switch (blockInfo.category) {
+        case "start":
+        case "moving":
+        case "looks":
+        case "sound":
+          scores.simple = (scores.simple || 0) + 0.5;
+          break;
+        case "flow":
+          if (keyword === "복제" || keyword === "총알" || keyword === "발사") {
+            scores.complex = (scores.complex || 0) + 0.5;
+          } else {
+            scores.simple = (scores.simple || 0) + 0.3;
+          }
+          break;
+        case "variable":
+        case "func":
+          scores.simple = (scores.simple || 0) + 0.3;
+          scores.conceptual = (scores.conceptual || 0) + 0.2;
+          break;
+      }
+    }
+  }
+
+  /**
    * 특별 규칙 적용
    */
   applySpecialRules(normalized, scores) {
     const safeNormalized = this.safeToString(normalized);
 
-    // "만들고 싶" 패턴 강화
+    // "만들고 싶" 패턴
     if (safeNormalized.includes("만들고 싶") || safeNormalized.includes("만들고싶")) {
       scores.complex = (scores.complex || 0) + 2;
       scores.simple = Math.max(0, (scores.simple || 0) - 1);
     }
 
-    // "왜...안" 패턴 강화
+    // "왜...안" 패턴
     if (safeNormalized.includes("왜") && (safeNormalized.includes("안") || safeNormalized.includes("않"))) {
       scores.debug = (scores.debug || 0) + 2;
       scores.simple = Math.max(0, (scores.simple || 0) - 1);
     }
 
-    // 비교/차이 패턴 강화
+    // 비교/차이 패턴
     if (safeNormalized.includes("비교") || safeNormalized.includes("차이")) {
       scores.conceptual = (scores.conceptual || 0) + 2;
       scores.simple = Math.max(0, (scores.simple || 0) - 1);
     }
 
-    // 게임/프로그램 + 만들기 조합
+    // 게임/프로그램 + 만들기
     if (
       (safeNormalized.includes("게임") || safeNormalized.includes("프로그램")) &&
       (safeNormalized.includes("만들") || safeNormalized.includes("제작"))
@@ -625,7 +770,7 @@ class EntryQuestionClassifier {
       scores.simple = 0;
     }
 
-    // 오류/에러 강화
+    // 오류/에러
     if (safeNormalized.includes("오류") || safeNormalized.includes("에러")) {
       scores.debug = (scores.debug || 0) + 2;
     }
@@ -635,12 +780,9 @@ class EntryQuestionClassifier {
       scores.conceptual = (scores.conceptual || 0) + 2;
     }
 
-    // 스페이스/키 + 이동 조합
-    if (
-      (safeNormalized.includes("스페이스") || safeNormalized.includes("키")) &&
-      (safeNormalized.includes("이동") || safeNormalized.includes("움직"))
-    ) {
-      scores.simple = (scores.simple || 0) + 2;
+    // 위치/어디 패턴 강화
+    if (safeNormalized.includes("위치") || safeNormalized.includes("어디")) {
+      scores.simple = (scores.simple || 0) + 1.5;
     }
   }
 
@@ -782,16 +924,6 @@ class EntryQuestionClassifier {
       },
     };
   }
-
-  /**
-   * 호환성을 위한 이전 메서드
-   */
-  classifyByRules(message) {
-    const normalized = this.normalizeText(message);
-    const tokens = this.tokenizeKorean(normalized);
-    const { keywords } = this.extractKeywords(tokens, normalized);
-    return this.classifyByRulesWithTokens(normalized, tokens, keywords);
-  }
 }
 
 // Chrome Extension 환경에서 사용할 수 있도록 export
@@ -799,7 +931,7 @@ if (typeof module !== "undefined" && module.exports) {
   module.exports = EntryQuestionClassifier;
 }
 
-// 전역 변수로도 사용 가능하도록
-if (typeof window !== "undefined") {
-  window.EntryQuestionClassifier = EntryQuestionClassifier;
+// Service Worker 환경
+if (typeof self !== "undefined") {
+  self.EntryQuestionClassifier = EntryQuestionClassifier;
 }

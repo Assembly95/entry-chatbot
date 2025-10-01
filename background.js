@@ -1,5 +1,8 @@
 // Entry Block Helper - Background Service Worker (Quick & CoT 통합 버전)
-
+// window 객체 polyfill
+if (typeof self !== "undefined" && !self.window) {
+  self.window = self;
+}
 // ===== 전역 설정 =====
 let USE_RAG = true;
 let entryBlockData = null;
@@ -9,11 +12,11 @@ let dataLoadPromise = null;
 importScripts("questionClassifier.js");
 importScripts("quickResponse.js");
 importScripts("cotResponse.js");
-
+importScripts("lib/hangul.min.js");
 // 핸들러 인스턴스
 let questionClassifier = new EntryQuestionClassifier();
-let quickResponseHandler = new QuickResponseHandler();
-let cotResponseHandler = new CoTResponseHandler();
+let quickResponseHandler = new QuickResponseGenerator(); // ✅ Generator로 수정
+let cotResponseHandler = new CoTResponseGenerator(); // ✅ 이것도 확인 필요
 
 // ===== Chrome Extension 초기화 =====
 chrome.runtime.onInstalled.addListener(() => {
@@ -311,11 +314,7 @@ async function handleAIRequest(request) {
         ragUsed = ragResults.length > 0;
       }
 
-      response = await quickResponseHandler.generateResponse(
-        message,
-        ragResults,
-        finalClassification // classification 전달
-      );
+      response = await quickResponseHandler.generateResponse(message, classification, ragResults);
     } else if (finalClassification.type === "complex") {
       console.log("🎮 복합 질문 → CoT Response 처리");
 

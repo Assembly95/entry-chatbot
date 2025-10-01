@@ -1,629 +1,341 @@
-// cotResponse.js - Entry 블록코딩 단계별 학습 가이드 (CoT)
-// 복잡한 질문에 대해 단계적으로 생각하도록 유도하는 교육적 응답 생성
+// cotResponse.js - Chain of Thought Response Generator for Entry Block Helper
 
-class CoTResponseHandler {
+/**
+ * CoT Response Generator
+ * 복잡한 질문에 대한 단계별 사고 과정을 포함한 응답 생성
+ */
+class CoTResponseGenerator {
   constructor() {
-    // CoT 템플릿 라이브러리
-    this.templates = {
-      // 움직임 관련
-      movement: {
-        forward: this.createForwardMovementTemplate(),
-        jump: this.createJumpTemplate(),
-        rotate: this.createRotateTemplate(),
-        follow: this.createFollowMouseTemplate(),
+    this.projectTemplates = {
+      슈팅게임: {
+        steps: [
+          "플레이어 캐릭터 설정하기",
+          "키보드로 캐릭터 움직이기",
+          "총알 발사 구현하기",
+          "적 캐릭터 만들기",
+          "충돌 감지 추가하기",
+          "점수 시스템 만들기",
+          "게임 오버 조건 설정하기",
+        ],
+        blocks: ["when_some_key_pressed", "move_direction", "create_clone", "is_touched", "set_variable"],
       },
-
-      // 게임 제작
-      games: {
-        shooting: this.createShootingGameTemplate(),
-        racing: this.createRacingGameTemplate(),
-        avoiding: this.createAvoidingGameTemplate(),
+      미로게임: {
+        steps: [
+          "미로 맵 디자인하기",
+          "플레이어 시작 위치 설정",
+          "방향키로 이동 구현",
+          "벽 충돌 감지",
+          "목표 지점 도달 체크",
+          "타이머 추가하기",
+        ],
+        blocks: ["when_some_key_pressed", "move_x", "move_y", "is_touched", "_if", "repeat_basic"],
       },
-
-      // 상호작용
-      interaction: {
-        collision: this.createCollisionTemplate(),
-        click: this.createClickEventTemplate(),
-        keyboard: this.createKeyboardControlTemplate(),
+      점프게임: {
+        steps: [
+          "캐릭터 기본 이동 설정",
+          "중력 효과 구현",
+          "점프 동작 만들기",
+          "장애물 생성 및 이동",
+          "충돌 감지",
+          "점수 및 라이프 시스템",
+        ],
+        blocks: ["when_some_key_pressed", "change_y", "repeat_inf", "is_touched", "set_variable"],
       },
-
-      // 애니메이션
-      animation: {
-        walking: this.createWalkingAnimationTemplate(),
-        blinking: this.createBlinkingTemplate(),
-      },
-    };
-
-    // 키워드-템플릿 매핑
-    this.keywordMapping = {
-      // 움직임
-      앞으로: "movement.forward",
-      전진: "movement.forward",
-      점프: "movement.jump",
-      뛰: "movement.jump",
-      회전: "movement.rotate",
-      돌: "movement.rotate",
-      "마우스 따라": "movement.follow",
-
-      // 게임
-      슈팅: "games.shooting",
-      총: "games.shooting",
-      발사: "games.shooting",
-      레이싱: "games.racing",
-      경주: "games.racing",
-      피하기: "games.avoiding",
-      장애물: "games.avoiding",
-
-      // 상호작용
-      충돌: "interaction.collision",
-      부딪: "interaction.collision",
-      클릭: "interaction.click",
-      누르: "interaction.click",
-      키보드: "interaction.keyboard",
-
-      // 애니메이션
-      걷: "animation.walking",
-      깜빡: "animation.blinking",
     };
   }
 
   /**
-   * 메인 응답 생성 함수
+   * CoT 응답 생성 메인 함수
    */
-  generateResponse(message, classification) {
-    console.log("🎯 CoT Response 생성 시작");
+  async generateResponse(question, classification, ragResults) {
+    console.log("🧠 CoT Response 생성 시작");
+    console.log("  - 질문 타입:", classification.type);
+    console.log("  - 키워드:", classification.keywords);
 
-    // 1. 적절한 템플릿 선택
-    const template = this.selectTemplate(message);
+    let response = "";
 
-    if (!template) {
-      console.log("⚠️ 적절한 CoT 템플릿을 찾지 못함");
-      return this.createGenericCoTResponse(message);
+    switch (classification.type) {
+      case "complex":
+        response = await this.generateComplexResponse(question, classification, ragResults);
+        break;
+      case "debug":
+        response = await this.generateDebugResponse(question, classification, ragResults);
+        break;
+      case "conceptual":
+        response = await this.generateConceptualResponse(question, classification, ragResults);
+        break;
+      default:
+        response = await this.generateDefaultCotResponse(question, classification, ragResults);
     }
 
-    console.log(`📚 선택된 템플릿: ${template.title}`);
-
-    // 2. CoT 응답 구조 생성
-    return {
-      type: "cot",
-      template: template,
-      currentStep: 1,
-      totalSteps: template.steps.length,
-      sequence: this.formatCoTSequence(template),
-    };
+    return response;
   }
 
   /**
-   * 메시지 분석해서 적절한 템플릿 선택
+   * 복잡한 프로젝트 관련 응답
    */
-  selectTemplate(message) {
-    const lowercaseMsg = message.toLowerCase();
+  async generateComplexResponse(question, classification, ragResults) {
+    let response = "## 🎮 프로젝트 만들기 가이드\n\n";
 
-    // 키워드 매칭으로 템플릿 찾기
-    for (const [keyword, templatePath] of Object.entries(this.keywordMapping)) {
-      if (lowercaseMsg.includes(keyword)) {
-        const [category, type] = templatePath.split(".");
-        const template = this.templates[category]?.[type];
+    // 프로젝트 타입 식별
+    const projectType = this.identifyProjectType(question, classification.keywords);
 
-        if (template) {
-          console.log(`✅ 키워드 '${keyword}'로 템플릿 매칭: ${templatePath}`);
-          return template;
+    if (projectType && this.projectTemplates[projectType]) {
+      const template = this.projectTemplates[projectType];
+
+      response += `### "${projectType}" 만들기\n\n`;
+      response += "프로젝트를 단계별로 만들어볼게요!\n\n";
+
+      // 사고 과정 표시
+      response += "**💭 생각 과정:**\n";
+      response += "1. 먼저 필요한 기능들을 파악하고\n";
+      response += "2. 각 기능에 맞는 블록을 찾아서\n";
+      response += "3. 단계별로 구현해나가면 됩니다\n\n";
+
+      // 단계별 가이드
+      response += "**📋 구현 단계:**\n\n";
+      template.steps.forEach((step, index) => {
+        response += `**${index + 1}단계: ${step}**\n`;
+        response += this.getStepDetails(step, ragResults);
+        response += "\n";
+      });
+
+      // 필요한 주요 블록들
+      response += "\n**🔧 필요한 주요 블록:**\n";
+      template.blocks.forEach((blockType) => {
+        const block = this.findBlockInRag(blockType, ragResults);
+        if (block) {
+          response += `• **${block.name}** (${this.getCategoryName(block.category)})\n`;
         }
-      }
+      });
+
+      // 추가 팁
+      response += "\n**💡 팁:**\n";
+      response += "• 작은 기능부터 하나씩 완성해가세요\n";
+      response += "• 자주 테스트하면서 문제를 바로바로 해결하세요\n";
+      response += "• 변수를 활용해서 게임 상태를 관리하세요\n";
+    } else {
+      // 일반적인 프로젝트 가이드
+      response += "프로젝트를 만들 때는 다음과 같은 순서로 접근해보세요:\n\n";
+      response += "**1. 기획 단계** 🎯\n";
+      response += "   • 무엇을 만들지 명확히 정하기\n";
+      response += "   • 필요한 기능 리스트 작성\n\n";
+
+      response += "**2. 기본 구조 만들기** 🏗️\n";
+      response += "   • 시작 이벤트 블록 배치\n";
+      response += "   • 기본 동작 구현\n\n";
+
+      response += "**3. 기능 추가** ⚙️\n";
+      response += "   • 조건문으로 게임 규칙 추가\n";
+      response += "   • 변수로 점수/상태 관리\n\n";
+
+      response += "**4. 테스트 및 개선** 🔧\n";
+      response += "   • 버그 찾아 수정\n";
+      response += "   • 난이도 조절\n";
     }
 
-    // 키워드 매칭 실패시 의도 분석
-    return this.analyzeIntentAndSelect(lowercaseMsg);
+    return response;
   }
 
   /**
-   * 의도 분석 기반 템플릿 선택
+   * 디버깅 관련 응답
    */
-  analyzeIntentAndSelect(message) {
-    // 게임 만들기 의도
-    if (message.includes("게임") || message.includes("만들")) {
-      if (message.includes("쏘") || message.includes("총")) {
-        return this.templates.games.shooting;
-      }
-      return this.templates.games.avoiding; // 기본 게임
+  async generateDebugResponse(question, classification, ragResults) {
+    let response = "## 🔍 문제 해결 가이드\n\n";
+
+    response += "**💭 문제 분석 과정:**\n";
+    response += "1. 어떤 동작을 기대했는지 확인\n";
+    response += "2. 실제로 어떻게 동작하는지 관찰\n";
+    response += "3. 차이가 나는 부분 찾기\n";
+    response += "4. 해당 부분의 블록 확인\n\n";
+
+    // 일반적인 문제들과 해결법
+    response += "**🔧 자주 발생하는 문제들:**\n\n";
+
+    if (question.includes("안 움직") || question.includes("안움직")) {
+      response += "**📍 캐릭터가 움직이지 않는 경우:**\n";
+      response += "• 시작 이벤트 블록이 있는지 확인\n";
+      response += "• 이동 블록의 값이 0이 아닌지 확인\n";
+      response += "• 반복 블록 안에 이동 블록이 있는지 확인\n\n";
     }
 
-    // 움직임 의도
-    if (message.includes("움직") || message.includes("이동")) {
-      return this.templates.movement.forward;
+    if (question.includes("충돌") || question.includes("닿")) {
+      response += "**📍 충돌 감지가 안 되는 경우:**\n";
+      response += "• 오브젝트 이름이 정확한지 확인\n";
+      response += "• 충돌 감지 블록이 반복문 안에 있는지 확인\n";
+      response += "• 오브젝트들이 실제로 겹치는지 확인\n\n";
+    }
+
+    if (question.includes("반복") || question.includes("멈춰") || question.includes("멈춤")) {
+      response += "**📍 반복이 제대로 안 되는 경우:**\n";
+      response += "• 무한 반복인지 횟수 반복인지 확인\n";
+      response += "• 반복 조건이 올바른지 확인\n";
+      response += "• 반복 블록 안에 대기 시간이 있는지 확인\n\n";
+    }
+
+    // 디버깅 팁
+    response += "**🎯 디버깅 팁:**\n";
+    response += "• 말하기 블록으로 변수 값 확인하기\n";
+    response += "• 한 부분씩 나누어서 테스트하기\n";
+    response += "• 속도를 느리게 해서 관찰하기\n";
+    response += "• 블록을 하나씩 비활성화하며 원인 찾기\n";
+
+    return response;
+  }
+
+  /**
+   * 개념 설명 응답
+   */
+  async generateConceptualResponse(question, classification, ragResults) {
+    let response = "## 📚 프로그래밍 개념 설명\n\n";
+
+    const keywords = classification.keywords;
+
+    response += "**💭 이해를 돕기 위한 설명:**\n\n";
+
+    // 주요 개념별 설명
+    if (keywords.some((k) => k.includes("반복"))) {
+      response += "**🔄 반복이란?**\n";
+      response += "같은 동작을 여러 번 실행하는 것을 말해요.\n";
+      response += "• 예시: 10걸음 걷기 = 1걸음 걷기를 10번 반복\n";
+      response += "• 장점: 코드가 간결해지고 수정이 쉬워요\n\n";
+
+      response += "**반복의 종류:**\n";
+      response += "1. **횟수 반복**: 정해진 횟수만큼 반복\n";
+      response += "2. **무한 반복**: 끝나지 않고 계속 반복\n";
+      response += "3. **조건 반복**: 조건이 참인 동안 반복\n\n";
+    }
+
+    if (keywords.some((k) => k.includes("조건") || k.includes("만약"))) {
+      response += "**❓ 조건문이란?**\n";
+      response += "특정 조건에 따라 다른 동작을 하는 것을 말해요.\n";
+      response += '• 예시: "만약 비가 온다면 우산을 쓴다"\n';
+      response += "• 장점: 상황에 따른 유연한 처리 가능\n\n";
+
+      response += "**조건문 활용:**\n";
+      response += "• 게임 오버 체크\n";
+      response += "• 충돌 감지\n";
+      response += "• 점수에 따른 레벨 변경\n\n";
+    }
+
+    if (keywords.some((k) => k.includes("변수"))) {
+      response += "**📦 변수란?**\n";
+      response += "데이터를 저장하는 상자라고 생각하면 돼요.\n";
+      response += "• 예시: 점수, 생명, 레벨 등을 저장\n";
+      response += "• 특징: 언제든지 값을 바꿀 수 있어요\n\n";
+
+      response += "**변수 사용법:**\n";
+      response += "1. **만들기**: 변수 생성\n";
+      response += "2. **정하기**: 값을 설정\n";
+      response += "3. **바꾸기**: 값을 증가/감소\n";
+      response += "4. **사용하기**: 조건이나 계산에 활용\n\n";
+    }
+
+    if (keywords.some((k) => k.includes("함수"))) {
+      response += "**📝 함수란?**\n";
+      response += "여러 블록을 하나로 묶어 이름을 붙인 것이에요.\n";
+      response += '• 예시: "점프하기" 함수 = 여러 동작을 묶음\n';
+      response += "• 장점: 재사용 가능, 코드 정리\n\n";
+    }
+
+    // 실습 제안
+    response += "**🎯 실습해보기:**\n";
+    response += "간단한 예제를 만들어보면서 개념을 익혀보세요!\n";
+    response += "• 반복: 도형 그리기\n";
+    response += "• 조건: 클릭 게임\n";
+    response += "• 변수: 카운터 만들기\n";
+
+    return response;
+  }
+
+  /**
+   * 기본 CoT 응답
+   */
+  async generateDefaultCotResponse(question, classification, ragResults) {
+    let response = "## 💡 도움말\n\n";
+
+    response += "**💭 분석 과정:**\n";
+    response += `질문을 분석한 결과, ${classification.type} 관련 내용으로 보입니다.\n\n`;
+
+    if (ragResults && ragResults.length > 0) {
+      response += "**📌 관련 블록:**\n";
+      ragResults.slice(0, 3).forEach((block) => {
+        response += `• **${block.name}** - ${block.description || "관련 블록"}\n`;
+      });
+      response += "\n";
+    }
+
+    response += "**🎯 추천 접근 방법:**\n";
+    response += "1. 목표를 명확히 정의하기\n";
+    response += "2. 필요한 블록 찾기\n";
+    response += "3. 단계별로 구현하기\n";
+    response += "4. 테스트 및 수정하기\n";
+
+    return response;
+  }
+
+  /**
+   * 헬퍼 메서드들
+   */
+  identifyProjectType(question, keywords) {
+    const questionLower = question.toLowerCase();
+
+    if (questionLower.includes("슈팅") || questionLower.includes("총")) {
+      return "슈팅게임";
+    }
+    if (questionLower.includes("미로")) {
+      return "미로게임";
+    }
+    if (questionLower.includes("점프") || questionLower.includes("플랫폼")) {
+      return "점프게임";
     }
 
     return null;
   }
 
-  /**
-   * CoT 시퀀스 포맷팅
-   */
-  formatCoTSequence(template) {
-    return {
-      title: template.title,
-      totalSteps: template.steps.length,
-      steps: template.steps.map((step, index) => ({
-        stepNumber: index + 1,
-        title: step.title,
-        content: step.content,
-        hints: step.hints || [],
-        blocks: step.blocks || [],
-        checkpoint: step.checkpoint || null,
-        completed: false,
-      })),
+  getStepDetails(step, ragResults) {
+    const stepDetails = {
+      "플레이어 캐릭터 설정하기": "• 오브젝트 추가하기\n• 시작 위치 설정 (x:0, y:0)\n• 크기와 모양 조절",
+      "키보드로 캐릭터 움직이기": '• "~키를 눌렀을 때" 블록 사용\n• 방향키마다 이동 블록 연결\n• 이동 속도 조절',
+      "총알 발사 구현하기": "• 스페이스키 입력 감지\n• 복제본 생성하기 블록 사용\n• 총알 이동 방향 설정",
+      "적 캐릭터 만들기": "• 새 오브젝트 추가\n• 무작위 위치 생성\n• 자동 이동 패턴 설정",
+      "충돌 감지 추가하기": '• "~에 닿았는가?" 블록 사용\n• 조건문으로 처리\n• 효과음이나 애니메이션 추가',
+      "점수 시스템 만들기": "• 점수 변수 생성\n• 충돌 시 점수 증가\n• 화면에 점수 표시",
+      "게임 오버 조건 설정하기": "• 생명 변수 추가\n• 조건 확인 후 모든 스크립트 정지\n• 게임 오버 메시지 표시",
     };
+
+    return stepDetails[step] || "• 관련 블록을 찾아 구현해보세요";
   }
 
-  /**
-   * 일반적인 CoT 응답 (템플릿 없을 때)
-   */
-  createGenericCoTResponse(message) {
-    return {
-      type: "cot",
-      template: {
-        title: "블록 코딩 프로젝트 만들기",
-        steps: [
-          {
-            title: "🎯 목표 정하기",
-            content: "먼저 무엇을 만들고 싶은지 구체적으로 생각해봐요!",
-            hints: ["어떤 동작을 만들고 싶나요?", "누가 어떻게 움직이면 좋겠어요?"],
-          },
-          {
-            title: "🔍 필요한 블록 찾기",
-            content: "목표를 달성하기 위해 어떤 블록이 필요할까요?",
-            hints: ["시작 조건은?", "어떤 동작이 필요한가요?"],
-          },
-          {
-            title: "🔗 블록 연결하기",
-            content: "찾은 블록들을 논리적 순서대로 연결해봐요!",
-            hints: ["순서가 중요해요", "조건을 확인하세요"],
-          },
-          {
-            title: "✅ 테스트하기",
-            content: "실행 버튼을 눌러 결과를 확인하고 수정해요!",
-            hints: ["예상대로 작동하나요?", "개선할 점은?"],
-          },
-        ],
-      },
-      currentStep: 1,
-      totalSteps: 4,
-    };
+  findBlockInRag(blockType, ragResults) {
+    if (!ragResults) return null;
+    return ragResults.find((block) => block.type === blockType);
   }
 
-  // ===== 템플릿 생성 함수들 =====
-
-  /**
-   * 앞으로 이동 템플릿
-   */
-  createForwardMovementTemplate() {
-    return {
-      title: "캐릭터를 앞으로 이동시키기",
-      description: "키보드를 눌러 캐릭터가 앞으로 가도록 만들어봐요",
-      difficulty: "초급",
-      steps: [
-        {
-          title: "🎯 목표 확인",
-          content: "캐릭터를 앞으로 움직이게 하려고 해요!\n어떤 방법으로 움직이게 할까요?",
-          hints: ["키보드 조작으로 움직이기", "자동으로 계속 움직이기", "마우스를 따라 움직이기"],
-          question: "스페이스키를 누를 때마다 움직이게 할까요, 아니면 계속 움직이게 할까요?",
-        },
-        {
-          title: "🔍 시작 블록 선택",
-          content: "먼저 '언제' 실행할지 정해야 해요.",
-          blocks: ["when_run_button_click", "when_some_key_pressed"],
-          hints: ["시작 카테고리를 확인하세요", "초록색 깃발 블록이나 키 입력 블록을 찾아보세요"],
-          checkpoint: "시작 블록을 작업 영역에 놓았나요?",
-        },
-        {
-          title: "🏃 움직임 블록 추가",
-          content: "이제 '어떻게' 움직일지 정해봐요.",
-          blocks: ["move_direction", "move_x"],
-          hints: [
-            "움직임 카테고리를 확인하세요",
-            "x좌표로 () 만큼 이동하기 블록을 사용해보세요",
-            "양수는 오른쪽, 음수는 왼쪽이에요",
-          ],
-          checkpoint: "움직임 블록을 시작 블록 아래에 연결했나요?",
-        },
-        {
-          title: "🔄 반복 추가 (선택)",
-          content: "계속 움직이게 하려면 반복을 추가해요.",
-          blocks: ["repeat_basic", "repeat_inf"],
-          hints: ["흐름 카테고리의 반복 블록", "무한 반복이나 횟수 반복을 선택하세요"],
-          optional: true,
-        },
-        {
-          title: "✅ 테스트 및 조정",
-          content: "실행 버튼을 눌러 테스트해봐요!",
-          hints: ["움직이는 속도가 적당한가요?", "이동 거리를 조절해보세요", "다른 키로 바꿔볼까요?"],
-          checkpoint: "캐릭터가 원하는 대로 움직이나요?",
-        },
-      ],
+  getCategoryName(category) {
+    const categoryNames = {
+      start: "시작",
+      flow: "흐름",
+      moving: "움직임",
+      looks: "생김새",
+      sound: "소리",
+      judgement: "판단",
+      calc: "계산",
+      variable: "자료",
+      func: "함수",
+      hardware: "하드웨어",
     };
-  }
 
-  /**
-   * 점프 동작 템플릿
-   */
-  createJumpTemplate() {
-    return {
-      title: "캐릭터 점프 만들기",
-      description: "스페이스키를 누르면 점프하는 동작을 만들어요",
-      difficulty: "초급",
-      steps: [
-        {
-          title: "🎯 점프 동작 계획",
-          content: "점프는 위로 올라갔다가 내려오는 동작이에요.\n어떻게 구현할까요?",
-          hints: ["y좌표를 위로 이동 (양수)", "잠시 대기", "y좌표를 아래로 이동 (음수)"],
-        },
-        {
-          title: "🔍 키 입력 감지",
-          content: "스페이스키를 누를 때 실행되도록 설정해요.",
-          blocks: ["when_some_key_pressed"],
-          hints: ["시작 카테고리에서 '키를 눌렀을 때' 블록", "드롭다운에서 'space' 선택"],
-        },
-        {
-          title: "⬆️ 위로 이동",
-          content: "먼저 캐릭터를 위로 올려요.",
-          blocks: ["move_y", "locate_y"],
-          hints: ["움직임 카테고리", "y좌표로 50만큼 이동하기", "양수 값이 위쪽이에요"],
-        },
-        {
-          title: "⏰ 잠시 대기",
-          content: "공중에 잠깐 머물게 해요.",
-          blocks: ["wait_second"],
-          hints: ["흐름 카테고리", "0.3초 기다리기"],
-        },
-        {
-          title: "⬇️ 아래로 이동",
-          content: "다시 원래 위치로 내려와요.",
-          blocks: ["move_y"],
-          hints: ["y좌표로 -50만큼 이동하기", "음수 값이 아래쪽이에요"],
-        },
-        {
-          title: "✅ 테스트 및 개선",
-          content: "점프가 자연스러운지 확인해요!",
-          hints: ["점프 높이 조절하기", "대기 시간 조절하기", "부드러운 애니메이션 추가"],
-        },
-      ],
-    };
-  }
-
-  /**
-   * 슈팅 게임 템플릿
-   */
-  createShootingGameTemplate() {
-    return {
-      title: "간단한 슈팅 게임 만들기",
-      description: "스페이스키로 총알을 발사하는 게임을 만들어요",
-      difficulty: "중급",
-      steps: [
-        {
-          title: "🎯 게임 구성 요소",
-          content: "슈팅 게임에 필요한 요소들을 생각해봐요.",
-          hints: ["플레이어 캐릭터", "총알 오브젝트", "적 캐릭터", "점수 시스템"],
-          question: "어떤 것부터 만들어볼까요?",
-        },
-        {
-          title: "🚀 플레이어 움직임",
-          content: "먼저 플레이어가 좌우로 움직이도록 만들어요.",
-          blocks: ["when_some_key_pressed", "move_x"],
-          hints: ["왼쪽 화살표키 → x좌표 -10", "오른쪽 화살표키 → x좌표 +10"],
-        },
-        {
-          title: "🔫 총알 복제본 만들기",
-          content: "스페이스키를 누르면 총알이 발사되도록 해요.",
-          blocks: ["when_some_key_pressed", "create_clone"],
-          hints: ["총알 오브젝트 미리 준비", "스페이스키 입력 시 복제본 생성", "복제본은 플레이어 위치에서 생성"],
-        },
-        {
-          title: "📍 총알 이동",
-          content: "생성된 총알이 위로 날아가게 해요.",
-          blocks: ["when_clone_start", "repeat_inf", "move_y"],
-          hints: ["복제본이 생성되었을 때", "무한 반복으로 계속 이동", "y좌표로 10씩 이동"],
-        },
-        {
-          title: "💥 충돌 감지",
-          content: "총알이 적과 충돌하면 처리해요.",
-          blocks: ["reach_something", "_if", "delete_clone"],
-          hints: ["만약 적에 닿았다면", "복제본 삭제하기", "점수 증가시키기"],
-        },
-        {
-          title: "📊 점수 시스템",
-          content: "변수를 만들어 점수를 관리해요.",
-          blocks: ["set_variable", "change_variable", "show_variable"],
-          hints: ["점수 변수 만들기", "충돌 시 점수 +10", "화면에 점수 표시"],
-        },
-        {
-          title: "✅ 게임 완성도 높이기",
-          content: "추가 기능으로 게임을 개선해요!",
-          hints: ["적이 움직이게 하기", "게임 오버 조건 추가", "효과음 넣기", "배경 음악 추가"],
-        },
-      ],
-    };
-  }
-
-  /**
-   * 회전 템플릿
-   */
-  createRotateTemplate() {
-    return {
-      title: "오브젝트 회전시키기",
-      description: "다양한 방법으로 오브젝트를 회전시켜요",
-      difficulty: "초급",
-      steps: [
-        {
-          title: "🎯 회전 방식 선택",
-          content: "어떤 방식으로 회전시킬까요?",
-          hints: ["계속 빙글빙글 돌기", "클릭할 때마다 90도씩", "마우스 방향 바라보기"],
-        },
-        {
-          title: "🔄 회전 블록 찾기",
-          content: "움직임 카테고리에서 회전 블록을 찾아요.",
-          blocks: ["rotate_relative", "rotate_absolute"],
-          hints: ["시계방향으로 ( )도 회전하기", "( )도 방향 보기"],
-        },
-        {
-          title: "🔁 반복 설정",
-          content: "계속 회전하려면 반복을 추가해요.",
-          blocks: ["repeat_inf", "wait_second"],
-          hints: ["무한 반복 블록 사용", "회전 속도 조절을 위한 대기"],
-        },
-        {
-          title: "✅ 테스트",
-          content: "회전이 자연스러운지 확인해요!",
-          hints: ["회전 각도 조절", "회전 속도 조절"],
-        },
-      ],
-    };
-  }
-
-  /**
-   * 마우스 따라가기 템플릿
-   */
-  createFollowMouseTemplate() {
-    return {
-      title: "마우스 포인터 따라가기",
-      description: "오브젝트가 마우스를 따라 움직이게 해요",
-      difficulty: "초급",
-      steps: [
-        {
-          title: "🎯 추적 방식 결정",
-          content: "어떻게 마우스를 따라갈까요?",
-          hints: ["즉시 마우스 위치로 이동", "천천히 따라가기", "일정 거리 유지하며 따라가기"],
-        },
-        {
-          title: "🖱️ 마우스 좌표 사용",
-          content: "마우스 x, y 좌표로 이동하는 블록을 사용해요.",
-          blocks: ["locate_xy", "coordinate_mouse"],
-          hints: ["움직임 카테고리", "마우스 포인터로 이동하기"],
-        },
-        {
-          title: "🔄 계속 따라가기",
-          content: "무한 반복으로 계속 추적하게 해요.",
-          blocks: ["repeat_inf"],
-          hints: ["흐름 카테고리의 무한 반복", "반복 안에 이동 블록 넣기"],
-        },
-        {
-          title: "✨ 부드럽게 만들기",
-          content: "움직임을 더 자연스럽게 해요.",
-          blocks: ["move_xy_time"],
-          hints: ["( )초 동안 이동하기 블록 사용", "0.1초 정도로 설정"],
-        },
-      ],
-    };
-  }
-
-  // 나머지 템플릿들도 비슷한 구조로...
-
-  createRacingGameTemplate() {
-    return {
-      title: "레이싱 게임 만들기",
-      description: "장애물을 피하며 달리는 게임",
-      difficulty: "중급",
-      steps: [
-        {
-          title: "🎯 게임 설계",
-          content: "레이싱 게임의 기본 요소를 정해요.",
-          hints: ["자동차", "도로", "장애물", "점수"],
-        },
-        {
-          title: "🚗 자동차 조작",
-          content: "좌우 키로 자동차를 움직여요.",
-          blocks: ["when_some_key_pressed", "move_x"],
-        },
-        {
-          title: "🛣️ 도로 움직임",
-          content: "배경이 아래로 움직이는 효과를 만들어요.",
-          blocks: ["repeat_inf", "move_y"],
-        },
-        {
-          title: "🚧 장애물 생성",
-          content: "랜덤하게 장애물을 만들어요.",
-          blocks: ["create_clone", "calc_rand"],
-        },
-        {
-          title: "💥 충돌 처리",
-          content: "장애물과 충돌하면 게임 오버!",
-          blocks: ["reach_something", "stop_object"],
-        },
-      ],
-    };
-  }
-
-  createAvoidingGameTemplate() {
-    return {
-      title: "피하기 게임 만들기",
-      description: "떨어지는 물체를 피하는 게임",
-      difficulty: "초급",
-      steps: [
-        {
-          title: "🎯 게임 규칙",
-          content: "어떤 것을 피할까요?",
-          hints: ["떨어지는 공", "움직이는 장애물"],
-        },
-        {
-          title: "🏃 플레이어 움직임",
-          content: "마우스나 키보드로 조작해요.",
-          blocks: ["when_some_key_pressed", "move_x"],
-        },
-        {
-          title: "☄️ 장애물 떨어뜨리기",
-          content: "위에서 아래로 떨어지게 해요.",
-          blocks: ["repeat_inf", "move_y", "locate_xy"],
-        },
-        {
-          title: "💥 충돌 감지",
-          content: "닿으면 게임 오버!",
-          blocks: ["reach_something", "_if"],
-        },
-      ],
-    };
-  }
-
-  createCollisionTemplate() {
-    return {
-      title: "충돌 감지 구현",
-      description: "두 오브젝트가 만났을 때 반응하기",
-      difficulty: "초급",
-      steps: [
-        {
-          title: "🎯 충돌 상황",
-          content: "어떤 충돌을 감지할까요?",
-          hints: ["캐릭터와 아이템", "총알과 적"],
-        },
-        {
-          title: "💥 충돌 블록",
-          content: "판단 카테고리에서 충돌 블록을 찾아요.",
-          blocks: ["reach_something"],
-        },
-        {
-          title: "🔄 지속적 확인",
-          content: "계속 충돌을 확인해야 해요.",
-          blocks: ["repeat_inf", "_if"],
-        },
-        {
-          title: "✨ 충돌 효과",
-          content: "충돌했을 때 어떤 일이 일어날까요?",
-          hints: ["소리 재생", "점수 증가", "오브젝트 삭제"],
-        },
-      ],
-    };
-  }
-
-  createClickEventTemplate() {
-    return {
-      title: "클릭 이벤트 만들기",
-      description: "오브젝트를 클릭하면 반응하게 하기",
-      difficulty: "초급",
-      steps: [
-        {
-          title: "🎯 클릭 효과",
-          content: "클릭하면 어떤 일이 일어날까요?",
-          hints: ["색 바꾸기", "소리 내기", "움직이기"],
-        },
-        {
-          title: "🖱️ 클릭 감지",
-          content: "시작 카테고리에서 클릭 블록을 찾아요.",
-          blocks: ["when_object_click"],
-        },
-        {
-          title: "✨ 반응 추가",
-          content: "클릭했을 때의 동작을 추가해요.",
-          blocks: ["change_effect_amount", "play_sound"],
-        },
-      ],
-    };
-  }
-
-  createKeyboardControlTemplate() {
-    return {
-      title: "키보드로 조작하기",
-      description: "방향키로 캐릭터 움직이기",
-      difficulty: "초급",
-      steps: [
-        {
-          title: "🎯 조작 키 정하기",
-          content: "어떤 키를 사용할까요?",
-          hints: ["방향키", "WASD", "스페이스바"],
-        },
-        {
-          title: "⬆️ 위쪽 이동",
-          content: "위 방향키 설정",
-          blocks: ["when_some_key_pressed", "move_y"],
-        },
-        {
-          title: "⬇️ 아래 이동",
-          content: "아래 방향키 설정",
-          blocks: ["when_some_key_pressed", "move_y"],
-        },
-        {
-          title: "⬅️➡️ 좌우 이동",
-          content: "좌우 방향키 설정",
-          blocks: ["when_some_key_pressed", "move_x"],
-        },
-      ],
-    };
-  }
-
-  createWalkingAnimationTemplate() {
-    return {
-      title: "걷기 애니메이션",
-      description: "캐릭터가 걷는 것처럼 보이게 하기",
-      difficulty: "중급",
-      steps: [
-        {
-          title: "🎯 모양 준비",
-          content: "걷는 동작 이미지들을 준비해요.",
-          hints: ["최소 2개 이상의 모양", "발 위치가 다른 이미지"],
-        },
-        {
-          title: "🔄 모양 바꾸기",
-          content: "반복하며 모양을 바꿔요.",
-          blocks: ["repeat_inf", "change_to_next_shape", "wait_second"],
-        },
-        {
-          title: "🚶 이동과 함께",
-          content: "움직이면서 애니메이션 재생",
-          blocks: ["move_x"],
-        },
-      ],
-    };
-  }
-
-  createBlinkingTemplate() {
-    return {
-      title: "깜빡이는 효과",
-      description: "오브젝트가 깜빡이게 만들기",
-      difficulty: "초급",
-      steps: [
-        {
-          title: "🎯 깜빡임 효과",
-          content: "어떻게 깜빡이게 할까요?",
-          hints: ["숨기기/보이기", "투명도 조절"],
-        },
-        {
-          title: "✨ 숨기고 보이기",
-          content: "반복하며 숨기고 보여요.",
-          blocks: ["repeat_basic", "hide", "wait_second", "show"],
-        },
-        {
-          title: "⏰ 속도 조절",
-          content: "대기 시간으로 속도를 조절해요.",
-          hints: ["0.1초 = 빠른 깜빡임", "0.5초 = 느린 깜빡임"],
-        },
-      ],
-    };
+    return categoryNames[category] || category;
   }
 }
 
-// Export for use in other modules
+// Service Worker 환경에서 사용 가능하도록 export
+if (typeof self !== "undefined") {
+  self.CoTResponseGenerator = CoTResponseGenerator;
+}
+
+// Node.js 환경 지원
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = CoTResponseHandler;
-}
-
-// For browser environment
-if (typeof window !== "undefined") {
-  window.CoTResponseHandler = CoTResponseHandler;
+  module.exports = CoTResponseGenerator;
 }

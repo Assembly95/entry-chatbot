@@ -1,317 +1,416 @@
-// quickResponse.js - Entry 블록코딩 즉각 답변 생성 모듈
-// RAG 검색 결과를 최대한 활용하여 빠르고 정확한 답변 제공
+// quickResponse.js - Quick Response Generator for Entry Block Helper
 
-class QuickResponseHandler {
+/**
+ * Quick Response Generator
+ * 단순 질문에 대한 빠른 응답 생성
+ */
+class QuickResponseGenerator {
   constructor() {
-    // 응답 템플릿 정의
-    this.templates = {
-      // 높은 신뢰도 응답
-      highConfidence: {
-        found: "✅ {category} 카테고리에 있는 '{blockName}' 블록을 사용하세요!\n\n{description}",
-        usage: "사용법: {usage}",
-        tip: "💡 팁: {tip}",
+    this.categoryInfo = {
+      start: {
+        name: "시작",
+        emoji: "▶️",
+        description: "프로그램을 시작하는 이벤트 블록들이에요",
       },
-
-      // 중간 신뢰도 응답
-      mediumConfidence: {
-        intro: "이런 블록들을 확인해보세요:",
-        blockList: "• {category} → {blockName}",
-        footer: "\n원하는 블록이 맞나요? 더 자세히 설명해주시면 정확히 찾아드릴게요!",
+      flow: {
+        name: "흐름",
+        emoji: "🔄",
+        description: "프로그램의 흐름을 제어하는 블록들이에요",
       },
-
-      // 낮은 신뢰도/결과 없음
-      lowConfidence: {
-        notFound: "🔍 정확한 블록을 찾지 못했어요.",
-        askDetail: "어떤 동작을 만들고 싶으신지 좀 더 자세히 설명해주시겠어요?",
-        example: "예시: '스페이스키를 누르면 캐릭터가 점프하게 하고 싶어요'",
+      moving: {
+        name: "움직임",
+        emoji: "🏃",
+        description: "오브젝트를 움직이게 하는 블록들이에요",
       },
-
-      // 카테고리별 힌트
-      categoryHints: {
-        start: "🚀 프로그램이 시작되는 조건을 설정하는 블록들이에요",
-        moving: "🏃 오브젝트를 움직이게 하는 블록들이에요",
-        looks: "🎨 오브젝트의 모양을 바꾸는 블록들이에요",
-        sound: "🔊 소리를 재생하거나 조절하는 블록들이에요",
-        flow: "🔄 프로그램의 흐름을 제어하는 블록들이에요",
-        judgement: "❓ 조건을 판단하는 블록들이에요",
-        variable: "📦 데이터를 저장하고 관리하는 블록들이에요",
-        calc: "🔢 계산을 수행하는 블록들이에요",
-        func: "⚙️ 함수를 만들고 사용하는 블록들이에요",
-        brush: "🖌️ 그리기 기능을 제공하는 블록들이에요",
+      looks: {
+        name: "생김새",
+        emoji: "🎨",
+        description: "오브젝트의 모양이나 효과를 바꾸는 블록들이에요",
+      },
+      sound: {
+        name: "소리",
+        emoji: "🔊",
+        description: "소리를 재생하거나 제어하는 블록들이에요",
+      },
+      judgement: {
+        name: "판단",
+        emoji: "❓",
+        description: "조건을 확인하는 블록들이에요",
+      },
+      calc: {
+        name: "계산",
+        emoji: "🔢",
+        description: "숫자나 문자를 계산하는 블록들이에요",
+      },
+      variable: {
+        name: "자료",
+        emoji: "📦",
+        description: "변수와 리스트를 관리하는 블록들이에요",
+      },
+      func: {
+        name: "함수",
+        emoji: "📝",
+        description: "함수를 만들고 사용하는 블록들이에요",
+      },
+      hardware: {
+        name: "하드웨어",
+        emoji: "🔌",
+        description: "하드웨어를 제어하는 블록들이에요",
       },
     };
 
-    // 블록별 사용 팁
-    this.blockTips = {
-      when_run_button_click: "시작하기 버튼을 누르면 아래 연결된 블록들이 실행돼요",
-      when_some_key_pressed: "드롭다운에서 원하는 키를 선택할 수 있어요",
-      move_direction: "음수를 입력하면 반대 방향으로 이동해요",
-      repeat_basic: "반복 횟수를 입력해서 같은 동작을 여러 번 실행해요",
-      _if: "조건이 참일 때만 내부 블록이 실행돼요",
-      set_variable: "변수에 값을 저장해서 나중에 사용할 수 있어요",
-      create_clone: "현재 오브젝트의 복사본을 만들어요",
-      when_clone_start: "복제본이 생성될 때 실행돼요",
-    };
-
-    // 동의어 매핑 (RAG 검색 향상용)
-    this.synonyms = {
-      움직이기: ["이동", "가기", "걷기", "달리기"],
-      점프: ["뛰기", "도약", "올라가기"],
-      회전: ["돌기", "돌리기", "회전하기"],
-      충돌: ["부딪치기", "닿기", "만나기"],
-      시작: ["실행", "시작하기", "켜기"],
-      반복: ["계속", "반복하기", "루프"],
-      조건: ["만약", "조건문", "판단"],
-      변수: ["저장", "데이터", "값"],
+    this.blockExamples = {
+      repeat_basic: "10번 반복하기 블록 안에 이동 블록을 넣으면, 10번 이동해요",
+      repeat_inf: "무한 반복하기 블록은 게임이 끝날 때까지 계속 실행돼요",
+      repeat_while_true: "조건을 만족하는 동안만 반복해요 (예: 점수 < 100일 때까지)",
+      _if: "만약 스페이스키를 눌렀다면, 점프하기",
+      if_else: "만약 벽에 닿았다면 게임 끝내기, 아니면 계속 진행",
+      move_direction: "위쪽 화살표 방향으로 10만큼 이동하기",
+      move_x: "x좌표로 10만큼 이동하기 (오른쪽으로)",
+      move_y: "y좌표로 10만큼 이동하기 (위쪽으로)",
+      locate_xy: "x: 0, y: 0 위치로 이동하기 (화면 중앙)",
+      when_some_key_pressed: "스페이스 키를 눌렀을 때 시작하기",
+      when_run_button_click: "시작 버튼을 클릭했을 때 실행",
+      is_press_some_key: "스페이스 키를 누르고 있는지 확인",
+      is_touched: "다른 오브젝트와 닿았는지 확인",
+      reach_something: "마우스나 벽에 닿았는지 확인",
+      create_clone: "복제본 생성하기 (예: 총알 발사)",
+      delete_clone: "복제본 삭제하기",
+      when_clone_start: "복제본이 생성되었을 때",
+      set_variable: "변수값을 10으로 정하기",
+      change_variable: "변수값을 1만큼 바꾸기",
+      get_variable: "변수값 가져오기",
+      show_variable: "변수를 화면에 표시하기",
+      hide_variable: "변수를 화면에서 숨기기",
     };
   }
 
   /**
-   * 메인 응답 생성 함수
+   * 통합 응답 생성 메서드
    */
-  async generateResponse(message, ragResults, classification) {
-    console.log(`📝 Quick Response 생성 시작`);
-    console.log(`  - RAG 결과: ${ragResults?.length || 0}개`);
+  generateResponse(question, classification, ragResults) {
+    console.log("📝 Quick Response 생성");
 
-    // RAG 결과가 없는 경우
-    if (!ragResults || ragResults.length === 0) {
-      return this.handleNoResults(message, classification);
+    const keywords = classification.keywords || [];
+    const questionLower = question.toLowerCase();
+
+    // 질문 유형 파악 후 적절한 메서드 호출
+    if (questionLower.includes("어디") || questionLower.includes("위치") || questionLower.includes("찾")) {
+      return this.generateLocationResponse(ragResults, keywords);
     }
 
-    // 최상위 블록의 점수 확인
-    const topBlock = ragResults[0];
-    const score = topBlock._searchScore || 0;
+    if (questionLower.includes("사용법") || questionLower.includes("어떻게") || questionLower.includes("방법")) {
+      return this.generateUsageResponse(ragResults, keywords);
+    }
 
-    console.log(`  - 최고 점수: ${score}`);
-    console.log(`  - 최상위 블록: ${topBlock.name || topBlock.fileName}`);
+    if (
+      questionLower.includes("무엇") ||
+      questionLower.includes("뭐") ||
+      questionLower.includes("개념") ||
+      questionLower.includes("란")
+    ) {
+      return this.generateConceptResponse(keywords);
+    }
 
-    // 점수에 따른 응답 전략
-    if (score >= 80) {
-      return this.createHighConfidenceResponse(topBlock, ragResults);
-    } else if (score >= 40) {
-      return this.createMediumConfidenceResponse(ragResults);
+    // 기본값: 위치 응답
+    return this.generateLocationResponse(ragResults, keywords);
+  }
+
+  /**
+   * 위치 관련 질문 응답 생성
+   */
+  generateLocationResponse(ragResults, keywords) {
+    console.log("📝 Quick Response 생성 시작");
+    console.log("  - RAG 결과:", ragResults);
+    console.log("  - 키워드:", keywords);
+
+    // ragResults 검증 및 배열 변환
+    if (!ragResults) {
+      return this.generateNotFoundResponse(keywords);
+    }
+
+    // 배열이 아닌 경우 처리
+    let results = [];
+    if (Array.isArray(ragResults)) {
+      results = ragResults;
+    } else if (typeof ragResults === "object") {
+      // 객체인 경우 배열로 변환 시도
+      results = Object.values(ragResults);
     } else {
-      return this.createLowConfidenceResponse(ragResults, message);
-    }
-  }
-
-  /**
-   * 높은 신뢰도 응답 (정확한 블록을 찾은 경우)
-   */
-  createHighConfidenceResponse(block, allResults) {
-    const categoryName = this.getCategoryKorean(block.category);
-    const blockName = block.name || block.fileName || "블록";
-
-    let response = this.templates.highConfidence.found
-      .replace("{category}", categoryName)
-      .replace("{blockName}", blockName)
-      .replace("{description}", block.description || "");
-
-    // 사용 팁 추가
-    const tip = this.blockTips[block.fileName];
-    if (tip) {
-      response += `\n\n💡 팁: ${tip}`;
+      return this.generateNotFoundResponse(keywords);
     }
 
-    // 카테고리 힌트 추가
-    const categoryHint = this.templates.categoryHints[block.category];
-    if (categoryHint) {
-      response += `\n\nℹ️ ${categoryHint}`;
+    if (results.length === 0) {
+      return this.generateNotFoundResponse(keywords);
     }
 
-    // 관련 블록이 있으면 추가
-    if (allResults.length > 1) {
-      response += "\n\n📌 함께 사용하면 좋은 블록:";
-      for (let i = 1; i < Math.min(3, allResults.length); i++) {
-        const related = allResults[i];
-        response += `\n• ${this.getCategoryKorean(related.category)} → ${related.name || related.fileName}`;
+    // 점수 계산 및 정렬
+    const scoredResults = results
+      .map((result) => ({
+        ...result,
+        displayScore: result.score || result.relevanceScore || 10, // 기본값 10
+      }))
+      .sort((a, b) => b.displayScore - a.displayScore);
+
+    console.log("  - 최고 점수:", scoredResults[0].displayScore);
+    console.log("  - 최상위 블록:", scoredResults[0].name);
+
+    // RAG 결과가 있으면 무조건 성공으로 처리 (점수 체크 제거)
+    // if (scoredResults[0].displayScore < 5) {
+    //   return this.generateNotFoundResponse(keywords);
+    // }
+
+    // 상위 결과 선택 (최대 3개)
+    const topResults = scoredResults.slice(0, 3);
+
+    // 카테고리별 그룹화
+    const byCategory = {};
+    topResults.forEach((block) => {
+      const category = block.category || "unknown";
+      if (!byCategory[category]) {
+        byCategory[category] = [];
       }
-    }
-
-    return response;
-  }
-
-  /**
-   * 중간 신뢰도 응답 (여러 옵션 제시)
-   */
-  createMediumConfidenceResponse(ragResults) {
-    let response = this.templates.mediumConfidence.intro + "\n\n";
-
-    // 상위 3개 블록 표시
-    const topBlocks = ragResults.slice(0, Math.min(3, ragResults.length));
-
-    topBlocks.forEach((block, index) => {
-      const categoryName = this.getCategoryKorean(block.category);
-      const blockName = block.name || block.fileName;
-
-      // 각 블록을 박스로 감싸기
-      response += `<div style="
-      background: white;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 8px;
-    ">`;
-
-      // 번호와 제목
-      response += `<div style="
-      font-weight: 600;
-      margin-bottom: 6px;
-    ">${index + 1}. ${categoryName} → ${blockName}</div>`;
-
-      // 설명
-      if (block.description) {
-        response += `<div style="
-        color: #666;
-        font-size: 13px;
-        line-height: 1.4;
-      ">${block.description.substring(0, 100)}...</div>`;
-      }
-
-      response += `</div>`;
+      byCategory[category].push(block);
     });
 
-    response += `\n${this.templates.mediumConfidence.footer}`;
+    // 응답 생성
+    let response = "";
+
+    if (topResults.length === 1) {
+      // 단일 결과
+      const block = topResults[0];
+      response = `🎯 **${block.name}** 블록을 찾았어요!\n\n`;
+      response += `📍 위치: **${this.getCategoryName(block.category)}** 카테고리\n`;
+      response += `${this.getCategoryEmoji(block.category)} ${this.getCategoryDescription(block.category)}\n\n`;
+
+      if (block.description) {
+        response += `💡 **설명**: ${block.description}\n`;
+      }
+
+      // 사용 예시 추가
+      const example = this.getBlockExample(block.type);
+      if (example) {
+        response += `\n📝 **예시**: ${example}`;
+      }
+    } else {
+      // 복수 결과
+      response = `🎯 관련 블록들을 찾았어요!\n\n`;
+
+      Object.entries(byCategory).forEach(([category, blocks]) => {
+        response += `📍 **${this.getCategoryName(category)}** 카테고리\n`;
+        response += `${this.getCategoryEmoji(category)} ${this.getCategoryDescription(category)}\n`;
+
+        blocks.forEach((block) => {
+          response += `  • **${block.name}**`;
+          if (block.description) {
+            response += ` - ${this.shortenDescription(block.description)}`;
+          }
+          response += "\n";
+        });
+        response += "\n";
+      });
+    }
+
+    // 추가 도움말
+    const additionalHelp = this.getAdditionalHelp(topResults[0].type);
+    if (additionalHelp) {
+      response += "\n" + additionalHelp;
+    }
 
     return response;
   }
 
   /**
-   * 낮은 신뢰도 응답 (더 많은 정보 요청)
+   * 사용법 관련 질문 응답 생성
    */
-  createLowConfidenceResponse(ragResults, originalMessage) {
-    let response = this.templates.lowConfidence.notFound + "\n\n";
+  generateUsageResponse(ragResults, keywords) {
+    // ragResults 검증 및 배열 변환
+    if (!ragResults) {
+      return this.generateNotFoundResponse(keywords);
+    }
 
-    // 가능한 카테고리 제안
-    if (ragResults && ragResults.length > 0) {
-      const categories = [...new Set(ragResults.map((b) => b.category))];
-      response += "혹시 이런 카테고리의 블록을 찾으시나요?\n";
-      categories.forEach((cat) => {
-        response += `• ${this.getCategoryKorean(cat)} - ${this.templates.categoryHints[cat]}\n`;
+    let results = [];
+    if (Array.isArray(ragResults)) {
+      results = ragResults;
+    } else if (typeof ragResults === "object") {
+      results = Object.values(ragResults);
+    } else {
+      return this.generateNotFoundResponse(keywords);
+    }
+
+    if (results.length === 0) {
+      return this.generateNotFoundResponse(keywords);
+    }
+
+    const block = results[0];
+    let response = `📖 **${block.name}** 블록 사용법\n\n`;
+
+    // 기본 설명
+    if (block.description) {
+      response += `**설명**: ${block.description}\n\n`;
+    }
+
+    // 파라미터 설명
+    if (block.params && block.params.length > 0) {
+      response += `**입력값**:\n`;
+      block.params.forEach((param) => {
+        response += `  • ${param.name}: ${param.description || param.type}\n`;
       });
       response += "\n";
     }
 
-    response += this.templates.lowConfidence.askDetail + "\n";
-    response += this.templates.lowConfidence.example;
+    // 사용 예시
+    const example = this.getBlockExample(block.type);
+    if (example) {
+      response += `**예시**: ${example}\n\n`;
+    }
+
+    // 팁 추가
+    response += this.getUsageTips(block.type);
 
     return response;
   }
 
   /**
-   * 검색 결과가 없을 때 처리
+   * 개념 설명 응답 생성
    */
-  handleNoResults(message, classification) {
-    let response = "🤔 해당하는 블록을 찾지 못했어요.\n\n";
+  generateConceptResponse(keywords) {
+    const concepts = {
+      반복: {
+        title: "반복 블록",
+        description: "같은 동작을 여러 번 실행하게 해주는 블록이에요.",
+        types: [
+          "• **n번 반복하기**: 정해진 횟수만큼 반복",
+          "• **무한 반복하기**: 프로그램이 끝날 때까지 계속 반복",
+          "• **조건 반복하기**: 특정 조건을 만족하는 동안 반복",
+        ],
+        tip: "게임에서 캐릭터가 계속 움직이게 하려면 반복 블록을 사용하세요!",
+      },
+      조건: {
+        title: "조건 블록",
+        description: "특정 상황에서만 코드를 실행하게 해주는 블록이에요.",
+        types: ["• **만약 ~라면**: 조건이 참일 때만 실행", "• **만약 ~라면, 아니면**: 참/거짓에 따라 다른 동작 실행"],
+        tip: "게임에서 충돌 감지나 점수 체크할 때 유용해요!",
+      },
+      변수: {
+        title: "변수",
+        description: "데이터를 저장하고 사용할 수 있는 상자예요.",
+        types: ["• **변수 만들기**: 새로운 저장 공간 생성", "• **변수 정하기**: 값을 저장", "• **변수 바꾸기**: 값을 변경"],
+        tip: "점수, 생명, 레벨 등을 저장할 때 사용해요!",
+      },
+    };
 
-    // 키워드 추출 시도
-    const keywords = this.extractKeywords(message);
-
-    if (keywords.length > 0) {
-      response += `'${keywords.join("', '")}' 관련 블록을 찾고 계신가요?\n\n`;
-    }
-
-    // 일반적인 도움말 제공
-    response += "Entry 블록은 다음과 같은 카테고리로 구성되어 있어요:\n\n";
-
-    const mainCategories = ["start", "moving", "looks", "flow", "variable"];
-    mainCategories.forEach((cat) => {
-      response += `• ${this.getCategoryKorean(cat)}: ${this.templates.categoryHints[cat]}\n`;
-    });
-
-    response += "\n어떤 기능을 만들고 싶으신지 구체적으로 알려주시면 도와드릴게요!";
-
-    return response;
-  }
-
-  /**
-   * 키워드 추출
-   */
-  extractKeywords(message) {
-    const words = message.split(/\s+/);
-    const keywords = [];
-
-    // 주요 키워드 매칭
-    const importantWords = [
-      "블록",
-      "이동",
-      "움직",
-      "점프",
-      "회전",
-      "반복",
-      "조건",
-      "변수",
-      "소리",
-      "시작",
-      "클릭",
-      "키",
-      "마우스",
-    ];
-
-    words.forEach((word) => {
-      if (importantWords.some((kw) => word.includes(kw))) {
-        keywords.push(word);
-      }
-    });
-
-    return keywords;
-  }
-
-  /**
-   * 동의어 확장을 통한 RAG 검색 개선
-   */
-  expandQueryWithSynonyms(message) {
-    let expandedQuery = message;
-
-    for (const [key, synonymList] of Object.entries(this.synonyms)) {
-      if (message.includes(key)) {
-        // 동의어 추가 (원본 유지)
-        expandedQuery += " " + synonymList.join(" ");
+    // 키워드에 맞는 개념 찾기
+    for (const keyword of keywords) {
+      for (const [key, concept] of Object.entries(concepts)) {
+        if (keyword.includes(key) || key.includes(keyword)) {
+          let response = `📚 **${concept.title}** 설명\n\n`;
+          response += `${concept.description}\n\n`;
+          response += `**종류**:\n${concept.types.join("\n")}\n\n`;
+          response += `💡 **Tip**: ${concept.tip}`;
+          return response;
+        }
       }
     }
 
-    return expandedQuery;
+    return this.generateNotFoundResponse(keywords);
   }
 
   /**
-   * 카테고리 한국어 변환
+   * 찾지 못한 경우 응답
    */
-  getCategoryKorean(category) {
-    const categoryMap = {
-      start: "시작",
-      moving: "움직임",
-      looks: "생김새",
-      sound: "소리",
-      judgement: "판단",
-      flow: "흐름",
-      variable: "자료",
-      func: "함수",
-      calc: "계산",
-      brush: "붓",
-    };
-    return categoryMap[category] || category;
+  generateNotFoundResponse(keywords) {
+    if (keywords && keywords.length > 0) {
+      return (
+        `🔍 "${keywords.join(", ")}" 관련 블록을 정확히 찾지 못했어요.\n\n` +
+        `혹시 이런 카테고리의 블록을 찾으시나요?\n` +
+        `• **흐름** - 🔄 반복, 조건 등 프로그램 흐름 제어\n` +
+        `• **움직임** - 🏃 이동, 회전 등 오브젝트 동작\n` +
+        `• **시작** - ▶️ 키보드, 마우스 등 이벤트 시작\n` +
+        `• **판단** - ❓ 충돌, 비교 등 조건 확인\n` +
+        `• **자료** - 📦 변수, 리스트 등 데이터 관리\n\n` +
+        `좀 더 구체적으로 설명해주시면 정확한 블록을 찾아드릴게요!`
+      );
+    }
+
+    return (
+      `🔍 정확한 블록을 찾지 못했어요.\n\n` +
+      `어떤 동작을 만들고 싶으신지 좀 더 자세히 설명해주시겠어요?\n\n` +
+      `예시:\n` +
+      `• "스페이스키를 누르면 점프하게 하고 싶어요"\n` +
+      `• "캐릭터가 계속 움직이게 만들고 싶어요"\n` +
+      `• "점수를 화면에 표시하고 싶어요"`
+    );
   }
 
   /**
-   * 블록 사용법 생성
+   * 헬퍼 메서드들
    */
-  generateUsageGuide(block) {
-    const guides = {
-      when_run_button_click: "1. 시작 카테고리에서 블록 선택\n2. 작업 영역에 드래그\n3. 아래에 실행할 블록 연결",
-      move_direction: "1. 움직임 카테고리에서 블록 선택\n2. 이동 거리 입력 (예: 10)\n3. 음수는 반대 방향",
-      repeat_basic: "1. 흐름 카테고리에서 블록 선택\n2. 반복 횟수 입력\n3. 반복할 블록을 내부에 넣기",
+  getCategoryName(category) {
+    return this.categoryInfo[category]?.name || category;
+  }
+
+  getCategoryEmoji(category) {
+    return this.categoryInfo[category]?.emoji || "📌";
+  }
+
+  getCategoryDescription(category) {
+    return this.categoryInfo[category]?.description || "관련 블록들이에요";
+  }
+
+  getBlockExample(blockType) {
+    return this.blockExamples[blockType] || null;
+  }
+
+  shortenDescription(description) {
+    if (description.length > 50) {
+      return description.substring(0, 50) + "...";
+    }
+    return description;
+  }
+
+  getAdditionalHelp(blockType) {
+    if (!blockType) return "";
+
+    if (blockType.includes("repeat")) {
+      return "💡 **Tip**: 반복 블록 안에 다른 블록을 넣어서 반복할 동작을 만들어보세요!";
+    }
+    if (blockType.includes("if")) {
+      return "💡 **Tip**: 조건 블록으로 특정 상황에서만 실행되는 코드를 만들 수 있어요!";
+    }
+    if (blockType.includes("move")) {
+      return "💡 **Tip**: 이동 블록과 반복 블록을 함께 사용하면 계속 움직이는 효과를 만들 수 있어요!";
+    }
+    if (blockType.includes("variable")) {
+      return "💡 **Tip**: 변수로 점수나 생명 같은 게임 데이터를 관리할 수 있어요!";
+    }
+    if (blockType.includes("when")) {
+      return "💡 **Tip**: 시작 블록 아래에 실행할 블록들을 연결하세요!";
+    }
+
+    return "";
+  }
+
+  getUsageTips(blockType) {
+    const tips = {
+      repeat_basic: "💡 반복 횟수를 변수로 설정하면 동적으로 변경할 수 있어요!",
+      repeat_inf: "💡 무한 반복 안에는 꼭 대기 시간이나 조건 체크를 넣어주세요!",
+      _if: "💡 여러 조건을 체크하려면 조건 블록을 중첩해서 사용하세요!",
+      move_direction: "💡 음수 값을 넣으면 반대 방향으로 이동해요!",
+      set_variable: "💡 게임 시작할 때 변수를 초기화하는 것을 잊지 마세요!",
+      when_some_key_pressed: "💡 여러 키에 반응하려면 각각 시작 블록을 만드세요!",
     };
 
-    return guides[block.fileName] || "블록을 작업 영역으로 드래그하여 사용하세요.";
+    return tips[blockType] || "💡 블록을 드래그해서 연결하면 프로그램이 완성돼요!";
   }
 }
 
-// Export for use in other modules
+// Service Worker 환경에서 사용 가능하도록 export
+if (typeof self !== "undefined") {
+  self.QuickResponseGenerator = QuickResponseGenerator;
+}
+
+// Node.js 환경 지원
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = QuickResponseHandler;
-}
-
-// For browser environment
-if (typeof window !== "undefined") {
-  window.QuickResponseHandler = QuickResponseHandler;
+  module.exports = QuickResponseGenerator;
 }
