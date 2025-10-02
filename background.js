@@ -268,9 +268,88 @@ async function searchEntryBlocks(userMessage, topK = 5) {
 
   return results;
 }
+// 새로운 함수: 질문 의도 분해
+async function decomposeQuestion(question) {
+  try {
+    const result = await chrome.storage.sync.get(["openai_api_key"]);
+    if (!result.openai_api_key) {
+      console.log("⚠️ API 키 없음, 의도 분해 건너뜀");
+      return null;
+    }
 
-// ===== 메인 AI 요청 처리 (수정) =====
-// background.js의 handleAIRequest 함수 수정
+    console.log("\n🧠 AI 의도 분해 시작");
+    console.log("━".repeat(60));
+    console.log("📝 원본 질문:", question);
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${result.openai_api_key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: `Entry 블록코딩 질문을 분석하여 구성 요소로 분해하세요.
+
+다음 JSON 형식으로만 응답하세요:
+{
+  "trigger": "시작 조건 (예: 스페이스키 누르면, 클릭했을 때, 시작하면)",
+  "action": "수행할 동작 (예: 이동하기, 회전하기, 말하기, 소리내기)",
+  "target": "대상 오브젝트 (예: 엔트리봇, 캐릭터, 이 오브젝트)",
+  "direction": "방향이나 위치 (예: 앞으로, 위로, 오른쪽으로, 10만큼)",
+  "condition": "조건 (예: 벽에 닿으면, 점수가 10이면)",
+  "blocks": ["추천 블록 타입들 예: when_some_key_pressed, move_direction"]
+}
+
+없는 요소는 null로 표시하세요.
+blocks는 Entry 블록 이름으로 추천하세요:
+- when_some_key_pressed: 키 입력
+- when_run_button_click: 시작 버튼
+- move_direction: 방향 이동
+- move_x, move_y: 좌표 이동
+- repeat_basic: n번 반복
+- repeat_inf: 무한 반복
+- _if, if_else: 조건문
+- set_variable: 변수 설정`,
+          },
+          {
+            role: "user",
+            content: question,
+          },
+        ],
+        temperature: 0.3,
+        max_tokens: 200,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("❌ AI 의도 분해 실패:", response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    const decomposed = JSON.parse(data.choices[0].message.content);
+
+    console.log("\n✨ 의도 분해 결과:");
+    console.log("━".repeat(60));
+    console.log("🎯 트리거:", decomposed.trigger || "없음");
+    console.log("⚡ 동작:", decomposed.action || "없음");
+    console.log("👤 대상:", decomposed.target || "없음");
+    console.log("➡️ 방향/값:", decomposed.direction || "없음");
+    console.log("❓ 조건:", decomposed.condition || "없음");
+    console.log("🔧 추천 블록:", decomposed.blocks?.join(", ") || "없음");
+    console.log("━".repeat(60));
+
+    return decomposed;
+  } catch (error) {
+    console.error("❌ 의도 분해 오류:", error);
+    return null;
+  }
+}
+// 개선된 handleAIRequest 함수
 async function handleAIRequest(request) {
   const { message, conversationHistory = [] } = request;
 
@@ -280,10 +359,11 @@ async function handleAIRequest(request) {
   console.log("💬 대화 기록:", conversationHistory.length + "개");
 
   try {
-    // 1. 질문 분류
-    const classification = await classifyQuestion(message);
+    // 1. AI로 의도 분해 (새로운 단계)
+    const decomposed = await decomposeQuestion(message);
 
-    // classification이 null/undefined인 경우 기본값 설정
+    // 2. 기존 분류도 유지 (비교용)
+    const classification = await classifyQuestion(message);
     const finalClassification = classification || {
       type: "simple",
       confidence: 0.5,
@@ -292,9 +372,9 @@ async function handleAIRequest(request) {
       scores: {},
     };
 
-    console.log("📊 분류 결과:", finalClassification);
+    console.log("📊 분류 결과:", finalClassification.type);
 
-    // 2. API 키 확인
+    // 3. API 키 확인
     const settings = await chrome.storage.sync.get(["openai_api_key"]);
     if (!settings.openai_api_key?.trim()) {
       throw new Error("API 키가 설정되지 않았습니다");
@@ -305,63 +385,93 @@ async function handleAIRequest(request) {
     let ragUsed = false;
     let ragResults = [];
 
-    // 3. 질문 타입별 처리
+    // 4. 의도 분해 결과가 있으면 이를 활용한 RAG 검색
+    // 기존 코드 (line 390-407 부분)
+    if (decomposed && decomposed.blocks && decomposed.blocks.length > 0) {
+      console.log("\n🔍 AI 추천 블록으로 검색 시작:", decomposed.blocks);
+
+      const blockData = await loadEntryBlockData();
+      ragResults = blockData.filter((block) => {
+        // fileName 기반 매칭도 추가
+        const fileName = block.fileName || "";
+        const blockType = block.type || "";
+
+        return decomposed.blocks.some(
+          (recommended) =>
+            fileName.includes(recommended) ||
+            blockType.includes(recommended) ||
+            recommended === fileName ||
+            recommended === blockType
+        );
+      });
+
+      if (ragResults.length > 0) {
+        console.log(
+          `✅ ${ragResults.length}개 블록 찾음:`,
+          ragResults.map((b) => b.fileName || b.type)
+        );
+        ragUsed = true;
+      } else {
+        console.log("⚠️ AI 추천 블록을 데이터에서 찾지 못함");
+        // 블록 데이터 구조 확인용
+        console.log("첫 번째 블록 예시:", blockData[0]);
+      }
+    }
+
+    // 5. 기존 RAG 검색도 실행 (폴백용)
+    if (!ragUsed && USE_RAG) {
+      ragResults = await searchEntryBlocks(message, 7);
+      ragUsed = ragResults.length > 0;
+    }
+
+    // 6. 응답 생성 (기존 로직 유지)
     if (finalClassification.type === "simple") {
       console.log("📦 단순 질문 → Quick Response 처리");
-
-      if (USE_RAG) {
-        ragResults = await searchEntryBlocks(message, 7);
-        ragUsed = ragResults.length > 0;
-      }
-
       response = await quickResponseHandler.generateResponse(message, classification, ragResults);
     } else if (finalClassification.type === "complex") {
       console.log("🎮 복합 질문 → CoT Response 처리");
-
       const cotResult = cotResponseHandler.generateResponse(message, finalClassification);
-
       if (cotResult && cotResult.template) {
         responseType = "cot";
         response = formatCoTForUser(cotResult);
-
         return {
           success: true,
           response: response,
           responseType: "cot",
           cotSequence: cotResult.sequence,
           rawBlocks: [],
-          classification: finalClassification, // 분류 정보 포함
+          classification: finalClassification,
           ragUsed: false,
+          decomposed: decomposed, // 의도 분해 결과 포함
         };
       } else {
         response = await generateBasicResponse(message, finalClassification, settings.openai_api_key);
       }
-    } else if (finalClassification.type === "debug") {
-      console.log("🐛 디버깅 질문 → 문제 해결 가이드");
-      response = await generateDebugResponse(message, finalClassification, settings.openai_api_key);
-    } else if (finalClassification.type === "conceptual") {
-      console.log("💡 개념 질문 → 개념 설명");
-      response = await generateConceptualResponse(message, finalClassification, settings.openai_api_key);
     } else {
       response = await generateBasicResponse(message, finalClassification, settings.openai_api_key);
     }
 
-    // 4. 결과 반환
+    // 7. 의도 분해 결과를 응답에 추가 (디버깅용)
+    if (decomposed) {
+      response =
+        response +
+        "\n\n---\n💡 디버그 정보:\n" +
+        `트리거: ${decomposed.trigger || "없음"}\n` +
+        `동작: ${decomposed.action || "없음"}\n` +
+        `추천 블록: ${decomposed.blocks?.join(", ") || "없음"}`;
+    }
+
     console.log("\n✨ 처리 완료");
     console.log("━".repeat(60));
-    console.log("📋 요약:");
-    console.log(`  • 질문 타입: ${finalClassification.type}`);
-    console.log(`  • 응답 타입: ${responseType}`);
-    console.log(`  • RAG 사용: ${ragUsed ? "예" : "아니오"}`);
-    console.log("━".repeat(60) + "\n");
 
     return {
       success: true,
       response: response,
       responseType: responseType,
       rawBlocks: ragResults,
-      classification: finalClassification, // 분류 정보 반드시 포함
+      classification: finalClassification,
       ragUsed: ragUsed,
+      decomposed: decomposed, // 의도 분해 결과 포함
     };
   } catch (error) {
     console.error("\n❌ AI 요청 처리 실패:", error);
