@@ -4,6 +4,142 @@
  * Quick Response Generator
  * 단순 질문에 대한 빠른 응답 생성
  */
+function generateStepByStepResponse(decomposed, ragResults) {
+  if (!decomposed) {
+    return null;
+  }
+
+  const steps = [];
+  let stepNumber = 1;
+
+  // Step 1: 트리거 설정
+  if (decomposed.trigger) {
+    const triggerBlock = ragResults.find(
+      (block) => block.type === "when_some_key_pressed" || block.fileName === "when_some_key_pressed"
+    );
+
+    steps.push({
+      stepNumber: stepNumber++,
+      title: "시작 이벤트 설정하기",
+      content:
+        `**${decomposed.trigger}** 조건을 만들어요.\n\n` +
+        `📍 위치: **시작** 카테고리\n` +
+        `🔧 블록: **[스페이스] 키를 눌렀을 때**\n\n` +
+        `💡 이 블록을 작업 영역에 드래그해서 놓으세요.`,
+      blockType: "when_some_key_pressed",
+      category: "start",
+    });
+  }
+
+  // Step 2: 대상 선택 (필요한 경우)
+  if (decomposed.target && decomposed.target !== "이 오브젝트") {
+    steps.push({
+      stepNumber: stepNumber++,
+      title: "오브젝트 선택하기",
+      content:
+        `**${decomposed.target}**를 선택하세요.\n\n` +
+        `📍 위치: 오브젝트 목록\n` +
+        `💡 화면 아래 오브젝트 목록에서 ${decomposed.target}를 클릭하세요.\n` +
+        `선택된 오브젝트에 코드가 추가됩니다.`,
+      blockType: null,
+      category: "object",
+    });
+  }
+
+  // Step 3: 동작 추가
+  if (decomposed.action) {
+    const actionBlock = ragResults.find((block) => block.type === "move_direction" || block.fileName === "move_direction");
+
+    let actionDescription = "";
+    if (decomposed.action.includes("이동") || decomposed.action.includes("움직")) {
+      actionDescription = "**10만큼 움직이기** 블록을 연결하세요";
+    } else if (decomposed.action.includes("회전")) {
+      actionDescription = "**15도 회전하기** 블록을 연결하세요";
+    } else {
+      actionDescription = `**${decomposed.action}** 블록을 연결하세요`;
+    }
+
+    steps.push({
+      stepNumber: stepNumber++,
+      title: "동작 블록 연결하기",
+      content:
+        `${actionDescription}\n\n` +
+        `📍 위치: **움직임** 카테고리\n` +
+        `🔧 블록: **( )만큼 움직이기**\n\n` +
+        `💡 이 블록을 Step 1의 블록 아래에 연결하세요.\n` +
+        `블록이 자석처럼 달라붙을 거예요!`,
+      blockType: "move_direction",
+      category: "moving",
+    });
+  }
+
+  // Step 4: 값 설정
+  if (decomposed.direction || decomposed.action) {
+    steps.push({
+      stepNumber: stepNumber++,
+      title: "값 조정하기",
+      content:
+        `블록의 값을 조정해요.\n\n` +
+        (decomposed.direction
+          ? `➡️ 방향: **${decomposed.direction}**\n` + `   • 앞으로 = 오른쪽 (0도)\n` + `   • 뒤로 = 왼쪽 (180도)\n\n`
+          : "") +
+        `📏 이동 거리: 10 (기본값)\n` +
+        `   • 더 빠르게: 20, 30...\n` +
+        `   • 더 느리게: 5, 3...\n\n` +
+        `💡 숫자를 클릭해서 원하는 값으로 바꿔보세요!`,
+      blockType: null,
+      category: "setting",
+    });
+  }
+
+  // Step 5: 테스트
+  steps.push({
+    stepNumber: stepNumber++,
+    title: "테스트하기",
+    content:
+      `완성! 이제 실행해볼까요?\n\n` +
+      `▶️ **실행 버튼**을 클릭하세요\n` +
+      `⌨️ **스페이스바**를 눌러보세요\n\n` +
+      `✅ 예상 결과:\n` +
+      `${decomposed.target || "오브젝트"}가 ${decomposed.direction || "지정한 방향으로"} 움직입니다!\n\n` +
+      `💡 움직이지 않나요?\n` +
+      `• 블록이 제대로 연결되었는지 확인하세요\n` +
+      `• 실행 버튼을 먼저 눌렀는지 확인하세요`,
+    blockType: null,
+    category: "test",
+    completed: false,
+  });
+
+  // CoT 형식으로 포맷팅
+  const totalSteps = steps.length;
+
+  const cotSequence = {
+    totalSteps: totalSteps,
+    currentStep: 1,
+    steps: steps.map((step) => ({
+      ...step,
+      completed: false,
+    })),
+  };
+
+  // 초기 응답 (첫 번째 단계만 표시)
+  const initialResponse = `
+🎯 **블록 코딩 가이드** (단계: 1/${totalSteps})
+
+${steps[0].title ? `### Step 1: ${steps[0].title}` : ""}
+${steps[0].content}
+
+---
+💡 **다음 단계로 이동**: 아래 화살표(→) 버튼을 클릭하세요
+  `;
+
+  return {
+    response: initialResponse,
+    cotSequence: cotSequence,
+    type: "step-by-step",
+  };
+}
+
 class QuickResponseGenerator {
   constructor() {
     this.categoryInfo = {
@@ -88,34 +224,30 @@ class QuickResponseGenerator {
   /**
    * 통합 응답 생성 메서드
    */
-  generateResponse(question, classification, ragResults) {
+  generateResponse(question, classification, ragResults, decomposed) {
     console.log("📝 Quick Response 생성");
 
+    // decomposed가 있으면 단계별 안내 생성
+    if (decomposed && decomposed.trigger && decomposed.action) {
+      console.log("🎯 단계별 안내 생성");
+      const stepByStepResult = generateStepByStepResponse(decomposed, ragResults);
+
+      if (stepByStepResult) {
+        return stepByStepResult;
+      }
+    }
+
+    // 기존 로직 (decomposed가 없거나 단계별 안내가 실패한 경우)
     const keywords = classification.keywords || [];
     const questionLower = question.toLowerCase();
 
-    // 질문 유형 파악 후 적절한 메서드 호출
-    if (questionLower.includes("어디") || questionLower.includes("위치") || questionLower.includes("찾")) {
-      return this.generateLocationResponse(ragResults, keywords);
+    if (questionLower.includes("어디") || questionLower.includes("위치")) {
+      return {
+        response: this.generateLocationResponse(ragResults, keywords),
+        type: "location",
+      };
     }
-
-    if (questionLower.includes("사용법") || questionLower.includes("어떻게") || questionLower.includes("방법")) {
-      return this.generateUsageResponse(ragResults, keywords);
-    }
-
-    if (
-      questionLower.includes("무엇") ||
-      questionLower.includes("뭐") ||
-      questionLower.includes("개념") ||
-      questionLower.includes("란")
-    ) {
-      return this.generateConceptResponse(keywords);
-    }
-
-    // 기본값: 위치 응답
-    return this.generateLocationResponse(ragResults, keywords);
   }
-
   /**
    * 위치 관련 질문 응답 생성
    */

@@ -318,6 +318,20 @@ window.displayLearnerProgress = function (progress) {
     }, 100);
   };
 
+  // Extension context 체크 함수
+  function isExtensionValid() {
+    return !!(chrome.runtime && chrome.runtime.id);
+  }
+
+  // Chrome API 호출 래퍼
+  async function safeStorageGet(keys) {
+    if (!isExtensionValid()) {
+      throw new Error("Extension context lost");
+    }
+    return chrome.storage.sync.get(keys);
+  }
+
+  // 모든 chrome.storage.sync.get을 safeStorageGet으로 교체
   // ===== 유틸리티 함수들 =====
   function getCategoryColor(category) {
     const colors = {
@@ -377,6 +391,12 @@ window.displayLearnerProgress = function (progress) {
 
   async function loadCurrentKeyStatus() {
     try {
+      // Extension이 여전히 유효한지 확인
+      if (!chrome.runtime?.id) {
+        console.log("Extension context lost");
+        return;
+      }
+
       const result = await chrome.storage.sync.get(["openai_api_key"]);
       const indicator = document.getElementById("key-status-indicator");
       const message = document.getElementById("key-status-message");
@@ -391,6 +411,22 @@ window.displayLearnerProgress = function (progress) {
         }
       }
     } catch (error) {
+      // Extension context가 무효화된 경우
+      if (error.message.includes("Extension context invalidated")) {
+        console.log("Extension이 업데이트되었습니다. 페이지를 새로고침하세요.");
+
+        // 사용자에게 알림
+        const modal = document.getElementById("api-key-modal");
+        if (modal) {
+          modal.innerHTML = `
+          <div style="padding: 20px; text-align: center;">
+            <h3>Extension 재시작 필요</h3>
+            <p>페이지를 새로고침해주세요 (F5)</p>
+          </div>
+        `;
+        }
+        return;
+      }
       console.error("키 상태 로드 실패:", error);
     }
   }
@@ -782,12 +818,12 @@ window.displayLearnerProgress = function (progress) {
   async function sendMessage() {
     try {
       const chatInput = document.getElementById("chat-input");
-      const message = chatInput.value.trim();
-      if (!message) return;
+      const userMessage = chatInput.value.trim(); // message -> userMessage로 변경
+      if (!userMessage) return;
 
       // 사용자 메시지 표시
-      addChatMessage(message, false);
-      conversationHistory.push({ role: "user", content: message });
+      addChatMessage(userMessage, false);
+      conversationHistory.push({ role: "user", content: userMessage });
 
       // 입력창 초기화
       chatInput.value = "";
@@ -803,11 +839,11 @@ window.displayLearnerProgress = function (progress) {
       chrome.runtime.sendMessage(
         {
           action: "generateAIResponse",
-          message: message,
+          message: userMessage, // 여기도 userMessage로 변경
           conversationHistory: conversationHistory.slice(),
         },
         async (response) => {
-          // Chrome runtime 에러를 가장 먼저 체크
+          // Chrome runtime 에러 체크
           if (chrome.runtime.lastError) {
             console.error("Chrome runtime 오류:", chrome.runtime.lastError);
             if (typingIndicator) {
@@ -898,6 +934,12 @@ window.displayLearnerProgress = function (progress) {
 
   // ===== API 키 모달 표시 =====
   function showApiKeyModal() {
+    // Extension 유효성 체크
+    if (!chrome.runtime?.id) {
+      alert("Extension이 업데이트되었습니다. 페이지를 새로고침해주세요.");
+      location.reload();
+      return;
+    }
     const existingModal = document.getElementById("api-key-modal");
     if (existingModal) {
       existingModal.remove();
@@ -1061,7 +1103,11 @@ window.displayLearnerProgress = function (progress) {
       });
     }
 
-    loadCurrentKeyStatus();
+    try {
+      loadCurrentKeyStatus();
+    } catch (error) {
+      console.log("키 상태 로드 건너뜀:", error);
+    }
   }
 
   // ===== 이벤트 리스너 설정 =====
