@@ -13,6 +13,7 @@ importScripts("questionClassifier.js");
 importScripts("quickResponse.js");
 importScripts("cotResponse.js");
 importScripts("lib/hangul.min.js");
+importScripts("data/block_name_id_match.js");
 // 핸들러 인스턴스
 let questionClassifier = new EntryQuestionClassifier();
 let quickResponseHandler = new QuickResponseGenerator(); // ✅ Generator로 수정
@@ -30,6 +31,31 @@ chrome.runtime.onInstalled.addListener(() => {
   USE_RAG = true;
   loadEntryBlockData();
 });
+
+function createReverseBlockMap() {
+  // entryBlockMap이 로드되었는지 확인
+  if (typeof entryBlockMap === "undefined") {
+    console.error("entryBlockMap이 로드되지 않음");
+    return {};
+  }
+  const reverseMap = {};
+
+  // entryBlockMap을 순회하면서 역방향 매핑 생성
+  for (const [id, name] of Object.entries(entryBlockMap)) {
+    // "소리 재생하기" → "sound_something_with_block"
+    reverseMap[name] = id;
+
+    // 추가로 간단한 키워드 매핑도 생성
+    if (name.includes("소리") && name.includes("재생")) {
+      reverseMap["play_sound"] = "sound_something_with_block"; // AI가 사용할 가능성 있는 이름
+    }
+    // ... 더 많은 패턴 추가
+  }
+
+  return reverseMap;
+}
+
+// background.js의 decomposeQuestion 함수 개선
 
 async function decomposeQuestion(question) {
   try {
@@ -72,8 +98,38 @@ async function decomposeQuestion(question) {
 - target: 대상 오브젝트 (예: "엔트리봇")
 - direction: 방향/값 (예: "앞으로", "10만큼")
 - condition: 조건 (예: "벽에 닿으면")
-- blocks: 추천 블록 배열 ["when_some_key_pressed", "move_direction"]
+- blocks: 추천 블록 ID 배열
 - 없는 항목은 null
+
+주요 Entry 블록 ID (blocks 배열에 사용):
+- when_run_button_click: 시작 버튼을 클릭했을 때
+- when_some_key_pressed: 키를 눌렀을 때  
+- when_object_click: 오브젝트를 클릭했을 때
+- when_scene_start: 장면이 시작되었을 때
+- when_message_cast: 신호를 받았을 때
+- move_direction: 움직이기
+- move_x: x좌표 바꾸기
+- move_y: y좌표 바꾸기
+- rotate_relative: 회전하기
+- repeat_basic: n번 반복하기
+- repeat_inf: 계속 반복하기
+- _if: 만약 ~라면
+- if_else: 만약 ~라면, 아니면
+- set_variable: 변수 설정
+- get_variable: 변수 값
+- change_variable: 변수 바꾸기
+- sound_something_with_block: 소리 재생하기
+- play_bgm: 배경음악 재생하기
+- dialog: 말하기
+- show: 보이기
+- hide: 숨기기
+
+예시 매핑:
+- "시작 버튼", "시작하기 버튼", "실행 버튼" → ["when_run_button_click"]
+- "스페이스", "스페이스바", "스페이스키" → ["when_some_key_pressed"]
+- "소리 재생", "소리 내기" → ["sound_something_with_block"]
+- "이동", "움직이기" → ["move_direction"]
+- "반복" → ["repeat_basic"] 또는 ["repeat_inf"]
 
 JSON만 응답. 설명 없음.`,
           },
@@ -150,35 +206,44 @@ async function loadEntryBlockData() {
 
           for (const fileName of knownFiles) {
             try {
-              const response = await fetch(chrome.runtime.getURL(`data/blocks/${category}/${fileName}`));
+              const url = chrome.runtime.getURL(`data/blocks/${category}/${fileName}`);
+              const response = await fetch(url);
 
-              if (response.ok) {
-                const blockData = await response.json();
-                const imagePath = `data/block-images/${category}/${fileName.replace(".json", ".png")}`;
-                const imageUrl = chrome.runtime.getURL(imagePath);
-
-                let hasImage = false;
-                try {
-                  const imgResponse = await fetch(imageUrl, { method: "HEAD" });
-                  hasImage = imgResponse.ok;
-                } catch {
-                  hasImage = false;
-                }
-
-                allBlocks.push({
-                  category,
-                  fileName: fileName.replace(".json", ""),
-                  imageUrl: hasImage ? imageUrl : null,
-                  hasImage,
-                  ...blockData,
-                });
+              if (!response.ok) {
+                console.error(`❌ 파일 로드 실패: ${category}/${fileName} - Status: ${response.status}`);
+                continue;
               }
+
+              const blockData = await response.json();
+
+              // id가 없으면 파일명에서 추출
+              const blockId = blockData.id || fileName.replace(".json", "");
+
+              const imagePath = `data/block-images/${category}/${fileName.replace(".json", ".png")}`;
+              const imageUrl = chrome.runtime.getURL(imagePath);
+
+              let hasImage = false;
+              try {
+                const imgResponse = await fetch(imageUrl, { method: "HEAD" });
+                hasImage = imgResponse.ok;
+              } catch {
+                hasImage = false;
+              }
+
+              allBlocks.push({
+                ...blockData, // 원본 데이터 먼저 (id가 있으면 사용)
+                id: blockData.id || fileName.replace(".json", ""), // id 없으면 파일명 사용
+                category,
+                fileName: fileName.replace(".json", ""),
+              });
+
+              console.log(`✅ 로드 성공: ${fileName} (ID: ${blockId})`);
             } catch (fileError) {
-              console.log(`파일 건너뜀: ${category}/${fileName}`);
+              console.error(`❌ 파일 처리 에러: ${category}/${fileName}`, fileError.message);
             }
           }
         } catch (categoryError) {
-          console.log(`카테고리 건너뜀: ${category}`);
+          console.error(`카테고리 에러: ${category}`, categoryError);
         }
       }
 
@@ -262,16 +327,33 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
   // 1. AI 추천 블록 우선 처리
   if (decomposed && decomposed.blocks && decomposed.blocks.length > 0) {
     console.log(`🤖 AI 추천 블록: ${decomposed.blocks.join(", ")}`);
+    const reverseMap = createReverseBlockMap();
+
+    const aiToEntryMap = {
+      play_sound: "sound_something_with_block", // 또는 'play_bgm'
+      // 필요한 다른 매핑 추가
+    };
 
     const recommendedBlocks = [];
     for (const recommendedId of decomposed.blocks) {
-      const found = blockData.find((block) => block.id === recommendedId || block.fileName === recommendedId);
+      // 1. 직접 ID 매칭 시도
+      let found = blockData.find((block) => {
+        // 정확한 ID 매칭만
+        return block.id === recommendedId;
+      });
+
+      // 2. 못 찾으면 역방향 매핑 시도
+      if (!found) {
+        const mappedId = reverseMap[recommendedId];
+        if (mappedId) {
+          found = blockData.find((block) => block.id === mappedId);
+        }
+      }
       if (found) {
-        console.log(`✅ AI 추천 블록 발견: ${found.name} (${found.id})`);
+        console.log(`✅ 블록 발견: ${found.name} (${found.id})`);
         recommendedBlocks.push(found);
       }
     }
-
     if (recommendedBlocks.length > 0) {
       return recommendedBlocks;
     }
@@ -611,47 +693,197 @@ function getCategoryKorean(category) {
 }
 
 // ===== 블록 파일 목록 =====
+// background.js의 getKnownBlockFiles 함수 업데이트
+
 function getKnownBlockFiles(category) {
   const fileMap = {
     start: [
+      "when_run_button_click.json",
+      "when_some_key_pressed.json",
+      "mouse_clicked.json",
+      "mouse_click_cancled.json",
+      "when_object_click.json",
+      "when_object_click_canceled.json",
+      "when_message_cast.json",
       "message_cast.json",
       "message_cast_wait.json",
-      "when_message_cast.json",
-      "when_object_click.json",
-      "when_run_button_click.json",
       "when_scene_start.json",
-      "when_some_key_pressed.json",
+      "start_scene.json",
+      "start_neighbor_scene.json",
+      // 나머지 start 블록들 (필요시 추가)
     ],
+
     moving: [
-      "bounce_wall.json",
-      "locate.json",
-      "locate_xy.json",
       "move_direction.json",
+      "bounce_wall.json",
       "move_x.json",
       "move_y.json",
+      "move_xy_time.json",
+      "locate_x.json",
+      "locate_y.json",
+      "locate_xy.json",
+      "locate_xy_time.json",
+      "locate.json",
+      "locate_object_time.json",
       "rotate_relative.json",
+      "direction_relative.json",
+      "rotate_by_time.json",
+      "direction_relative_duration.json",
+      "rotate_absolute.json",
+      "direction_absolute.json",
+      "see_angle_object.json",
+      "move_to_angle.json",
     ],
-    looks: ["change_to_next_shape.json", "dialog.json", "hide.json", "show.json"],
-    sound: ["play_sound.json", "sound_volume_change.json"],
-    judgement: ["boolean_and_or.json", "boolean_basic_operator.json", "is_clicked.json", "reach_something.json"],
+
+    looks: [
+      "show.json",
+      "hide.json",
+      "dialog_time.json",
+      "dialog.json",
+      "remove_dialog.json",
+      "change_to_some_shape.json",
+      "change_to_next_shape.json",
+      "add_effect_amount.json",
+      "change_effect_amount.json",
+      "erase_all_effects.json",
+      "change_scale_size.json",
+      "set_scale_size.json",
+      "stretch_scale_size.json",
+      "reset_scale_size.json",
+      "flip_x.json",
+      "flip_y.json",
+      "change_object_index.json",
+    ],
+
+    sound: [
+      "sound_something_with_block.json",
+      "sound_something_second_with_block.json",
+      "sound_from_to.json",
+      "sound_something_wait_with_block.json",
+      "sound_something_second_wait_with_block.json",
+      "sound_from_to_and_wait.json",
+      "sound_volume_change.json",
+      "sound_volume_set.json",
+      "get_sound_speed.json",
+      "sound_speed_change.json",
+      "sound_speed_set.json",
+      "sound_silent_all.json",
+      "play_bgm.json",
+      "stop_bgm.json",
+      "get_sound_volume.json",
+      "get_sound_duration.json",
+    ],
+
+    judgement: [
+      "is_clicked.json",
+      "is_object_clicked.json",
+      "is_press_some_key.json",
+      "reach_something.json",
+      "is_type.json",
+      "boolean_basic_operator.json",
+      "boolean_and_or.json",
+      "boolean_not.json",
+    ],
+
     flow: [
-      "_if.json",
-      "if_else.json",
+      "wait_second.json",
       "repeat_basic.json",
       "repeat_inf.json",
-      "wait_second.json",
+      "repeat_while_true.json",
+      "stop_repeat.json",
+      "continue_repeat.json",
+      "_if.json",
+      "if_else.json",
+      "wait_until_true.json",
+      "stop_object.json",
+      "restart_project.json",
+      "when_clone_start.json",
       "create_clone.json",
       "delete_clone.json",
-      "when_clone_start.json",
+      "remove_all_clones.json",
     ],
+
     variable: ["set_variable.json", "get_variable.json", "change_variable.json", "ask_and_wait.json"],
-    func: ["function_create.json", "function_general.json"],
-    calc: ["calc_basic.json", "calc_operation.json", "calc_rand.json"],
-    brush: ["brush_erase_all.json", "brush_stamp.json", "start_drawing.json"],
+
+    func: [
+      "function_create.json",
+      "function_general.json",
+      "function_value.json",
+      "function_field_label.json",
+      "function_field_string.json",
+      "function_field_boolean.json",
+      "function_param_string.json",
+      "function_param_boolean.json",
+      "set_func_variable.json",
+      "get_func_variable.json",
+    ],
+
+    calc: [
+      "calc_basic.json",
+      "calc_rand.json",
+      "coordinate_mouse.json",
+      "coordinate_object.json",
+      "quotient_and_mod.json",
+      "calc_operation.json",
+      "get_project_timer_value.json",
+      "choose_project_timer_action.json",
+      "set_visible_project_timer.json",
+      "get_date.json",
+      "distance_something.json",
+      "get_user_name.json",
+      "get_nickname.json",
+      "length_of_string.json",
+      "reverse_of_string.json",
+      "combine_something.json",
+      "char_at.json",
+      "substring.json",
+      "count_match_string.json",
+      "index_of_string.json",
+      "replace_string.json",
+      "change_string_case.json",
+      "get_block_count.json",
+      "change_rgb_to_hex.json",
+      "change_hex_to_rgb.json",
+      "get_boolean_value.json",
+    ],
+
+    brush: [
+      "brush_stamp.json",
+      "start_drawing.json",
+      "stop_drawing.json",
+      "start_fill.json",
+      "stop_fill.json",
+      "set_color.json",
+      "set_random_color.json",
+      "set_fill_color.json",
+      "change_thickness.json",
+      "set_thickness.json",
+      "change_brush_transparency.json",
+      "set_brush_tranparency.json",
+      "brush_erase_all.json",
+    ],
   };
 
   return fileMap[category] || [];
 }
+
+// AI 추천 블록 ID를 실제 Entry 블록 ID로 매핑
+const aiToEntryMapping = {
+  // AI가 추천할 가능성이 있는 이름들
+  play_sound: "sound_something_with_block",
+  play_bgm: "play_bgm",
+  move_direction: "move_direction",
+  when_key_pressed: "when_some_key_pressed",
+  when_some_key_pressed: "when_some_key_pressed",
+  repeat: "repeat_basic",
+  repeat_forever: "repeat_inf",
+  if: "_if",
+  if_else: "if_else",
+  set_variable: "set_variable",
+  get_variable: "get_variable",
+  change_variable: "change_variable",
+  // 필요에 따라 추가
+};
 
 // ===== Chrome Extension 메시지 처리 =====
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

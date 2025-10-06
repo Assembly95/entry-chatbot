@@ -53,12 +53,12 @@ const entryBlockMap = {
 
   // block_start.js
   messageAddButton: "메시지 만들기",
-  when_run_button_click: "[시작] 버튼을 클릭했을 때",
+  when_run_button_click: "시작하기 버튼을 클릭했을 때",
   when_some_key_pressed: "[키] 키를 눌렀을 때",
   mouse_clicked: "마우스를 클릭했을 때",
   mouse_click_cancled: "마우스를 뗐을 때",
   when_object_click: "이 오브젝트를 클릭했을 때",
-  when_object_click_canceled: "이 오브젝트에서 마우스를 뗐을 때",
+  when_object_click_cancled: "이 오브젝트에서 마우스를 뗐을 때",
   when_message_cast: "[메시지]를 받았을 때",
   message_cast: "[메시지] 방송하기",
   message_cast_wait: "[메시지] 방송하고 기다리기",
@@ -80,22 +80,22 @@ const entryBlockMap = {
   register_score: "[이름]를 [값]으로 정하기",
 
   // block_sound.js
-  sound_something_with_block: "[소리] 재생하기",
-  sound_something_second_with_block: "[소리]를 [시간]초 동안 재생하기",
-  sound_from_to: "[소리]를 [시작]초부터 [끝]초까지 재생하기",
-  sound_something_wait_with_block: "[소리] 재생하고 기다리기",
-  sound_something_second_wait_with_block: "[소리]를 [시간]초 동안 재생하고 기다리기",
-  sound_from_to_and_wait: "[소리]를 [시작]초부터 [끝]초까지 재생하고 기다리기",
+  sound_something_with_block: "소리[소리] 재생하기",
+  sound_something_second_with_block: "소리[소리]를 [시간]초 동안 재생하기",
+  sound_from_to: "소리[소리]를 [시작]초부터 [끝]초까지 재생하기",
+  sound_something_wait_with_block: "소리[소리] 재생하고 기다리기",
+  sound_something_second_wait_with_block: "소리[소리]를 [시간]초 동안 재생하고 기다리기",
+  sound_from_to_and_wait: "소리[소리]를 [시작]초부터 [끝]초까지 재생하고 기다리기",
   sound_volume_change: "소리 크기를 [값]만큼 바꾸기",
   sound_volume_set: "소리 크기를 [값]로 정하기",
-  get_sound_speed: "재생 속도 값",
-  sound_speed_change: "재생 속도를 [값]만큼 바꾸기",
-  sound_speed_set: "재생 속도를 [값]으로 정하기",
-  sound_silent_all: "모든 소리 끄기",
-  play_bgm: "배경 음악으로 [소리] 재생하기",
-  stop_bgm: "배경 음악 끄기",
+  get_sound_speed: "소리 빠르기",
+  sound_speed_change: "소리 빠르기를 [값]만큼 바꾸기",
+  sound_speed_set: "소리 빠르기를 [값]으로 정하기",
+  sound_silent_all: "모든 소리 멈추기",
+  play_bgm: "[소리]을(를) 배경 음악으로  재생하기",
+  stop_bgm: "배경 음악 멈추기",
   get_sound_volume: "소리 크기",
-  get_sound_duration: "[소리]의 길이",
+  get_sound_duration: "[소리]소리의 길이",
 
   // block_flow.js
   wait_second: "[시간]초 기다리기",
@@ -186,7 +186,6 @@ const entryBlockMap = {
   change_object_index: "순서를 [맨 앞/한 단계 앞/한 단계 뒤/맨 뒤]로 바꾸기",
 };
 
-// 모듈 내보내기
-module.exports = {
-  getBlocks: () => entryBlockMap,
-};
+if (typeof self !== "undefined") {
+  self.entryBlockMap = entryBlockMap;
+}
