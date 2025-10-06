@@ -81,6 +81,8 @@ async function decomposeQuestion(question) {
           {
             role: "system",
             content: `Entry 블록코딩 질문 분석기입니다.
+            중요: "~블록 위치", "~블록 어디" 같은 질문은 단순 위치 질문입니다.
+이런 경우 모든 필드를 null로 설정하고 blocks에만 블록 ID를 넣으세요.
 반드시 아래 형식의 JSON만 응답하세요. 다른 텍스트는 절대 포함하지 마세요.
 
 {
@@ -710,7 +712,6 @@ function getKnownBlockFiles(category) {
       "when_scene_start.json",
       "start_scene.json",
       "start_neighbor_scene.json",
-      // 나머지 start 블록들 (필요시 추가)
     ],
 
     moving: [
@@ -796,7 +797,6 @@ function getKnownBlockFiles(category) {
       "if_else.json",
       "wait_until_true.json",
       "stop_object.json",
-      "restart_project.json",
       "when_clone_start.json",
       "create_clone.json",
       "delete_clone.json",
@@ -887,6 +887,7 @@ const aiToEntryMapping = {
 
 // ===== Chrome Extension 메시지 처리 =====
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  
   switch (request.action) {
     case "generateAIResponse":
       handleAIRequest(request)

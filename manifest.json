@@ -22,7 +22,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["icon.png", "data/blocks/*/*.json", "data/block_icon/*.svg", "lib/hangul.min.js"],
+      "resources": ["icon.png", "data/blocks/*/*.json", "data/block_icon/*.svg", "lib/hangul.min.js","data/*"],
       "matches": ["*://playentry.org/*", "*://*.playentry.org/*"]
     }
   ],

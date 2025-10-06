@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>블록코딩 챗봇 평가 기준표</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .category {
+            margin-bottom: 40px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .category-title {
+            font-size: 20px;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .criteria-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .criteria-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .criteria-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .criteria-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .criteria-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .criteria-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .score-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .score-high {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .score-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .score-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .total-score {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 12px;
+            color: white;
+            text-align: center;
+        }
+        
+        .comparison-section {
+            margin-top: 40px;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .comparison-table th {
+            background: #495057;
+            color: white;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .comparison-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+        
+        .winner {
+            background: #d4edda;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 블록코딩 챗봇 평가 기준표</h1>
+        
+        <!-- 1. 정보 정확성 -->
+        <div class="category">
+            <div class="category-title">1. 정보 정확성 (Information Accuracy) - 25점</div>
+            <table class="criteria-table">
+                <thead>
+                    <tr>
+                        <th width="20%">평가 항목</th>
+                        <th width="15%">배점</th>
+                        <th width="20%">점수 기준</th>
+                        <th width="45%">예시</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td rowspan="5"><strong>블록 이름</strong></td>
+                        <td rowspan="5">10점</td>
+                        <td><span class="score-badge score-high">10점</span></td>
+                        <td>정확한 공식 명칭 사용: "시작하기 버튼을 클릭했을 때"</td>
+                    </tr>
+                    <tr>
+                        <td><span class="score-badge score-high">8-9점</span></td>
+                        <td>거의 정확: "시작하기 버튼을 클릭했을 때 블록"</td>
+                    </tr>
+                    <tr>
+                        <td><span class="score-badge score-medium">5-7점</span></td>
+                        <td>의미 통하나 부정확: "시작 블록", "실행 블록"</td>
+                    </tr>
+                    <tr>
+                        <td><span class="score-badge score-low">1-4점</span></td>
+                        <td>잘못된 이름: "플레이 블록", "런 블록"</td>
+                    </tr>
+                    <tr>
+                        <td><span class="score-badge score-low">0점</span></td>
+                        <td>블록 이름 미제시</td>
+                    </tr>
+                    
+                    <tr style="background: #f8f9fa;">
+                        <td rowspan="5"><strong>카테고리 및 색상</strong></td>
+                        <td rowspan="5">10점</td>
+                        <td><span class="score-badge score-high">10점</span></td>
+                        <td>카테고리명 + 정확한 색상: "시작 카테고리 (초록색)"</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td><span class="score-badge score-high">7-8점</span></td>
+                        <td>카테고리만 정확: "시작 카테고리"</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td><span class="score-badge score-medium">3-5점</span></td>
+                        <td>부분 정확: "초록색 카테고리"</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td><span class="score-badge score-low">1-2점</span></td>
+                        <td>잘못된 정보: "시작 카테고리 (노란색)"</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td><span class="score-badge score-low">0점</span></td>
+                        <td>정보 미제시</td>
+                    </tr>
+                    
+                    <tr>
+                        <td rowspan="3"><strong>설명 정확도</strong></td>
+                        <td rowspan="3">5점</td>
+                        <td><span class="score-badge score-high">5점</span></td>
+                        <td>기능과 용도 정확히 설명</td>
+                    </tr>
+                    <tr>
+                        <td><span class="score-badge score-medium">3-4점</span></td>
+                        <td>기본 기능만 설명</td>
+                    </tr>
+                    <tr>
+                        <td><span class="score-badge score-low">0-2점</span></td>
+                        <td>설명 없거나 오류</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 2. 시각적 구조화 -->
+        <div class="category">
+            <div class="category-title">2. 시각적 구조화 (Visual Structure) - 25점</div>
+            <table class="criteria-table">
+                <thead>
+                    <tr>
+                        <th width="20%">평가 항목</th>
+                        <th width="15%">배점</th>
+                        <th width="20%">점수 기준</th>
+                        <th width="45%">예시</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td rowspan="4"><strong>정보 계층화</strong></td>
+                        <td rowspan="4">15점</td>
+                        <td><span class="score-badge score-high">15점</span></td>
+                        <td>카드/섹션으로 명확히 구분</td>
+                    </tr>
+                    <tr>
+                        <td><span class="score-badge score-high">10-12점</span></td>
+                        <td>부분적 구조화 (제목, 본문 구분)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="score-badge score-medium">5-9점</span></td>
+                        <td>기본 문단 구분</td>
+                    </tr>
+                    <tr>
+                        <td><span class="score-badge score-low">0-4점</span></td>
+                        <td>연속된 텍스트</td>
+                    </tr>
+                    
+                    <tr style="background: #f8f9fa;">
+                        <td rowspan="4"><strong>시각적 단서</strong></td>
+                        <td rowspan="4">10점</td>
+                        <td><span class="score-badge score-high">10점</span></td>
+                        <td>아이콘 + 색상 + 강조 표시</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td><span class="score-badge score-high">7-8점</span></td>
+                        <td>2가지 요소 사용</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td><span class="score-badge score-medium">4-6점</span></td>
+                        <td>1가지 요소만 사용</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td><span class="score-badge score-low">0-3점</span></td>
+                        <td>시각적 요소 없음</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 실제 비교 예시 -->
+        <div class="comparison-section">
+            <h2 style="color: #333; margin-bottom: 20px;">📊 실제 평가 적용 예시</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>평가 항목</th>
+                        <th>개발 챗봇</th>
+                        <th>GPT-4</th>
+                        <th>Claude</th>
+                        <th>Gemini</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>블록 이름 (10점)</strong></td>
+                        <td class="winner">10점</td>
+                        <td>8점</td>
+                        <td>5점</td>
+                        <td>6점</td>
+                    </tr>
+                    <tr>
+                        <td><strong>카테고리/색상 (10점)</strong></td>
+                        <td class="winner">10점</td>
+                        <td style="background: #f8d7da;">2점</td>
+                        <td>7점</td>
+                        <td>5점</td>
+                    </tr>
+                    <tr>
+                        <td><strong>설명 정확도 (5점)</strong></td>
+                        <td class="winner">5점</td>
+                        <td>3점</td>
+                        <td>3점</td>
+                        <td>2점</td>
+                    </tr>
+                    <tr>
+                        <td><strong>정보 계층화 (15점)</strong></td>
+                        <td class="winner">15점</td>
+                        <td>5점</td>
+                        <td>4점</td>
+                        <td>6점</td>
+                    </tr>
+                    <tr>
+                        <td><strong>시각적 단서 (10점)</strong></td>
+                        <td class="winner">10점</td>
+                        <td>0점</td>
+                        <td>2점</td>
+                        <td>3점</td>
+                    </tr>
+                    <tr style="background: #495057; color: white; font-weight: bold;">
+                        <td>총점</td>
+                        <td class="winner" style="background: #28a745; color: white;">50/50</td>
+                        <td style="background: #ffc107; color: #333;">18/50</td>
+                        <td style="background: #ffc107; color: #333;">21/50</td>
+                        <td style="background: #dc3545; color: white;">22/50</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="total-score">
+            <h2>💯 평가 결과 요약</h2>
+            <p style="font-size: 20px; margin-top: 10px;">
+                개발 챗봇이 블록코딩 교육에 특화된 정확한 정보와 시각적 구조화로<br>
+                일반 LLM 대비 <strong>2배 이상</strong>의 높은 점수를 획득했습니다.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

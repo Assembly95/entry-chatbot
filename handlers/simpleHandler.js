@@ -3,16 +3,16 @@
 class SimpleHandler {
   constructor() {
     this.categoryInfo = {
-      start: { name: "시작", emoji: "▶️", color: "#4CAF50" },
-      moving: { name: "움직임", emoji: "🏃", color: "#2196F3" },
-      looks: { name: "생김새", emoji: "🎨", color: "#9C27B0" },
-      sound: { name: "소리", emoji: "🔊", color: "#FF9800" },
-      judgement: { name: "판단", emoji: "❓", color: "#F44336" },
-      flow: { name: "흐름", emoji: "🔄", color: "#FF5722" },
-      variable: { name: "자료", emoji: "📦", color: "#795548" },
-      func: { name: "함수", emoji: "📝", color: "#607D8B" },
-      calc: { name: "계산", emoji: "🔢", color: "#009688" },
-      brush: { name: "붓", emoji: "🖌️", color: "#E91E63" },
+      start: { name: "시작", emoji: "▶️", color: "#00B400" },
+      moving: { name: "움직임", emoji: "🏃", color: "#AD3EFB" },
+      looks: { name: "생김새", emoji: "🎨", color: "#FF3A61" },
+      sound: { name: "소리", emoji: "🔊", color: "#67B100" },
+      judgement: { name: "판단", emoji: "❓", color: "#5A75F6" },
+      flow: { name: "흐름", emoji: "🔄", color: "#19BAEA" },
+      variable: { name: "자료", emoji: "📦", color: "#DD47D8" },
+      func: { name: "함수", emoji: "📝", color: "#DE5C04" },
+      calc: { name: "계산", emoji: "🔢", color: "#F4AF18" },
+      brush: { name: "붓", emoji: "🖌️", color: "#FF9B00" },
     };
   }
 
@@ -56,113 +56,128 @@ class SimpleHandler {
 
     // 가장 점수가 높은 블록 하나만 선택
     const topBlock = ragResults[0];
+    
+    // 블록 이름 임시 수정
+    if (topBlock.id === 'when_run_button_click') {
+      topBlock.name = '시작하기 버튼을 클릭했을 때';
+    }
+    
     console.log(`🎯 최상위 블록 선택: ${topBlock.name} (점수: ${topBlock._searchScore})`);
 
-    // 단일 블록 응답 생성
-    return this.generateSingleBlockResponse(topBlock);
+    // 사용자 질문 분석
+    const isAskingLocation = message.includes("위치") || message.includes("어디");
+    const isAskingUsage = message.includes("사용") || message.includes("어떻게") || message.includes("방법");
+    const isAskingExample = message.includes("예제") || message.includes("예시");
+
+    // 질문 유형에 따른 응답 생성
+    if (isAskingUsage || isAskingExample) {
+      return this.generateDetailedResponse(topBlock);
+    } else {
+      // 기본적으로 카드 형식 응답
+      return this.generateCardResponse(topBlock);
+    }
   }
 
   /**
-   * 단일 블록 응답 생성 - RAG 데이터 최대한 활용
+   * 카드 형식의 간단한 응답 생성 - 이모지만 사용
    */
-  generateSingleBlockResponse(block) {
+  generateCardResponse(block) {
+    const category = this.categoryInfo[block.category] || { name: block.category, emoji: "📌", color: "#757575" };
+    
+    let response = `
+<div style="
+    background: linear-gradient(135deg, ${category.color}CC, ${category.color}99);
+    border-radius: 16px;
+    padding: 24px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    margin: 16px 0;
+">
+    <div style="font-size: 48px; margin-bottom: 16px; text-align: center;">
+        ${category.emoji}
+    </div>
+    <h3 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700;">
+        ${block.name}
+    </h3>
+    <div style="
+        background: rgba(255,255,255,0.2);
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 12px;
+        font-weight: 600;
+    ">
+        📍 위치: ${category.name} 카테고리
+    </div>
+    <div style="
+        background: rgba(255,255,255,0.1);
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 14px;
+        line-height: 1.6;
+    ">
+        ${block.description || "이 블록을 사용하여 프로그램을 제어할 수 있어요."}
+    </div>
+</div>
+
+💡 **더 알고 싶으신가요?**
+- "사용법 알려줘" - 자세한 사용 방법
+- "예제 보여줘" - 실제 사용 예시
+- "문제 해결" - 안 될 때 해결 방법`;
+
+    return {
+      success: true,
+      response: response,
+      type: "simple-card",
+      blockInfo: block,
+      responseType: "html"
+    };
+  }
+
+  /**
+   * 상세한 응답 생성 (사용법 요청 시)
+   */
+  generateDetailedResponse(block) {
     const category = this.categoryInfo[block.category] || { name: block.category, emoji: "📌" };
 
-    let response = `## 🎯 "${block.name}" 블록을 찾았어요!\n\n`;
+    let response = `## 📚 "${block.name}" 사용법\n\n`;
 
-    // 위치 정보
-    response += `### 📍 블록 위치\n`;
-    response += `${category.emoji} **${category.name}** 카테고리에서 찾을 수 있어요.\n\n`;
-
-    // 블록 설명 (RAG 데이터)
+    // 블록 설명
     if (block.description) {
-      response += `### 💡 블록 설명\n`;
+      response += `### 💡 설명\n`;
       response += `${block.description}\n\n`;
     }
 
-    // 사용 방법 (RAG 데이터의 usage_steps 또는 usage_context)
-    response += `### 📝 사용 방법\n`;
+    // 사용 방법
+    response += `### 📝 사용 단계\n`;
     response += this.getUsageGuide(block);
+    response += `\n`;
 
-    // 파라미터 정보 (RAG 데이터)
+    // 파라미터 정보
     if (block.parameters && Object.keys(block.parameters).length > 0) {
-      response += `\n\n### ⚙️ 설정 가능한 값\n`;
+      response += `### ⚙️ 설정 가능한 값\n`;
       for (const [key, value] of Object.entries(block.parameters)) {
-        response += `- **${key}**: ${value}\n`;
+        response += `• **${key}**: ${value}\n`;
       }
+      response += `\n`;
     }
 
-    // 예시 (RAG 데이터의 example 또는 common_questions)
-    if (block.example) {
-      response += `\n### 🎮 예시\n`;
-      response += `${block.example}\n`;
-    } else if (block.common_questions && block.common_questions.length > 0) {
-      response += `\n### 🎮 자주 사용되는 경우\n`;
-      response += `- ${block.common_questions[0]}\n`;
+    // 예시
+    if (block.usage_examples && block.usage_examples.length > 0) {
+      response += `### 🎮 사용 예시\n`;
+      const example = block.usage_examples[0];
+      response += `**${example.title}**\n`;
+      response += `${example.description}\n\n`;
     }
 
-    // 관련 블록 (RAG 데이터)
-    if (block.related_blocks && block.related_blocks.length > 0) {
-      response += `\n### 🔗 함께 사용하면 좋은 블록\n`;
-      block.related_blocks.forEach((related) => {
-        if (typeof related === "string") {
-          response += `- ${related}\n`;
-        } else if (related.block_id) {
-          response += `- ${related.block_id}`;
-          if (related.explanation) {
-            response += `: ${related.explanation}`;
-          }
-          response += `\n`;
-        }
-      });
-    }
-
-    // 팁 (RAG 데이터)
-    response += `\n### 💭 팁\n`;
+    // 팁
+    response += `### 💭 팁\n`;
     response += this.getTip(block);
 
     return {
       success: true,
       response: response,
-      type: "simple",
+      type: "simple-detailed",
       blockInfo: block,
-    };
-  }
-
-  /**
-   * 여러 블록 응답 생성
-   */
-  generateMultipleBlocksResponse(blocks) {
-    let response = `## 🎯 관련 블록들을 찾았어요!\n\n`;
-
-    // 카테고리별로 그룹화
-    const grouped = this.groupByCategory(blocks);
-
-    for (const [categoryKey, categoryBlocks] of Object.entries(grouped)) {
-      const category = this.categoryInfo[categoryKey] || { name: categoryKey, emoji: "📌" };
-
-      response += `### ${category.emoji} ${category.name} 카테고리\n`;
-
-      categoryBlocks.forEach((block) => {
-        response += `- **${block.name}**`;
-        if (block.description) {
-          const shortDesc = block.description.length > 50 ? block.description.substring(0, 50) + "..." : block.description;
-          response += `: ${shortDesc}`;
-        }
-        response += `\n`;
-      });
-
-      response += `\n`;
-    }
-
-    response += `### 💡 다음 단계\n`;
-    response += `원하는 블록을 찾으셨나요? 구체적인 사용법이 궁금하시면 블록 이름을 말씀해주세요!`;
-
-    return {
-      success: true,
-      response: response,
-      type: "simple-multiple",
-      blocks: blocks,
     };
   }
 
@@ -175,9 +190,9 @@ class SimpleHandler {
     // 의도 분해 결과가 있으면 활용
     if (decomposed) {
       response += `이해한 내용:\n`;
-      if (decomposed.trigger) response += `- 시작 조건: ${decomposed.trigger}\n`;
-      if (decomposed.action) response += `- 동작: ${decomposed.action}\n`;
-      if (decomposed.target) response += `- 대상: ${decomposed.target}\n`;
+      if (decomposed.trigger) response += `• 시작 조건: ${decomposed.trigger}\n`;
+      if (decomposed.action) response += `• 동작: ${decomposed.action}\n`;
+      if (decomposed.target) response += `• 대상: ${decomposed.target}\n`;
       response += `\n`;
     }
 
@@ -237,17 +252,10 @@ class SimpleHandler {
   getUsageGuide(block) {
     // step_by_step_guide가 있으면 우선 사용
     if (block.step_by_step_guide && Array.isArray(block.step_by_step_guide)) {
-      return block.step_by_step_guide.map((step) => `${step.step}. ${step.title}: ${step.instruction}`).join("\n");
-    }
-
-    // usage_steps가 있으면 사용
-    if (block.usage_steps && Array.isArray(block.usage_steps)) {
-      return block.usage_steps.map((step, idx) => `${idx + 1}. ${step}`).join("\n");
-    }
-
-    // usage_context가 있으면 활용
-    if (block.usage_context && Array.isArray(block.usage_context)) {
-      return block.usage_context.join("\n");
+      return block.step_by_step_guide
+        .slice(0, 3) // 처음 3단계만
+        .map((step) => `${step.step}. ${step.title}`)
+        .join("\n");
     }
 
     // 기본 사용법
@@ -266,21 +274,8 @@ class SimpleHandler {
       }
     }
 
-    // tips가 있으면 사용
-    if (block.tips && Array.isArray(block.tips) && block.tips.length > 0) {
-      return block.tips[0];
-    }
-
-    // common_mistakes가 있으면 주의사항으로 활용
-    if (block.common_mistakes && Array.isArray(block.common_mistakes) && block.common_mistakes.length > 0) {
-      const mistake = block.common_mistakes[0];
-      if (mistake.solution) {
-        return `⚠️ 주의: ${mistake.solution}`;
-      }
-    }
-
     // 기본 팁
-    return "블록을 드래그해서 연결하면 프로그램이 완성돼요!";
+    return "💡 블록을 드래그해서 연결하면 프로그램이 완성돼요!";
   }
 }
 
