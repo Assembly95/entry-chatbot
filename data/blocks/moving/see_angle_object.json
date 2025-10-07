@@ -1,7 +1,7 @@
 {
   "id": "see_angle_object",
   "category": "moving",
-  "name": "[오브젝트]의 방향 보기",
+  "name": "[오브젝트]쪽 바라보기",
   "description": "현재 오브젝트가 지정된 다른 오브젝트나 마우스를 바라보도록 방향을 즉시 설정하는 블록입니다. 추적, 조준, 시선 처리 등에 사용되며, 오브젝트 간의 상호작용을 구현할 때 필수적입니다.",
 
   "educational_context": {

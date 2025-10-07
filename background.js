@@ -14,6 +14,19 @@ importScripts("quickResponse.js");
 importScripts("cotResponse.js");
 importScripts("lib/hangul.min.js");
 importScripts("data/block_name_id_match.js");
+
+// 핸들러 임포트 (handlers 정의 전에 와야 함)
+importScripts("handlers/simpleHandler.js");
+importScripts("handlers/complexHandler.js");
+importScripts("handlers/debugHandler.js");
+
+// handlers 객체 정의 추가
+const handlers = {
+  simple: new SimpleHandler(),
+  complex: new ComplexHandler(),
+  debug: new DebugHandler(),
+};
+
 // 핸들러 인스턴스
 let questionClassifier = new EntryQuestionClassifier();
 let quickResponseHandler = new QuickResponseGenerator(); // ✅ Generator로 수정
@@ -350,20 +363,10 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
     console.log(`🤖 AI 추천 블록: ${decomposed.blocks.join(", ")}`);
     const reverseMap = createReverseBlockMap();
 
-    const aiToEntryMap = {
-      play_sound: "sound_something_with_block", // 또는 'play_bgm'
-      // 필요한 다른 매핑 추가
-    };
-
     const recommendedBlocks = [];
     for (const recommendedId of decomposed.blocks) {
-      // 1. 직접 ID 매칭 시도
-      let found = blockData.find((block) => {
-        // 정확한 ID 매칭만
-        return block.id === recommendedId;
-      });
+      let found = blockData.find((block) => block.id === recommendedId);
 
-      // 2. 못 찾으면 역방향 매핑 시도
       if (!found) {
         const mappedId = reverseMap[recommendedId];
         if (mappedId) {
@@ -394,17 +397,46 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
   console.log("🔤 검색 토큰:", tokens);
   console.log("🔑 추출 키워드:", keywords);
 
+  // ⭐ 의도 파악 (새로 추가)
+  const isAskingLocation = userMessage.includes("위치") || userMessage.includes("어디");
+  const isCreating = userMessage.includes("만들") || userMessage.includes("생성");
+  const isDeleting = userMessage.includes("삭제") || userMessage.includes("지우") || userMessage.includes("제거");
+  
   // 점수 계산
   const scored = blockData.map((block) => {
     let score = 0;
     let matchedBy = [];
+
+    // ⭐ 0. 정확한 의도 매칭 우선 (새로 추가)
+    if (isAskingLocation) {
+      // "복제본 만들기 블록 위치" 같은 경우
+      if (isCreating && block.name.includes("만들") && userMessage.includes("복제본") && block.name.includes("복제본")) {
+        score += 300; // 매우 높은 우선순위
+        matchedBy.push("exact-intent: 만들기+위치");
+      } else if (isDeleting && block.name.includes("삭제") && userMessage.includes("복제본") && block.name.includes("복제본")) {
+        score += 300;
+        matchedBy.push("exact-intent: 삭제+위치");
+      }
+    }
+    
+    // ⭐ 의도에 따른 추가 가중치 (수정)
+    if (!isAskingLocation) {
+      // 위치를 묻는게 아닐 때만 동작 가중치 적용
+      if (isCreating && block.name.includes("만들")) {
+        score += 100;
+        matchedBy.push("intent: 만들기");
+      }
+      if (isDeleting && (block.name.includes("삭제") || block.name.includes("지우"))) {
+        score += 100;
+        matchedBy.push("intent: 삭제");
+      }
+    }
 
     // 1. 블록 ID와 키워드 매칭
     const blockId = block.id || block.fileName?.replace(".json", "") || "";
     if (blockId) {
       const lowerId = blockId.toLowerCase();
 
-      // 키워드와 ID 매핑
       const idKeywordMap = {
         스페이스: ["when_some_key_pressed"],
         스페이스키: ["when_some_key_pressed"],
@@ -419,9 +451,10 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
         변수: ["set_variable", "get_variable", "change_variable"],
         시작: ["when_run_button_click", "when_scene_start"],
         클릭: ["when_object_click", "when_run_button_click"],
+        // ⭐ 복제본 관련 추가
+        복제본: ["create_clone", "delete_clone", "when_clone_start", "remove_all_clones"],
       };
 
-      // 토큰이 매핑된 ID와 일치하는지 확인
       for (const token of tokens) {
         if (idKeywordMap[token]) {
           for (const mappedId of idKeywordMap[token]) {
@@ -433,7 +466,6 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
           }
         }
 
-        // ID에 토큰이 직접 포함되는 경우
         if (token.length >= 2 && lowerId.includes(token)) {
           score += 50;
           matchedBy.push(`id-contains: ${token}`);
@@ -441,11 +473,10 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
       }
     }
 
-    // 2. 블록 이름 매칭
+    // 2. 블록 이름 매칭 (수정)
     if (block.name && typeof block.name === "string") {
       const lowerName = block.name.toLowerCase();
 
-      // 핵심 키워드 매칭
       const coreKeywords = {
         키: 80,
         누르: 70,
@@ -457,6 +488,10 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
         변수: 80,
         클릭: 70,
         움직: 70,
+        // ⭐ 복제본 관련 추가 (낮은 점수)
+        복제본: 30,  // 복제본만으로는 낮은 점수
+        만들: 40,    // 만들기도 단독으로는 낮은 점수
+        삭제: 40,    // 삭제도 단독으로는 낮은 점수
       };
 
       for (const [keyword, points] of Object.entries(coreKeywords)) {
@@ -466,34 +501,34 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
         }
       }
 
-      // 부분 매칭
+      // 부분 매칭 (점수 낮춤)
       for (const token of tokens) {
         if (token.length >= 2 && lowerName.includes(token)) {
-          score += 20;
+          score += 10;  // 20에서 10으로 낮춤
           matchedBy.push(`name-partial: ${token}`);
         }
       }
     }
 
-    // 3. description 매칭
+    // 3. description 매칭 (점수 낮춤)
     if (block.description && typeof block.description === "string") {
       const lowerDesc = block.description.toLowerCase();
       for (const token of tokens) {
         if (token && token.length >= 2 && lowerDesc.includes(token)) {
-          score += 10;
+          score += 5;  // 10에서 5로 낮춤
           matchedBy.push(`desc: ${token}`);
         }
       }
     }
 
-    // 4. usage_examples 매칭 (JSON 구조에 맞게 수정)
+    // 4. usage_examples 매칭 (점수 낮춤)
     if (block.usage_examples && Array.isArray(block.usage_examples)) {
       for (const example of block.usage_examples) {
         if (example.description && typeof example.description === "string") {
           const lowerExample = example.description.toLowerCase();
           for (const token of tokens) {
             if (token && token.length >= 2 && lowerExample.includes(token)) {
-              score += 15;
+              score += 5;  // 15에서 5로 낮춤
               matchedBy.push(`example: ${token}`);
             }
           }
@@ -535,16 +570,6 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
 
   return results;
 }
-
-importScripts("handlers/simpleHandler.js");
-importScripts("handlers/complexHandler.js");
-importScripts("handlers/debugHandler.js");
-
-const handlers = {
-  simple: new SimpleHandler(),
-  complex: new ComplexHandler(),
-  debug: new DebugHandler(),
-};
 
 // background.js - handleAIRequest 수정
 async function handleAIRequest(request) {
