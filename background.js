@@ -57,18 +57,24 @@ function createReverseBlockMap() {
 
 // background.js의 decomposeQuestion 함수 개선
 
+// background.js의 decomposeQuestion 함수 개선
+
 async function decomposeQuestion(question) {
   try {
+    // 1단계: 로컬 매핑으로 먼저 시도
+    const localResult = tryLocalBlockMapping(question);
+    if (localResult) {
+      console.log("✅ 로컬 매핑으로 해결:", localResult);
+      return localResult;
+    }
+
+    // 2단계: API 키 확인
     const result = await chrome.storage.sync.get(["openai_api_key"]);
     if (!result.openai_api_key) {
-      console.log("⚠️ API 키 없음, 의도 분해 건너뜀");
       return null;
     }
 
-    console.log("\n🧠 AI 의도 분해 시작");
-    console.log("━".repeat(60));
-    console.log("📝 원본 질문:", question);
-
+    // 3단계: AI로 간단한 의도만 파악
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -80,117 +86,130 @@ async function decomposeQuestion(question) {
         messages: [
           {
             role: "system",
-            content: `Entry 블록코딩 질문 분석기입니다.
-            중요: "~블록 위치", "~블록 어디" 같은 질문은 단순 위치 질문입니다.
-이런 경우 모든 필드를 null로 설정하고 blocks에만 블록 ID를 넣으세요.
-반드시 아래 형식의 JSON만 응답하세요. 다른 텍스트는 절대 포함하지 마세요.
+            content: `사용자 질문에서 핵심 동작/트리거만 추출하세요.
+            
+예시:
+- "마우스 클릭했을 때" → "마우스 클릭"
+- "스페이스 누르면" → "스페이스키 누르기"
+- "10번 반복" → "반복"
 
-{
-  "trigger": "시작 조건",
-  "action": "수행 동작", 
-  "target": "대상",
-  "direction": "방향",
-  "condition": "조건",
-  "blocks": []
-}
-
-규칙:
-- trigger: 키 입력, 클릭 등 (예: "스페이스키 누르면")
-- action: 동작 (예: "이동하기")
-- target: 대상 오브젝트 (예: "엔트리봇")
-- direction: 방향/값 (예: "앞으로", "10만큼")
-- condition: 조건 (예: "벽에 닿으면")
-- blocks: 추천 블록 ID 배열
-- 없는 항목은 null
-
-주요 Entry 블록 ID (blocks 배열에 사용):
-- when_run_button_click: 시작 버튼을 클릭했을 때
-- when_some_key_pressed: 키를 눌렀을 때  
-- when_object_click: 오브젝트를 클릭했을 때
-- when_scene_start: 장면이 시작되었을 때
-- when_message_cast: 신호를 받았을 때
-- move_direction: 움직이기
-- move_x: x좌표 바꾸기
-- move_y: y좌표 바꾸기
-- rotate_relative: 회전하기
-- repeat_basic: n번 반복하기
-- repeat_inf: 계속 반복하기
-- _if: 만약 ~라면
-- if_else: 만약 ~라면, 아니면
-- set_variable: 변수 설정
-- get_variable: 변수 값
-- change_variable: 변수 바꾸기
-- sound_something_with_block: 소리 재생하기
-- play_bgm: 배경음악 재생하기
-- dialog: 말하기
-- show: 보이기
-- hide: 숨기기
-
-예시 매핑:
-- "시작 버튼", "시작하기 버튼", "실행 버튼" → ["when_run_button_click"]
-- "스페이스", "스페이스바", "스페이스키" → ["when_some_key_pressed"]
-- "소리 재생", "소리 내기" → ["sound_something_with_block"]
-- "이동", "움직이기" → ["move_direction"]
-- "반복" → ["repeat_basic"] 또는 ["repeat_inf"]
-
-JSON만 응답. 설명 없음.`,
+한국어 단어/구문만 반환하세요.`
           },
           {
             role: "user",
-            content: question,
-          },
+            content: question
+          }
         ],
         temperature: 0.3,
-        max_tokens: 200,
-      }),
+        max_tokens: 50
+      })
     });
 
-    if (!response.ok) {
-      console.error("❌ AI 의도 분해 실패:", response.status);
-      return null;
-    }
-
     const data = await response.json();
-    const responseText = data.choices[0].message.content;
+    const intent = data.choices[0].message.content.trim();
+    
+    // 4단계: 의도를 블록 ID로 변환
+    const blocks = findBlocksByIntent(intent);
+    
+    return {
+      trigger: intent,
+      blocks: blocks,
+      method: "ai+local"
+    };
 
-    // JSON 파싱 시도 (에러 처리 강화)
-    let decomposed;
-    try {
-      decomposed = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error("❌ JSON 파싱 실패:", responseText);
-      console.error("파싱 에러:", parseError);
-
-      // JSON 추출 시도 (텍스트에 JSON이 포함된 경우)
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        try {
-          decomposed = JSON.parse(jsonMatch[0]);
-          console.log("✅ JSON 추출 성공");
-        } catch {
-          console.error("❌ JSON 추출도 실패");
-          return null;
-        }
-      } else {
-        return null;
-      }
-    }
-
-    console.log("\n✨ 의도 분해 결과:");
-    console.log("━".repeat(60));
-    console.log("🎯 트리거:", decomposed.trigger || "없음");
-    console.log("⚡ 동작:", decomposed.action || "없음");
-    console.log("👤 대상:", decomposed.target || "없음");
-    console.log("➡️ 방향/값:", decomposed.direction || "없음");
-    console.log("❓ 조건:", decomposed.condition || "없음");
-    console.log("🔧 추천 블록:", decomposed.blocks?.join(", ") || "없음");
-    console.log("━".repeat(60));
-
-    return decomposed;
   } catch (error) {
     console.error("❌ 의도 분해 오류:", error);
     return null;
   }
+}
+
+// 로컬 블록 매핑
+function tryLocalBlockMapping(question) {
+  const q = question.toLowerCase();
+  
+  // 직접 매핑 패턴
+  const patterns = [
+    { pattern: /마우스.*클릭(?!.*오브젝트)/, blockId: "mouse_clicked" },
+    { pattern: /오브젝트.*클릭/, blockId: "when_object_click" },
+    { pattern: /스페이스/, blockId: "when_some_key_pressed" },
+    { pattern: /키.*누르/, blockId: "when_some_key_pressed" },
+    { pattern: /시작.*버튼/, blockId: "when_run_button_click" },
+    { pattern: /반복/, blockId: "repeat_basic" },
+    { pattern: /무한.*반복/, blockId: "repeat_inf" },
+    { pattern: /이동|움직/, blockId: "move_direction" },
+    { pattern: /소리.*재생/, blockId: "sound_something_with_block" }
+  ];
+  
+  for (const {pattern, blockId} of patterns) {
+    if (pattern.test(q)) {
+      return {
+        trigger: question,
+        blocks: [blockId],
+        method: "local"
+      };
+    }
+  }
+  
+  return null;
+}
+
+// 의도에서 블록 ID 찾기 (entryBlockMap 활용)
+function findBlocksByIntent(intent) {
+  const blocks = [];
+  const intentLower = intent.toLowerCase();
+  
+  // entryBlockMap을 역으로 검색
+  for (const [blockId, blockName] of Object.entries(entryBlockMap)) {
+    const nameLower = blockName.toLowerCase();
+    
+    // 의도와 블록 이름 매칭
+    if (
+      (intentLower.includes("마우스") && intentLower.includes("클릭") && 
+       blockId === "mouse_clicked") ||
+      (intentLower.includes("오브젝트") && intentLower.includes("클릭") && 
+       blockId === "when_object_click") ||
+      (intentLower.includes("스페이스") && blockId === "when_some_key_pressed") ||
+      (intentLower.includes("반복") && !intentLower.includes("무한") && 
+       blockId === "repeat_basic") ||
+      (intentLower.includes("무한") && blockId === "repeat_inf") ||
+      (intentLower.includes("이동") && blockId === "move_direction")
+    ) {
+      blocks.push(blockId);
+      break; // 첫 번째 매칭만
+    }
+  }
+  
+  // 못 찾으면 유사도로 찾기
+  if (blocks.length === 0) {
+    for (const [blockId, blockName] of Object.entries(entryBlockMap)) {
+      if (calculateSimilarity(intent, blockName) > 0.6) {
+        blocks.push(blockId);
+        break;
+      }
+    }
+  }
+  
+  return blocks;
+}
+
+// 간단한 유사도 계산
+function calculateSimilarity(str1, str2) {
+  const s1 = str1.toLowerCase();
+  const s2 = str2.toLowerCase();
+  
+  let matches = 0;
+  const words1 = s1.split(/\s+/);
+  const words2 = s2.split(/\s+/);
+  
+  for (const w1 of words1) {
+    for (const w2 of words2) {
+      if (w1.includes(w2) || w2.includes(w1)) {
+        matches++;
+      }
+    }
+  }
+  
+  return matches / Math.max(words1.length, words2.length);
 }
 // ===== Entry 블록 데이터 로드 =====
 async function loadEntryBlockData() {
