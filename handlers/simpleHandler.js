@@ -82,6 +82,7 @@ class SimpleHandler {
    * 카드 형식의 간단한 응답 생성 - 이모지만 사용
    */
   generateCardResponse(block) {
+    
     const category = this.categoryInfo[block.category] || { name: block.category, emoji: "📌", color: "#757575" };
     
     let response = `

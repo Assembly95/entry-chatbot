@@ -1,4 +1,4 @@
-// blockMappings.js - Entry 블록 매핑 테이블
+// blockMappings.js - Entry 블록 매핑 테이블 (신호 블록 구분 추가)
 
 /**
  * Entry 블록 매핑 데이터
@@ -14,7 +14,7 @@ class BlockMappings {
         category: "start",
       },
       클릭: {
-        blocks: ["when_run_button_click", "when_object_click", "when_message_received"],
+        blocks: ["when_run_button_click", "when_object_click", "when_message_cast"],
         category: "start",
       },
       키: {
@@ -33,12 +33,38 @@ class BlockMappings {
         blocks: ["when_some_key_pressed"],
         category: "start",
       },
+      
+      // ===== 신호 관련 (구분 강화) =====
       메시지: {
-        blocks: ["when_message_received", "send_message"],
+        blocks: ["when_message_cast", "message_cast", "message_cast_wait"],
         category: "start",
       },
       신호: {
-        blocks: ["when_message_received", "send_message"],
+        blocks: ["when_message_cast", "message_cast", "message_cast_wait"],
+        category: "start",
+      },
+      "신호 받기": {
+        blocks: ["when_message_cast"],
+        category: "start",
+      },
+      "신호 받았을 때": {
+        blocks: ["when_message_cast"],
+        category: "start",
+      },
+      "신호 보내기": {
+        blocks: ["message_cast"],  // 기다리지 않음
+        category: "start",
+      },
+      "신호 보내고 기다리기": {
+        blocks: ["message_cast_wait"],  // 기다림
+        category: "start",
+      },
+      "보내기": {
+        blocks: ["message_cast", "message_cast_wait"],
+        category: "start",
+      },
+      "기다리기": {
+        blocks: ["message_cast_wait", "wait_second"],
         category: "start",
       },
 
@@ -63,12 +89,12 @@ class BlockMappings {
         blocks: ["if_else"],
         category: "flow",
       },
-      기다리기: {
-        blocks: ["wait_for_seconds", "wait_until_true"],
+      "기다리기": {
+        blocks: ["wait_second", "wait_until_true", "message_cast_wait"],
         category: "flow",
       },
       대기: {
-        blocks: ["wait_for_seconds", "wait_until_true"],
+        blocks: ["wait_second", "wait_until_true"],
         category: "flow",
       },
       멈추기: {
@@ -442,5 +468,39 @@ class BlockMappings {
         category: "moving",
       },
     };
+
+    // 동의어 매핑
+    this.synonymMap = {
+      메세지: "메시지",
+      시그널: "신호",
+      브로드캐스트: "신호",
+    };
+
+    // 오타 교정 사전
+    this.commonTypos = {
+      스페이스바: "스페이스",
+      스페바: "스페이스",
+      ㅅㅍㅇㅅ: "스페이스",
+    };
+  }
+
+  /**
+   * 키워드로 블록 찾기
+   */
+  getBlocksByKeyword(keyword) {
+    return this.keywordToBlocks[keyword] || null;
+  }
+
+  /**
+   * 부분 매칭으로 키워드 찾기
+   */
+  findKeywordsByPartialMatch(partial) {
+    const matches = [];
+    for (const keyword of Object.keys(this.keywordToBlocks)) {
+      if (keyword.includes(partial) || partial.includes(keyword)) {
+        matches.push(keyword);
+      }
+    }
+    return matches;
   }
 }
