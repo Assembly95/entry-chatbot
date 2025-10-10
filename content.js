@@ -317,7 +317,29 @@ window.displayLearnerProgress = function (progress) {
       }
     }, 100);
   };
+  function convertMarkdownToHTML(text) {
+    if (!text) return text;
 
+    return (
+      text
+        // 굵은 텍스트
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        // 기울임
+        .replace(/\*(.*?)\*/g, "<em>$1</em>")
+        // 인라인 코드
+        .replace(/`(.*?)`/g, '<code style="background: #f4f4f4; padding: 2px 4px; border-radius: 3px;">$1</code>')
+        // 제목들
+        .replace(/^### (.*?)$/gm, '<h3 style="margin: 16px 0 8px 0;">$1</h3>')
+        .replace(/^## (.*?)$/gm, '<h2 style="margin: 20px 0 12px 0;">$1</h2>')
+        .replace(/^# (.*?)$/gm, '<h1 style="margin: 24px 0 16px 0;">$1</h1>')
+        // 줄바꿈
+        .replace(/\n/g, "<br>")
+        // 리스트
+        .replace(/^• (.*?)$/gm, "<li>$1</li>")
+        .replace(/^- (.*?)$/gm, "<li>$1</li>")
+        .replace(/^\d+\. (.*?)$/gm, "<li>$1</li>")
+    );
+  }
   // Extension context 체크 함수
   function isExtensionValid() {
     return !!(chrome.runtime && chrome.runtime.id);
@@ -511,50 +533,79 @@ window.displayLearnerProgress = function (progress) {
     const now = new Date();
     const timeStr = now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
 
+    // HTML 응답인지 체크 (response 객체에서 responseType 확인)
+    const isHTML = type === "html" || (typeof content === "string" && content.includes("style="));
+
     if (type === "cot") {
       messageDiv.className = "message bot-message cot-message";
       messageDiv.innerHTML = `
-        <div class="message-avatar">
-          <img src="${chrome.runtime.getURL("icon.png")}" style="width:20px;height:20px;">
-        </div>
-        <div class="message-content" style="max-width: 100%;">
-          ${content}
-          <div class="message-time">${timeStr}</div>
-        </div>
-      `;
-    } else if (type === "block-with-image") {
+      <div class="message-avatar">
+        <img src="${chrome.runtime.getURL("icon.png")}" style="width:20px;height:20px;">
+      </div>
+      <div class="message-content" style="max-width: 100%;">
+        ${content}
+        <div class="message-time">${timeStr}</div>
+      </div>
+    `;
+    } else if (type === "block-with-image" || type === "html" || isHTML) {
+      // HTML 타입은 그대로 표시 (카드 형태 유지)
       messageDiv.className = "message bot-message";
       messageDiv.innerHTML = `
-        <div class="message-avatar">
-          <img src="${chrome.runtime.getURL("icon.png")}" style="width:20px;height:20px;">
-        </div>
-        <div class="message-content">
-          ${content}
-          <div class="message-time">${timeStr}</div>
-        </div>
-      `;
+      <div class="message-avatar">
+        <img src="${chrome.runtime.getURL("icon.png")}" style="width:20px;height:20px;">
+      </div>
+      <div class="message-content" style="max-width: 100%;">
+        ${content}
+        <div class="message-time">${timeStr}</div>
+      </div>
+    `;
     } else if (type === "system") {
       messageDiv.className = "message system-message";
       messageDiv.innerHTML = `
-        <div class="message-content system-message-content">
-          <div class="message-text">${content}</div>
-        </div>
-      `;
+      <div class="message-content system-message-content">
+        <div class="message-text">${content}</div>
+      </div>
+    `;
     } else {
+      // 일반 텍스트 메시지 (마크다운 변환)
       messageDiv.className = `message ${isBot ? "bot-message" : "user-message"}`;
+
+      // 봇 메시지이고 텍스트인 경우 마크다운 변환
+      let processedContent = content;
+      if (isBot && typeof content === "string" && !content.includes("<div") && !content.includes("<span")) {
+        processedContent = convertMarkdownToHTML(content);
+      }
+
       messageDiv.innerHTML = `
-        <div class="message-avatar">${
-          isBot ? `<img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">` : "👤"
-        }</div>
-        <div class="message-content">
-          <div class="message-text">${content}</div>
-          <div class="message-time">${timeStr}</div>
-        </div>
-      `;
+      <div class="message-avatar">${
+        isBot ? `<img src="${chrome.runtime.getURL("icon.png")}" style="width: 20px; height: 20px;">` : "👤"
+      }</div>
+      <div class="message-content">
+        <div class="message-text">${processedContent}</div>
+        <div class="message-time">${timeStr}</div>
+      </div>
+    `;
     }
 
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+
+  // 마크다운 변환 함수 추가
+  function convertMarkdownToHTML(text) {
+    if (!text || typeof text !== "string") return text;
+
+    return (
+      text
+        // **굵은 텍스트**
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        // *기울임*
+        .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+        // `인라인 코드`
+        .replace(/`([^`]+)`/g, '<code style="background: #f4f4f4; padding: 2px 4px; border-radius: 3px;">$1</code>')
+        // 줄바꿈
+        .replace(/\n/g, "<br>")
+    );
   }
 
   // ===== CoT 응답 표시 함수 =====
@@ -814,11 +865,11 @@ window.displayLearnerProgress = function (progress) {
     }
   }
 
-  // ===== 메시지 전송 함수 (수정됨) =====
+  // ===== 메시지 전송 함수 =====
   async function sendMessage() {
     try {
       const chatInput = document.getElementById("chat-input");
-      const userMessage = chatInput.value.trim(); // message -> userMessage로 변경
+      const userMessage = chatInput.value.trim();
       if (!userMessage) return;
 
       // 사용자 메시지 표시
@@ -839,7 +890,7 @@ window.displayLearnerProgress = function (progress) {
       chrome.runtime.sendMessage(
         {
           action: "generateAIResponse",
-          message: userMessage, // 여기도 userMessage로 변경
+          message: userMessage,
           conversationHistory: conversationHistory.slice(),
         },
         async (response) => {
@@ -863,45 +914,48 @@ window.displayLearnerProgress = function (progress) {
             // 분류 타입 확인
             const classification = response.classification;
             console.log(`📊 응답 타입: ${classification?.type || "unknown"}`);
+            console.log(`📊 response.type: ${response.type}`);
 
             // CoT 응답인 경우 특별 처리
             if (response.responseType === "cot" && response.cotSequence) {
               displayCoTResponse(response.cotSequence, response.response);
+            } else if (response.responseType === "html") {
+              // HTML 응답은 그대로 표시
+              addChatMessage(response.response, true, "html");
             } else {
-              addChatMessage(response.response, true);
+              // 일반 텍스트 (마크다운 변환 적용)
+              addChatMessage(response.response, true, "text");
             }
 
             // 대화 기록 추가
             conversationHistory.push({ role: "assistant", content: response.response });
 
-            // RAG 블록 표시 부분
+            // RAG 블록 표시 부분 - SimpleHandler가 이미 카드를 생성한 경우 스킵
+            // response.type이 'simple-card'인 경우 추가 카드 생성하지 않음
             if (response.rawBlocks && response.rawBlocks.length > 0) {
-              const attemptCount = conversationHistory.filter(
-                (msg) =>
-                  msg.role === "user" &&
-                  (msg.content.includes("모르겠") || msg.content.includes("막혔") || msg.content.includes("도와"))
-              ).length;
+              // SimpleHandler가 생성한 카드가 아닌 경우에만 블록 표시
+              if (response.type !== "simple-card" && response.type !== "simple-detailed" && response.type !== "simple-notfound") {
+                console.log("RAG 블록 표시 - type이 simple이 아님:", response.type);
 
-              if (attemptCount <= 1) {
-                const topBlock = response.rawBlocks[0];
+                const attemptCount = conversationHistory.filter(
+                  (msg) =>
+                    msg.role === "user" &&
+                    (msg.content.includes("모르겠") || msg.content.includes("막혔") || msg.content.includes("도와"))
+                ).length;
 
-                // window 접두사 추가
-                if (typeof window.createSingleCategoryCard === "function") {
-                  const singleCategoryCard = window.createSingleCategoryCard(topBlock);
-                  addChatMessage(singleCategoryCard, true, "block-with-image");
-                } else if (typeof window.createBlockListWithImages === "function") {
-                  const blockListHtml = window.createBlockListWithImages([topBlock]);
-                  addChatMessage(blockListHtml, true, "block-with-image");
+                if (attemptCount >= 2) {
+                  // 여러 번 막힌 경우 - 블록 리스트 표시
+                  if (typeof window.createBlockListWithImages === "function") {
+                    const blockListHtml = window.createBlockListWithImages(response.rawBlocks.slice(0, 3));
+                    addChatMessage(blockListHtml, true, "block-with-image");
+                  }
                 }
               } else {
-                if (typeof window.createBlockListWithImages === "function") {
-                  const blockListHtml = window.createBlockListWithImages(response.rawBlocks.slice(0, 1));
-                  addChatMessage(blockListHtml, true, "block-with-image");
-                }
+                console.log("RAG 블록 표시 스킵 - SimpleHandler가 이미 처리함");
               }
             }
 
-            // 학습 진행상황 표시
+            // 학습 진행상황 표시 (선택적)
             if (
               response.learnerProgress &&
               response.learnerProgress.progress > 0 &&
@@ -910,11 +964,12 @@ window.displayLearnerProgress = function (progress) {
               window.displayLearnerProgress(response.learnerProgress);
             }
 
-            // 대화 기록 관리 - splice 사용
+            // 대화 기록 관리 - 최대 10개 유지
             if (conversationHistory.length > 10) {
               conversationHistory.splice(0, conversationHistory.length - 10);
             }
           } else {
+            // 에러 처리
             const errorMsg = response?.error || "연결에 문제가 있어요. 다시 시도해주세요!";
             console.error("AI 응답 오류:", errorMsg);
             addChatMessage(`죄송해요, ${errorMsg}`, true);
@@ -931,7 +986,6 @@ window.displayLearnerProgress = function (progress) {
       }
     }
   }
-
   // ===== API 키 모달 표시 =====
   function showApiKeyModal() {
     // Extension 유효성 체크

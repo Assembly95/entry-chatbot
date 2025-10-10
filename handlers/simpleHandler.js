@@ -56,12 +56,12 @@ class SimpleHandler {
 
     // 가장 점수가 높은 블록 하나만 선택
     const topBlock = ragResults[0];
-    
+
     // 블록 이름 임시 수정
-    if (topBlock.id === 'when_run_button_click') {
-      topBlock.name = '시작하기 버튼을 클릭했을 때';
+    if (topBlock.id === "when_run_button_click") {
+      topBlock.name = "시작하기 버튼을 클릭했을 때";
     }
-    
+
     console.log(`🎯 최상위 블록 선택: ${topBlock.name} (점수: ${topBlock._searchScore})`);
 
     // 사용자 질문 분석
@@ -82,58 +82,134 @@ class SimpleHandler {
    * 카드 형식의 간단한 응답 생성 - 이모지만 사용
    */
   generateCardResponse(block) {
-    
     const category = this.categoryInfo[block.category] || { name: block.category, emoji: "📌", color: "#757575" };
-    
+
+    // 카테고리별 아이콘 경로 (엔트리 스타일)
+    const iconPath = chrome.runtime.getURL(`data/block_icon/${block.category}_icon.svg`);
+
     let response = `
 <div style="
-    background: linear-gradient(135deg, ${category.color}CC, ${category.color}99);
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
     border-radius: 16px;
     padding: 24px;
-    color: white;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     margin: 16px 0;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border: 1px solid #e0e0e0;
 ">
-    <div style="font-size: 48px; margin-bottom: 16px; text-align: center;">
-        ${category.emoji}
-    </div>
-    <h3 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700;">
-        ${block.name}
-    </h3>
+    <!-- 메인 타이틀 -->
     <div style="
-        background: rgba(255,255,255,0.2);
-        border-radius: 8px;
-        padding: 12px;
-        margin-bottom: 12px;
-        font-weight: 600;
+        font-size: 18px; 
+        color: #333; 
+        margin-bottom: 20px; 
+        font-weight: 700;
+        text-align: center;
     ">
-        📍 위치: ${category.name} 카테고리
+        💡 이 카테고리를 확인하세요!
     </div>
+    
+    <!-- 카테고리 카드 (엔트리 스타일) -->
     <div style="
-        background: rgba(255,255,255,0.1);
-        border-radius: 8px;
+        background: #ffffff;
+        border: 2px solid ${category.color};
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    ">
+        <!-- 아이콘 영역 -->
+        <div style="
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 12px;
+            background: ${category.color}15;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        ">
+            <img src="${iconPath}" 
+                 style="width: 48px; height: 48px;"
+                 onerror="this.parentElement.innerHTML='<div style=\\'font-size:36px;\\'>${category.emoji}</div>'"
+                 alt="${category.name}">
+        </div>
+        
+        <!-- 카테고리 이름 -->
+        <div style="
+            font-size: 20px;
+            font-weight: 700;
+            color: ${category.color};
+            margin-bottom: 8px;
+        ">${category.name}</div>
+        
+        <!-- 블록 이름 -->
+        <div style="
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 12px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        ">"${block.name}"</div>
+        
+        <!-- 설명 -->
+        ${
+          block.description
+            ? `
+        <div style="
+            font-size: 14px;
+            color: #777;
+            line-height: 1.5;
+            margin-top: 12px;
+            text-align: left;
+            padding: 12px;
+            background: #fafafa;
+            border-radius: 8px;
+            border-left: 3px solid ${category.color};
+        ">
+            ${block.description}
+        </div>
+        `
+            : ""
+        }
+    </div>
+    
+    <!-- 추가 안내 -->
+    <div style="
+        margin-top: 16px;
         padding: 12px;
+        background: #f0f7ff;
+        border-radius: 8px;
         font-size: 14px;
-        line-height: 1.6;
+        color: #555;
+        text-align: center;
     ">
-        ${block.description || "이 블록을 사용하여 프로그램을 제어할 수 있어요."}
+        <strong>${category.name}</strong> 카테고리에서 이 블록을 찾아보세요!
     </div>
 </div>
 
-💡 **더 알고 싶으신가요?**
-- "사용법 알려줘" - 자세한 사용 방법
-- "예제 보여줘" - 실제 사용 예시
-- "문제 해결" - 안 될 때 해결 방법`;
+<div style="
+    margin-top: 12px;
+    padding: 12px;
+    background: #fff9e6;
+    border-radius: 8px;
+    border: 1px dashed #ffc107;
+">
+    <strong>💬 더 궁금한 점이 있나요?</strong><br>
+    <span style="color: #666; font-size: 13px;">
+    • "사용법 알려줘" - 자세한 사용 방법<br>
+    • "예제 보여줘" - 실제 사용 예시<br>
+    • "안 돼요" - 문제 해결 도움
+    </span>
+</div>`;
 
     return {
       success: true,
       response: response,
       type: "simple-card",
       blockInfo: block,
-      responseType: "html"
+      responseType: "html",
     };
   }
-
   /**
    * 상세한 응답 생성 (사용법 요청 시)
    */

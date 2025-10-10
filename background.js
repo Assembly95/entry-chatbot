@@ -106,30 +106,29 @@ async function decomposeQuestion(question) {
 - "스페이스 누르면" → "스페이스키 누르기"
 - "10번 반복" → "반복"
 
-한국어 단어/구문만 반환하세요.`
+한국어 단어/구문만 반환하세요.`,
           },
           {
             role: "user",
-            content: question
-          }
+            content: question,
+          },
         ],
         temperature: 0.3,
-        max_tokens: 50
-      })
+        max_tokens: 50,
+      }),
     });
 
     const data = await response.json();
     const intent = data.choices[0].message.content.trim();
-    
+
     // 4단계: 의도를 블록 ID로 변환
     const blocks = findBlocksByIntent(intent);
-    
+
     return {
       trigger: intent,
       blocks: blocks,
-      method: "ai+local"
+      method: "ai+local",
     };
-
   } catch (error) {
     console.error("❌ 의도 분해 오류:", error);
     return null;
@@ -139,7 +138,7 @@ async function decomposeQuestion(question) {
 // 로컬 블록 매핑
 function tryLocalBlockMapping(question) {
   const q = question.toLowerCase();
-  
+
   // 직접 매핑 패턴
   const patterns = [
     { pattern: /마우스.*클릭(?!.*오브젝트)/, blockId: "mouse_clicked" },
@@ -150,19 +149,19 @@ function tryLocalBlockMapping(question) {
     { pattern: /반복/, blockId: "repeat_basic" },
     { pattern: /무한.*반복/, blockId: "repeat_inf" },
     { pattern: /이동|움직/, blockId: "move_direction" },
-    { pattern: /소리.*재생/, blockId: "sound_something_with_block" }
+    { pattern: /소리.*재생/, blockId: "sound_something_with_block" },
   ];
-  
-  for (const {pattern, blockId} of patterns) {
+
+  for (const { pattern, blockId } of patterns) {
     if (pattern.test(q)) {
       return {
         trigger: question,
         blocks: [blockId],
-        method: "local"
+        method: "local",
       };
     }
   }
-  
+
   return null;
 }
 
@@ -170,20 +169,17 @@ function tryLocalBlockMapping(question) {
 function findBlocksByIntent(intent) {
   const blocks = [];
   const intentLower = intent.toLowerCase();
-  
+
   // entryBlockMap을 역으로 검색
   for (const [blockId, blockName] of Object.entries(entryBlockMap)) {
     const nameLower = blockName.toLowerCase();
-    
+
     // 의도와 블록 이름 매칭
     if (
-      (intentLower.includes("마우스") && intentLower.includes("클릭") && 
-       blockId === "mouse_clicked") ||
-      (intentLower.includes("오브젝트") && intentLower.includes("클릭") && 
-       blockId === "when_object_click") ||
+      (intentLower.includes("마우스") && intentLower.includes("클릭") && blockId === "mouse_clicked") ||
+      (intentLower.includes("오브젝트") && intentLower.includes("클릭") && blockId === "when_object_click") ||
       (intentLower.includes("스페이스") && blockId === "when_some_key_pressed") ||
-      (intentLower.includes("반복") && !intentLower.includes("무한") && 
-       blockId === "repeat_basic") ||
+      (intentLower.includes("반복") && !intentLower.includes("무한") && blockId === "repeat_basic") ||
       (intentLower.includes("무한") && blockId === "repeat_inf") ||
       (intentLower.includes("이동") && blockId === "move_direction")
     ) {
@@ -191,7 +187,7 @@ function findBlocksByIntent(intent) {
       break; // 첫 번째 매칭만
     }
   }
-  
+
   // 못 찾으면 유사도로 찾기
   if (blocks.length === 0) {
     for (const [blockId, blockName] of Object.entries(entryBlockMap)) {
@@ -201,7 +197,7 @@ function findBlocksByIntent(intent) {
       }
     }
   }
-  
+
   return blocks;
 }
 
@@ -209,11 +205,11 @@ function findBlocksByIntent(intent) {
 function calculateSimilarity(str1, str2) {
   const s1 = str1.toLowerCase();
   const s2 = str2.toLowerCase();
-  
+
   let matches = 0;
   const words1 = s1.split(/\s+/);
   const words2 = s2.split(/\s+/);
-  
+
   for (const w1 of words1) {
     for (const w2 of words2) {
       if (w1.includes(w2) || w2.includes(w1)) {
@@ -221,7 +217,7 @@ function calculateSimilarity(str1, str2) {
       }
     }
   }
-  
+
   return matches / Math.max(words1.length, words2.length);
 }
 // ===== Entry 블록 데이터 로드 =====
@@ -401,7 +397,7 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
   const isAskingLocation = userMessage.includes("위치") || userMessage.includes("어디");
   const isCreating = userMessage.includes("만들") || userMessage.includes("생성");
   const isDeleting = userMessage.includes("삭제") || userMessage.includes("지우") || userMessage.includes("제거");
-  
+
   // 점수 계산
   const scored = blockData.map((block) => {
     let score = 0;
@@ -418,7 +414,7 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
         matchedBy.push("exact-intent: 삭제+위치");
       }
     }
-    
+
     // ⭐ 의도에 따른 추가 가중치 (수정)
     if (!isAskingLocation) {
       // 위치를 묻는게 아닐 때만 동작 가중치 적용
@@ -489,9 +485,9 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
         클릭: 70,
         움직: 70,
         // ⭐ 복제본 관련 추가 (낮은 점수)
-        복제본: 30,  // 복제본만으로는 낮은 점수
-        만들: 40,    // 만들기도 단독으로는 낮은 점수
-        삭제: 40,    // 삭제도 단독으로는 낮은 점수
+        복제본: 30, // 복제본만으로는 낮은 점수
+        만들: 40, // 만들기도 단독으로는 낮은 점수
+        삭제: 40, // 삭제도 단독으로는 낮은 점수
       };
 
       for (const [keyword, points] of Object.entries(coreKeywords)) {
@@ -504,7 +500,7 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
       // 부분 매칭 (점수 낮춤)
       for (const token of tokens) {
         if (token.length >= 2 && lowerName.includes(token)) {
-          score += 10;  // 20에서 10으로 낮춤
+          score += 10; // 20에서 10으로 낮춤
           matchedBy.push(`name-partial: ${token}`);
         }
       }
@@ -515,7 +511,7 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
       const lowerDesc = block.description.toLowerCase();
       for (const token of tokens) {
         if (token && token.length >= 2 && lowerDesc.includes(token)) {
-          score += 5;  // 10에서 5로 낮춤
+          score += 5; // 10에서 5로 낮춤
           matchedBy.push(`desc: ${token}`);
         }
       }
@@ -528,7 +524,7 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
           const lowerExample = example.description.toLowerCase();
           for (const token of tokens) {
             if (token && token.length >= 2 && lowerExample.includes(token)) {
-              score += 5;  // 15에서 5로 낮춤
+              score += 5; // 15에서 5로 낮춤
               matchedBy.push(`example: ${token}`);
             }
           }
@@ -571,20 +567,48 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
   return results;
 }
 
-// background.js - handleAIRequest 수정
+// background.js - 개선된 질문 분류 로직
+
 async function handleAIRequest(request) {
   const message = request.message;
 
   try {
-    // 1. 의도 분해
-    const decomposed = await decomposeQuestion(message);
+    // 1. 질문 분류 (더 정확한 분류)
+    const classification = await classifyUserIntent(message);
+    console.log(`📊 분류 결과: ${classification.type} (신뢰도: ${classification.confidence})`);
 
-    // 2. 질문 타입 결정
-    const type = determineQuestionType(decomposed, message);
+    // 2. RAG 검색 (모든 경우에 수행)
+    let ragResults = [];
+    if (USE_RAG) {
+      ragResults = await searchEntryBlocks(message, 5);
+    }
 
-    // 3. 핸들러 호출 (각 핸들러가 필요시 searchEntryBlocks 호출)
-    const handler = handlers[type];
-    const result = await handler.handle(decomposed, message);
+    // 3. 핸들러 라우팅
+    let result;
+    switch (classification.type) {
+      case "debug":
+        const debugHandler = new DebugHandler();
+        result = await debugHandler.handle(null, message);
+        break;
+
+      case "location":
+      case "usage":
+        const simpleHandler = new SimpleHandler();
+        result = await simpleHandler.handle(null, message);
+        result.rawBlocks = ragResults; // RAG 결과 포함
+        break;
+
+      case "complex":
+        const complexHandler = new ComplexHandler();
+        result = await complexHandler.handle(null, ragResults, message);
+        break;
+
+      default:
+        // 기본적으로 Simple로 처리
+        const defaultHandler = new SimpleHandler();
+        result = await defaultHandler.handle(null, message);
+        result.rawBlocks = ragResults;
+    }
 
     return result;
   } catch (error) {
@@ -594,6 +618,177 @@ async function handleAIRequest(request) {
       response: getFallbackResponse(error.message),
     };
   }
+}
+
+/**
+ * 개선된 사용자 의도 분류 함수
+ */
+async function classifyUserIntent(message) {
+  const lower = message.toLowerCase();
+
+  // 1. 디버깅 키워드 체크 (최우선)
+  const debugPatterns = {
+    // 작동 문제
+    notWorking: [/안\s*돼/, /안\s*됨/, /작동.*안/, /실행.*안/, /먹통/, /아무.*반응/],
+
+    // 한 번만 실행 (연구 기반 패턴)
+    onceOnly: [/한\s*번만/, /처음만/, /처음에만/, /계속.*안/, /다시.*안/],
+
+    // 충돌/감지 문제
+    collision: [/닿.*안/, /충돌.*안/, /감지.*안/, /인식.*안/],
+
+    // 변수 문제
+    variable: [/변수.*안/, /점수.*안/, /공유.*안/, /각자/, /따로/],
+
+    // 신호/메시지 문제
+    message: [/신호.*안/, /메시지.*안/, /메세지.*안/, /받.*안/, /전달.*안/],
+
+    // 복제본 문제
+    clone: [/복제.*안/, /복사.*안/, /클론.*안/, /총알.*안/, /하나만/],
+
+    // 움직임 문제
+    movement: [/안\s*움직/, /움직.*안/, /이동.*안/, /멈춰/, /멈춤/],
+  };
+
+  // 디버깅 패턴 체크
+  for (const [category, patterns] of Object.entries(debugPatterns)) {
+    for (const pattern of patterns) {
+      if (pattern.test(lower)) {
+        console.log(`🐛 디버깅 패턴 감지: ${category}`);
+        return {
+          type: "debug",
+          subtype: category,
+          confidence: 0.9,
+          method: "pattern",
+        };
+      }
+    }
+  }
+
+  // 2. 위치/사용법 키워드 체크 (SimpleHandler)
+  const simplePatterns = {
+    location: [/어디.*있/, /어디.*찾/, /위치/, /카테고리/, /어디서/, /어딨/],
+
+    usage: [/어떻게.*사용/, /사용.*방법/, /사용법/, /쓰는.*방법/, /방법.*알려/, /블록.*설명/],
+
+    whatIs: [/뭐야/, /무엇/, /뭔가요/, /이란/, /설명/],
+  };
+
+  for (const [category, patterns] of Object.entries(simplePatterns)) {
+    for (const pattern of patterns) {
+      if (pattern.test(lower)) {
+        console.log(`📦 Simple 패턴 감지: ${category}`);
+        return {
+          type: category === "location" || category === "usage" ? category : "simple",
+          subtype: category,
+          confidence: 0.85,
+          method: "pattern",
+        };
+      }
+    }
+  }
+
+  // 3. 복잡한 프로젝트/게임 체크 (ComplexHandler)
+  const complexKeywords = ["게임", "만들", "프로젝트", "프로그램", "제작", "구현", "개발", "시스템"];
+
+  if (complexKeywords.some((keyword) => lower.includes(keyword))) {
+    // 디버깅 키워드와 함께 있으면 디버깅으로 분류
+    if (lower.includes("안") || lower.includes("오류") || lower.includes("문제")) {
+      return {
+        type: "debug",
+        subtype: "complex",
+        confidence: 0.8,
+        method: "keyword",
+      };
+    }
+
+    return {
+      type: "complex",
+      confidence: 0.8,
+      method: "keyword",
+    };
+  }
+
+  // 4. 특정 블록 이름 언급 체크
+  const blockNamePatterns = [
+    /스페이스.*키/,
+    /반복.*블록/,
+    /조건.*블록/,
+    /변수.*블록/,
+    /이동.*블록/,
+    /신호.*보내/,
+    /신호.*받/,
+    /복제.*생성/,
+    /복제.*삭제/,
+  ];
+
+  for (const pattern of blockNamePatterns) {
+    if (pattern.test(lower)) {
+      // "안"이 포함되면 디버그, 아니면 simple
+      if (lower.includes("안") || lower.includes("않") || lower.includes("못")) {
+        return {
+          type: "debug",
+          subtype: "block-specific",
+          confidence: 0.85,
+          method: "block-name",
+        };
+      }
+
+      return {
+        type: "simple",
+        subtype: "block-specific",
+        confidence: 0.8,
+        method: "block-name",
+      };
+    }
+  }
+
+  // 5. 기본값 (애매한 경우)
+  // 짧은 질문은 simple, 긴 질문은 complex
+  if (message.length < 20) {
+    return {
+      type: "simple",
+      confidence: 0.6,
+      method: "default-short",
+    };
+  } else {
+    return {
+      type: "simple", // 안전하게 simple로
+      confidence: 0.5,
+      method: "default-long",
+    };
+  }
+}
+
+/**
+ * 분류 테스트 (개발용)
+ */
+function testClassification() {
+  const testCases = [
+    // 디버그로 분류되어야 함
+    "스페이스키가 한 번만 작동해요",
+    "변수가 다른 스프라이트에서 안 보여요",
+    "신호를 보냈는데 받지를 못해요",
+    "충돌이 감지가 안 돼요",
+    "캐릭터가 안 움직여요",
+
+    // Simple로 분류되어야 함
+    "반복 블록 어디 있어요?",
+    "변수 블록 사용법 알려주세요",
+    "이동 블록 위치가 어디에요?",
+    "신호 보내기 블록 설명해주세요",
+
+    // Complex로 분류되어야 함
+    "슈팅 게임 만들고 싶어요",
+    "미로 게임 어떻게 만들어요?",
+    "점프 게임 제작 방법",
+  ];
+
+  testCases.forEach(async (testCase) => {
+    const result = await classifyUserIntent(testCase);
+    console.log(`"${testCase}"`);
+    console.log(`  → ${result.type} (${result.confidence})`);
+  });
 }
 
 function determineQuestionType(decomposed, message) {
@@ -931,7 +1126,6 @@ const aiToEntryMapping = {
 
 // ===== Chrome Extension 메시지 처리 =====
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  
   switch (request.action) {
     case "generateAIResponse":
       handleAIRequest(request)
