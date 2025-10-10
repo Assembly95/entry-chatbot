@@ -608,7 +608,6 @@ window.displayLearnerProgress = function (progress) {
     );
   }
 
-  // ===== CoT 응답 표시 함수 =====
   function displayCoTResponse(cotSequence, fullResponse) {
     if (!cotSequence || !cotSequence.steps) {
       addChatMessage(fullResponse, true);
@@ -616,126 +615,231 @@ window.displayLearnerProgress = function (progress) {
     }
 
     const cotId = `cot-${Date.now()}`;
+    const firstStep = cotSequence.steps[0];
 
+    // 한 번에 한 단계만 표시하는 간단한 구조
     const cotHtml = `
-    <div class="cot-response" id="${cotId}" data-total-steps="${cotSequence.totalSteps}">
-      <div class="cot-header">
-        <span class="cot-badge">
-          <span style="margin-right: 5px;">🎯</span>
-          단계별 가이드
+    <div class="cot-response" id="${cotId}" data-total-steps="${cotSequence.totalSteps}" data-current-step="1">
+      <!-- 헤더 -->
+      <div class="cot-header" style="
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 16px;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      ">
+        <span class="cot-badge" style="font-weight: bold; font-size: 16px;">
+          🎯 단계별 가이드
         </span>
-        <span class="cot-progress">
-          <span class="current-step-text">1</span>/${cotSequence.totalSteps}
+        <span class="cot-progress" style="
+          background: rgba(255,255,255,0.2);
+          padding: 6px 12px;
+          border-radius: 20px;
+          font-size: 14px;
+        ">
+          <span class="current-step-text">1</span> / ${cotSequence.totalSteps}
         </span>
       </div>
-      <div class="cot-steps">
-        ${cotSequence.steps
-          .map(
-            (step, index) => `
-          <div class="cot-step ${index === 0 ? "active" : ""}" 
-               data-step="${step.stepNumber}"
-               style="margin-bottom: 12px;">
-            <div class="step-header cot-step-toggle" 
-                 data-step-num="${step.stepNumber}"
-                 style="
-                   cursor: pointer;
-                   padding: 8px 12px;
-                   background: ${index === 0 ? "#e3f2fd" : "#f5f5f5"};
-                   border-radius: 8px;
-                   display: flex;
-                   align-items: center;
-                   justify-content: space-between;
-                 ">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span class="step-number" style="
-                  background: #2196f3;
-                  color: white;
-                  width: 24px;
-                  height: 24px;
-                  border-radius: 50%;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  font-size: 12px;
-                  font-weight: bold;
-                ">${step.stepNumber}</span>
-                <span class="step-title" style="font-weight: 600; color: #333;">
-                  ${step.title}
-                </span>
-              </div>
-              <span class="step-toggle-icon" style="color: #666;">
-                ${index === 0 ? "▼" : "▶"}
-              </span>
-            </div>
-            <div class="step-content ${index === 0 ? "expanded" : "collapsed"}" 
-                 data-step-content="${step.stepNumber}"
-                 style="
-                   padding: ${index === 0 ? "12px" : "0 12px"};
-                   background: white;
-                   border-radius: 0 0 8px 8px;
-                   max-height: ${index === 0 ? "500px" : "0"};
-                   overflow: hidden;
-                   transition: all 0.3s ease;
-                 ">
-              <div style="white-space: pre-wrap; line-height: 1.6;">
-                ${step.content}
-              </div>
-              ${step.completed ? '<div style="margin-top: 8px; color: #4caf50; font-size: 12px;">✓ 완료됨</div>' : ""}
-            </div>
-          </div>
-        `
-          )
-          .join("")}
+      
+      <!-- 현재 단계 내용 -->
+      <div class="cot-content" style="
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-top: none;
+        padding: 20px;
+        border-radius: 0 0 12px 12px;
+      ">
+        <div class="current-step-content" id="step-content-${cotId}">
+          <h3 style="color: #333; margin: 0 0 16px 0;">
+            <span style="
+              background: #667eea;
+              color: white;
+              width: 28px;
+              height: 28px;
+              border-radius: 50%;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 14px;
+              margin-right: 12px;
+            ">${firstStep.stepNumber}</span>
+            ${firstStep.title}
+          </h3>
+          <div style="
+            color: #555;
+            line-height: 1.6;
+            white-space: pre-wrap;
+          ">${firstStep.content}</div>
+        </div>
       </div>
+      
+      <!-- 네비게이션 -->
       <div class="cot-navigation" style="
         display: flex;
-        gap: 8px;
+        gap: 12px;
         margin-top: 16px;
-        padding-top: 16px;
-        border-top: 1px solid #e0e0e0;
+        padding: 0 4px;
       ">
         <button class="cot-nav-prev" 
                 data-cot-id="${cotId}"
                 style="
-                  padding: 8px 16px;
-                  border-radius: 6px;
+                  flex: 1;
+                  padding: 12px;
+                  border-radius: 8px;
                   border: 1px solid #ddd;
                   background: white;
-                  cursor: pointer;
-                  font-size: 13px;
-                " disabled>이전 단계</button>
-        <button class="cot-nav-next"
-                data-cot-id="${cotId}"
-                style="
-                  padding: 8px 16px;
-                  border-radius: 6px;
-                  border: 1px solid #2196f3;
-                  background: #2196f3;
-                  color: white;
-                  cursor: pointer;
-                  font-size: 13px;
-                ">다음 단계</button>
+                  cursor: not-allowed;
+                  opacity: 0.5;
+                  font-size: 14px;
+                  transition: all 0.3s;
+                " disabled>
+          ◀ 이전 단계
+        </button>
+        
         <button class="cot-complete-step"
                 data-cot-id="${cotId}"
                 style="
-                  margin-left: auto;
-                  padding: 8px 16px;
-                  border-radius: 6px;
+                  flex: 1;
+                  padding: 12px;
+                  border-radius: 8px;
                   border: 1px solid #4caf50;
                   background: white;
                   color: #4caf50;
                   cursor: pointer;
-                  font-size: 13px;
-                ">현재 단계 완료</button>
+                  font-size: 14px;
+                  font-weight: 600;
+                  transition: all 0.3s;
+                "
+                onmouseover="this.style.background='#4caf50'; this.style.color='white';"
+                onmouseout="this.style.background='white'; this.style.color='#4caf50';">
+          ✓ 현재 단계 완료
+        </button>
+        
+        <button class="cot-nav-next"
+                data-cot-id="${cotId}"
+                style="
+                  flex: 1;
+                  padding: 12px;
+                  border-radius: 8px;
+                  border: none;
+                  background: #667eea;
+                  color: white;
+                  cursor: pointer;
+                  font-size: 14px;
+                  transition: all 0.3s;
+                "
+                onmouseover="this.style.background='#764ba2';"
+                onmouseout="this.style.background='#667eea';">
+          다음 단계 ▶
+        </button>
       </div>
     </div>
   `;
 
+    // 전체 단계 데이터를 저장
+    window[`cotData_${cotId}`] = cotSequence;
+
     addChatMessage(cotHtml, true, "cot");
 
     setTimeout(() => {
-      setupCoTEventListeners(cotId, cotSequence);
+      setupSimplifiedCoTListeners(cotId, cotSequence);
     }, 100);
+  }
+
+  // 단순화된 이벤트 리스너
+  function setupSimplifiedCoTListeners(cotId, cotSequence) {
+    const cotElement = document.getElementById(cotId);
+    if (!cotElement) return;
+
+    let currentStep = 1;
+    const prevBtn = cotElement.querySelector(".cot-nav-prev");
+    const nextBtn = cotElement.querySelector(".cot-nav-next");
+    const completeBtn = cotElement.querySelector(".cot-complete-step");
+    const contentArea = document.getElementById(`step-content-${cotId}`);
+
+    // 다음 버튼
+    nextBtn.addEventListener("click", () => {
+      if (currentStep < cotSequence.totalSteps) {
+        currentStep++;
+        updateStepDisplay(cotElement, cotSequence.steps[currentStep - 1], currentStep, cotSequence.totalSteps);
+      }
+    });
+
+    // 이전 버튼
+    prevBtn.addEventListener("click", () => {
+      if (currentStep > 1) {
+        currentStep--;
+        updateStepDisplay(cotElement, cotSequence.steps[currentStep - 1], currentStep, cotSequence.totalSteps);
+      }
+    });
+
+    // 완료 버튼
+    completeBtn.addEventListener("click", () => {
+      // 현재 단계 완료 표시
+      const stepContent = contentArea.querySelector("h3");
+      if (stepContent && !stepContent.innerHTML.includes("✅")) {
+        stepContent.innerHTML = stepContent.innerHTML.replace(/(\d+)/, "$1 ✅");
+      }
+
+      // 마지막 단계가 아니면 자동으로 다음 단계로
+      if (currentStep < cotSequence.totalSteps) {
+        setTimeout(() => {
+          currentStep++;
+          updateStepDisplay(cotElement, cotSequence.steps[currentStep - 1], currentStep, cotSequence.totalSteps);
+        }, 500);
+      }
+    });
+  }
+
+  // 단계 표시 업데이트
+  function updateStepDisplay(cotElement, step, currentStep, totalSteps) {
+    const contentArea = cotElement.querySelector(".current-step-content");
+    const progressText = cotElement.querySelector(".current-step-text");
+    const prevBtn = cotElement.querySelector(".cot-nav-prev");
+    const nextBtn = cotElement.querySelector(".cot-nav-next");
+
+    // 내용 업데이트
+    contentArea.innerHTML = `
+    <h3 style="color: #333; margin: 0 0 16px 0;">
+      <span style="
+        background: #667eea;
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        margin-right: 12px;
+      ">${step.stepNumber}</span>
+      ${step.title}
+    </h3>
+    <div style="
+      color: #555;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    ">${step.content}</div>
+  `;
+
+    // 진행 상황 업데이트
+    progressText.textContent = currentStep;
+
+    // 버튼 상태 업데이트
+    prevBtn.disabled = currentStep === 1;
+    prevBtn.style.opacity = currentStep === 1 ? "0.5" : "1";
+    prevBtn.style.cursor = currentStep === 1 ? "not-allowed" : "pointer";
+
+    nextBtn.disabled = currentStep === totalSteps;
+    nextBtn.style.opacity = currentStep === totalSteps ? "0.5" : "1";
+    nextBtn.style.cursor = currentStep === totalSteps ? "not-allowed" : "pointer";
+
+    // 마지막 단계에서 버튼 텍스트 변경
+    if (currentStep === totalSteps) {
+      nextBtn.textContent = "완료 🎉";
+    }
   }
 
   // ===== CoT 이벤트 리스너 설정 =====

@@ -36,9 +36,6 @@ class ComplexHandler {
     };
   }
 
-  /**
-   * 복합 질문 처리 메인 함수
-   */
   async handle(decomposed, ragResults, message) {
     console.log("🎮 ComplexHandler 처리 시작");
 
@@ -60,9 +57,12 @@ class ComplexHandler {
     // 초기 응답 생성 (첫 번째 단계)
     const initialResponse = this.formatInitialResponse(steps, cotSequence.totalSteps);
 
+    // 반환 객체 수정 - success와 responseType 추가!
     return {
+      success: true, // ← 이것 추가
       response: initialResponse,
-      type: "cot",
+      responseType: "cot", // ← type이 아니라 responseType으로 변경
+      type: "complex-cot", // 이건 분류용
       cotSequence: cotSequence,
       decomposed: decomposed,
     };
@@ -307,11 +307,9 @@ class ComplexHandler {
     );
   }
 
-  /**
-   * 기본 복합 가이드 (의도 분해 실패시)
-   */
   generateBasicComplexGuide(message) {
     return {
+      success: true, // ← 여기도 추가
       response:
         `## 🎮 프로젝트 만들기 가이드\n\n` +
         `복잡한 동작을 만들려면 여러 블록을 조합해야 해요!\n\n` +
@@ -322,6 +320,7 @@ class ComplexHandler {
         `4. **반복** 설정 (계속 실행?)\n` +
         `5. **테스트** (잘 작동하나?)\n\n` +
         `구체적으로 무엇을 만들고 싶은지 다시 설명해주세요!`,
+      responseType: "text", // ← 추가
       type: "complex-basic",
     };
   }

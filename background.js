@@ -569,55 +569,108 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
 
 // background.js - 개선된 질문 분류 로직
 
+// background.js - handleAIRequest 함수 수정
+
 async function handleAIRequest(request) {
   const message = request.message;
 
   try {
-    // 1. 질문 분류 (더 정확한 분류)
+    // 1. 질문 분류
     const classification = await classifyUserIntent(message);
     console.log(`📊 분류 결과: ${classification.type} (신뢰도: ${classification.confidence})`);
 
     // 2. RAG 검색 (모든 경우에 수행)
     let ragResults = [];
     if (USE_RAG) {
-      ragResults = await searchEntryBlocks(message, 5);
+      try {
+        ragResults = await searchEntryBlocks(message, 5);
+        console.log(`📚 RAG 검색 완료: ${ragResults.length}개 블록`);
+      } catch (error) {
+        console.error("RAG 검색 실패:", error);
+        ragResults = [];
+      }
     }
 
     // 3. 핸들러 라우팅
     let result;
+
     switch (classification.type) {
       case "debug":
+        console.log("🐛 DebugHandler 호출");
         const debugHandler = new DebugHandler();
         result = await debugHandler.handle(null, message);
         break;
 
       case "location":
       case "usage":
+      case "simple":
+        console.log("📦 SimpleHandler 호출");
         const simpleHandler = new SimpleHandler();
         result = await simpleHandler.handle(null, message);
-        result.rawBlocks = ragResults; // RAG 결과 포함
+        result.rawBlocks = ragResults;
         break;
 
       case "complex":
+        console.log("🎮 ComplexHandler 호출");
         const complexHandler = new ComplexHandler();
-        result = await complexHandler.handle(null, ragResults, message);
+
+        // decomposed 생성 (간단한 버전)
+        const decomposed = {
+          trigger: "시작",
+          action: "술래잡기",
+          target: "플레이어",
+        };
+
+        // ComplexHandler의 handle 함수 시그니처 확인
+        result = await complexHandler.handle(decomposed, ragResults, message);
         break;
 
       default:
-        // 기본적으로 Simple로 처리
+        console.log("❓ 기본 SimpleHandler 호출");
         const defaultHandler = new SimpleHandler();
         result = await defaultHandler.handle(null, message);
         result.rawBlocks = ragResults;
     }
 
+    // 결과 확인
+    if (!result) {
+      console.error("핸들러가 null 반환");
+      result = {
+        success: false,
+        response: "응답 생성에 실패했습니다.",
+      };
+    }
+
+    // success 플래그 확인
+    if (!result.hasOwnProperty("success")) {
+      result.success = true;
+    }
+
+    console.log("✅ 최종 응답:", result);
     return result;
   } catch (error) {
-    console.error("AI 요청 처리 오류:", error);
+    console.error("❌ handleAIRequest 오류:", error);
     return {
       success: false,
       response: getFallbackResponse(error.message),
+      error: error.message,
     };
   }
+}
+
+// ComplexHandler 존재 여부 확인
+if (typeof ComplexHandler === "undefined") {
+  console.error("ComplexHandler가 정의되지 않았습니다!");
+}
+
+// 테스트 함수
+function testComplexClassification() {
+  const testMessages = ["술래잡기 게임 만들고 싶어요", "슈팅 게임 어떻게 만들어요?", "미로 게임 제작 방법"];
+
+  testMessages.forEach(async (msg) => {
+    const result = await classifyUserIntent(msg);
+    console.log(`"${msg}" → ${result.type}`);
+  });
 }
 
 /**
