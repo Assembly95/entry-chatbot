@@ -14,8 +14,8 @@ else:  # Linux
 
 plt.rcParams['axes.unicode_minus'] = False
 
-# CSV 읽기
-df = pd.read_csv('대답 결과.csv')
+# Excel 파일 읽기 (CSV 대신 XLSX)
+df = pd.read_excel('대답 결과.xlsx')
 
 # 정답 정보 - 실제 엔트리 색상
 CORRECT_INFO = {
@@ -243,18 +243,27 @@ def evaluate_answer_new(answer, question):
         '색상_표현_방식': color_expression
     }
 
+# LLM 컬럼 매핑 (Excel 컬럼명과 표시 이름)
+llm_columns = {
+    'GPT5': 'GPT-5',
+    'Gemini Pro': 'Gemini Pro',
+    'Claude(Sonnet4.5)': 'Claude',
+    'Copilot': 'Copilot',
+    '개발 챗봇': '개발 챗봇'
+}
+
 # 각 LLM별 점수 계산
 results = []
 detailed_analysis = []
 
 for idx, row in df.iterrows():
-    for llm in ['GPT', '제미나이', '개발 챗봇']:
-        if llm in df.columns:
-            scores = evaluate_answer_new(row[llm], row['질문'])
+    for col_name, display_name in llm_columns.items():
+        if col_name in df.columns:
+            scores = evaluate_answer_new(row[col_name], row['질문'])
             results.append({
                 '질문번호': row['번호'],
                 '질문': row['질문'],
-                'LLM': llm,
+                'LLM': display_name,
                 '총점': scores['총점'],
                 '정확성': scores['정확성'],
                 '즉답성': scores['즉답성'],
@@ -265,7 +274,7 @@ for idx, row in df.iterrows():
             # 상세 분석 데이터
             detailed_analysis.append({
                 '질문번호': row['번호'],
-                'LLM': llm,
+                'LLM': display_name,
                 '색상_표현': scores['색상_표현_방식']
             })
 
@@ -273,138 +282,192 @@ for idx, row in df.iterrows():
 results_df = pd.DataFrame(results)
 analysis_df = pd.DataFrame(detailed_analysis)
 
-# 시각화
-fig, axes = plt.subplots(2, 3, figsize=(18, 12))
-
 # 색상 설정
-colors = {'GPT': '#FF6B6B', '제미나이': '#4ECDC4', '개발 챗봇': '#45B7D1'}
+colors = {
+    'GPT-5': '#FF6B6B',      # 빨강
+    'Gemini Pro': '#4ECDC4',  # 청록
+    '개발 챗봇': '#45B7D1',   # 파랑
+    'Claude': '#9B59B6',      # 보라
+    'Copilot': '#F39C12'      # 주황
+}
+
+# 데이터 준비
+avg_scores = results_df.groupby('LLM')['총점'].mean().round(1)
+eval_categories = ['정확성', '즉답성', '사용성', '교육적_가치']
+category_avg = results_df.groupby('LLM')[eval_categories].mean()
+
+# LLM 순서 정의 (개발 챗봇을 마지막에 배치)
+llm_order = ['GPT-5', 'Gemini Pro', 'Claude', 'Copilot', '개발 챗봇']
+
+# ====== 각 그래프를 개별적으로 생성 및 저장 ======
 
 # 1. 전체 평균 점수 비교
-ax1 = axes[0, 0]
-avg_scores = results_df.groupby('LLM')['총점'].mean().round(1)
-bars = ax1.bar(avg_scores.index, avg_scores.values, 
-                color=[colors[llm] for llm in avg_scores.index])
+fig1, ax1 = plt.subplots(figsize=(10, 6))
+# 순서대로 정렬
+avg_scores_ordered = avg_scores.reindex([llm for llm in llm_order if llm in avg_scores.index])
+bars = ax1.bar(avg_scores_ordered.index, avg_scores_ordered.values, 
+                color=[colors[llm] for llm in avg_scores_ordered.index])
 ax1.set_title('전체 평균 점수 비교', fontsize=14, fontweight='bold')
 ax1.set_ylabel('평균 점수 (100점 만점)', fontsize=12)
 ax1.set_ylim(0, 100)
 
-for bar, score in zip(bars, avg_scores.values):
+for bar, score in zip(bars, avg_scores_ordered.values):
     ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1,
-             f'{score:.1f}점', ha='center', fontweight='bold', fontsize=12)
+             f'{score:.1f}점', ha='center', fontweight='bold', fontsize=11)
+plt.xticks(rotation=15, ha='right')
+plt.tight_layout()
+plt.savefig('graph_1_average_scores.png', dpi=300, bbox_inches='tight')
+plt.close()
 
 # 2. 평가 영역별 점수
-ax2 = axes[0, 1]
-eval_categories = ['정확성', '즉답성', '사용성', '교육적_가치']
-category_avg = results_df.groupby('LLM')[eval_categories].mean()
-
+fig2, ax2 = plt.subplots(figsize=(12, 6))
 x = np.arange(len(eval_categories))
-width = 0.25
+width = 0.15  # 5개 모델용 너비
 
-for i, llm in enumerate(['GPT', '제미나이', '개발 챗봇']):
+for i, llm in enumerate(llm_order):
     if llm in category_avg.index:
         values = category_avg.loc[llm].values
-        ax2.bar(x + i*width, values, width, label=llm, color=colors[llm], alpha=0.8)
+        ax2.bar(x + i*width - width*2, values, width, label=llm, color=colors[llm], alpha=0.8)
 
 ax2.set_xlabel('평가 영역', fontsize=12)
 ax2.set_ylabel('평균 점수', fontsize=12)
 ax2.set_title('평가 영역별 점수 비교', fontsize=14, fontweight='bold')
-ax2.set_xticks(x + width)
+ax2.set_xticks(x)
 ax2.set_xticklabels(['정확성\n(30점)', '즉답성\n(25점)', '사용성\n(25점)', '교육적 가치\n(20점)'])
-ax2.legend()
+ax2.legend(loc='upper left', ncol=3)
 ax2.grid(axis='y', alpha=0.3)
+plt.tight_layout()
+plt.savefig('graph_2_category_scores.png', dpi=300, bbox_inches='tight')
+plt.close()
 
 # 3. 레이더 차트
-ax3 = axes[0, 2]
+fig3 = plt.figure(figsize=(10, 8))
+ax3 = fig3.add_subplot(111, projection='polar')
 angles = np.linspace(0, 2*np.pi, len(eval_categories), endpoint=False).tolist()
 angles += angles[:1]
 
-ax3 = plt.subplot(2, 3, 3, projection='polar')
-for llm in ['GPT', '제미나이', '개발 챗봇']:
+for llm in llm_order:
     if llm in category_avg.index:
         values = category_avg.loc[llm].tolist()
         values += values[:1]
         ax3.plot(angles, values, 'o-', linewidth=2, label=llm, color=colors[llm])
-        ax3.fill(angles, values, alpha=0.25, color=colors[llm])
+        ax3.fill(angles, values, alpha=0.2, color=colors[llm])
 
 ax3.set_xticks(angles[:-1])
 ax3.set_xticklabels(eval_categories, fontsize=10)
 ax3.set_ylim(0, 30)
 ax3.set_title('영역별 성능 레이더 차트', fontsize=14, fontweight='bold', pad=20)
-ax3.legend(loc='upper right', bbox_to_anchor=(1.3, 1.0))
+ax3.legend(loc='upper right', bbox_to_anchor=(1.35, 1.0))
+plt.tight_layout()
+plt.savefig('graph_3_radar_chart.png', dpi=300, bbox_inches='tight')
+plt.close()
 
 # 4. 질문별 점수 히트맵
-ax4 = axes[1, 0]
+fig4, ax4 = plt.subplots(figsize=(12, 8))
 pivot_data = results_df.pivot_table(values='총점', index='질문번호', columns='LLM')
-pivot_data = pivot_data.head(10)
+# LLM 순서대로 정렬
+pivot_data = pivot_data[[llm for llm in llm_order if llm in pivot_data.columns]]
+pivot_data = pivot_data.head(15)  # 상위 15개 질문
 im = ax4.imshow(pivot_data.T, cmap='RdYlGn', aspect='auto', vmin=0, vmax=100)
 ax4.set_xticks(range(len(pivot_data)))
-ax4.set_xticklabels([f'Q{int(i)}' for i in pivot_data.index])
+ax4.set_xticklabels([f'Q{int(i)}' for i in pivot_data.index], rotation=45, ha='right')
 ax4.set_yticks(range(len(pivot_data.columns)))
 ax4.set_yticklabels(pivot_data.columns)
-ax4.set_title('질문별 점수 히트맵 (상위 10개)', fontsize=14, fontweight='bold')
+ax4.set_title('질문별 점수 히트맵 (상위 15개)', fontsize=14, fontweight='bold')
 cbar = plt.colorbar(im, ax=ax4)
 cbar.set_label('점수', rotation=270, labelpad=15)
+plt.tight_layout()
+plt.savefig('graph_4_heatmap.png', dpi=300, bbox_inches='tight')
+plt.close()
 
 # 5. 점수 분포 박스플롯
-ax5 = axes[1, 1]
+fig5, ax5 = plt.subplots(figsize=(10, 6))
 data_for_box = []
 labels_for_box = []
-for llm in ['GPT', '제미나이', '개발 챗봇']:
+colors_for_box = []
+for llm in llm_order:
     if llm in results_df['LLM'].values:
         data_for_box.append(results_df[results_df['LLM']==llm]['총점'].values)
         labels_for_box.append(llm)
+        colors_for_box.append(colors[llm])
 
 if data_for_box:
     bp = ax5.boxplot(data_for_box, labels=labels_for_box, patch_artist=True)
-    for patch, llm in zip(bp['boxes'], labels_for_box):
-        patch.set_facecolor(colors[llm])
+    for patch, color in zip(bp['boxes'], colors_for_box):
+        patch.set_facecolor(color)
         patch.set_alpha(0.7)
 
 ax5.set_ylabel('점수', fontsize=12)
 ax5.set_title('점수 분포 비교', fontsize=14, fontweight='bold')
 ax5.grid(axis='y', alpha=0.3)
 ax5.set_ylim(0, 100)
+plt.xticks(rotation=15, ha='right')
+plt.tight_layout()
+plt.savefig('graph_5_boxplot.png', dpi=300, bbox_inches='tight')
+plt.close()
 
 # 6. 개선율 표시
-ax6 = axes[1, 2]
-if '개발 챗봇' in avg_scores.index and 'GPT' in avg_scores.index and '제미나이' in avg_scores.index:
-    improvement = pd.DataFrame({
-        'vs GPT': [(avg_scores['개발 챗봇'] / avg_scores['GPT'] - 1) * 100],
-        'vs 제미나이': [(avg_scores['개발 챗봇'] / avg_scores['제미나이'] - 1) * 100]
-    })
-    bars = ax6.bar(improvement.columns, improvement.values[0], color=['#95E77E', '#95E77E'])
-    ax6.set_title('개발 챗봇 성능 개선율', fontsize=14, fontweight='bold')
-    ax6.set_ylabel('개선율 (%)', fontsize=12)
-    ax6.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
-    ax6.grid(axis='y', alpha=0.3)
+fig6, ax6 = plt.subplots(figsize=(10, 6))
+if '개발 챗봇' in avg_scores.index:
+    improvements = {}
+    for llm in llm_order[:-1]:  # 개발 챗봇 제외
+        if llm in avg_scores.index:
+            improvements[f'vs {llm}'] = (avg_scores['개발 챗봇'] / avg_scores[llm] - 1) * 100
     
-    for bar, val in zip(bars, improvement.values[0]):
-        ax6.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1,
-                 f'{val:.1f}%', ha='center', fontweight='bold')
+    if improvements:
+        improvement_df = pd.DataFrame([improvements])
+        bars = ax6.bar(improvement_df.columns, improvement_df.values[0], 
+                       color=['#95E77E' if v > 0 else '#FF9999' for v in improvement_df.values[0]])
+        ax6.set_title('개발 챗봇 성능 비교 (상대 개선율)', fontsize=14, fontweight='bold')
+        ax6.set_ylabel('개선율 (%)', fontsize=12)
+        ax6.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
+        ax6.grid(axis='y', alpha=0.3)
+        
+        for bar, val in zip(bars, improvement_df.values[0]):
+            ax6.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1 if val > 0 else bar.get_height() - 3,
+                     f'{val:.1f}%', ha='center', fontweight='bold')
+        plt.xticks(rotation=15, ha='right')
 
 plt.tight_layout()
-plt.savefig('llm_evaluation_results_visual.png', dpi=300, bbox_inches='tight')
-plt.show()
+plt.savefig('graph_6_improvement.png', dpi=300, bbox_inches='tight')
+plt.close()
 
 # 최종 점수표 출력
-print("\n" + "="*60)
-print("시작 카테고리 블록 위치 질문 평가 결과")
-print("="*60)
-for llm in avg_scores.index:
-    print(f"{llm}: {avg_scores[llm]:.1f}점")
-print("-"*60)
+print("\n" + "="*70)
+print("엔트리 블록 위치 질문 평가 결과")
+print("="*70)
+print("\n📊 전체 평균 점수 (100점 만점):")
+print("-"*40)
+for llm in llm_order:
+    if llm in avg_scores.index:
+        print(f"{llm:15s}: {avg_scores[llm]:6.1f}점")
+print("-"*40)
 
 if '개발 챗봇' in avg_scores.index:
-    if 'GPT' in avg_scores.index:
-        print(f"개발 챗봇이 GPT 대비 {(avg_scores['개발 챗봇']/avg_scores['GPT']-1)*100:.1f}% {'높은' if avg_scores['개발 챗봇'] > avg_scores['GPT'] else '낮은'} 점수")
-    if '제미나이' in avg_scores.index:
-        print(f"개발 챗봇이 Gemini 대비 {(avg_scores['개발 챗봇']/avg_scores['제미나이']-1)*100:.1f}% {'높은' if avg_scores['개발 챗봇'] > avg_scores['제미나이'] else '낮은'} 점수")
+    print("\n🚀 개발 챗봇 성능 비교:")
+    print("-"*40)
+    for llm in llm_order[:-1]:
+        if llm in avg_scores.index:
+            diff = avg_scores['개발 챗봇'] - avg_scores[llm]
+            percent = (avg_scores['개발 챗봇']/avg_scores[llm] - 1) * 100
+            print(f"vs {llm:12s}: {diff:+6.1f}점 ({percent:+6.1f}%)")
 
 # 색상 표현 방식 분석
-print("\n색상 표현 방식 분석:")
+print("\n🎨 색상 표현 방식 분석:")
+print("-"*40)
 color_analysis = analysis_df.groupby(['LLM', '색상_표현']).size().unstack(fill_value=0)
 print(color_analysis)
 
 # 영역별 상세 점수
-print("\n영역별 평균 점수:")
-print(category_avg.round(1))
+print("\n📈 영역별 평균 점수:")
+print("-"*40)
+category_avg_ordered = category_avg.reindex([llm for llm in llm_order if llm in category_avg.index])
+print(category_avg_ordered.round(1))
+
+print("\n✅ 그래프가 개별 파일로 저장되었습니다:")
+print("  1. graph_1_average_scores.png - 전체 평균 점수 비교")
+print("  2. graph_2_category_scores.png - 평가 영역별 점수")
+print("  3. graph_3_radar_chart.png - 레이더 차트")
+print("  4. graph_4_heatmap.png - 질문별 점수 히트맵")
+print("  5. graph_5_boxplot.png - 점수 분포 박스플롯")
+print("  6. graph_6_improvement.png - 개선율 표시")
