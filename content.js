@@ -714,7 +714,7 @@ window.displayLearnerProgress = function (progress) {
                 "
                 onmouseover="this.style.background='#ff9800'; this.style.color='white';"
                 onmouseout="this.style.background='white'; this.style.color='#ff9800';">
-          🔄 다른 방법
+          ➕ 기능추가
         </button>
         
         <button class="cot-nav-next"
@@ -776,19 +776,38 @@ window.displayLearnerProgress = function (progress) {
       }
     });
 
-    // 다른 방법 버튼 (새로 추가)
+    // setupSimplifiedCoTListeners 함수 내의 alternativeBtn 이벤트 리스너 부분 수정
     alternativeBtn.addEventListener("click", () => {
-      // 임시로 알림 표시 (나중에 실제 기능 구현)
       const currentStepData = cotSequence.steps[currentStep - 1];
 
-      // 채팅창에 메시지 추가
-      addChatMessage("다른 방법으로 해보고 싶으신가요? 어떤 방식을 원하시는지 자유롭게 말씀해주세요!", true);
+      // 현재 CoT 컨텍스트를 저장
+      window.currentCoTContext = {
+        cotId: cotId,
+        currentStep: currentStep,
+        stepData: currentStepData,
+        cotSequence: cotSequence,
+      };
 
-      // 입력창에 포커스
+      // 입력창으로 포커스 이동 및 플레이스홀더 변경
       const chatInput = document.getElementById("chat-input");
       if (chatInput) {
+        chatInput.placeholder = `"${currentStepData.title}" 단계에 추가하고 싶은 기능을 설명해주세요`;
         chatInput.focus();
-        chatInput.placeholder = `${currentStepData.title}을 다른 방법으로...`;
+
+        // 안내 메시지 표시
+        addChatMessage(
+          `💡 **추가 기능 입력 모드**\n\n` +
+            `현재 "${currentStepData.title}" 단계에 추가하고 싶은 기능을 자유롭게 설명해주세요.\n\n` +
+            `예시:\n` +
+            `• "효과음도 넣고 싶어요"\n` +
+            `• "캐릭터가 반짝이게 하고 싶어요"\n` +
+            `• "점수가 올라가게 하고 싶어요"\n` +
+            `• "다른 캐릭터도 같이 움직이게 하고 싶어요"`,
+          true
+        );
+
+        // 입력 모드 플래그 설정
+        window.isCoTAdditionMode = true;
       }
     });
   }
@@ -969,6 +988,128 @@ window.displayLearnerProgress = function (progress) {
     }
   }
 
+  /**
+   * CoT 추가 기능 요청 처리
+   */
+  async function handleCoTAddition(userRequest) {
+    const context = window.currentCoTContext;
+    if (!context) return;
+
+    // 사용자 요청 표시
+    addChatMessage(userRequest, false);
+
+    // 타이핑 인디케이터
+    const typingIndicator = document.getElementById("typing-indicator");
+    if (typingIndicator) {
+      typingIndicator.classList.remove("hidden");
+    }
+
+    try {
+      // 백그라운드로 추가 기능 분석 요청
+      const response = await chrome.runtime.sendMessage({
+        action: "analyzeCoTAddition",
+        request: userRequest,
+        currentStep: context.stepData,
+        cotContext: {
+          stepTitle: context.stepData.title,
+          stepNumber: context.currentStep,
+          blockType: context.stepData.blockType,
+          category: context.stepData.category,
+        },
+      });
+
+      if (typingIndicator) {
+        typingIndicator.classList.add("hidden");
+      }
+
+      if (response && response.success) {
+        // 생성된 추가 단계들 삽입
+        insertDynamicSteps(context, response.additionalSteps);
+
+        // 성공 메시지
+        addChatMessage(
+          `✨ "${response.featureName}" 기능을 추가했어요! ${response.additionalSteps.length}개의 단계가 추가되었습니다.`,
+          true
+        );
+      } else {
+        // 실패 시 메시지
+        addChatMessage("죄송해요, 그 기능을 추가하는 방법을 잘 모르겠어요. 다시 설명해주시거나 다른 기능을 시도해보세요.", true);
+      }
+    } catch (error) {
+      console.error("CoT 추가 처리 오류:", error);
+      if (typingIndicator) {
+        typingIndicator.classList.add("hidden");
+      }
+      addChatMessage("추가 기능 처리 중 오류가 발생했어요.", true);
+    }
+  }
+
+  /**
+   * 동적으로 생성된 단계들을 CoT에 삽입
+   */
+  function insertDynamicSteps(context, additionalSteps) {
+    const { cotId, currentStep, cotSequence } = context;
+
+    // 추가된 기능 기록
+    if (!cotSequence.addedFeatures) {
+      cotSequence.addedFeatures = [];
+    }
+    cotSequence.addedFeatures.push({
+      atStep: currentStep,
+      steps: additionalSteps.length,
+      timestamp: new Date().toISOString(),
+    });
+
+    // 현재 단계 다음에 새 단계들 삽입
+    const insertIndex = currentStep;
+    additionalSteps.forEach((step, idx) => {
+      step.stepNumber = insertIndex + idx + 1;
+      step.isAdditional = true; // 추가된 단계 표시
+    });
+
+    cotSequence.steps.splice(insertIndex, 0, ...additionalSteps);
+    cotSequence.totalSteps += additionalSteps.length;
+
+    // 이후 단계들의 번호 재조정
+    for (let i = insertIndex + additionalSteps.length; i < cotSequence.steps.length; i++) {
+      cotSequence.steps[i].stepNumber = i + 1;
+    }
+
+    // UI 업데이트
+    const cotElement = document.getElementById(cotId);
+    if (cotElement) {
+      // 진행 상황 업데이트
+      const progressText = cotElement.querySelector(".cot-progress");
+      if (progressText) {
+        progressText.innerHTML = `
+        <span class="current-step-text">${currentStep + 1}</span> / ${cotSequence.totalSteps}
+        <span style="color: #ff9800; font-size: 12px; margin-left: 8px;">
+          ✨ 확장됨
+        </span>
+      `;
+      }
+
+      // 추가된 첫 단계로 이동
+      updateStepDisplay(cotElement, additionalSteps[0], currentStep + 1, cotSequence.totalSteps);
+
+      // 버튼 상태 업데이트
+      const prevBtn = cotElement.querySelector(".cot-nav-prev");
+      const nextBtn = cotElement.querySelector(".cot-nav-next");
+
+      if (prevBtn) {
+        prevBtn.disabled = false;
+        prevBtn.style.opacity = "1";
+        prevBtn.style.cursor = "pointer";
+      }
+
+      if (nextBtn) {
+        nextBtn.disabled = false;
+        nextBtn.style.opacity = "1";
+        nextBtn.style.cursor = "pointer";
+      }
+    }
+  }
+
   // ===== 메시지 전송 함수 =====
   async function sendMessage() {
     try {
@@ -976,6 +1117,18 @@ window.displayLearnerProgress = function (progress) {
       const userMessage = chatInput.value.trim();
       if (!userMessage) return;
 
+      // I-CoTB 추가 모드 체크
+      if (window.isCoTAdditionMode && window.currentCoTContext) {
+        // 추가 기능 모드 처리
+        await handleCoTAddition(userMessage);
+
+        // 입력창 초기화
+        chatInput.value = "";
+        chatInput.placeholder = "질문을 적어보세요...";
+        window.isCoTAdditionMode = false;
+
+        return; // 일반 메시지 처리 건너뛰기
+      }
       // 사용자 메시지 표시
       addChatMessage(userMessage, false);
       conversationHistory.push({ role: "user", content: userMessage });

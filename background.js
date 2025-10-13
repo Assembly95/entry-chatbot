@@ -290,6 +290,119 @@ async function loadEntryBlockData() {
   return dataLoadPromise;
 }
 
+// 새로운 함수 추가
+async function handleCoTAdditionAnalysis(request) {
+  const { request: userRequest, currentStep, cotContext } = request;
+
+  try {
+    // API 키 확인
+    const result = await chrome.storage.sync.get(["openai_api_key"]);
+    if (!result.openai_api_key) {
+      throw new Error("API 키가 설정되지 않았습니다");
+    }
+
+    // OpenAI API로 사용자 요구사항 분석
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${result.openai_api_key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: `당신은 Entry 블록코딩 교육 도우미입니다.
+            
+현재 학습자는 "${cotContext.stepTitle}" 단계를 진행 중입니다.
+학습자가 이 단계에 추가 기능을 요청했습니다.
+
+요청을 분석하고 Entry 블록으로 구현 가능한 추가 단계들을 생성하세요.
+
+응답 형식 (JSON):
+{
+  "featureName": "추가 기능 이름",
+  "additionalSteps": [
+    {
+      "title": "단계 제목",
+      "content": "단계 설명 (마크다운)",
+      "blockType": "사용할 블록 ID",
+      "category": "블록 카테고리"
+    }
+  ]
+}
+
+블록 카테고리: start, moving, looks, sound, flow, variable, calc, judgement`,
+          },
+          {
+            role: "user",
+            content: userRequest,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 800,
+      }),
+    });
+
+    const data = await response.json();
+    const content = data.choices[0].message.content;
+
+    // JSON 파싱
+    let parsedResponse;
+    try {
+      parsedResponse = JSON.parse(content);
+    } catch (e) {
+      // JSON 파싱 실패 시 기본 구조로
+      parsedResponse = generateFallbackSteps(userRequest, cotContext);
+    }
+
+    return {
+      success: true,
+      ...parsedResponse,
+    };
+  } catch (error) {
+    console.error("CoT 추가 분석 오류:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+}
+
+// 폴백 단계 생성 (AI 실패 시)
+function generateFallbackSteps(userRequest, cotContext) {
+  const lower = userRequest.toLowerCase();
+
+  // 키워드 기반 간단한 분석
+  if (lower.includes("소리") || lower.includes("효과음")) {
+    return {
+      featureName: "효과음 추가",
+      additionalSteps: [
+        {
+          title: "소리 블록 추가하기",
+          content: "### 🔊 효과음 추가\n\n소리 카테고리에서 '소리 재생하기' 블록을 찾아 추가하세요.",
+          blockType: "play_sound",
+          category: "sound",
+        },
+      ],
+    };
+  }
+
+  // 기본 응답
+  return {
+    featureName: "사용자 정의 기능",
+    additionalSteps: [
+      {
+        title: "추가 기능 구현",
+        content: `### 🎯 ${userRequest}\n\n이 기능을 구현하기 위한 블록을 추가하세요.`,
+        blockType: null,
+        category: "custom",
+      },
+    ],
+  };
+}
+
 // ===== 질문 분류 (향상된 로깅) =====
 async function classifyQuestion(message) {
   // 메시지 타입 검증 추가
@@ -1224,6 +1337,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           sendResponse({ success: true, ragEnabled: newState });
         });
       });
+      return true;
+
+    // 여기에 새 case 추가! ↓↓↓
+    case "analyzeCoTAddition":
+      handleCoTAdditionAnalysis(request)
+        .then((result) => {
+          sendResponse(result);
+        })
+        .catch((error) => {
+          sendResponse({
+            success: false,
+            error: error.message,
+          });
+        });
       return true;
 
     default:
