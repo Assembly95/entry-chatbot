@@ -617,10 +617,10 @@ window.displayLearnerProgress = function (progress) {
     const cotId = `cot-${Date.now()}`;
     const firstStep = cotSequence.steps[0];
 
-    // 한 번에 한 단계만 표시하는 간단한 구조
+    // displayCoTResponse 함수 내의 버튼 부분 수정
     const cotHtml = `
     <div class="cot-response" id="${cotId}" data-total-steps="${cotSequence.totalSteps}" data-current-step="1">
-      <!-- 헤더 -->
+      <!-- 헤더 (기존 유지) -->
       <div class="cot-header" style="
         background: linear-gradient(135deg, #667eea, #764ba2);
         color: white;
@@ -643,7 +643,7 @@ window.displayLearnerProgress = function (progress) {
         </span>
       </div>
       
-      <!-- 현재 단계 내용 -->
+      <!-- 내용 (기존 유지) -->
       <div class="cot-content" style="
         background: white;
         border: 1px solid #e0e0e0;
@@ -675,7 +675,7 @@ window.displayLearnerProgress = function (progress) {
         </div>
       </div>
       
-      <!-- 네비게이션 -->
+      <!-- 네비게이션 버튼 수정 -->
       <div class="cot-navigation" style="
         display: flex;
         gap: 12px;
@@ -695,26 +695,26 @@ window.displayLearnerProgress = function (progress) {
                   font-size: 14px;
                   transition: all 0.3s;
                 " disabled>
-          ◀ 이전 단계
+          ◀ 이전
         </button>
         
-        <button class="cot-complete-step"
+        <button class="cot-alternative"
                 data-cot-id="${cotId}"
                 style="
                   flex: 1;
                   padding: 12px;
                   border-radius: 8px;
-                  border: 1px solid #4caf50;
+                  border: 1px solid #ff9800;
                   background: white;
-                  color: #4caf50;
+                  color: #ff9800;
                   cursor: pointer;
                   font-size: 14px;
                   font-weight: 600;
                   transition: all 0.3s;
                 "
-                onmouseover="this.style.background='#4caf50'; this.style.color='white';"
-                onmouseout="this.style.background='white'; this.style.color='#4caf50';">
-          ✓ 현재 단계 완료
+                onmouseover="this.style.background='#ff9800'; this.style.color='white';"
+                onmouseout="this.style.background='white'; this.style.color='#ff9800';">
+          🔄 다른 방법
         </button>
         
         <button class="cot-nav-next"
@@ -732,7 +732,7 @@ window.displayLearnerProgress = function (progress) {
                 "
                 onmouseover="this.style.background='#764ba2';"
                 onmouseout="this.style.background='#667eea';">
-          다음 단계 ▶
+          다음 ▶
         </button>
       </div>
     </div>
@@ -749,6 +749,7 @@ window.displayLearnerProgress = function (progress) {
   }
 
   // 단순화된 이벤트 리스너
+  // setupSimplifiedCoTListeners 함수 수정
   function setupSimplifiedCoTListeners(cotId, cotSequence) {
     const cotElement = document.getElementById(cotId);
     if (!cotElement) return;
@@ -756,7 +757,7 @@ window.displayLearnerProgress = function (progress) {
     let currentStep = 1;
     const prevBtn = cotElement.querySelector(".cot-nav-prev");
     const nextBtn = cotElement.querySelector(".cot-nav-next");
-    const completeBtn = cotElement.querySelector(".cot-complete-step");
+    const alternativeBtn = cotElement.querySelector(".cot-alternative");
     const contentArea = document.getElementById(`step-content-${cotId}`);
 
     // 다음 버튼
@@ -775,20 +776,19 @@ window.displayLearnerProgress = function (progress) {
       }
     });
 
-    // 완료 버튼
-    completeBtn.addEventListener("click", () => {
-      // 현재 단계 완료 표시
-      const stepContent = contentArea.querySelector("h3");
-      if (stepContent && !stepContent.innerHTML.includes("✅")) {
-        stepContent.innerHTML = stepContent.innerHTML.replace(/(\d+)/, "$1 ✅");
-      }
+    // 다른 방법 버튼 (새로 추가)
+    alternativeBtn.addEventListener("click", () => {
+      // 임시로 알림 표시 (나중에 실제 기능 구현)
+      const currentStepData = cotSequence.steps[currentStep - 1];
 
-      // 마지막 단계가 아니면 자동으로 다음 단계로
-      if (currentStep < cotSequence.totalSteps) {
-        setTimeout(() => {
-          currentStep++;
-          updateStepDisplay(cotElement, cotSequence.steps[currentStep - 1], currentStep, cotSequence.totalSteps);
-        }, 500);
+      // 채팅창에 메시지 추가
+      addChatMessage("다른 방법으로 해보고 싶으신가요? 어떤 방식을 원하시는지 자유롭게 말씀해주세요!", true);
+
+      // 입력창에 포커스
+      const chatInput = document.getElementById("chat-input");
+      if (chatInput) {
+        chatInput.focus();
+        chatInput.placeholder = `${currentStepData.title}을 다른 방법으로...`;
       }
     });
   }
