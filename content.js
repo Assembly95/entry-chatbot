@@ -1024,7 +1024,13 @@ window.displayLearnerProgress = function (progress) {
 
       if (response && response.success) {
         // 생성된 추가 단계들 삽입
-        insertDynamicSteps(context, response.additionalSteps);
+        //insertDynamicSteps(context, response.additionalSteps);
+
+        // 변경: 별도 미니 CoT로 표시
+        showAdditionalFeatureCoT(context, response.additionalSteps, response.featureName);
+
+        // 컨텍스트 정리
+        window.currentCoTContext = null;
 
         // 성공 메시지
         addChatMessage(
@@ -1044,72 +1050,368 @@ window.displayLearnerProgress = function (progress) {
     }
   }
 
-  /**
-   * 동적으로 생성된 단계들을 CoT에 삽입
-   */
-  function insertDynamicSteps(context, additionalSteps) {
+  // insertDynamicSteps 함수를 대체하는 새로운 함수
+  function showAdditionalFeatureCoT(context, additionalSteps, featureName) {
     const { cotId, currentStep, cotSequence } = context;
 
-    // 추가된 기능 기록
-    if (!cotSequence.addedFeatures) {
-      cotSequence.addedFeatures = [];
-    }
-    cotSequence.addedFeatures.push({
-      atStep: currentStep,
-      steps: additionalSteps.length,
-      timestamp: new Date().toISOString(),
-    });
-
-    // 현재 단계 다음에 새 단계들 삽입
-    const insertIndex = currentStep;
-    additionalSteps.forEach((step, idx) => {
-      step.stepNumber = insertIndex + idx + 1;
-      step.isAdditional = true; // 추가된 단계 표시
-    });
-
-    cotSequence.steps.splice(insertIndex, 0, ...additionalSteps);
-    cotSequence.totalSteps += additionalSteps.length;
-
-    // 이후 단계들의 번호 재조정
-    for (let i = insertIndex + additionalSteps.length; i < cotSequence.steps.length; i++) {
-      cotSequence.steps[i].stepNumber = i + 1;
+    // 현재 CoT를 일시 정지 상태로 표시
+    const mainCotElement = document.getElementById(cotId);
+    if (mainCotElement) {
+      mainCotElement.style.opacity = "0.6";
+      mainCotElement.style.pointerEvents = "none";
     }
 
-    // UI 업데이트
-    const cotElement = document.getElementById(cotId);
-    if (cotElement) {
-      // 진행 상황 업데이트
-      const progressText = cotElement.querySelector(".cot-progress");
-      if (progressText) {
-        progressText.innerHTML = `
-        <span class="current-step-text">${currentStep + 1}</span> / ${cotSequence.totalSteps}
-        <span style="color: #ff9800; font-size: 12px; margin-left: 8px;">
-          ✨ 확장됨
+    // 추가 기능을 위한 별도 미니 CoT 생성
+    const miniCotId = `mini-cot-${Date.now()}`;
+    const miniCotHtml = `
+    <div class="cot-response mini-cot" id="${miniCotId}" 
+         style="
+           border: 2px solid #ff9800;
+           background: linear-gradient(135deg, #fff8e1, #ffecb3);
+           margin: 16px 0;
+         ">
+      <!-- 헤더 -->
+      <div class="cot-header" style="
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+        color: white;
+        padding: 16px;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      ">
+        <span class="cot-badge" style="font-weight: bold; font-size: 16px;">
+          ✨ 추가 기능: ${featureName}
         </span>
-      `;
-      }
+        <span class="cot-progress" style="
+          background: rgba(255,255,255,0.2);
+          padding: 6px 12px;
+          border-radius: 20px;
+          font-size: 14px;
+        ">
+          <span class="mini-step-text">1</span> / ${additionalSteps.length}
+        </span>
+      </div>
+      
+      <!-- 내용 -->
+      <div class="cot-content" style="
+        background: white;
+        border: 1px solid #ffcc80;
+        border-top: none;
+        padding: 20px;
+        border-radius: 0 0 12px 12px;
+      ">
+        <div class="current-step-content" id="mini-step-content-${miniCotId}">
+          <h3 style="color: #333; margin: 0 0 16px 0;">
+            <span style="
+              background: #ff9800;
+              color: white;
+              width: 28px;
+              height: 28px;
+              border-radius: 50%;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 14px;
+              margin-right: 12px;
+            ">1</span>
+            ${additionalSteps[0].title}
+          </h3>
+          <div style="
+            color: #555;
+            line-height: 1.6;
+            white-space: pre-wrap;
+          ">${additionalSteps[0].content}</div>
+        </div>
+      </div>
+      
+      <!-- 네비게이션 -->
+      <div class="cot-navigation" style="
+        display: flex;
+        gap: 12px;
+        margin-top: 16px;
+        padding: 0 4px;
+      ">
+        <button class="mini-cot-prev" 
+                data-mini-cot-id="${miniCotId}"
+                style="
+                  flex: 1;
+                  padding: 12px;
+                  border-radius: 8px;
+                  border: 1px solid #ddd;
+                  background: white;
+                  cursor: not-allowed;
+                  opacity: 0.5;
+                  font-size: 14px;
+                " disabled>
+          ◀ 이전
+        </button>
+        
+        <button class="mini-cot-next"
+                data-mini-cot-id="${miniCotId}"
+                style="
+                  flex: 1;
+                  padding: 12px;
+                  border-radius: 8px;
+                  border: none;
+                  background: #ff9800;
+                  color: white;
+                  cursor: pointer;
+                  font-size: 14px;
+                ">
+          다음 ▶
+        </button>
+        
+        <button class="mini-cot-complete"
+                data-mini-cot-id="${miniCotId}"
+                style="
+                  flex: 1;
+                  padding: 12px;
+                  border-radius: 8px;
+                  border: 2px solid #4caf50;
+                  background: white;
+                  color: #4caf50;
+                  cursor: pointer;
+                  font-size: 14px;
+                  font-weight: bold;
+                  display: none;
+                ">
+          ✓ 완료하고 돌아가기
+        </button>
+      </div>
+    </div>
+  `;
 
-      // 추가된 첫 단계로 이동
-      updateStepDisplay(cotElement, additionalSteps[0], currentStep + 1, cotSequence.totalSteps);
+    // 미니 CoT 추가
+    addChatMessage(miniCotHtml, true, "html");
 
-      // 버튼 상태 업데이트
-      const prevBtn = cotElement.querySelector(".cot-nav-prev");
-      const nextBtn = cotElement.querySelector(".cot-nav-next");
+    // 미니 CoT 데이터 저장
+    window[`miniCotData_${miniCotId}`] = {
+      steps: additionalSteps,
+      currentStep: 1,
+      originalContext: context,
+      featureName: featureName,
+    };
 
-      if (prevBtn) {
+    // 이벤트 리스너 설정
+    setTimeout(() => {
+      setupMiniCoTListeners(miniCotId, additionalSteps.length);
+    }, 100);
+  }
+
+  // 미니 CoT 이벤트 리스너
+  function setupMiniCoTListeners(miniCotId, totalSteps) {
+    const miniCotElement = document.getElementById(miniCotId);
+    if (!miniCotElement) return;
+
+    const data = window[`miniCotData_${miniCotId}`];
+    let currentStep = 1;
+
+    const prevBtn = miniCotElement.querySelector(".mini-cot-prev");
+    const nextBtn = miniCotElement.querySelector(".mini-cot-next");
+    const completeBtn = miniCotElement.querySelector(".mini-cot-complete");
+
+    // 다음 버튼
+    nextBtn.addEventListener("click", () => {
+      if (currentStep < totalSteps) {
+        currentStep++;
+        updateMiniCoTDisplay(miniCotElement, data.steps[currentStep - 1], currentStep, totalSteps);
+
+        // 버튼 상태 업데이트
         prevBtn.disabled = false;
         prevBtn.style.opacity = "1";
         prevBtn.style.cursor = "pointer";
-      }
 
-      if (nextBtn) {
-        nextBtn.disabled = false;
-        nextBtn.style.opacity = "1";
-        nextBtn.style.cursor = "pointer";
+        if (currentStep === totalSteps) {
+          nextBtn.style.display = "none";
+          completeBtn.style.display = "block";
+        }
       }
-    }
+    });
+
+    // 이전 버튼
+    prevBtn.addEventListener("click", () => {
+      if (currentStep > 1) {
+        currentStep--;
+        updateMiniCoTDisplay(miniCotElement, data.steps[currentStep - 1], currentStep, totalSteps);
+
+        // 버튼 상태 업데이트
+        if (currentStep === 1) {
+          prevBtn.disabled = true;
+          prevBtn.style.opacity = "0.5";
+          prevBtn.style.cursor = "not-allowed";
+        }
+
+        nextBtn.style.display = "block";
+        completeBtn.style.display = "none";
+      }
+    });
+
+    // 완료 버튼
+    completeBtn.addEventListener("click", () => {
+      completeMiniCoT(miniCotId);
+    });
   }
 
+  // 미니 CoT 디스플레이 업데이트
+  function updateMiniCoTDisplay(miniCotElement, step, currentStep, totalSteps) {
+    const contentArea = miniCotElement.querySelector(".current-step-content");
+    const progressText = miniCotElement.querySelector(".mini-step-text");
+
+    contentArea.innerHTML = `
+    <h3 style="color: #333; margin: 0 0 16px 0;">
+      <span style="
+        background: #ff9800;
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        margin-right: 12px;
+      ">${currentStep}</span>
+      ${step.title}
+    </h3>
+    <div style="
+      color: #555;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    ">${step.content}</div>
+  `;
+
+    progressText.textContent = currentStep;
+  }
+
+  // 미니 CoT 완료 처리 - 순서 재조정 버전
+  function completeMiniCoT(miniCotId) {
+    const miniCotElement = document.getElementById(miniCotId);
+    const data = window[`miniCotData_${miniCotId}`];
+
+    if (!miniCotElement || !data) return;
+
+    const originalContext = data.originalContext;
+    const originalCotElement = document.getElementById(originalContext.cotId);
+
+    // 1. 미니 CoT 완료 애니메이션
+    miniCotElement.style.transition = "all 0.5s";
+    miniCotElement.style.transform = "scale(0.95)";
+    miniCotElement.style.opacity = "0.5";
+
+    setTimeout(() => {
+      miniCotElement.innerHTML = `
+      <div style="
+        padding: 20px;
+        text-align: center;
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        border-radius: 12px;
+        border: 2px solid #4caf50;
+      ">
+        <div style="font-size: 36px; margin-bottom: 12px;">✅</div>
+        <div style="font-size: 18px; font-weight: bold; color: #2e7d32; margin-bottom: 8px;">
+          "${data.featureName}" 추가 완료!
+        </div>
+        <div style="color: #555; font-size: 14px;">
+          원래 작업으로 돌아갑니다...
+        </div>
+      </div>
+    `;
+
+      // 2. 미니 CoT 제거 (1초 후)
+      setTimeout(() => {
+        miniCotElement.style.transition = "all 0.3s";
+        miniCotElement.style.transform = "scale(0.9)";
+        miniCotElement.style.opacity = "0";
+
+        setTimeout(() => {
+          miniCotElement.remove();
+
+          // 3. 안내 메시지 표시 (제거 완료 직후)
+          addChatMessage(
+            `🎉 **"${data.featureName}"** 추가 완료!\n\n` +
+              `📍 이제 **Step ${originalContext.currentStep}: ${originalContext.stepData.title}**부터 계속 진행하세요.`,
+            true
+          );
+
+          const reminderHtml = `
+          <div style="
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 4px solid #2196f3;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+          ">
+            <div style="font-weight: bold; color: #1565c0; margin-bottom: 4px;">
+              📌 현재 진행 중인 단계
+            </div>
+            <div style="color: #424242; font-size: 14px;">
+              ${originalContext.stepData.title}
+            </div>
+          </div>
+        `;
+          addChatMessage(reminderHtml, true, "html");
+
+          // 4. 원래 CoT 재활성화 및 포커스 (메시지 표시 후)
+          if (originalCotElement) {
+            // 재활성화
+            originalCotElement.style.opacity = "1";
+            originalCotElement.style.pointerEvents = "auto";
+
+            // 스크롤하여 보이도록
+            setTimeout(() => {
+              originalCotElement.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+
+              // 하이라이트 효과
+              originalCotElement.style.boxShadow = "0 0 20px rgba(103, 126, 234, 0.5)";
+              originalCotElement.style.transform = "scale(1.02)";
+
+              // 현재 단계 내용 새로고침
+              const currentStepContent = originalCotElement.querySelector(".current-step-content");
+              const currentStepData = originalContext.cotSequence.steps[originalContext.currentStep - 1];
+
+              if (currentStepContent && currentStepData) {
+                currentStepContent.innerHTML = `
+                <h3 style="color: #333; margin: 0 0 16px 0;">
+                  <span style="
+                    background: #667eea;
+                    color: white;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 14px;
+                    margin-right: 12px;
+                    animation: pulse 1s ease-in-out 3;
+                  ">${currentStepData.stepNumber}</span>
+                  ${currentStepData.title}
+                </h3>
+                <div style="
+                  color: #555;
+                  line-height: 1.6;
+                  white-space: pre-wrap;
+                ">${currentStepData.content}</div>
+              `;
+              }
+
+              setTimeout(() => {
+                originalCotElement.style.boxShadow = "";
+                originalCotElement.style.transform = "";
+              }, 2000);
+            }, 1000); // 메시지 표시 후 약간의 딜레이
+          }
+        }, 500); // opacity 애니메이션 완료 대기
+      }, 1000); // 완료 메시지 표시 시간
+    }, 500); // 초기 애니메이션 시간
+
+    // 데이터 정리
+    delete window[`miniCotData_${miniCotId}`];
+  }
   // ===== 메시지 전송 함수 =====
   async function sendMessage() {
     try {
