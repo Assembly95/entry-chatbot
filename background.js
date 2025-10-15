@@ -1309,6 +1309,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
       return true; // 비동기 응답
 
+    case "generateCustomCoT":
+      const complexHandler = new ComplexHandler();
+      const cotResult = complexHandler.generateCustomCoT(request.session);
+      sendResponse({
+        success: true,
+        cotSequence: cotResult,
+        response: complexHandler.formatInitialResponse(cotResult.steps, cotResult.totalSteps),
+      });
+      return true;
+
     case "getSettings":
       chrome.storage.sync.get(["openai_api_key", "rag_enabled"], (data) => {
         sendResponse({

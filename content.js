@@ -589,6 +589,138 @@ window.displayLearnerProgress = function (progress) {
 
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    if (type === "html" && content.includes("design-mode-container")) {
+      setTimeout(() => {
+        setupDesignModeListeners();
+      }, 100);
+    }
+  }
+  function handleDesignStep(sessionId) {
+    const container = document.getElementById(`design-${sessionId}`);
+    const input = container.querySelector(".design-input");
+    const response = input.value.trim();
+
+    if (!response) {
+      input.style.borderColor = "#ff4444";
+      input.placeholder = "답변을 입력해주세요!";
+      return;
+    }
+
+    const currentStep = parseInt(input.dataset.step);
+    const questionId = input.dataset.questionId;
+
+    // 세션 데이터 관리
+    if (!window[`designSession_${sessionId}`]) {
+      window[`designSession_${sessionId}`] = {
+        currentStep: 0,
+        responses: {},
+        startTime: Date.now(),
+      };
+    }
+
+    const session = window[`designSession_${sessionId}`];
+    session.responses[questionId] = response;
+    session.currentStep = currentStep + 1;
+
+    // 질문 데이터
+    const designQuestions = [
+      {
+        id: "objects",
+        question: '🎮 어떤 오브젝트(캐릭터)들을 등장시키고 싶나요?\n예시: "고양이, 쥐" 또는 "술래, 도망가는 사람들"',
+      },
+      {
+        id: "rules",
+        question: '📏 게임의 규칙은 무엇인가요?\n예시: "술래가 다른 사람을 터치하면 술래가 바뀜"',
+      },
+      {
+        id: "endCondition",
+        question: '🏁 언제 게임이 끝나나요?\n예시: "시간이 60초 지나면" 또는 "모든 사람을 잡으면"',
+      },
+    ];
+
+    if (session.currentStep < designQuestions.length) {
+      // 다음 질문 표시
+      const nextQuestion = designQuestions[session.currentStep];
+      const questionDiv = container.querySelector(".design-question");
+
+      questionDiv.innerHTML = `
+      <div style="font-size: 16px; line-height: 1.6; margin-bottom: 16px;">
+        ${nextQuestion.question}
+      </div>
+      <input type="text" 
+             class="design-input"
+             placeholder="여기에 답변을 입력하세요..."
+             style="
+               width: 100%;
+               padding: 12px;
+               border: 2px solid #e0e0e0;
+               border-radius: 8px;
+               font-size: 14px;
+               box-sizing: border-box;
+             "
+             data-session-id="${sessionId}"
+             data-question-id="${nextQuestion.id}"
+             data-step="${session.currentStep}">
+    `;
+
+      // 진행률 업데이트
+      const progressBar = container.querySelector(".progress-fill");
+      progressBar.style.width = `${((session.currentStep + 1) / 3) * 100}%`;
+
+      // Enter 키 이벤트 추가
+      const newInput = questionDiv.querySelector(".design-input");
+      newInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+          handleDesignStep(sessionId);
+        }
+      });
+    } else {
+      // 모든 질문 완료 - CoT 생성 요청
+      container.innerHTML = `
+      <div style="text-align: center; padding: 40px;">
+        <div style="font-size: 48px; margin-bottom: 16px;">✨</div>
+        <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">
+          설계 완료!
+        </div>
+        <div style="font-size: 14px; opacity: 0.9;">
+          맞춤형 가이드를 생성하고 있습니다...
+        </div>
+      </div>
+    `;
+
+      // 백그라운드로 CoT 생성 요청
+      chrome.runtime.sendMessage(
+        {
+          action: "generateCustomCoT",
+          session: session,
+          sessionId: sessionId,
+        },
+        (response) => {
+          if (response && response.cotSequence) {
+            // 설계 UI 제거
+            container.remove();
+            // CoT 표시
+            displayCoTResponse(response.cotSequence, response.response);
+          }
+        }
+      );
+    }
+  }
+  // 새로운 함수 추가
+  function setupDesignModeListeners() {
+    const designButtons = document.querySelectorAll(".design-next-btn");
+
+    designButtons.forEach((button) => {
+      if (!button.hasAttribute("data-listener-attached")) {
+        button.setAttribute("data-listener-attached", "true");
+
+        button.addEventListener("click", function () {
+          const sessionId = this.dataset.sessionId;
+          handleDesignStep(sessionId);
+        });
+      }
+    });
   }
 
   // 마크다운 변환 함수 추가
@@ -858,6 +990,8 @@ window.displayLearnerProgress = function (progress) {
     // 마지막 단계에서 버튼 텍스트 변경
     if (currentStep === totalSteps) {
       nextBtn.textContent = "완료 🎉";
+    } else {
+      nextBtn.textContent = "다음 ▶"; // 👈 이 부분 추가!
     }
   }
 
@@ -1005,6 +1139,8 @@ window.displayLearnerProgress = function (progress) {
     }
 
     try {
+      // ⏱️ 측정 시작
+      const startTime = performance.now();
       // 백그라운드로 추가 기능 분석 요청
       const response = await chrome.runtime.sendMessage({
         action: "analyzeCoTAddition",
@@ -1017,7 +1153,11 @@ window.displayLearnerProgress = function (progress) {
           category: context.stepData.category,
         },
       });
+      // ⏱️ 측정 종료
+      const endTime = performance.now();
+      const timeElapsed = ((endTime - startTime) / 1000).toFixed(2);
 
+      console.log(`⏱️ 분기(Mini CoT) 생성 시간: ${timeElapsed}초`);
       if (typingIndicator) {
         typingIndicator.classList.add("hidden");
       }
@@ -1445,6 +1585,51 @@ window.displayLearnerProgress = function (progress) {
         typingIndicator.classList.remove("hidden");
       }
 
+      // ⏱️ 측정 시작
+      const startTime = performance.now();
+      // ⭐ 기획 모드 체크
+      if (window.currentPlanningState) {
+        // 기획 단계의 답변 처리
+        chrome.runtime.sendMessage(
+          {
+            action: "handlePlanningResponse",
+            userAnswer: userMessage,
+            planningState: window.currentPlanningState,
+          },
+          (response) => {
+            if (typingIndicator) typingIndicator.classList.add("hidden");
+
+            // ⭐ 응답 확인
+            console.log("📬 받은 응답:", response);
+
+            if (!response) {
+              console.error("❌ 응답이 null입니다!");
+              addChatMessage("응답을 받지 못했습니다. 다시 시도해주세요.", true);
+              return;
+            }
+
+            if (!response.success) {
+              console.error("❌ 응답 실패:", response.error);
+              addChatMessage(response.response || "오류가 발생했습니다.", true);
+              return;
+            }
+
+            // ⭐ responseType에 따른 처리
+            console.log("📋 응답 타입:", response.responseType);
+
+            if (response.responseType === "interactive-planning") {
+              console.log("🎯 기획 모드 시작!");
+              displayPlanningQuestion(response);
+              window.currentPlanningState = response;
+            } else if (response.responseType === "cot") {
+              displayCoTResponse(response.cotSequence, response.response);
+            } else {
+              addChatMessage(response.response, true, response.responseType || "text");
+            }
+          }
+        );
+        return;
+      }
       // AI 응답 요청
       chrome.runtime.sendMessage(
         {
@@ -1453,6 +1638,12 @@ window.displayLearnerProgress = function (progress) {
           conversationHistory: conversationHistory.slice(),
         },
         async (response) => {
+          // ⏱️ 측정 종료
+          const endTime = performance.now();
+          const timeElapsed = ((endTime - startTime) / 1000).toFixed(2);
+
+          console.log(`⏱️ 메인 CoT 생성 시간: ${timeElapsed}초`);
+
           // Chrome runtime 에러 체크
           if (chrome.runtime.lastError) {
             console.error("Chrome runtime 오류:", chrome.runtime.lastError);
@@ -1545,6 +1736,74 @@ window.displayLearnerProgress = function (progress) {
       }
     }
   }
+
+  // 기획 질문 표시
+  // content.js - IIFE 내부 어딘가에 추가 (displayCoTResponse 함수 근처)
+
+  function displayPlanningQuestion(planningState) {
+    console.log("🎯 기획 질문 표시:", planningState);
+
+    const questionData = planningState.question;
+
+    if (!questionData) {
+      console.error("❌ 질문 데이터 없음!");
+      addChatMessage("질문을 생성하지 못했습니다.", true);
+      return;
+    }
+
+    const html = `
+<div class="planning-question" style="
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  border-left: 4px solid #4caf50;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+">
+  <div style="
+    font-size: 14px;
+    color: #2e7d32;
+    font-weight: bold;
+    margin-bottom: 8px;
+  ">
+    📋 게임 기획 중... (${planningState.planningPhase} / ${planningState.totalPhases})
+  </div>
+  
+  <div style="
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 12px 0;
+  ">
+    <h4 style="margin: 0 0 12px 0; color: #1b5e20;">
+      ${questionData.title}
+    </h4>
+    <div style="
+      color: #424242;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    ">${questionData.question}</div>
+  </div>
+  
+  <div style="
+    font-size: 13px;
+    color: #558b2f;
+    margin-top: 12px;
+  ">
+    💬 아래에 답변을 입력해주세요!
+  </div>
+</div>
+  `;
+
+    addChatMessage(html, true, "html");
+
+    // 입력창 플레이스홀더 변경
+    const chatInput = document.getElementById("chat-input");
+    if (chatInput) {
+      chatInput.placeholder = questionData.placeholder;
+      chatInput.focus();
+    }
+  }
+
   // ===== API 키 모달 표시 =====
   function showApiKeyModal() {
     // Extension 유효성 체크

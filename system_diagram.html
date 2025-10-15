@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>I-CoTB System Flowchart</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 40px;
+        max-width: 1200px;
+        width: 100%;
+      }
+
+      h1 {
+        text-align: center;
+        color: #667eea;
+        margin-bottom: 40px;
+        font-size: 2.5em;
+      }
+
+      .flowchart {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        padding: 20px;
+      }
+
+      .flow-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px 0;
+        position: relative;
+        width: 100%;
+      }
+
+      .node {
+        padding: 20px 30px;
+        margin: 0 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        position: relative;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-align: center;
+        min-width: 150px;
+      }
+
+      .node:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .node-start,
+      .node-end {
+        background: linear-gradient(135deg, #4caf50, #45a049);
+        color: white;
+        border-radius: 50px;
+      }
+
+      .node-process {
+        background: linear-gradient(135deg, #2196f3, #1976d2);
+        color: white;
+      }
+
+      .node-decision {
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+        color: white;
+        clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        padding: 35px 50px;
+      }
+
+      .node-mini {
+        background: linear-gradient(135deg, #ff5722, #d84315);
+        color: white;
+      }
+
+      .node-check {
+        background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+        color: white;
+      }
+
+      .arrow-down {
+        width: 0;
+        height: 0;
+        border-left: 15px solid transparent;
+        border-right: 15px solid transparent;
+        border-top: 30px solid #666;
+        margin: 10px auto;
+      }
+
+      .arrow-right,
+      .arrow-left {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 30px;
+        color: #666;
+      }
+
+      .arrow-right {
+        right: -30px;
+      }
+
+      .arrow-left {
+        left: -30px;
+      }
+
+      .branch-container {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        align-items: flex-start;
+        margin: 40px 0;
+      }
+
+      .branch {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0 20px;
+      }
+
+      .branch-left {
+        border-right: 2px dashed #ccc;
+      }
+
+      .branch-label {
+        background: #f5f5f5;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 20px;
+      }
+
+      .merge-point {
+        width: 40px;
+        height: 40px;
+        background: #9e9e9e;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        margin: 20px auto;
+      }
+
+      .description {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        padding: 20px;
+        margin: 40px 0;
+        border-radius: 10px;
+      }
+
+      .description h3 {
+        color: #667eea;
+        margin-bottom: 10px;
+      }
+
+      .description p {
+        color: #555;
+        line-height: 1.6;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        50% {
+          box-shadow: 0 4px 30px rgba(102, 126, 234, 0.4);
+        }
+        100% {
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+      }
+
+      .highlight {
+        animation: pulse 2s infinite;
+      }
+
+      .tooltip {
+        position: absolute;
+        background: #333;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        top: -40px;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s;
+        white-space: nowrap;
+        pointer-events: none;
+      }
+
+      .node:hover .tooltip {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>I-CoTB System Flowchart</h1>
+
+      <div class="flowchart">
+        <!-- 시작 -->
+        <div class="flow-row">
+          <div class="node node-start">
+            학습 시작
+            <span class="tooltip">사용자가 블록코딩 학습을 시작합니다</span>
+          </div>
+        </div>
+
+        <div class="arrow-down"></div>
+
+        <!-- 메인 CoT 진행 -->
+        <div class="flow-row">
+          <div class="node node-process">
+            메인 CoT 진행
+            <span class="tooltip">기본 학습 경로를 따라 진행</span>
+          </div>
+        </div>
+
+        <div class="arrow-down"></div>
+
+        <!-- Step N 실행 -->
+        <div class="flow-row">
+          <div class="node node-process highlight">
+            Step N 실행 중
+            <span class="tooltip">현재 단계를 학습 중</span>
+          </div>
+        </div>
+
+        <div class="arrow-down"></div>
+
+        <!-- 결정 포인트 -->
+        <div class="flow-row">
+          <div class="node node-decision">
+            추가 기능<br />요청?
+            <span class="tooltip">학습자가 "이것도 해보고 싶어요"</span>
+          </div>
+        </div>
+
+        <!-- 분기 -->
+        <div class="branch-container">
+          <!-- Yes 경로 (왼쪽) -->
+          <div class="branch branch-left">
+            <div class="branch-label">Yes - 추가 기능 처리</div>
+
+            <div class="node node-mini">
+              사용자 입력 캡처
+              <span class="tooltip">"효과음도 넣고 싶어요"</span>
+            </div>
+
+            <div class="arrow-down"></div>
+
+            <div class="node node-mini">
+              AI 요구사항 분석
+              <span class="tooltip">Entry 블록으로 변환</span>
+            </div>
+
+            <div class="arrow-down"></div>
+
+            <div class="node node-check">
+              중복/충돌 검사
+              <span class="tooltip">이미 있거나 예정된 기능 확인</span>
+            </div>
+
+            <div class="arrow-down"></div>
+
+            <div class="node node-mini">
+              미니 CoT 생성
+              <span class="tooltip">추가 학습 단계 생성</span>
+            </div>
+
+            <div class="arrow-down"></div>
+
+            <div class="node node-mini">
+              미니 CoT 실행
+              <span class="tooltip">별도 카드로 학습</span>
+            </div>
+
+            <div class="arrow-down"></div>
+
+            <div class="node node-process">
+              메인 CoT 복귀
+              <span class="tooltip">원래 경로로 돌아감</span>
+            </div>
+          </div>
+
+          <!-- No 경로 (오른쪽) -->
+          <div class="branch">
+            <div class="branch-label">No - 계속 진행</div>
+
+            <div style="height: 400px"></div>
+
+            <div class="node node-process">
+              Step N+1 진행
+              <span class="tooltip">다음 단계로 이동</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 합류점 -->
+        <div class="flow-row">
+          <div class="merge-point">↓</div>
+        </div>
+
+        <!-- 완료 체크 -->
+        <div class="flow-row">
+          <div class="node node-decision">
+            전체 완료?
+            <span class="tooltip">모든 단계를 완료했는지 확인</span>
+          </div>
+        </div>
+
+        <div class="arrow-down"></div>
+
+        <!-- 종료 또는 반복 -->
+        <div class="flow-row">
+          <div class="node node-end">
+            학습 완료
+            <span class="tooltip">프로젝트 완성!</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 설명 섹션 -->
+      <div class="description">
+        <h3>핵심 특징</h3>
+        <p>
+          <strong>1. 동적 확장:</strong> 학습자가 언제든지 추가 기능을 요청할 수 있습니다.<br />
+          <strong>2. 컨텍스트 보존:</strong> 미니 CoT 완료 후 원래 진행 상황으로 자연스럽게 복귀합니다.<br />
+          <strong>3. 충돌 방지:</strong> 중복되거나 이후 예정된 기능을 지능적으로 처리합니다.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
