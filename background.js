@@ -1310,14 +1310,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return true; // 비동기 응답
 
     case "generateCustomCoT":
-      const complexHandler = new ComplexHandler();
-      const cotResult = complexHandler.generateCustomCoT(request.session);
-      sendResponse({
-        success: true,
-        cotSequence: cotResult,
-        response: complexHandler.formatInitialResponse(cotResult.steps, cotResult.totalSteps),
-      });
-      return true;
+      (async () => {
+        try {
+          const complexHandler = new ComplexHandler();
+          const cotResult = await complexHandler.generateCustomCoT(request.session);
+
+          sendResponse({
+            success: true,
+            cotSequence: cotResult,
+            response: complexHandler.formatInitialResponse(cotResult.steps, cotResult.totalSteps),
+          });
+        } catch (error) {
+          console.error("CoT 생성 실패:", error);
+          sendResponse({
+            success: false,
+            error: error.message,
+          });
+        }
+      })();
+      return true; // 비동기 응답을 위해 true 반환
 
     case "getSettings":
       chrome.storage.sync.get(["openai_api_key", "rag_enabled"], (data) => {

@@ -213,11 +213,11 @@ true 또는 false만 답하세요.`,
     };
   }
 
-  generateCustomCoT(session) {
+  async generateCustomCoT(session) {
     const { responses } = session;
 
-    // 수집된 정보 기반으로 맞춤형 단계 생성
-    const steps = this.createGameSteps(responses);
+    // AI를 사용해서 게임에 맞는 단계 생성
+    const steps = await this.createGameStepsWithAI(responses);
 
     return {
       totalSteps: steps.length,
@@ -226,187 +226,149 @@ true 또는 false만 답하세요.`,
       gameDesign: responses,
     };
   }
-  createGameSteps(responses) {
+
+  async createGameStepsWithAI(responses) {
+    try {
+      const storageData = await chrome.storage.sync.get(["openai_api_key"]);
+      if (!storageData.openai_api_key) {
+        // API 키 없으면 기본 템플릿 사용
+        return this.createDefaultSteps(responses);
+      }
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${storageData.openai_api_key}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: `Entry 블록코딩으로 게임을 만드는 8단계 가이드를 생성하세요.
+
+사용자가 제공한 정보:
+- 오브젝트: ${responses.objects}
+- 게임 규칙: ${responses.rules}
+- 종료 조건: ${responses.endCondition}
+
+각 단계는 다음 형식의 JSON 배열로 응답하세요:
+[
+  {
+    "stepNumber": 1,
+    "title": "단계 제목",
+    "content": "### 이모지 제목\\n\\n구체적인 설명과 블록 사용법",
+    "blockType": "주요 사용 블록 ID" (선택사항),
+    "category": "블록 카테고리" (start/moving/looks/sound/flow/variable/judgement)
+  }
+]
+
+단계 구성:
+1. 오브젝트 추가
+2. 주인공 움직임
+3. 게임 규칙 구현
+4. 변수/점수 시스템
+5. 상호작용/충돌
+6. 종료 조건
+7. 효과 추가
+8. 테스트
+
+각 단계는 구체적인 블록 이름과 연결 방법을 포함해야 합니다.`,
+            },
+            {
+              role: "user",
+              content: `다음 게임의 단계별 가이드를 만들어주세요:
+오브젝트: ${responses.objects}
+규칙: ${responses.rules}
+종료: ${responses.endCondition}`,
+            },
+          ],
+          temperature: 0.7,
+          max_tokens: 3000,
+          response_format: { type: "json_object" },
+        }),
+      });
+
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+
+      // JSON 파싱
+      let steps;
+      try {
+        const parsed = JSON.parse(content);
+        steps = parsed.steps || parsed; // steps 키가 있거나 직접 배열
+      } catch (e) {
+        console.error("AI 응답 파싱 실패:", e);
+        return this.createDefaultSteps(responses);
+      }
+
+      // completed: false 추가
+      return steps.map((step) => ({
+        ...step,
+        completed: false,
+      }));
+    } catch (error) {
+      console.error("AI 단계 생성 실패:", error);
+      return this.createDefaultSteps(responses);
+    }
+  }
+  // 폴백용 기본 템플릿
+  createDefaultSteps(responses) {
     const steps = [];
     let stepNumber = 1;
 
-    // Step 1: 오브젝트 추가
-    if (responses.objects) {
-      const objects = responses.objects.split(",").map((o) => o.trim());
-      steps.push({
-        stepNumber: stepNumber++,
-        title: "오브젝트 준비하기",
-        content: `### 🎨 캐릭터 추가하기
-
-**추가할 오브젝트**: ${objects.join(", ")}
-
-**따라하기**:
-1. 화면 아래 오브젝트 목록에서 + 버튼 클릭
-2. 오브젝트 라이브러리에서 검색 또는 직접 그리기
-3. 각 오브젝트의 크기와 위치 조정
-
-💡 **팁**: 술래는 다른 색상으로 구분하면 좋아요!`,
-        blockType: null,
+    // 기본 8단계 템플릿
+    const templates = [
+      {
+        title: "오브젝트 준비",
+        getContent: (r) => `### 🎨 오브젝트 추가\n\n${r.objects || "캐릭터"}를 추가하세요`,
         category: "object",
-        completed: false,
-      });
-    }
-
-    // Step 2: 주인공 움직임 설정
-    steps.push({
-      stepNumber: stepNumber++,
-      title: "캐릭터 움직이기",
-      content: `### 🎮 키보드로 조작하기
-
-**사용할 블록**:
-📍 시작 카테고리: [시작하기 버튼을 클릭했을 때]
-📍 흐름 카테고리: [무한 반복하기]
-📍 판단 카테고리: [만약 ~키를 눌렀다면]
-📍 움직임 카테고리: [~만큼 움직이기]
-
-**블록 연결 순서**:
-\`\`\`
-[시작하기 버튼을 클릭했을 때]
-└─[무한 반복하기]
-   ├─[만약 ↑키를 눌렀다면]
-   │  └─[위쪽으로 10만큼 움직이기]
-   ├─[만약 ↓키를 눌렀다면]
-   │  └─[아래쪽으로 10만큼 움직이기]
-   ├─[만약 ←키를 눌렀다면]
-   │  └─[왼쪽으로 10만큼 움직이기]
-   └─[만약 →키를 눌렀다면]
-      └─[오른쪽으로 10만큼 움직이기]
-\`\`\``,
-      blockType: "when_run_button_click",
-      category: "start",
-      completed: false,
-    });
-
-    // Step 3: 게임 규칙 구현
-    if (responses.rules) {
-      const ruleContent = this.generateRuleImplementation(responses.rules);
-      steps.push({
-        stepNumber: stepNumber++,
-        title: "게임 규칙 만들기",
-        content: `### 📏 규칙 구현하기
-
-**설정한 규칙**: ${responses.rules}
-
-${ruleContent}`,
-        blockType: "_if",
+      },
+      {
+        title: "움직임 설정",
+        getContent: () => `### 🎮 키보드 조작\n\n방향키로 움직이는 블록을 추가하세요`,
+        category: "moving",
+      },
+      {
+        title: "규칙 구현",
+        getContent: (r) => `### 📏 게임 규칙\n\n${r.rules || "기본 규칙"}을 구현하세요`,
         category: "flow",
-        completed: false,
-      });
-    }
-
-    // Step 4: 변수 시스템
-    steps.push({
-      stepNumber: stepNumber++,
-      title: "점수와 타이머 추가",
-      content: `### 🏆 게임 데이터 관리
-
-**변수 만들기**:
-1. 자료 카테고리 → 변수 만들기 클릭
-2. 필요한 변수들:
-   • "시간" - 게임 진행 시간
-   • "잡은횟수" - 술래가 잡은 횟수
-   • "현재술래" - 누가 술래인지
-
-**초기값 설정**:
-[시작하기 버튼을 클릭했을 때]
-├─[시간을 0으로 정하기]
-├─[잡은횟수를 0으로 정하기]
-└─[현재술래를 "player1"로 정하기]`,
-      blockType: "set_variable",
-      category: "variable",
-      completed: false,
-    });
-
-    // Step 5: 충돌 감지
-    steps.push({
-      stepNumber: stepNumber++,
-      title: "술래잡기 충돌 감지",
-      content: `### 🎯 터치 감지하기
-
-**충돌 감지 블록**:
-[무한 반복하기]
-└─[만약 (다른 오브젝트)에 닿았는가?]
-   ├─[신호 보내기: "잡혔다"]
-   ├─[잡은횟수를 1만큼 바꾸기]
-   └─[0.5초 기다리기]  // 중복 감지 방지
-
-**잡힌 오브젝트 처리**:
-[(잡혔다) 신호를 받았을 때]
-├─[2초 동안 "잡혔어요!" 말하기]
-└─[무작위 위치로 이동하기]`,
-      blockType: "reach_something",
-      category: "judgement",
-      completed: false,
-    });
-
-    // Step 6: 게임 종료 조건
-    if (responses.endCondition) {
-      steps.push({
-        stepNumber: stepNumber++,
-        title: "게임 종료 설정",
-        content: `### 🏁 종료 조건 만들기
-
-**설정한 조건**: ${responses.endCondition}
-
-${this.generateEndCondition(responses.endCondition)}`,
-        blockType: "stop_object",
+      },
+      {
+        title: "변수 추가",
+        getContent: () => `### 🏆 점수와 데이터\n\n필요한 변수를 만드세요`,
+        category: "variable",
+      },
+      {
+        title: "상호작용",
+        getContent: () => `### 🎯 충돌 감지\n\n오브젝트 간 상호작용을 설정하세요`,
+        category: "judgement",
+      },
+      {
+        title: "종료 설정",
+        getContent: (r) => `### 🏁 게임 종료\n\n${r.endCondition || "종료 조건"}을 설정하세요`,
         category: "flow",
-        completed: false,
-      });
-    }
+      },
+      {
+        title: "효과 추가",
+        getContent: () => `### ✨ 소리와 효과\n\n게임을 더 재미있게 만드세요`,
+        category: "sound",
+      },
+      {
+        title: "테스트",
+        getContent: () => `### ✅ 최종 테스트\n\n게임을 실행하고 개선하세요`,
+        category: "test",
+      },
+    ];
 
-    // Step 7: 효과 추가
-    steps.push({
-      stepNumber: stepNumber++,
-      title: "재미있는 효과 추가",
-      content: `### ✨ 게임 효과
-
-**소리 효과**:
-- 잡았을 때: [딩동댕 소리 재생하기]
-- 게임 종료: [팡파레 소리 재생하기]
-
-**시각 효과**:
-- 술래 구분: [색깔을 빨간색으로 바꾸기]
-- 잡혔을 때: [0.5초 동안 유령 효과 100 주기]
-
-**배경음악**:
-[시작하기 버튼을 클릭했을 때]
-└─[배경음악 재생하기]`,
-      blockType: "sound_something_with_block",
-      category: "sound",
+    return templates.map((template, idx) => ({
+      stepNumber: idx + 1,
+      title: template.title,
+      content: template.getContent(responses),
+      category: template.category,
       completed: false,
-    });
-
-    // Step 8: 테스트
-    steps.push({
-      stepNumber: stepNumber++,
-      title: "테스트하고 완성하기",
-      content: `### ✅ 최종 테스트
-
-**체크리스트**:
-☐ 모든 캐릭터가 잘 움직이나요?
-☐ 술래가 다른 사람을 잡을 수 있나요?
-☐ 점수/시간이 제대로 작동하나요?
-☐ 게임이 정상적으로 끝나나요?
-
-**개선 아이디어**:
-- 캐릭터 속도 조절
-- 장애물 추가
-- 파워업 아이템
-- 레벨 시스템
-
-🎉 **축하합니다!** 술래잡기 게임 완성!`,
-      blockType: null,
-      category: "test",
-      completed: false,
-    });
-
-    return steps;
+    }));
   }
 
   generateRuleImplementation(rules) {
