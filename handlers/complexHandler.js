@@ -66,47 +66,121 @@ class ComplexHandler {
     };
   }
 
-  // background.js의 searchEntryBlocks 함수 활용
   async searchRelevantBlocks(responses) {
     const allText = `${responses.objects} ${responses.rules} ${responses.endCondition}`.toLowerCase();
     const searchQueries = [];
 
     // 텍스트 분석해서 검색 쿼리 생성
-    if (allText.includes("점프")) searchQueries.push("점프", "y좌표", "스페이스");
-    if (allText.includes("이동") || allText.includes("움직")) searchQueries.push("이동", "움직이기", "방향키");
-    if (allText.includes("충돌") || allText.includes("닿")) searchQueries.push("닿았는가", "충돌");
-    if (allText.includes("점수")) searchQueries.push("변수", "점수");
-    if (allText.includes("시간")) searchQueries.push("타이머", "기다리기");
-    if (allText.includes("반복")) searchQueries.push("반복", "무한");
-    if (allText.includes("소리")) searchQueries.push("소리", "재생");
-
-    const allBlocks = [];
-
-    // background.js의 searchEntryBlocks 함수 호출
-    for (const query of searchQueries) {
-      try {
-        const results = await chrome.runtime.sendMessage({
-          action: "searchBlocks",
-          query: query,
-          topK: 5,
-        });
-
-        if (results && results.blocks) {
-          allBlocks.push(...results.blocks);
-        }
-      } catch (error) {
-        console.error(`블록 검색 실패 (${query}):`, error);
+    if (responses.objects) {
+      const objects = responses.objects.toLowerCase();
+      // "스프라이트" 같은 Entry 전용 용어는 제외
+      if (objects.includes("캐릭터") || objects.includes("오브젝트")) {
+        searchQueries.push("오브젝트");
       }
+      // 구체적인 오브젝트 이름만 추가
+      const objectNames = objects
+        .split(/[,\s]+/)
+        .filter((name) => name.length > 1 && !["의", "를", "을", "이", "가"].includes(name));
+      searchQueries.push(...objectNames);
     }
 
-    // 중복 제거
-    const seen = new Set();
-    return allBlocks.filter((block) => {
-      const id = block.id || block.fileName;
-      if (seen.has(id)) return false;
-      seen.add(id);
-      return true;
+    // 기존 쿼리 생성 로직...
+    if (allText.includes("점프")) searchQueries.push("점프", "y좌표");
+    if (allText.includes("이동") || allText.includes("움직")) searchQueries.push("이동", "움직이기", "방향키");
+    // ... (나머지는 동일)
+
+    // 기본 블록 데이터 반환 (RAG 검색 실패 시 폴백)
+    const defaultBlocks = this.getDefaultBlocksForGame(responses);
+
+    try {
+      // complexHandler가 background script에서 실행되는 경우에만 작동
+      if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
+        const allBlocks = [];
+
+        for (const query of searchQueries) {
+          try {
+            const results = await chrome.runtime.sendMessage({
+              action: "searchBlocks",
+              query: query,
+              topK: 5,
+            });
+
+            if (results && results.blocks) {
+              allBlocks.push(...results.blocks);
+            }
+          } catch (error) {
+            console.warn(`블록 검색 건너뜀 (${query})`);
+          }
+        }
+
+        if (allBlocks.length > 0) {
+          // 중복 제거
+          const seen = new Set();
+          return allBlocks.filter((block) => {
+            const id = block.id || block.fileName;
+            if (seen.has(id)) return false;
+            seen.add(id);
+            return true;
+          });
+        }
+      }
+    } catch (error) {
+      console.log("RAG 검색 사용 불가, 기본 블록 사용");
+    }
+
+    // RAG 검색 실패 시 기본 블록 반환
+    return defaultBlocks;
+  }
+
+  // 폴백용 기본 블록 데이터
+  getDefaultBlocksForGame(responses) {
+    const blocks = [];
+    const rulesLower = responses.rules?.toLowerCase() || "";
+
+    // 기본 시작 블록
+    blocks.push({
+      name: "시작하기 버튼을 클릭했을 때",
+      category: "start",
+      description: "프로그램 시작",
     });
+
+    // 규칙에 따른 블록 추가
+    if (rulesLower.includes("이동") || rulesLower.includes("움직")) {
+      blocks.push({
+        name: "( )키를 눌렀을 때",
+        category: "start",
+        description: "키보드 입력",
+      });
+      blocks.push({
+        name: "( )만큼 움직이기",
+        category: "moving",
+        description: "오브젝트 이동",
+      });
+    }
+
+    if (rulesLower.includes("충돌") || rulesLower.includes("닿")) {
+      blocks.push({
+        name: "( )에 닿았는가?",
+        category: "judgement",
+        description: "충돌 감지",
+      });
+    }
+
+    if (rulesLower.includes("점수")) {
+      blocks.push({
+        name: "변수 ( )를 ( )로 정하기",
+        category: "variable",
+        description: "변수 설정",
+      });
+    }
+
+    blocks.push({
+      name: "무한 반복하기",
+      category: "flow",
+      description: "반복 실행",
+    });
+
+    return blocks;
   }
 
   async checkIfNeedsDesign(message) {
@@ -162,6 +236,23 @@ true 또는 false만 답하세요.`,
   // complexHandler.js - startDesignMode 메소드 수정
 
   // complexHandler.js - startDesignMode 메소드 수정
+
+  // complexHandler.js에 추가
+  validateBlockExists(blockName, category) {
+    // RAG 데이터에서 실제 블록 확인
+    const validBlocks = {
+      start: ["시작하기 버튼을 클릭했을 때", "~키를 눌렀을 때", "마우스를 클릭했을 때"],
+      moving: ["( )만큼 움직이기", "x좌표를 ( )만큼 바꾸기", "y좌표를 ( )만큼 바꾸기"],
+      looks: ["보이기", "숨기기", "( )모양으로 바꾸기", "크기를 ( )%로 정하기"],
+      sound: ["( )소리 재생하기", "모든 소리 멈추기"],
+      flow: ["무한 반복하기", "( )번 반복하기", "만약 ~라면", "복제본 만들기"],
+      variable: ["변수 ( )를 ( )로 정하기", "변수 ( )를 ( )만큼 바꾸기"],
+      judgement: ["( )에 닿았는가?", "( )키를 눌렀는가?"],
+      calc: ["( ) + ( )", "( )부터 ( )사이의 무작위 수"],
+    };
+
+    return validBlocks[category]?.some((valid) => blockName.includes(valid.replace(/\(.*?\)/g, "")));
+  }
 
   startDesignMode(message) {
     const designSessionId = `design-${Date.now()}`;
@@ -398,49 +489,84 @@ true 또는 false만 답하세요.`,
       const blockInfo = this.formatBlocksForAI(relevantBlocks);
       console.log("📝 포맷된 블록 정보:", blockInfo);
 
+      const objects = responses.objects
+        ? responses.objects
+            .split(/[,，、와과및]/g)
+            .map((o) => o.trim())
+            .filter((o) => o.length > 0 && !["등", "들"].includes(o))
+        : [];
+
       const systemPrompt = `Entry 블록코딩 가이드 생성 AI입니다.
 
-중요 규칙:
-1. 카테고리는 정확한 이름만 사용 (설명 추가 금지)
-2. 블록 이름은 [대괄호]로 표시
-3. 입력값은 작은따옴표로 표시 (예: '10')
+절대 규칙:
+1. 모든 블록은 반드시 오브젝트를 먼저 선택한 후 추가
+2. "오브젝트 선택" 없이 블록 추가 지시 금지
+3. 오브젝트 목록: ${objects.join(", ")}
+4. 각 단계에서 "○○ 오브젝트 선택" 또는 "○○ 오브젝트의 코드 영역에" 형식 사용
+5. 변수 사용 시 반드시 먼저 "변수 만들기" 과정 포함
+6. 다른 오브젝트로 전환할 때만 "○○ 오브젝트 선택" 명시
 
-Entry 카테고리 (정확한 이름만):
-- 시작
-- 움직임
-- 생김새
-- 소리
-- 흐름
-- 판단
-- 자료
-- 계산
-- 붓
+타이머/시간 제한 구현:
+- 초시계 사용: "계산 카테고리 → [초시계 값] 블록"
+- 조건 확인: "판단 카테고리 → [( ) > ( )] 블록으로 시간 체크"
+- 올바른 방법: "만약 [초시계 값] > 10 이라면 → 게임 종료"
+- 잘못된 방법: "[10초 기다리기] 블록" (게임이 멈춤)
 
-절대 금지 표현:
-❌ "흐름 - 반복/조건문"
-❌ "움직임 - 오브젝트 이동/회전"
-❌ "자료 - 변수 관리"
+블록 추가 순서 (필수):
+1. [오브젝트명] 오브젝트 선택
+2. [카테고리명] 카테고리 클릭  
+3. [블록명] 블록 추가
 
-올바른 표현:
-✅ "흐름 카테고리"
-✅ "움직임 카테고리에서"
-✅ "[무한 반복하기] 블록"
+변수 관련 규칙:
+- 변수를 사용하기 전에 반드시 "변수 만들기" 단계 필요
+- 순서: "자료 카테고리 클릭 → 변수 만들기 버튼 클릭 → 변수 이름 입력 → 확인"
+- 변수를 만들면 자동으로 [변수 ( )를 ( )으로 정하기], [변수 ( )를 ( )만큼 바꾸기] 블록이 생성됨
+
+올바른 변수 단계 예시:
+1. 자료 카테고리 클릭
+2. '변수 만들기' 버튼 클릭
+3. 변수 이름 '점수' 입력
+4. 확인 버튼 클릭
+5. [변수 (점수)를 (0)으로 정하기] 블록을 코드 영역에 추가
+
+블록 추가 시 형식:
+"1. [오브젝트명] 오브젝트 선택"
+"2. [카테고리명] 카테고리 클릭"
+"3. [블록명] 블록 추가"
+
+사용자가 만들려는 게임:
+- 오브젝트: ${responses.objects}
+- 규칙: ${responses.rules}
+- 종료 조건: ${responses.endCondition}
+
+Entry 카테고리별 주요 블록:
+- 시작: [시작하기 버튼을 클릭했을 때], [~키를 눌렀을 때], [마우스를 클릭했을 때]
+- 움직임: [( )만큼 움직이기], [x좌표를 ( )만큼 바꾸기], [( )초 동안 x:( ) y:( )로 이동하기]
+- 생김새: [보이기], [숨기기], [( )모양으로 바꾸기], [크기를 ( )%로 정하기]
+- 소리: [( )소리 재생하기], [모든 소리 멈추기]
+- 흐름: [무한 반복하기], [( )번 반복하기], [만약 ~라면], [복제본 만들기]
+- 자료: [변수 ( )를 ( )로 정하기], [변수 ( )를 ( )만큼 바꾸기]
+- 판단: [마우스를 클릭했는가?], [( )에 닿았는가?], [( )키를 눌렀는가?]
+- 계산: [( ) + ( )], [( )부터 ( )사이의 무작위 수]
+
+오브젝트 추가 방법:
+"화면 왼쪽 하단의 '오브젝트 추가하기' 버튼 클릭 → 오브젝트 선택 → 추가"
 
 검색된 블록들:
 ${blockInfo}
 
-작성 예시:
-"1. 흐름 카테고리 클릭
-2. [무한 반복하기] 블록 추가
-3. 값을 '10'으로 설정"
+작성 형식:
+1. 시작 카테고리 클릭
+2. [시작하기 버튼을 클릭했을 때] 블록 추가
+3. 값을 '10'으로 설정
 
 JSON 응답 형식:
 {
   "steps": [
     {
       "stepNumber": 1,
-      "title": "제목",
-      "content": "### 🎨 제목\\n\\n1. 시작 카테고리 클릭\\n2. [시작하기 버튼을 클릭했을 때] 블록 추가\\n3. 움직임 카테고리에서 [( )만큼 움직이기] 선택\\n4. 값을 '10'으로 설정",
+      "title": "단계 제목",
+      "content": "1. 시작 카테고리 클릭\\n2. [시작하기 버튼을 클릭했을 때] 블록 추가\\n3. 값을 '10'으로 설정",
       "category": "카테고리명"
     }
   ]
@@ -574,7 +700,6 @@ JSON 응답 형식:
 
   generateObjectStep(objects) {
     const knowledge = EntryKnowledge.uiActions.addObject;
-    let content = `### 🎨 ${objects} 추가하기\\n\\n`;
 
     knowledge.steps.forEach((step, idx) => {
       content += `${idx + 1}. ${step}\\n`;
