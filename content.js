@@ -684,7 +684,7 @@ window.displayLearnerProgress = function (progress) {
           설계 완료!
         </div>
         <div style="font-size: 14px; opacity: 0.9;">
-          맞춤형 가이드를 생성하고 있습니다...
+          게임 제작 가이드를 생성하고 있습니다...
         </div>
       </div>
     `;

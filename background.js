@@ -14,6 +14,7 @@ importScripts("quickResponse.js");
 importScripts("cotResponse.js");
 importScripts("lib/hangul.min.js");
 importScripts("data/block_name_id_match.js");
+importScripts("data/entryKnowledge.js");
 
 // 핸들러 임포트 (handlers 정의 전에 와야 함)
 importScripts("handlers/simpleHandler.js");
@@ -1293,6 +1294,25 @@ const aiToEntryMapping = {
 // ===== Chrome Extension 메시지 처리 =====
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.action) {
+    // background.js - 메시지 핸들러에 추가
+
+    case "searchBlocks":
+      (async () => {
+        try {
+          const blocks = await searchEntryBlocks(request.query, request.topK || 5);
+          sendResponse({
+            success: true,
+            blocks: blocks,
+          });
+        } catch (error) {
+          sendResponse({
+            success: false,
+            error: error.message,
+          });
+        }
+      })();
+      return true;
+
     case "generateAIResponse":
       handleAIRequest(request)
         .then((result) => {
