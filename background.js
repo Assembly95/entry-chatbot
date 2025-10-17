@@ -1329,22 +1329,49 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
       return true; // 비동기 응답
 
+    // background.js - chrome.runtime.onMessage.addListener 부분에 추가
+
     case "generateCustomCoT":
       (async () => {
         try {
+          console.log("📝 generateCustomCoT 요청 받음:", request.session);
+
           const complexHandler = new ComplexHandler();
           const cotResult = await complexHandler.generateCustomCoT(request.session);
+
+          console.log("📦 generateCustomCoT 결과:", cotResult);
+
+          // cotResult와 steps 검증
+          if (!cotResult || !cotResult.steps || cotResult.steps.length === 0) {
+            console.error("❌ CoT 결과가 유효하지 않음");
+            sendResponse({
+              success: false,
+              error: "단계 생성 실패",
+              response: "게임 가이드를 생성할 수 없습니다.",
+            });
+            return;
+          }
+
+          // formatInitialResponse 호출
+          let initialResponse;
+          try {
+            initialResponse = complexHandler.formatInitialResponse(cotResult.steps, cotResult.totalSteps);
+          } catch (formatError) {
+            console.error("❌ formatInitialResponse 오류:", formatError);
+            initialResponse = "가이드를 준비 중입니다...";
+          }
 
           sendResponse({
             success: true,
             cotSequence: cotResult,
-            response: complexHandler.formatInitialResponse(cotResult.steps, cotResult.totalSteps),
+            response: initialResponse,
           });
         } catch (error) {
-          console.error("CoT 생성 실패:", error);
+          console.error("❌ CoT 생성 오류:", error);
           sendResponse({
             success: false,
             error: error.message,
+            response: "오류가 발생했습니다. 다시 시도해주세요.",
           });
         }
       })();

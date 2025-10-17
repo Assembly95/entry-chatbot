@@ -392,36 +392,56 @@ true 또는 false만 답하세요.`,
 
       // 관련 블록들을 RAG로 검색
       const relevantBlocks = await this.searchRelevantBlocks(responses);
-
       console.log("🔍 RAG 검색된 블록들:", relevantBlocks);
 
-      // AI에게 제공할 정보 준비
+      // blockInfo 변수 정의 (이 부분이 누락되었음)
       const blockInfo = this.formatBlocksForAI(relevantBlocks);
+      console.log("📝 포맷된 블록 정보:", blockInfo);
 
       const systemPrompt = `Entry 블록코딩 가이드 생성 AI입니다.
 
-Entry UI 조작 방법:
-${JSON.stringify(entryKnowledge?.uiActions || {}, null, 2)}
+중요 규칙:
+1. 카테고리는 정확한 이름만 사용 (설명 추가 금지)
+2. 블록 이름은 [대괄호]로 표시
+3. 입력값은 작은따옴표로 표시 (예: '10')
 
-카테고리 한글 이름:
-${JSON.stringify(entryKnowledge?.blockCategories || {}, null, 2)}
+Entry 카테고리 (정확한 이름만):
+- 시작
+- 움직임
+- 생김새
+- 소리
+- 흐름
+- 판단
+- 자료
+- 계산
+- 붓
 
-검색된 관련 블록들:
+절대 금지 표현:
+❌ "흐름 - 반복/조건문"
+❌ "움직임 - 오브젝트 이동/회전"
+❌ "자료 - 변수 관리"
+
+올바른 표현:
+✅ "흐름 카테고리"
+✅ "움직임 카테고리에서"
+✅ "[무한 반복하기] 블록"
+
+검색된 블록들:
 ${blockInfo}
 
-규칙:
-1. 위의 실제 블록 이름과 카테고리만 사용
-2. 각 단계는 구체적이고 친근하게 작성
-3. 블록 이름은 **굵게**, 값은 백틱으로 표시
+작성 예시:
+"1. 흐름 카테고리 클릭
+2. [무한 반복하기] 블록 추가
+3. 값을 '10'으로 설정"
 
 JSON 응답 형식:
 {
   "steps": [
     {
       "stepNumber": 1,
-      "title": "단계 제목",
-      "content": "### 🎨 제목\\n\\n상세한 설명과 단계별 지침",
-      "category": "카테고리"
+      "title": "제목",
+      "content": "### 🎨 제목\\n\\n1. 시작 카테고리 클릭\\n2. [시작하기 버튼을 클릭했을 때] 블록 추가\\n3. 움직임 카테고리에서 [( )만큼 움직이기] 선택\\n4. 값을 '10'으로 설정",
+      "category": "카테고리명"
     }
   ]
 }`;
@@ -623,47 +643,57 @@ JSON 응답 형식:
     const steps = [];
     let stepNumber = 1;
 
-    // 기본 8단계 템플릿
     const templates = [
       {
         title: "오브젝트 준비",
-        getContent: (r) => `### 🎨 오브젝트 추가\n\n${r.objects || "캐릭터"}를 추가하세요`,
+        getContent: (r) => `### 🎨 캐릭터 추가
+
+1. [+오브젝트] 버튼 클릭
+2. ${r.objects || "캐릭터"} 선택
+3. [적용하기] 클릭
+4. 화면에 배치`,
         category: "object",
       },
       {
         title: "움직임 설정",
-        getContent: () => `### 🎮 키보드 조작\n\n방향키로 움직이는 블록을 추가하세요`,
+        getContent: () => `### 🎮 키보드 조작
+
+1. 시작 카테고리 클릭
+2. [스페이스 키를 눌렀을 때] 블록 추가
+3. 움직임 카테고리 클릭
+4. [( )만큼 움직이기] 블록 연결
+5. 값을 '10'으로 설정`,
         category: "moving",
       },
       {
         title: "규칙 구현",
-        getContent: (r) => `### 📏 게임 규칙\n\n${r.rules || "기본 규칙"}을 구현하세요`,
+        getContent: (r) => `### 📏 게임 규칙
+
+1. 흐름 카테고리 선택
+2. [무한 반복하기] 블록 추가
+3. 판단 카테고리에서 [만약 ~라면] 선택
+4. 조건 설정: ${r.rules || "충돌 체크"}`,
         category: "flow",
       },
       {
         title: "변수 추가",
-        getContent: () => `### 🏆 점수와 데이터\n\n필요한 변수를 만드세요`,
+        getContent: () => `### 🏆 점수 시스템
+
+1. 자료 카테고리 클릭
+2. [변수 만들기] 버튼 클릭
+3. 이름: '점수' 입력
+4. [점수를 0으로 정하기] 추가`,
         category: "variable",
       },
       {
-        title: "상호작용",
-        getContent: () => `### 🎯 충돌 감지\n\n오브젝트 간 상호작용을 설정하세요`,
+        title: "충돌 감지",
+        getContent: () => `### 🎯 상호작용
+
+1. 판단 카테고리 선택
+2. [~에 닿았는가?] 블록 선택
+3. 충돌 대상 설정
+4. [만약 ~라면] 안에 넣기`,
         category: "judgement",
-      },
-      {
-        title: "종료 설정",
-        getContent: (r) => `### 🏁 게임 종료\n\n${r.endCondition || "종료 조건"}을 설정하세요`,
-        category: "flow",
-      },
-      {
-        title: "효과 추가",
-        getContent: () => `### ✨ 소리와 효과\n\n게임을 더 재미있게 만드세요`,
-        category: "sound",
-      },
-      {
-        title: "테스트",
-        getContent: () => `### ✅ 최종 테스트\n\n게임을 실행하고 개선하세요`,
-        category: "test",
       },
     ];
 
