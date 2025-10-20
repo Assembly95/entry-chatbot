@@ -674,13 +674,22 @@ window.displayLearnerProgress = function (progress) {
       const progressBar = container.querySelector(".progress-fill");
       progressBar.style.width = `${((session.currentStep + 1) / 3) * 100}%`;
 
-      // Enter 키 이벤트 추가
-      const newInput = questionDiv.querySelector(".design-input");
-      newInput.addEventListener("keypress", function (e) {
-        if (e.key === "Enter") {
-          handleDesignStep(sessionId);
+      // 🔴 새 입력창에 포커스 및 이벤트 리스너 추가 (setTimeout으로 DOM 업데이트 대기)
+      setTimeout(() => {
+        const newInput = container.querySelector(".design-input");
+        if (newInput) {
+          // 포커스
+          newInput.focus();
+
+          // Enter 키 이벤트 리스너
+          newInput.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleDesignStep(sessionId);
+            }
+          });
         }
-      });
+      }, 50); // DOM 업데이트를 위한 짧은 대기
     } else {
       // 모든 질문 완료 - CoT 생성 요청
       container.innerHTML = `

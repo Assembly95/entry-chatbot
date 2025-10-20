@@ -454,21 +454,13 @@ true 또는 false만 답하세요.`,
       return {
         totalSteps: 1,
         currentStep: 1,
-        steps: [
-          {
-            stepNumber: 1,
-            title: "오류 발생",
-            content: `가이드 생성 중 오류가 발생했습니다: ${error.message}`,
-            category: "error",
-            completed: false,
-          },
-        ],
+        steps: steps,
         gameDesign: session?.responses || {},
       };
     }
   }
 
-  // complexHandler.js - createGameStepsWithAI 함수에 로깅 추가
+  // complexHandler.js - createGameStepsWithAI 함수를 완전히 교체
 
   async createGameStepsWithAI(responses) {
     try {
@@ -477,131 +469,7 @@ true 또는 false만 답하세요.`,
         return this.createDefaultSteps(responses);
       }
 
-      // Entry Knowledge 로드
-      let entryKnowledge = null;
-      if (typeof EntryKnowledge !== "undefined") {
-        entryKnowledge = EntryKnowledge;
-      }
-
-      // 관련 블록들을 RAG로 검색
-      const relevantBlocks = await this.searchRelevantBlocks(responses);
-      console.log("🔍 RAG 검색된 블록들:", relevantBlocks);
-
-      const blockInfo = this.formatBlocksForAI(relevantBlocks);
-      console.log("📝 포맷된 블록 정보:", blockInfo);
-
-      const objects = responses.objects
-        ? responses.objects
-            .split(/[,，、와과및]/g)
-            .map((o) => o.trim())
-            .filter((o) => o.length > 0 && !["등", "들"].includes(o))
-        : [];
-
-      // 🔴 컨텍스트 정보 추가 - Branch History 체크
-      let contextInfo = "";
-      if (this.contextManager && this.contextManager.branches.length > 0) {
-        const previousBranches = this.contextManager.branches;
-        const addedVariables = previousBranches.flatMap((b) => b.context?.variables || []);
-        const addedBlocks = previousBranches.flatMap((b) => b.context?.blocks || []);
-
-        if (addedVariables.length > 0) {
-          contextInfo = `\n이미 생성된 변수들: ${addedVariables.join(", ")}`;
-          contextInfo += "\n이 변수들은 이미 존재하므로 다시 만들 필요 없음";
-        }
-        if (addedBlocks.length > 0) {
-          contextInfo += `\n이미 추가된 기능: ${addedBlocks.join(", ")}`;
-        }
-      }
-
-      const systemPrompt = `Entry 블록코딩 가이드 생성 AI입니다.
-
-절대 규칙:
-1. 모든 블록은 반드시 오브젝트를 먼저 선택한 후 추가
-2. "오브젝트 선택" 없이 블록 추가 지시 금지
-3. 오브젝트 목록: ${objects.join(", ")}
-4. 각 단계에서 "○○ 오브젝트 선택" 또는 "○○ 오브젝트의 코드 영역에" 형식 사용
-5. 변수 사용 시 반드시 먼저 "변수 만들기" 과정 포함
-6. 다른 오브젝트를 선택하는 경우에만 "○○ 오브젝트 선택" 명시
-
-${contextInfo}
-
-타이머/시간 제한 구현:
-- 초시계 사용: "계산 카테고리 → [초시계 값] 블록"
-- 조건 확인: "판단 카테고리 → [( ) > ( )] 블록으로 시간 체크"
-- 올바른 방법: "만약 [초시계 값] > 10 이라면 → 게임 종료"
-- 잘못된 방법: "[10초 기다리기] 블록" (게임이 멈춤)
-
-블록 추가 순서 (필수):
-1. [오브젝트명] 오브젝트 선택
-2. [카테고리명] 카테고리 클릭  
-3. [블록명] 블록 추가
-
-변수 관련 규칙:
-- 변수를 사용하기 전에 반드시 "변수 만들기" 단계 필요
-- 순서: "자료 카테고리 클릭 → 변수 만들기 버튼 클릭 → 변수 이름 입력 → 확인"
-- 변수를 만들면 자동으로 [변수 ( )를 ( )으로 정하기], [변수 ( )를 ( )만큼 바꾸기] 블록이 생성됨
-
-올바른 변수 단계 예시:
-1. 자료 카테고리 클릭
-2. '변수 만들기' 버튼 클릭
-3. 변수 이름 '점수' 입력
-4. 확인 버튼 클릭
-5. [변수 (점수)를 (0)으로 정하기] 블록을 코드 영역에 추가
-
-블록 추가 시 형식:
-"1. [오브젝트명] 오브젝트 선택"
-"2. [카테고리명] 카테고리 클릭"
-"3. [블록명] 블록 추가"
-
-사용자가 만들려는 게임:
-- 오브젝트: ${responses.objects}
-- 규칙: ${responses.rules}
-- 종료: ${responses.endCondition}
-
-Entry 카테고리별 주요 블록:
-- 시작: [시작하기 버튼을 클릭했을 때], [~키를 눌렀을 때], [마우스를 클릭했을 때]
-- 움직임: [( )만큼 움직이기], [x좌표를 ( )만큼 바꾸기], [( )초 동안 x:( ) y:( )로 이동하기]
-- 생김새: [보이기], [숨기기], [( )모양으로 바꾸기], [크기를 ( )%로 정하기]
-- 소리: [( )소리 재생하기], [모든 소리 멈추기]
-- 흐름: [무한 반복하기], [( )번 반복하기], [만약 ~라면], [복제본 만들기]
-- 자료: [변수 ( )를 ( )로 정하기], [변수 ( )를 ( )만큼 바꾸기]
-- 판단: [마우스를 클릭했는가?], [( )에 닿았는가?], [( )키를 눌렀는가?]
-- 계산: [( ) + ( )], [( )부터 ( )사이의 무작위 수]
-
-오브젝트 추가 방법:
-"화면 왼쪽 하단의 '오브젝트 추가하기' 버튼 클릭 → 오브젝트 선택 → 추가"
-
-검색된 블록들:
-${blockInfo}
-
-작성 형식:
-1. 시작 카테고리 클릭
-2. [시작하기 버튼을 클릭했을 때] 블록 추가
-3. 값을 '10'으로 설정
-
-JSON 응답 형식:
-{
-  "steps": [
-    {
-      "stepNumber": 1,
-      "title": "단계 제목",
-      "content": "1. 시작 카테고리 클릭\\n2. [시작하기 버튼을 클릭했을 때] 블록 추가\\n3. 값을 '10'으로 설정",
-      "category": "카테고리명",
-      "variables": ["추가되는 변수명들"],
-      "blocks": ["사용되는 블록 ID들"]
-    }
-  ]
-}`;
-
-      const userPrompt = `"${responses.objects}" 게임 제작 가이드를 만들어주세요:
-- 오브젝트: ${responses.objects}
-- 규칙: ${responses.rules}
-- 종료: ${responses.endCondition}`;
-
-      console.log("📤 GPT-4o-mini로 보내는 프롬프트:");
-      console.log("System:", systemPrompt);
-      console.log("User:", userPrompt);
-
+      // 더 자연스러운 프롬프트
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -611,115 +479,157 @@ JSON 응답 형식:
         body: JSON.stringify({
           model: "gpt-4o-mini",
           messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
+            {
+              role: "system",
+              content: "Entry 블록코딩 교육 도우미입니다. 게임 제작 방법을 단계별로 설명해주세요.",
+            },
+            {
+              role: "user",
+              content: `Entry 블록코딩으로 게임을 만들려고 합니다.
+            - 오브젝트: ${responses.objects}
+            - 게임 규칙: ${responses.rules}
+            - 종료 조건: ${responses.endCondition}
+            
+            각 오브젝트별로 필요한 스크립트를 단계별로 설명해주세요.`,
+            },
           ],
           temperature: 0.7,
-          max_tokens: 3000,
+          max_tokens: 2000,
         }),
       });
 
       const data = await response.json();
-      console.log("📥 GPT-4o-mini 원본 응답:", data);
+      const gptResponse = data.choices[0].message.content;
 
-      const aiResponseContent = data.choices[0].message.content;
-      console.log("💬 GPT-4o-mini 응답 텍스트:");
-      console.log(aiResponseContent);
+      console.log("📥 GPT 원본 응답:", gptResponse);
 
-      // JSON 파싱
-      let parsed;
-      try {
-        parsed = JSON.parse(aiResponseContent);
-        console.log("✅ 파싱된 JSON:", parsed);
-      } catch (parseError) {
-        console.error("❌ JSON 파싱 실패:", parseError);
-        console.log("원본 텍스트:", aiResponseContent);
+      const steps = [];
+
+      // ### 패턴으로 메인 섹션 분리
+      const mainSections = gptResponse.split(/###\s+\d+\.\s*/);
+
+      if (mainSections.length > 1) {
+        mainSections.shift(); // 첫 번째 빈 요소 제거
+
+        mainSections.forEach((section, idx) => {
+          const lines = section.split("\n");
+          const mainTitle = lines[0].trim(); // "고양이 오브젝트 스크립트"
+
+          // #### 패턴으로 서브 단계 찾기
+          const subSteps = section.split(/####\s+/);
+
+          if (subSteps.length > 1) {
+            // 첫 번째는 메인 제목 부분이므로 제외
+            subSteps.shift();
+
+            subSteps.forEach((subStep, subIdx) => {
+              const subLines = subStep.split("\n");
+              const subTitle = subLines[0].trim(); // "1단계: 고양이 오브젝트 생성"
+              let subContent = subLines.slice(1).join("\n").trim();
+
+              // 코드블록 변환
+              if (subContent.includes("```")) {
+                subContent = this.convertPseudoCodeToEntryBlocks(subContent);
+              }
+
+              steps.push({
+                stepNumber: steps.length + 1,
+                title: `${mainTitle} - ${subTitle}`, // "고양이 오브젝트 스크립트 - 1단계: 고양이 오브젝트 생성"
+                content: subContent,
+                category: this.getCategoryFromTitle(subTitle),
+                mainSection: mainTitle, // 메인 섹션 정보 저장
+                completed: false,
+              });
+            });
+          } else {
+            // #### 서브스텝이 없으면 전체를 하나의 단계로
+            let content = lines.slice(1).join("\n").trim();
+
+            if (content.includes("```")) {
+              content = this.convertPseudoCodeToEntryBlocks(content);
+            }
+
+            steps.push({
+              stepNumber: idx + 1,
+              title: mainTitle,
+              content: content,
+              category: this.getCategoryFromTitle(mainTitle),
+              completed: false,
+            });
+          }
+        });
+      } else {
+        // ### 형식이 없으면 기본 처리
         return this.createDefaultSteps(responses);
       }
 
-      const steps = parsed.steps || [];
-
-      // 🔴 컨텍스트 추출 및 저장
-      const extractedContext = {
-        variables: new Set(),
-        blocks: new Set(),
-        concepts: [],
-      };
-
-      steps.forEach((step) => {
-        // AI가 명시적으로 제공한 변수/블록 정보 사용
-        if (step.variables && Array.isArray(step.variables)) {
-          step.variables.forEach((v) => extractedContext.variables.add(v));
-        }
-        if (step.blocks && Array.isArray(step.blocks)) {
-          step.blocks.forEach((b) => extractedContext.blocks.add(b));
-        }
-
-        // 컨텐츠에서 추가로 추출 (폴백)
-        const varMatches = step.content.match(/변수\s+['"]([^'"]+)['"]/g);
-        if (varMatches) {
-          varMatches.forEach((match) => {
-            const varName = match.match(/['"]([^'"]+)['"]/)[1];
-            extractedContext.variables.add(varName);
-          });
-        }
-
-        // 개념 추출
-        if (step.title.includes("변수")) extractedContext.concepts.push("변수");
-        if (step.title.includes("충돌")) extractedContext.concepts.push("충돌감지");
-        if (step.title.includes("소리")) extractedContext.concepts.push("효과음");
-      });
-
-      // 🔴 컨텍스트 매니저에 저장
-      if (!this.contextManager) {
-        this.contextManager = { mainPath: [], branches: [] };
+      if (steps.length === 0) {
+        return this.createDefaultSteps(responses);
       }
 
-      const contextData = {
-        timestamp: Date.now(),
-        source: "main", // 또는 'branch'
-        context: {
-          variables: Array.from(extractedContext.variables),
-          blocks: Array.from(extractedContext.blocks),
-          concepts: extractedContext.concepts,
-        },
-        steps: steps,
-      };
-
-      // Main CoT인지 Mini CoT인지 구분
-      if (responses.isBranch) {
-        this.contextManager.branches.push(contextData);
-      } else {
-        this.contextManager.mainPath.push(contextData);
-      }
-
-      console.log("📋 생성된 단계 수:", steps.length);
-      console.log("💾 추출된 컨텍스트:", contextData.context);
-
-      steps.forEach((step, idx) => {
-        console.log(`Step ${idx + 1}: ${step.title}`);
-        console.log(`  내용 길이: ${step.content?.length || 0}자`);
-        console.log(`  카테고리: ${step.category}`);
-        if (step.variables) console.log(`  변수: ${step.variables.join(", ")}`);
-        if (step.blocks) console.log(`  블록: ${step.blocks.join(", ")}`);
-      });
-
-      // 🔴 반환되는 steps에 컨텍스트 정보 포함
-      return steps.map((step, idx) => ({
-        stepNumber: step.stepNumber || idx + 1,
-        title: step.title || `단계 ${idx + 1}`,
-        content: step.content || "",
-        category: step.category || "general",
-        completed: false,
-        // 컨텍스트 정보 추가
-        variables: step.variables || [],
-        blocks: step.blocks || [],
-        contextAware: true,
-      }));
+      console.log(`✅ ${steps.length}개 단계 생성 완료`);
+      return steps;
     } catch (error) {
-      console.error("❌ AI 단계 생성 실패:", error);
+      console.error("AI 단계 생성 실패:", error);
       return this.createDefaultSteps(responses);
     }
+  }
+
+  // 헬퍼 함수: 의사코드를 Entry 블록으로 변환
+  convertPseudoCodeToEntryBlocks(content) {
+    // ```코드블록``` 찾기
+    const codeBlockRegex = /```(?:plaintext)?\n?([\s\S]*?)```/g;
+
+    return content.replace(codeBlockRegex, (match, code) => {
+      const lines = code.trim().split("\n");
+      let entryBlocks = "\n**Entry 블록으로 변환:**\n";
+
+      lines.forEach((line) => {
+        const trimmedLine = line.trim();
+        if (trimmedLine) {
+          const entryBlock = this.mapPseudoToEntry(trimmedLine);
+          entryBlocks += `• ${entryBlock}\n`;
+        }
+      });
+
+      return entryBlocks;
+    });
+  }
+
+  // 의사코드 → Entry 블록 매핑
+  mapPseudoToEntry(pseudoCode) {
+    const mappings = {
+      "무한 반복": "[무한 반복하기]",
+      위치를: "[오브젝트] 쪽 바라보기",
+      향하게: "[오브젝트] 쪽 바라보기",
+      다가가기: "(10)만큼 움직이기",
+      이동하기: "(10)만큼 움직이기",
+      닿으면: "만약 <( )에 닿았는가?> (이)라면",
+      말하기: "( )(을)를 (2)초 동안 말하기",
+      "게임 종료": "[모든 스크립트 멈추기]",
+      랜덤: "(1)부터 (360)사이의 무작위 수",
+      가장자리: "[화면 끝에 닿으면 튕기기]",
+    };
+
+    for (const [keyword, block] of Object.entries(mappings)) {
+      if (pseudoCode.includes(keyword)) {
+        return block + " 블록";
+      }
+    }
+
+    return pseudoCode; // 매칭 안 되면 원본
+  }
+
+  // 제목에서 카테고리 추론
+  getCategoryFromTitle(title) {
+    const lower = title.toLowerCase();
+
+    if (lower.includes("오브젝트") || lower.includes("준비")) return "setup";
+    if (lower.includes("스크립트") || lower.includes("코드")) return "code";
+    if (lower.includes("시작") || lower.includes("게임")) return "start";
+    if (lower.includes("추가") || lower.includes("기능")) return "feature";
+
+    return "general";
   }
 
   // 유연한 기본 템플릿
@@ -981,6 +891,7 @@ JSON 응답 형식:
     console.log("  - totalSteps:", totalSteps);
 
     // steps 배열 검증
+
     if (!steps || !Array.isArray(steps) || steps.length === 0) {
       console.error("❌ formatInitialResponse: 유효하지 않은 steps 배열");
       return "게임 제작 가이드를 준비 중입니다...";
