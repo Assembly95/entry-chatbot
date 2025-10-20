@@ -1919,23 +1919,6 @@ window.displayLearnerProgress = function (progress) {
             originalCotElement.style.opacity = "1";
             originalCotElement.style.pointerEvents = "auto";
 
-            // 뱃지 추가
-            const headerElement = originalCotElement.querySelector(".cot-header");
-            if (headerElement && !headerElement.querySelector(`[data-branch="${data.featureName}"]`)) {
-              const badge = document.createElement("span");
-              badge.setAttribute("data-branch", data.featureName);
-              badge.style.cssText = `
-              background: #4caf50;
-              color: white;
-              padding: 2px 8px;
-              border-radius: 12px;
-              font-size: 11px;
-              margin-left: 8px;
-            `;
-              badge.textContent = `✓ ${data.featureName}`;
-              headerElement.appendChild(badge);
-            }
-
             // 스크롤 및 하이라이트
             setTimeout(() => {
               originalCotElement.scrollIntoView({
