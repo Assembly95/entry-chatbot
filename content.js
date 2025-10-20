@@ -1274,7 +1274,99 @@ window.displayLearnerProgress = function (progress) {
 
     return svg;
   }
+  // 🔴 새로운 함수: CoT 가이드 완료 처리
+  function completeCoTGuide(cotId, cotSequence) {
+    const cotElement = document.getElementById(cotId);
+    if (!cotElement) return;
 
+    // 완료 애니메이션
+    cotElement.style.transition = "all 0.5s";
+    cotElement.style.transform = "scale(0.95)";
+    cotElement.style.opacity = "0.8";
+
+    setTimeout(() => {
+      // 완료 메시지로 교체
+      cotElement.innerHTML = `
+      <div style="
+        background: linear-gradient(135deg, #4caf50, #45a049);
+        border-radius: 16px;
+        padding: 40px;
+        text-align: center;
+        color: white;
+      ">
+        <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
+        <h2 style="margin: 0 0 16px 0; font-size: 24px;">
+          가이드 완료!
+        </h2>
+        <p style="margin: 0 0 24px 0; opacity: 0.95;">
+          ${cotSequence.totalSteps}개 단계를 모두 완료했습니다!
+        </p>
+        
+        <div style="
+          background: rgba(255,255,255,0.2);
+          border-radius: 12px;
+          padding: 16px;
+          margin-bottom: 24px;
+        ">
+          <strong>학습한 내용:</strong><br>
+          ${
+            cotSequence.gameDesign
+              ? `• 오브젝트: ${cotSequence.gameDesign.objects}<br>
+             • 규칙: ${cotSequence.gameDesign.rules}<br>
+             • 종료조건: ${cotSequence.gameDesign.endCondition}`
+              : "게임 제작 완료"
+          }
+        </div>
+        
+        <button onclick="this.parentElement.parentElement.remove()" style="
+          background: white;
+          color: #4caf50;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: bold;
+          cursor: pointer;
+        ">
+          닫기
+        </button>
+      </div>
+    `;
+
+      // 완료 메시지 추가
+      addChatMessage("🎊 축하합니다! 게임 제작 가이드를 완료했어요! 이제 직접 Entry에서 만들어보세요.", true);
+
+      // 3초 후 자동으로 축소
+      setTimeout(() => {
+        cotElement.style.transform = "scale(0.9)";
+        cotElement.style.opacity = "0.5";
+
+        // 5초 후 완전히 제거
+        setTimeout(() => {
+          cotElement.remove();
+        }, 2000);
+      }, 3000);
+    }, 500);
+
+    // 완료 데이터 저장 (통계용)
+    if (window.cotCompletionData) {
+      window.cotCompletionData.push({
+        cotId: cotId,
+        completedAt: new Date().toISOString(),
+        totalSteps: cotSequence.totalSteps,
+        gameType: cotSequence.gameDesign,
+      });
+    } else {
+      window.cotCompletionData = [
+        {
+          cotId: cotId,
+          completedAt: new Date().toISOString(),
+          totalSteps: cotSequence.totalSteps,
+          gameType: cotSequence.gameDesign,
+        },
+      ];
+    }
+  }
   // 모달 애니메이션 스타일 추가
   function addModalAnimationStyles() {
     const styleId = "branch-modal-animations";
@@ -1314,6 +1406,9 @@ window.displayLearnerProgress = function (progress) {
       if (currentStep < cotSequence.totalSteps) {
         currentStep++;
         updateStepDisplay(cotElement, cotSequence.steps[currentStep - 1], currentStep, cotSequence.totalSteps);
+      } else if (currentStep === cotSequence.totalSteps) {
+        // 🔴 마지막 단계에서 완료 처리
+        completeCoTGuide(cotId, cotSequence);
       }
     });
 
@@ -1403,6 +1498,20 @@ window.displayLearnerProgress = function (progress) {
     nextBtn.disabled = currentStep === totalSteps;
     nextBtn.style.opacity = currentStep === totalSteps ? "0.5" : "1";
     nextBtn.style.cursor = currentStep === totalSteps ? "not-allowed" : "pointer";
+
+    if (currentStep === totalSteps) {
+      nextBtn.textContent = "완료 🎉";
+      nextBtn.style.background = "#4caf50";
+      nextBtn.disabled = false; // 비활성화 하지 않음!
+      nextBtn.style.opacity = "1";
+      nextBtn.style.cursor = "pointer";
+    } else {
+      nextBtn.textContent = "다음 ▶";
+      nextBtn.style.background = "#667eea";
+      nextBtn.disabled = false;
+      nextBtn.style.opacity = "1";
+      nextBtn.style.cursor = "pointer";
+    }
 
     // 마지막 단계에서 버튼 텍스트 변경
     if (currentStep === totalSteps) {

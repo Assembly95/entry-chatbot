@@ -460,6 +460,60 @@ true 또는 false만 답하세요.`,
     }
   }
 
+  // complexHandler.js에 추가할 블록 로더
+  async loadBlockDatabase() {
+    const categories = ["start", "moving", "looks", "sound", "flow", "variable", "calc", "judgement", "func", "brush"];
+    const blockDB = {};
+
+    for (const category of categories) {
+      const files = getKnownBlockFiles(category);
+      for (const file of files) {
+        const data = await fetch(chrome.runtime.getURL(`data/blocks/${category}/${file}`));
+        const block = await data.json();
+
+        // ID와 한글명 매핑
+        blockDB[block.id] = {
+          name: entryBlockMap[block.id] || block.name,
+          category: category,
+          description: block.description,
+          usage: block.usage_examples,
+        };
+      }
+    }
+    return blockDB;
+  }
+
+  // complexHandler.js에 추가
+  validateAndCorrectBlockName(blockName) {
+    const normalized = blockName.replace(/[\[\]]/g, "").trim();
+
+    // 1. 정확한 매칭 확인
+    for (const [id, name] of Object.entries(entryBlockMap)) {
+      if (name === normalized) {
+        return { valid: true, corrected: name, id: id };
+      }
+    }
+
+    // 2. 부분 매칭으로 수정
+    for (const [id, name] of Object.entries(entryBlockMap)) {
+      if (name.includes(normalized) || normalized.includes(name)) {
+        return { valid: true, corrected: name, id: id };
+      }
+    }
+
+    // 3. 키워드 기반 추천
+    const keywords = normalized.split(" ");
+    for (const [id, name] of Object.entries(entryBlockMap)) {
+      const nameWords = name.split(" ");
+      const matches = keywords.filter((k) => nameWords.some((w) => w.includes(k)));
+      if (matches.length >= 2) {
+        return { valid: false, suggested: name, id: id };
+      }
+    }
+
+    return { valid: false, original: normalized };
+  }
+
   // complexHandler.js - createGameStepsWithAI 함수를 완전히 교체
 
   async createGameStepsWithAI(responses) {
@@ -469,7 +523,23 @@ true 또는 false만 답하세요.`,
         return this.createDefaultSteps(responses);
       }
 
-      // 더 자연스러운 프롬프트
+      // 개선된 프롬프트
+      const improvedPrompt = `Entry 블록코딩으로 게임을 만드는 핵심 단계만 설명해주세요.
+
+        주의사항:
+        - Entry 로그인, 프로젝트 생성 같은 기본 단계는 제외
+        - 실제 블록 조작과 코딩 단계만 포함
+        - 각 단계 제목은 동작 중심으로 (예: "오브젝트 추가", "변수 생성", "충돌 감지 설정")
+
+        게임 정보:
+        - 오브젝트: ${responses.objects}
+        - 규칙: ${responses.rules}
+        - 종료 조건: ${responses.endCondition}
+
+        형식:
+        ### 단계제목
+        - 구체적인 작업 내용`;
+
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -481,16 +551,11 @@ true 또는 false만 답하세요.`,
           messages: [
             {
               role: "system",
-              content: "Entry 블록코딩 교육 도우미입니다. 게임 제작 방법을 단계별로 설명해주세요.",
+              content: "Entry 블록코딩 실습 가이드 생성. 불필요한 설명 제외, 핵심 작업만 포함.",
             },
             {
               role: "user",
-              content: `Entry 블록코딩으로 게임을 만들려고 합니다.
-            - 오브젝트: ${responses.objects}
-            - 게임 규칙: ${responses.rules}
-            - 종료 조건: ${responses.endCondition}
-            
-            각 오브젝트별로 필요한 스크립트를 단계별로 설명해주세요.`,
+              content: improvedPrompt,
             },
           ],
           temperature: 0.7,
@@ -503,76 +568,149 @@ true 또는 false만 답하세요.`,
 
       console.log("📥 GPT 원본 응답:", gptResponse);
 
-      const steps = [];
+      // 파싱
+      const steps = this.parseGPTResponse(gptResponse);
 
-      // ### 패턴으로 메인 섹션 분리
-      const mainSections = gptResponse.split(/###\s+\d+\.\s*/);
+      // 필터링 및 정제
+      const filteredSteps = this.filterUnnecessarySteps(steps);
+      const refinedSteps = filteredSteps.map((step, idx) => ({
+        ...step,
+        stepNumber: idx + 1,
+        title: this.cleanStepTitle(step.title),
+        content: this.enhanceStepContent(step.content),
+      }));
 
-      if (mainSections.length > 1) {
-        mainSections.shift(); // 첫 번째 빈 요소 제거
-
-        mainSections.forEach((section, idx) => {
-          const lines = section.split("\n");
-          const mainTitle = lines[0].trim(); // "고양이 오브젝트 스크립트"
-
-          // #### 패턴으로 서브 단계 찾기
-          const subSteps = section.split(/####\s+/);
-
-          if (subSteps.length > 1) {
-            // 첫 번째는 메인 제목 부분이므로 제외
-            subSteps.shift();
-
-            subSteps.forEach((subStep, subIdx) => {
-              const subLines = subStep.split("\n");
-              const subTitle = subLines[0].trim(); // "1단계: 고양이 오브젝트 생성"
-              let subContent = subLines.slice(1).join("\n").trim();
-
-              // 코드블록 변환
-              if (subContent.includes("```")) {
-                subContent = this.convertPseudoCodeToEntryBlocks(subContent);
-              }
-
-              steps.push({
-                stepNumber: steps.length + 1,
-                title: `${mainTitle} - ${subTitle}`, // "고양이 오브젝트 스크립트 - 1단계: 고양이 오브젝트 생성"
-                content: subContent,
-                category: this.getCategoryFromTitle(subTitle),
-                mainSection: mainTitle, // 메인 섹션 정보 저장
-                completed: false,
-              });
-            });
-          } else {
-            // #### 서브스텝이 없으면 전체를 하나의 단계로
-            let content = lines.slice(1).join("\n").trim();
-
-            if (content.includes("```")) {
-              content = this.convertPseudoCodeToEntryBlocks(content);
-            }
-
-            steps.push({
-              stepNumber: idx + 1,
-              title: mainTitle,
-              content: content,
-              category: this.getCategoryFromTitle(mainTitle),
-              completed: false,
-            });
-          }
-        });
-      } else {
-        // ### 형식이 없으면 기본 처리
-        return this.createDefaultSteps(responses);
-      }
-
-      if (steps.length === 0) {
-        return this.createDefaultSteps(responses);
-      }
-
-      console.log(`✅ ${steps.length}개 단계 생성 완료`);
-      return steps;
+      console.log(`✅ 최종 ${refinedSteps.length}개 단계 생성`);
+      return refinedSteps;
     } catch (error) {
       console.error("AI 단계 생성 실패:", error);
       return this.createDefaultSteps(responses);
     }
+  }
+
+  enhanceStepContent(content) {
+    // Entry 전용 용어로 변환
+    const entryTerms = {
+      제어: "시작",
+      타이머: "초시계",
+      텍스트: "글상자",
+      정지: "모든 스크립트 멈추기",
+      "게임 종료": "모든 스크립트 멈추기",
+    };
+
+    let enhanced = content;
+    for (const [old, newTerm] of Object.entries(entryTerms)) {
+      enhanced = enhanced.replace(new RegExp(old, "gi"), newTerm);
+    }
+
+    // 블록 이름 하이라이팅
+    enhanced = enhanced.replace(/\[(.*?)\]/g, "**[$1]**");
+
+    // 카테고리 힌트 추가
+    if (enhanced.includes("변수")) {
+      enhanced += "\n💡 자료 카테고리에서 찾으세요";
+    }
+    if (enhanced.includes("클릭")) {
+      enhanced += "\n💡 시작 카테고리에서 찾으세요";
+    }
+
+    return enhanced;
+  }
+
+  parseGPTResponse(gptResponse) {
+    const steps = [];
+
+    // ### 패턴으로 분리
+    const sections = gptResponse.split(/###\s*/);
+
+    for (const section of sections) {
+      if (!section.trim()) continue;
+
+      const lines = section.split("\n");
+      const title = lines[0].trim();
+
+      // 제목이 너무 길면 스킵 (보통 설명문)
+      if (title.length > 30) continue;
+
+      const content = lines.slice(1).join("\n").trim();
+
+      // 내용이 있는 경우만 추가
+      if (content.length > 10) {
+        steps.push({
+          title: title.replace(":", "").trim(),
+          content: content,
+          category: this.getCategoryFromContent(content),
+          completed: false,
+        });
+      }
+    }
+
+    return steps;
+  }
+
+  // 새로운 헬퍼 함수: 하위 단계 파싱
+  parseSubSteps(content) {
+    const subSteps = [];
+    const bulletPoints = content.match(/[-•]\s*\*\*(.*?)\*\*:(.*?)(?=[-•]|\n\n|$)/gs);
+
+    if (bulletPoints) {
+      bulletPoints.forEach((point) => {
+        const match = point.match(/[-•]\s*\*\*(.*?)\*\*:(.*)/s);
+        if (match) {
+          subSteps.push({
+            title: match[1].trim(),
+            content: match[2].trim(),
+          });
+        }
+      });
+    }
+
+    return subSteps;
+  }
+
+  // 개선된 Entry 블록 변환
+  convertToEntryBlocks(content) {
+    // 블록 데이터베이스 활용
+    const blockDB = this.blockDatabase || {};
+
+    let converted = content;
+
+    // GPT가 언급한 블록명을 실제 Entry 블록명으로 변환
+    const replacements = {
+      "무한 반복": "[무한 반복하기]",
+      "시작할 때": "[시작하기 버튼을 클릭했을 때]",
+      "만약 ~라면": "[만약 ( )라면]",
+      "x축으로 무작위 이동": "[x좌표를 ( )만큼 바꾸기]",
+      "y축으로 무작위 이동": "[y좌표를 ( )만큼 바꾸기]",
+      "고양이와 쥐가 닿았는지": "[( )에 닿았는가?]",
+      "게임 종료": "[모든 스크립트 멈추기]",
+      "0.5초 대기": "[( )초 기다리기]",
+      "고양이의 x좌표를 쥐의 x좌표로": "[x좌표를 ( )(으)로 정하기]",
+      "고양이의 y좌표를 쥐의 y좌표로": "[y좌표를 ( )(으)로 정하기]",
+    };
+
+    for (const [gptTerm, entryBlock] of Object.entries(replacements)) {
+      converted = converted.replace(new RegExp(gptTerm, "gi"), entryBlock);
+    }
+
+    // 블록명 강조
+    converted = converted.replace(/\[(.*?)\]/g, "**$1**");
+
+    return converted;
+  }
+
+  // 콘텐츠에서 카테고리 추론
+  getCategoryFromContent(content) {
+    const lower = content.toLowerCase();
+
+    if (lower.includes("오브젝트") || lower.includes("스프라이트")) return "object";
+    if (lower.includes("움직") || lower.includes("이동") || lower.includes("좌표")) return "moving";
+    if (lower.includes("시작") || lower.includes("클릭")) return "start";
+    if (lower.includes("반복") || lower.includes("만약")) return "flow";
+    if (lower.includes("변수") || lower.includes("점수")) return "variable";
+    if (lower.includes("충돌") || lower.includes("닿")) return "judgement";
+
+    return "general";
   }
 
   // 헬퍼 함수: 의사코드를 Entry 블록으로 변환
@@ -594,6 +732,33 @@ true 또는 false만 답하세요.`,
 
       return entryBlocks;
     });
+  }
+
+  // complexHandler.js에 추가
+  filterUnnecessarySteps(steps) {
+    // 제거할 단계들의 패턴
+    const skipPatterns = [/로그인/i, /새.*프로젝트.*만들/i, /Entry.*접속/i, /계정.*생성/i, /회원.*가입/i];
+
+    return steps.filter((step) => {
+      const titleAndContent = `${step.title} ${step.content}`;
+      return !skipPatterns.some((pattern) => pattern.test(titleAndContent));
+    });
+  }
+
+  // 제목 정제
+  cleanStepTitle(title) {
+    // "1단계:", "2단계:" 등 제거
+    let cleaned = title.replace(/^\d+단계[:：\s]*/i, "");
+
+    // "~하기" 형태로 통일
+    if (!cleaned.endsWith("하기") && !cleaned.endsWith("설정") && !cleaned.endsWith("추가")) {
+      // 명사형이면 "~하기" 추가
+      if (!cleaned.includes("을") && !cleaned.includes("를")) {
+        cleaned = cleaned + " 추가";
+      }
+    }
+
+    return cleaned.trim();
   }
 
   // 의사코드 → Entry 블록 매핑
