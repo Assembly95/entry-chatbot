@@ -551,7 +551,7 @@ true 또는 false만 답하세요.`,
           messages: [
             {
               role: "system",
-              content: "Entry 블록코딩 실습 가이드 생성. 불필요한 설명 제외, 핵심 작업만 포함.",
+              content: "Entry 블록코딩 실습 가이드 생성. 불필요한 설명 제외",
             },
             {
               role: "user",
@@ -571,6 +571,10 @@ true 또는 false만 답하세요.`,
       // 파싱
       const steps = this.parseGPTResponse(gptResponse);
 
+          // ✨ EntryKnowledge 매핑 (핵심!)
+    const enhancedSteps = this.enhanceStepsWithKnowledge(steps);
+    console.log("✨ Knowledge 적용 완료");
+
       // 필터링 및 정제
       const filteredSteps = this.filterUnnecessarySteps(steps);
       const refinedSteps = filteredSteps.map((step, idx) => ({
@@ -587,7 +591,88 @@ true 또는 false만 답하세요.`,
       return this.createDefaultSteps(responses);
     }
   }
+/**
+ * ✨ 핵심 함수: EntryKnowledge로 단계 내용 교체/보강
+ */
+enhanceStepsWithKnowledge(steps) {
+  return steps.map(step => {
+    const title = step.title.toLowerCase();
+    
+    // 1. 오브젝트 추가
+    if (title.match(/오브젝트.*추가|오브젝트.*생성|캐릭터.*추가/i)) {
+      return {
+        ...step,
+        content: this.generateContentFromKnowledge("addObject"),
+        category: "object",
+      };
+    }
+    
+    // 2. 변수 생성
+    if (title.match(/변수.*생성|변수.*만들|변수.*추가/i)) {
+      return {
+        ...step,
+        content: this.generateContentFromKnowledge("createVariable"),
+        category: "variable",
+      };
+    }
+    
+    // 3. 블록 추가/연결
+    if (title.match(/블록.*추가|블록.*연결|이벤트.*설정|클릭.*설정/i)) {
+      return {
+        ...step,
+        content: this.generateContentFromKnowledge("addBlock") + "\n\n" + step.content,
+        category: "block",
+      };
+    }
+    
+    // 4. 초시계/타이머 설정
+    if (title.match(/타이머|초시계|시간.*설정|시간.*체크/i)) {
+      return {
+        ...step,
+        content: this.generateContentFromKnowledge("setTimer"),
+        category: "timer",
+      };
+    }
+    
+    // 5. 실행/테스트
+    if (title.match(/실행|테스트|확인/i)) {
+      return {
+        ...step,
+        content: this.generateContentFromKnowledge("runProject") + "\n\n" + step.content,
+        category: "test",
+      };
+    }
+    
+    // 매칭 안 되면 원본 유지 (AI 생성 내용)
+    return step;
+  });
+}
 
+/**
+ * EntryKnowledge에서 내용 생성
+ */
+generateContentFromKnowledge(actionKey) {
+  const action = EntryKnowledge.uiActions?.[actionKey];
+  
+  if (!action) {
+    console.warn(`⚠️ ${actionKey}에 해당하는 Knowledge 없음`);
+    return "";
+  }
+  
+  let content = `### ${action.icon} ${action.category}\n\n`;
+  
+  // 단계별 설명
+  action.steps.forEach((step, idx) => {
+    content += `${idx + 1}. ${step}\n`;
+  });
+  
+  // 위치 힌트
+  if (action.location) {
+    content += `\n💡 **위치**: ${action.location}`;
+  }
+  
+  return content;
+}
   enhanceStepContent(content) {
     // Entry 전용 용어로 변환
     const entryTerms = {
