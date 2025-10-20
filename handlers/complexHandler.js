@@ -72,6 +72,54 @@ class ComplexHandler {
     };
   }
 
+  /**
+ * 단계 내용에서 언급된 블록들을 RAG에서 검색
+ */
+async searchBlocksInStep(stepContent) {
+  // 블록 이름 패턴 추출 ([], **[], () 등)
+  const blockPatterns = [
+    /\[([^\]]+)\]/g,           // [블록명]
+    /\*\*\[([^\]]+)\]\*\*/g,   // **[블록명]**
+    /「([^」]+)」/g,            // 「블록명」
+  ];
+  
+  const mentionedBlocks = new Set();
+  
+  for (const pattern of blockPatterns) {
+    const matches = stepContent.matchAll(pattern);
+    for (const match of matches) {
+      const blockName = match[1].trim();
+      // 너무 짧거나 일반 단어는 제외
+      if (blockName.length > 2 && !['확인', '추가', '저장'].includes(blockName)) {
+        mentionedBlocks.add(blockName);
+      }
+    }
+  }
+  
+  if (mentionedBlocks.size === 0) return [];
+  
+  // 각 블록에 대해 RAG 검색
+  const blockResults = [];
+  
+  for (const blockName of mentionedBlocks) {
+    try {
+      const results = await chrome.runtime.sendMessage({
+        action: "searchBlocks",
+        query: blockName,
+        topK: 1,  // 가장 관련성 높은 것만
+      });
+      
+      if (results && results.blocks && results.blocks.length > 0) {
+        blockResults.push(results.blocks[0]);
+      }
+    } catch (error) {
+      console.warn(`블록 검색 실패 (${blockName}):`, error);
+    }
+  }
+  
+  return blockResults;
+}
+
   async searchRelevantBlocks(responses) {
     const allText = `${responses.objects} ${responses.rules} ${responses.endCondition}`.toLowerCase();
     const searchQueries = [];
@@ -523,22 +571,53 @@ true 또는 false만 답하세요.`,
         return this.createDefaultSteps(responses);
       }
 
+    // ✅ 1단계: 게임 내용 기반으로 RAG 검색
+    const relevantBlocks = await this.searchRelevantBlocks(responses);
+    console.log("🔍 검색된 블록:", relevantBlocks);
+
+    // ✅ 2단계: RAG 결과를 GPT에게 제공
+    const blockContext = this.formatBlocksForAI(relevantBlocks);
+
       // 개선된 프롬프트
-      const improvedPrompt = `Entry 블록코딩으로 게임을 만드는 핵심 단계만 설명해주세요.
+      const improvedPrompt = `Entry 블록코딩으로 게임을 만드는 핵심 단계를 설명해주세요.
 
-        주의사항:
-        - Entry 로그인, 프로젝트 생성 같은 기본 단계는 제외
-        - 실제 블록 조작과 코딩 단계만 포함
-        - 각 단계 제목은 동작 중심으로 (예: "오브젝트 추가", "변수 생성", "충돌 감지 설정")
+      **게임 정보:**
+      - 오브젝트: ${responses.objects}
+      - 규칙: ${responses.rules}
+      - 종료 조건: ${responses.endCondition}
+      
 
-        게임 정보:
-        - 오브젝트: ${responses.objects}
-        - 규칙: ${responses.rules}
-        - 종료 조건: ${responses.endCondition}
+      **사용 가능한 Entry 블록 정보:**
+${blockContext}
 
-        형식:
-        ### 단계제목
-        - 구체적인 작업 내용`;
+**작성 규칙:**
+1. 위에 제공된 블록 정보를 **반드시 참조**하세요
+2. 각 단계는 아래 형식을 **엄격히** 따르세요:
+   * <카테고리명>에서 [블록명] 가져오기
+   * [블록A]와 [블록B] 조립하기
+   * [블록] 안의 값을 ~로 설정하기
+
+3. Entry 전용 용어를 사용하세요:
+   - "스프라이트" ❌ → "오브젝트" ✅
+   - "타이머" ❌ → "초시계" ✅
+   - "캔버스" ❌ → "무대" ✅
+
+**좋은 예시:**
+### 클릭 이벤트 설정
+* <시작>에서 [마우스를 클릭했을 때] 블록 가져오기
+* <자료>에서 [변수 ( )를 ( )만큼 바꾸기] 블록 가져오기
+* 두 블록을 조립하기
+* 변수를 "점수", 값을 "1"로 설정하기
+
+**나쁜 예시:**
+### 클릭 이벤트 설정
+- 마우스 클릭 블록을 추가합니다
+- 점수를 증가시키는 블록을 연결합니다
+
+**응답 형식:**
+### 단계제목
+* <카테고리>에서 [블록명] 가져오기
+* ...`;
 
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
@@ -551,14 +630,14 @@ true 또는 false만 답하세요.`,
           messages: [
             {
               role: "system",
-              content: "Entry 블록코딩 실습 가이드 생성. 불필요한 설명 제외",
+              content: "Entry 블록코딩 전문가. 제공된 블록 정보를 정확히 참조하여 답변합니다.",
             },
             {
               role: "user",
               content: improvedPrompt,
             },
           ],
-          temperature: 0.7,
+          temperature: 0.3,
           max_tokens: 2000,
         }),
       });
@@ -571,12 +650,13 @@ true 또는 false만 답하세요.`,
       // 파싱
       const steps = this.parseGPTResponse(gptResponse);
 
-          // ✨ EntryKnowledge 매핑 (핵심!)
-    const enhancedSteps = this.enhanceStepsWithKnowledge(steps);
-    console.log("✨ Knowledge 적용 완료");
+      const enhancedSteps = await this.enhanceStepsWithKnowledge(steps);  // ✅
+      console.log("✨ Knowledge + RAG 적용 완료");
+
+
 
       // 필터링 및 정제
-      const filteredSteps = this.filterUnnecessarySteps(steps);
+      const filteredSteps = this.filterUnnecessarySteps(enhancedSteps);
       const refinedSteps = filteredSteps.map((step, idx) => ({
         ...step,
         stepNumber: idx + 1,
@@ -594,58 +674,53 @@ true 또는 false만 답하세요.`,
 /**
  * ✨ 핵심 함수: EntryKnowledge로 단계 내용 교체/보강
  */
-enhanceStepsWithKnowledge(steps) {
-  return steps.map(step => {
+/**
+ * ✨ 핵심 함수: EntryKnowledge + RAG로 단계 내용 보강
+ */
+async enhanceStepsWithKnowledge(steps) {
+  const enhancedSteps = [];
+  
+  for (const step of steps) {
     const title = step.title.toLowerCase();
+    let enhanced = { ...step };
     
-    // 1. 오브젝트 추가
+    // 1. 오브젝트 추가는 EntryKnowledge 사용
     if (title.match(/오브젝트.*추가|오브젝트.*생성|캐릭터.*추가/i)) {
-      return {
-        ...step,
-        content: this.generateContentFromKnowledge("addObject"),
-        category: "object",
-      };
+      const knowledgeContent = this.generateContentFromKnowledge("addObject");
+      enhanced.content = `${step.content}\n\n---\n\n### 📘 상세 가이드\n${knowledgeContent}`;
+      enhanced.category = "object";
+    }
+    // 2. 나머지는 RAG 블록 정보 추가
+    else {
+      const blocks = await this.searchBlocksInStep(step.content);
+      
+      if (blocks.length > 0) {
+        let blockInfo = "\n\n---\n\n### 🧩 사용할 블록\n\n";
+        
+        blocks.forEach(block => {
+          const categoryKorean = this.getCategoryKorean(block.category);
+          blockInfo += `**[${block.name || block.fileName}]**\n`;
+          blockInfo += `- 📍 위치: **${categoryKorean}** 카테고리\n`;
+          
+          if (block.description) {
+            blockInfo += `- 📝 설명: ${block.description}\n`;
+          }
+          
+          if (block.usage_examples && block.usage_examples.length > 0) {
+            blockInfo += `- 💡 사용 예시: ${block.usage_examples[0]}\n`;
+          }
+          
+          blockInfo += "\n";
+        });
+        
+        enhanced.content += blockInfo;
+      }
     }
     
-    // 2. 변수 생성
-    if (title.match(/변수.*생성|변수.*만들|변수.*추가/i)) {
-      return {
-        ...step,
-        content: this.generateContentFromKnowledge("createVariable"),
-        category: "variable",
-      };
-    }
-    
-    // 3. 블록 추가/연결
-    if (title.match(/블록.*추가|블록.*연결|이벤트.*설정|클릭.*설정/i)) {
-      return {
-        ...step,
-        content: this.generateContentFromKnowledge("addBlock") + "\n\n" + step.content,
-        category: "block",
-      };
-    }
-    
-    // 4. 초시계/타이머 설정
-    if (title.match(/타이머|초시계|시간.*설정|시간.*체크/i)) {
-      return {
-        ...step,
-        content: this.generateContentFromKnowledge("setTimer"),
-        category: "timer",
-      };
-    }
-    
-    // 5. 실행/테스트
-    if (title.match(/실행|테스트|확인/i)) {
-      return {
-        ...step,
-        content: this.generateContentFromKnowledge("runProject") + "\n\n" + step.content,
-        category: "test",
-      };
-    }
-    
-    // 매칭 안 되면 원본 유지 (AI 생성 내용)
-    return step;
-  });
+    enhancedSteps.push(enhanced);
+  }
+  
+  return enhancedSteps;
 }
 
 /**
@@ -686,17 +761,6 @@ generateContentFromKnowledge(actionKey) {
     let enhanced = content;
     for (const [old, newTerm] of Object.entries(entryTerms)) {
       enhanced = enhanced.replace(new RegExp(old, "gi"), newTerm);
-    }
-
-    // 블록 이름 하이라이팅
-    enhanced = enhanced.replace(/\[(.*?)\]/g, "**[$1]**");
-
-    // 카테고리 힌트 추가
-    if (enhanced.includes("변수")) {
-      enhanced += "\n💡 자료 카테고리에서 찾으세요";
-    }
-    if (enhanced.includes("클릭")) {
-      enhanced += "\n💡 시작 카테고리에서 찾으세요";
     }
 
     return enhanced;
@@ -1070,6 +1134,23 @@ generateContentFromKnowledge(actionKey) {
       category: template.category,
       completed: false,
     }));
+  }
+
+  getCategoryKorean(category) {
+    const map = {
+      start: "시작",
+      moving: "움직임",
+      looks: "생김새",
+      sound: "소리",
+      judgement: "판단",
+      flow: "흐름",
+      variable: "자료",
+      func: "함수",
+      calc: "계산",
+      brush: "붓",
+      text: "글상자",
+    };
+    return map[category] || category;
   }
 
   generateRuleImplementation(rules) {
