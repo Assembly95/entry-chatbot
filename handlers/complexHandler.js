@@ -11,6 +11,12 @@ class ComplexHandler {
       // ... 기존 템플릿들
     };
 
+    // 컨텍스트 매니저 추가
+    this.contextManager = {
+      mainPath: [],
+      branches: [],
+    };
+
     // 게임 설계 질문 추가
     this.designQuestions = [
       {
@@ -232,10 +238,6 @@ true 또는 false만 답하세요.`,
       return false;
     }
   }
-
-  // complexHandler.js - startDesignMode 메소드 수정
-
-  // complexHandler.js - startDesignMode 메소드 수정
 
   // complexHandler.js에 추가
   validateBlockExists(blockName, category) {
@@ -485,7 +487,6 @@ true 또는 false만 답하세요.`,
       const relevantBlocks = await this.searchRelevantBlocks(responses);
       console.log("🔍 RAG 검색된 블록들:", relevantBlocks);
 
-      // blockInfo 변수 정의 (이 부분이 누락되었음)
       const blockInfo = this.formatBlocksForAI(relevantBlocks);
       console.log("📝 포맷된 블록 정보:", blockInfo);
 
@@ -496,6 +497,22 @@ true 또는 false만 답하세요.`,
             .filter((o) => o.length > 0 && !["등", "들"].includes(o))
         : [];
 
+      // 🔴 컨텍스트 정보 추가 - Branch History 체크
+      let contextInfo = "";
+      if (this.contextManager && this.contextManager.branches.length > 0) {
+        const previousBranches = this.contextManager.branches;
+        const addedVariables = previousBranches.flatMap((b) => b.context?.variables || []);
+        const addedBlocks = previousBranches.flatMap((b) => b.context?.blocks || []);
+
+        if (addedVariables.length > 0) {
+          contextInfo = `\n이미 생성된 변수들: ${addedVariables.join(", ")}`;
+          contextInfo += "\n이 변수들은 이미 존재하므로 다시 만들 필요 없음";
+        }
+        if (addedBlocks.length > 0) {
+          contextInfo += `\n이미 추가된 기능: ${addedBlocks.join(", ")}`;
+        }
+      }
+
       const systemPrompt = `Entry 블록코딩 가이드 생성 AI입니다.
 
 절대 규칙:
@@ -505,6 +522,8 @@ true 또는 false만 답하세요.`,
 4. 각 단계에서 "○○ 오브젝트 선택" 또는 "○○ 오브젝트의 코드 영역에" 형식 사용
 5. 변수 사용 시 반드시 먼저 "변수 만들기" 과정 포함
 6. 다른 오브젝트를 선택하는 경우에만 "○○ 오브젝트 선택" 명시
+
+${contextInfo}
 
 타이머/시간 제한 구현:
 - 초시계 사용: "계산 카테고리 → [초시계 값] 블록"
@@ -537,7 +556,7 @@ true 또는 false만 답하세요.`,
 사용자가 만들려는 게임:
 - 오브젝트: ${responses.objects}
 - 규칙: ${responses.rules}
-- 종료 조건: ${responses.endCondition}
+- 종료: ${responses.endCondition}
 
 Entry 카테고리별 주요 블록:
 - 시작: [시작하기 버튼을 클릭했을 때], [~키를 눌렀을 때], [마우스를 클릭했을 때]
@@ -567,7 +586,9 @@ JSON 응답 형식:
       "stepNumber": 1,
       "title": "단계 제목",
       "content": "1. 시작 카테고리 클릭\\n2. [시작하기 버튼을 클릭했을 때] 블록 추가\\n3. 값을 '10'으로 설정",
-      "category": "카테고리명"
+      "category": "카테고리명",
+      "variables": ["추가되는 변수명들"],
+      "blocks": ["사용되는 블록 ID들"]
     }
   ]
 }`;
@@ -599,12 +620,9 @@ JSON 응답 형식:
       });
 
       const data = await response.json();
-
       console.log("📥 GPT-4o-mini 원본 응답:", data);
 
-      // AI 응답 내용 추출
       const aiResponseContent = data.choices[0].message.content;
-
       console.log("💬 GPT-4o-mini 응답 텍스트:");
       console.log(aiResponseContent);
 
@@ -621,19 +639,82 @@ JSON 응답 형식:
 
       const steps = parsed.steps || [];
 
+      // 🔴 컨텍스트 추출 및 저장
+      const extractedContext = {
+        variables: new Set(),
+        blocks: new Set(),
+        concepts: [],
+      };
+
+      steps.forEach((step) => {
+        // AI가 명시적으로 제공한 변수/블록 정보 사용
+        if (step.variables && Array.isArray(step.variables)) {
+          step.variables.forEach((v) => extractedContext.variables.add(v));
+        }
+        if (step.blocks && Array.isArray(step.blocks)) {
+          step.blocks.forEach((b) => extractedContext.blocks.add(b));
+        }
+
+        // 컨텐츠에서 추가로 추출 (폴백)
+        const varMatches = step.content.match(/변수\s+['"]([^'"]+)['"]/g);
+        if (varMatches) {
+          varMatches.forEach((match) => {
+            const varName = match.match(/['"]([^'"]+)['"]/)[1];
+            extractedContext.variables.add(varName);
+          });
+        }
+
+        // 개념 추출
+        if (step.title.includes("변수")) extractedContext.concepts.push("변수");
+        if (step.title.includes("충돌")) extractedContext.concepts.push("충돌감지");
+        if (step.title.includes("소리")) extractedContext.concepts.push("효과음");
+      });
+
+      // 🔴 컨텍스트 매니저에 저장
+      if (!this.contextManager) {
+        this.contextManager = { mainPath: [], branches: [] };
+      }
+
+      const contextData = {
+        timestamp: Date.now(),
+        source: "main", // 또는 'branch'
+        context: {
+          variables: Array.from(extractedContext.variables),
+          blocks: Array.from(extractedContext.blocks),
+          concepts: extractedContext.concepts,
+        },
+        steps: steps,
+      };
+
+      // Main CoT인지 Mini CoT인지 구분
+      if (responses.isBranch) {
+        this.contextManager.branches.push(contextData);
+      } else {
+        this.contextManager.mainPath.push(contextData);
+      }
+
       console.log("📋 생성된 단계 수:", steps.length);
+      console.log("💾 추출된 컨텍스트:", contextData.context);
+
       steps.forEach((step, idx) => {
         console.log(`Step ${idx + 1}: ${step.title}`);
         console.log(`  내용 길이: ${step.content?.length || 0}자`);
         console.log(`  카테고리: ${step.category}`);
+        if (step.variables) console.log(`  변수: ${step.variables.join(", ")}`);
+        if (step.blocks) console.log(`  블록: ${step.blocks.join(", ")}`);
       });
 
+      // 🔴 반환되는 steps에 컨텍스트 정보 포함
       return steps.map((step, idx) => ({
         stepNumber: step.stepNumber || idx + 1,
         title: step.title || `단계 ${idx + 1}`,
         content: step.content || "",
         category: step.category || "general",
         completed: false,
+        // 컨텍스트 정보 추가
+        variables: step.variables || [],
+        blocks: step.blocks || [],
+        contextAware: true,
       }));
     } catch (error) {
       console.error("❌ AI 단계 생성 실패:", error);
@@ -917,18 +998,77 @@ JSON 응답 형식:
     // 속성들에 기본값 제공
     const stepNumber = firstStep.stepNumber || 1;
     const title = firstStep.title || "게임 제작 시작";
-    const content = firstStep.content || "단계별 가이드를 준비하고 있습니다...";
+    let content = firstStep.content || "단계별 가이드를 준비하고 있습니다...";
+
+    // 🔴 컨텍스트 정보 추가
+    let contextSection = "";
+
+    // Branch History가 있는 경우 표시
+    if (this.contextManager && this.contextManager.branches && this.contextManager.branches.length > 0) {
+      const allVariables = new Set();
+      const allBlocks = new Set();
+      const allConcepts = new Set();
+
+      // 모든 branch에서 정보 수집
+      this.contextManager.branches.forEach((branch) => {
+        if (branch.context) {
+          branch.context.variables?.forEach((v) => allVariables.add(v));
+          branch.context.blocks?.forEach((b) => allBlocks.add(b));
+          branch.context.concepts?.forEach((c) => allConcepts.add(c));
+        }
+      });
+
+      // 컨텍스트 섹션 구성
+      if (allVariables.size > 0 || allConcepts.size > 0) {
+        contextSection = "\n\n## 📌 활용 가능한 요소\n\n";
+
+        if (allVariables.size > 0) {
+          contextSection += `**생성된 변수**: ${Array.from(allVariables).join(", ")}\n`;
+        }
+
+        if (allConcepts.size > 0) {
+          contextSection += `**추가된 기능**: ${Array.from(allConcepts).join(", ")}\n`;
+        }
+
+        contextSection += "\n> 💡 위 요소들은 이미 생성되었으므로 바로 활용할 수 있습니다.\n";
+      }
+    }
+
+    // 현재 단계의 변수/블록 정보가 있으면 추가
+    if (firstStep.variables && firstStep.variables.length > 0) {
+      content += `\n\n**이 단계에서 생성할 변수**: ${firstStep.variables.join(", ")}`;
+    }
+
+    if (firstStep.blocks && firstStep.blocks.length > 0) {
+      const blockNames = firstStep.blocks.map((b) => {
+        // entryBlockMap이 있으면 이름으로 변환
+        if (typeof entryBlockMap !== "undefined" && entryBlockMap[b]) {
+          return entryBlockMap[b];
+        }
+        return b;
+      });
+      content += `\n**사용할 블록**: ${blockNames.join(", ")}`;
+    }
+
+    // 🔴 Branch 진행 상태 표시
+    let branchIndicator = "";
+    if (this.contextManager && this.contextManager.branches && this.contextManager.branches.length > 0) {
+      branchIndicator = `\n🔀 **확장 기능**: ${this.contextManager.branches.length}개 추가됨`;
+    }
 
     const response =
       `# 🎮 게임 만들기 가이드\n\n` +
-      `📊 **전체 진행**: ${stepNumber} / ${totalSteps || steps.length} 단계\n\n` +
+      `📊 **전체 진행**: ${stepNumber} / ${totalSteps || steps.length} 단계${branchIndicator}\n\n` +
       `---\n\n` +
       `## Step ${stepNumber}: ${title}\n\n` +
-      `${content}\n\n` +
-      `---\n\n` +
+      `${content}` +
+      `${contextSection}` +
+      `\n\n---\n\n` +
       `**네비게이션**: [다음 단계 →] 버튼을 클릭하세요`;
 
     console.log("✅ formatInitialResponse 완료");
+    console.log("  - 컨텍스트 포함 여부:", contextSection !== "");
+
     return response;
   }
 
