@@ -593,9 +593,15 @@ window.displayLearnerProgress = function (progress) {
     if (type === "html" && content.includes("design-mode-container")) {
       setTimeout(() => {
         setupDesignModeListeners();
+        const firstInput = document.querySelector(".design-input");
+
+        if (firstInput) {
+          firstInput.focus();
+        }
       }, 100);
     }
   }
+
   function handleDesignStep(sessionId) {
     const container = document.getElementById(`design-${sessionId}`);
     const input = container.querySelector(".design-input");
@@ -721,6 +727,19 @@ window.displayLearnerProgress = function (progress) {
         });
       }
     });
+
+    // 첫 번째 입력창에도 엔터 키 이벤트 추가
+    const firstInput = document.querySelector(".design-input");
+    if (firstInput && !firstInput.hasAttribute("data-enter-attached")) {
+      firstInput.setAttribute("data-enter-attached", "true");
+      firstInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const sessionId = this.dataset.sessionId;
+          handleDesignStep(sessionId);
+        }
+      });
+    }
   }
 
   // 마크다운 변환 함수 추가
@@ -754,76 +773,115 @@ window.displayLearnerProgress = function (progress) {
     const branchCount = cotSequence.branchHistory ? cotSequence.branchHistory.length : 0;
 
     const cotHtml = `
-    <div class="cot-response" id="${cotId}" data-total-steps="${cotSequence.totalSteps}" data-current-step="1">
-      <!-- 헤더 수정 - 브랜치 그래프 버튼 추가 -->
-      <div class="cot-header" style="
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        padding: 16px;
-        border-radius: 12px 12px 0 0;
+  <div class="cot-response" id="${cotId}" data-total-steps="${cotSequence.totalSteps}" data-current-step="1">
+    <!-- 개선된 헤더 디자인 -->
+    <div class="cot-header" style="
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 12px 12px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    ">
+      <!-- 왼쪽 영역: 제목 -->
+      <div style="
         display: flex;
-        justify-content: space-between;
         align-items: center;
+        gap: 8px;
+        flex: 1;
+        min-width: 0;
       ">
-        <span class="cot-badge" style="font-weight: bold; font-size: 16px;">
-          🎯 단계별 가이드
-        </span>
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <!-- 브랜치 그래프 버튼 추가 -->
-          <button class="branch-graph-btn" 
-                  data-cot-id="${cotId}"
-                  style="
-                    background: rgba(255,255,255,0.2);
-                    border: 1px solid rgba(255,255,255,0.3);
-                    color: white;
-                    padding: 6px 12px;
-                    border-radius: 6px;
-                    cursor: pointer;
-                    font-size: 12px;
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    transition: all 0.3s;
-                    position: relative;
-                  "
-                  onmouseover="this.style.background='rgba(255,255,255,0.3)'"
-                  onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"/>
-            </svg>
-            브랜치 보기
-            ${
-              branchCount > 0
-                ? `
-              <span style="
-                position: absolute;
-                top: -6px;
-                right: -6px;
-                background: #ff4444;
-                color: white;
-                border-radius: 50%;
-                width: 18px;
-                height: 18px;
-                font-size: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: bold;
-              ">${branchCount}</span>
-            `
-                : ""
-            }
-          </button>
-          <span class="cot-progress" style="
-            background: rgba(255,255,255,0.2);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-          ">
-            <span class="current-step-text">1</span> / ${cotSequence.totalSteps}
-          </span>
-        </div>
+        <span style="font-size: 20px;">🎯</span>
+        <span style="
+          font-weight: 600;
+          font-size: 14px;
+          white-space: nowrap;
+        ">단계별 가이드</span>
       </div>
+      
+      <!-- 중앙 영역: 브랜치 버튼 -->
+      <div style="
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+      ">
+        <button class="branch-graph-btn" 
+                data-cot-id="${cotId}"
+                style="
+                  background: rgba(255,255,255,0.15);
+                  border: 1px solid rgba(255,255,255,0.25);
+                  color: white;
+                  padding: 5px 10px;
+                  border-radius: 6px;
+                  cursor: pointer;
+                  font-size: 12px;
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                  transition: all 0.2s;
+                  position: relative;
+                  white-space: nowrap;
+                "
+                onmouseover="this.style.background='rgba(255,255,255,0.25)'; this.style.transform='scale(1.02)'"
+                onmouseout="this.style.background='rgba(255,255,255,0.15)'; this.style.transform='scale(1)'">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"/>
+          </svg>
+          <span style="font-size: 11px;">브랜치</span>
+          ${
+            branchCount > 0
+              ? `
+            <span style="
+              position: absolute;
+              top: -8px;
+              right: -8px;
+              background: #ff4444;
+              color: white;
+              border-radius: 50%;
+              width: 16px;
+              height: 16px;
+              font-size: 10px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: bold;
+              border: 2px solid #667eea;
+            ">${branchCount}</span>
+          `
+              : ""
+          }
+        </button>
+      </div>
+      
+      <!-- 오른쪽 영역: 진행 상태 -->
+      <div style="
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+        margin-left: 12px;
+      ">
+        <span style="
+          background: rgba(255,255,255,0.9);
+          color: #667eea;
+          padding: 4px 10px;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        ">
+          <span class="current-step-text">1</span>
+          <span style="opacity: 0.6;">/</span>
+          <span>${cotSequence.totalSteps}</span>
+        </span>
+      </div>
+    </div>
       
       <!-- 내용 -->
       <div class="cot-content" style="
@@ -1121,39 +1179,15 @@ window.displayLearnerProgress = function (progress) {
     addModalAnimationStyles();
   }
 
-  // 브랜치 그래프 생성 함수
+  // content.js - generateBranchGraph 함수 수정
   function generateBranchGraph(cotData) {
     const steps = cotData.steps || [];
     const branches = cotData.branchHistory || [];
 
-    if (branches.length === 0) {
-      return `
-      <div style="
-        text-align: center;
-        padding: 40px;
-        color: #999;
-      ">
-        <svg width="200" height="150" style="opacity: 0.3;">
-          <line x1="100" y1="20" x2="100" y2="130" stroke="#667eea" stroke-width="3" />
-          ${steps
-            .map(
-              (_, idx) => `
-            <circle cx="100" cy="${20 + idx * 30}" r="6" fill="#667eea" />
-          `
-            )
-            .join("")}
-        </svg>
-        <div style="margin-top: 20px; font-size: 14px;">
-          메인 CoT만 진행 중입니다.
-        </div>
-      </div>
-    `;
-    }
-
-    // SVG 그래프 생성
+    // SVG 그래프 생성 - 브랜치 유무와 관계없이 동일한 레이아웃 사용
     const svgWidth = 700;
     const svgHeight = Math.max(300, steps.length * 60);
-    const mainLineX = 100;
+    const mainLineX = 350;
     const stepHeight = 50;
     const startY = 50;
 
@@ -1164,7 +1198,7 @@ window.displayLearnerProgress = function (progress) {
             x2="${mainLineX}" y2="${startY + (steps.length - 1) * stepHeight}" 
             stroke="#667eea" stroke-width="3" />
       
-      <!-- 메인 브랜치 노드들 -->
+      <!-- 메인 브랜치 노드들 (텍스트를 왼쪽에 배치) -->
       ${steps
         .map((step, idx) => {
           const y = startY + idx * stepHeight;
@@ -1172,29 +1206,34 @@ window.displayLearnerProgress = function (progress) {
 
           return `
           <g>
+            <!-- Step 텍스트를 노드 왼쪽에 배치 -->
+            <text x="${mainLineX - 10}" y="${y + 5}" 
+                  font-size="13" fill="#333" 
+                  text-anchor="end"
+                  font-weight="${hasBranch ? "bold" : "normal"}">
+              Step ${idx + 1}: ${step.title}
+            </text>
+            
+            <!-- 메인 노드 -->
             <circle cx="${mainLineX}" cy="${y}" r="8" 
                     fill="${hasBranch ? "#ff9800" : "#667eea"}" 
                     stroke="white" stroke-width="2" />
-            <text x="${mainLineX + 20}" y="${y + 5}" 
-                  font-size="13" fill="#333" font-weight="${hasBranch ? "bold" : "normal"}">
-              Step ${idx + 1}: ${step.title}
-            </text>
           </g>
         `;
         })
         .join("")}
       
-      <!-- 브랜치들 -->
+      <!-- 브랜치들 (브랜치가 있을 때만 표시) -->
       ${branches
         .map((branch, branchIdx) => {
           const stepIdx = branch.atStep - 1;
           const y = startY + stepIdx * stepHeight;
-          const branchX = mainLineX + 200 + (branchIdx % 2) * 150;
+          const branchX = mainLineX + 120 + (branchIdx % 2) * 130;
 
           return `
           <g>
-            <!-- 브랜치 시작선 -->
-            <path d="M ${mainLineX} ${y} Q ${(mainLineX + branchX) / 2} ${y - 20} ${branchX} ${y}"
+            <!-- 브랜치 시작선 (더 짧은 곡선) -->
+            <path d="M ${mainLineX} ${y} Q ${mainLineX + 40} ${y} ${branchX} ${y}"
                   fill="none" stroke="#ff9800" stroke-width="2" stroke-dasharray="5,3" />
             
             <!-- 브랜치 노드 -->
@@ -1202,26 +1241,25 @@ window.displayLearnerProgress = function (progress) {
             
             <!-- 브랜치 라벨 배경 -->
             <rect x="${branchX + 15}" y="${y - 12}" width="140" height="28" 
-                  fill="white" stroke="#ff9800" stroke-width="1.5" rx="6" />
+                  fill="#fff8e1" stroke="#ff9800" stroke-width="1.5" rx="6" />
             
-            <!-- 브랜치 라벨 텍스트 -->
+            <!-- 브랜치 아이콘과 텍스트 -->
             <text x="${branchX + 22}" y="${y + 3}" font-size="12" fill="#ff9800" font-weight="600">
               🌿 ${branch.featureName}
             </text>
             
-            <!-- 머지 표시 -->
-            <path d="M ${branchX} ${y + 10} Q ${(mainLineX + branchX) / 2} ${y + 35} ${mainLineX} ${y + stepHeight / 2}"
+            <!-- 머지 표시 (더 짧은 경로) -->
+            <path d="M ${branchX} ${y + 10} Q ${mainLineX + 40} ${y + 25} ${mainLineX} ${y + stepHeight / 2}"
                   fill="none" stroke="#4caf50" stroke-width="2" stroke-dasharray="5,3" />
             
             <!-- 머지 포인트 -->
             <circle cx="${mainLineX}" cy="${y + stepHeight / 2}" r="5" fill="#4caf50" stroke="white" stroke-width="2" />
-            <text x="${mainLineX + 15}" y="${y + stepHeight / 2 + 3}" font-size="10" fill="#4caf50">
-              merged
-            </text>
           </g>
         `;
         })
         .join("")}
+      
+
     </svg>
   `;
 
