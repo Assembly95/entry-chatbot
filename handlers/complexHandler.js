@@ -73,52 +73,52 @@ class ComplexHandler {
   }
 
   /**
- * 단계 내용에서 언급된 블록들을 RAG에서 검색
- */
-async searchBlocksInStep(stepContent) {
-  // 블록 이름 패턴 추출 ([], **[], () 등)
-  const blockPatterns = [
-    /\[([^\]]+)\]/g,           // [블록명]
-    /\*\*\[([^\]]+)\]\*\*/g,   // **[블록명]**
-    /「([^」]+)」/g,            // 「블록명」
-  ];
-  
-  const mentionedBlocks = new Set();
-  
-  for (const pattern of blockPatterns) {
-    const matches = stepContent.matchAll(pattern);
-    for (const match of matches) {
-      const blockName = match[1].trim();
-      // 너무 짧거나 일반 단어는 제외
-      if (blockName.length > 2 && !['확인', '추가', '저장'].includes(blockName)) {
-        mentionedBlocks.add(blockName);
+   * 단계 내용에서 언급된 블록들을 RAG에서 검색
+   */
+  async searchBlocksInStep(stepContent) {
+    // 블록 이름 패턴 추출 ([], **[], () 등)
+    const blockPatterns = [
+      /\[([^\]]+)\]/g, // [블록명]
+      /\*\*\[([^\]]+)\]\*\*/g, // **[블록명]**
+      /「([^」]+)」/g, // 「블록명」
+    ];
+
+    const mentionedBlocks = new Set();
+
+    for (const pattern of blockPatterns) {
+      const matches = stepContent.matchAll(pattern);
+      for (const match of matches) {
+        const blockName = match[1].trim();
+        // 너무 짧거나 일반 단어는 제외
+        if (blockName.length > 2 && !["확인", "추가", "저장"].includes(blockName)) {
+          mentionedBlocks.add(blockName);
+        }
       }
     }
-  }
-  
-  if (mentionedBlocks.size === 0) return [];
-  
-  // 각 블록에 대해 RAG 검색
-  const blockResults = [];
-  
-  for (const blockName of mentionedBlocks) {
-    try {
-      const results = await chrome.runtime.sendMessage({
-        action: "searchBlocks",
-        query: blockName,
-        topK: 1,  // 가장 관련성 높은 것만
-      });
-      
-      if (results && results.blocks && results.blocks.length > 0) {
-        blockResults.push(results.blocks[0]);
+
+    if (mentionedBlocks.size === 0) return [];
+
+    // 각 블록에 대해 RAG 검색
+    const blockResults = [];
+
+    for (const blockName of mentionedBlocks) {
+      try {
+        const results = await chrome.runtime.sendMessage({
+          action: "searchBlocks",
+          query: blockName,
+          topK: 1, // 가장 관련성 높은 것만
+        });
+
+        if (results && results.blocks && results.blocks.length > 0) {
+          blockResults.push(results.blocks[0]);
+        }
+      } catch (error) {
+        console.warn(`블록 검색 실패 (${blockName}):`, error);
       }
-    } catch (error) {
-      console.warn(`블록 검색 실패 (${blockName}):`, error);
     }
+
+    return blockResults;
   }
-  
-  return blockResults;
-}
 
   async searchRelevantBlocks(responses) {
     const allText = `${responses.objects} ${responses.rules} ${responses.endCondition}`.toLowerCase();
@@ -571,12 +571,12 @@ true 또는 false만 답하세요.`,
         return this.createDefaultSteps(responses);
       }
 
-    // ✅ 1단계: 게임 내용 기반으로 RAG 검색
-    const relevantBlocks = await this.searchRelevantBlocks(responses);
-    console.log("🔍 검색된 블록:", relevantBlocks);
+      // ✅ 1단계: 게임 내용 기반으로 RAG 검색
+      const relevantBlocks = await this.searchRelevantBlocks(responses);
+      console.log("🔍 검색된 블록:", relevantBlocks);
 
-    // ✅ 2단계: RAG 결과를 GPT에게 제공
-    const blockContext = this.formatBlocksForAI(relevantBlocks);
+      // ✅ 2단계: RAG 결과를 GPT에게 제공
+      const blockContext = this.formatBlocksForAI(relevantBlocks);
 
       // 개선된 프롬프트
       const improvedPrompt = `Entry 블록코딩으로 게임을 만드는 핵심 단계를 설명해주세요.
@@ -601,6 +601,10 @@ ${blockContext}
    - "스프라이트" ❌ → "오브젝트" ✅
    - "타이머" ❌ → "초시계" ✅
    - "캔버스" ❌ → "무대" ✅
+
+   4. **카테고리명은 반드시 괄호 안에 한글로 작성**:
+   - (시작), (흐름), (움직임), (자료), (판단), (계산), (소리), (생김새)
+   - ❌ <start>, <variable> 같은 영어 태그 사용 금지
 
 **좋은 예시:**
 ### 클릭 이벤트 설정
@@ -643,17 +647,17 @@ ${blockContext}
       });
 
       const data = await response.json();
-      const gptResponse = data.choices[0].message.content;
+      let gptResponse = data.choices[0].message.content;
 
       console.log("📥 GPT 원본 응답:", gptResponse);
 
+      // ✅ HTML 파싱 전에 영어 카테고리를 한글로 변환
+      gptResponse = this.convertCategoriesToKorean(gptResponse);
       // 파싱
       const steps = this.parseGPTResponse(gptResponse);
 
-      const enhancedSteps = await this.enhanceStepsWithKnowledge(steps);  // ✅
+      const enhancedSteps = await this.enhanceStepsWithKnowledge(steps); // ✅
       console.log("✨ Knowledge + RAG 적용 완료");
-
-
 
       // 필터링 및 정제
       const filteredSteps = this.filterUnnecessarySteps(enhancedSteps);
@@ -671,83 +675,83 @@ ${blockContext}
       return this.createDefaultSteps(responses);
     }
   }
-/**
- * ✨ 핵심 함수: EntryKnowledge로 단계 내용 교체/보강
- */
-/**
- * ✨ 핵심 함수: EntryKnowledge + RAG로 단계 내용 보강
- */
-async enhanceStepsWithKnowledge(steps) {
-  const enhancedSteps = [];
-  
-  for (const step of steps) {
-    const title = step.title.toLowerCase();
-    let enhanced = { ...step };
-    
-    // 1. 오브젝트 추가는 EntryKnowledge 사용
-    if (title.match(/오브젝트.*추가|오브젝트.*생성|캐릭터.*추가/i)) {
-      const knowledgeContent = this.generateContentFromKnowledge("addObject");
-      enhanced.content = `${step.content}\n\n---\n\n### 📘 상세 가이드\n${knowledgeContent}`;
-      enhanced.category = "object";
-    }
-    // 2. 나머지는 RAG 블록 정보 추가
-    else {
-      const blocks = await this.searchBlocksInStep(step.content);
-      
-      if (blocks.length > 0) {
-        let blockInfo = "\n\n---\n\n### 🧩 사용할 블록\n\n";
-        
-        blocks.forEach(block => {
-          const categoryKorean = this.getCategoryKorean(block.category);
-          blockInfo += `**[${block.name || block.fileName}]**\n`;
-          blockInfo += `- 📍 위치: **${categoryKorean}** 카테고리\n`;
-          
-          if (block.description) {
-            blockInfo += `- 📝 설명: ${block.description}\n`;
-          }
-          
-          if (block.usage_examples && block.usage_examples.length > 0) {
-            blockInfo += `- 💡 사용 예시: ${block.usage_examples[0]}\n`;
-          }
-          
-          blockInfo += "\n";
-        });
-        
-        enhanced.content += blockInfo;
-      }
-    }
-    
-    enhancedSteps.push(enhanced);
-  }
-  
-  return enhancedSteps;
-}
+  /**
+   * ✨ 핵심 함수: EntryKnowledge로 단계 내용 교체/보강
+   */
+  /**
+   * ✨ 핵심 함수: EntryKnowledge + RAG로 단계 내용 보강
+   */
+  async enhanceStepsWithKnowledge(steps) {
+    const enhancedSteps = [];
 
-/**
- * EntryKnowledge에서 내용 생성
- */
-generateContentFromKnowledge(actionKey) {
-  const action = EntryKnowledge.uiActions?.[actionKey];
-  
-  if (!action) {
-    console.warn(`⚠️ ${actionKey}에 해당하는 Knowledge 없음`);
-    return "";
+    for (const step of steps) {
+      const title = step.title.toLowerCase();
+      let enhanced = { ...step };
+
+      // 1. 오브젝트 추가는 EntryKnowledge 사용
+      if (title.match(/오브젝트.*추가|오브젝트.*생성|캐릭터.*추가/i)) {
+        const knowledgeContent = this.generateContentFromKnowledge("addObject");
+        enhanced.content = `${step.content}\n\n---\n\n### 📘 상세 가이드\n${knowledgeContent}`;
+        enhanced.category = "object";
+      }
+      // 2. 나머지는 RAG 블록 정보 추가
+      else {
+        const blocks = await this.searchBlocksInStep(step.content);
+
+        if (blocks.length > 0) {
+          let blockInfo = "\n\n---\n\n### 🧩 사용할 블록\n\n";
+
+          blocks.forEach((block) => {
+            const categoryKorean = this.getCategoryKorean(block.category);
+            blockInfo += `**[${block.name || block.fileName}]**\n`;
+            blockInfo += `- 📍 위치: **${categoryKorean}** 카테고리\n`;
+
+            if (block.description) {
+              blockInfo += `- 📝 설명: ${block.description}\n`;
+            }
+
+            if (block.usage_examples && block.usage_examples.length > 0) {
+              blockInfo += `- 💡 사용 예시: ${block.usage_examples[0]}\n`;
+            }
+
+            blockInfo += "\n";
+          });
+
+          enhanced.content += blockInfo;
+        }
+      }
+
+      enhancedSteps.push(enhanced);
+    }
+
+    return enhancedSteps;
   }
-  
-  let content = `### ${action.icon} ${action.category}\n\n`;
-  
-  // 단계별 설명
-  action.steps.forEach((step, idx) => {
-    content += `${idx + 1}. ${step}\n`;
-  });
-  
-  // 위치 힌트
-  if (action.location) {
-    content += `\n💡 **위치**: ${action.location}`;
+
+  /**
+   * EntryKnowledge에서 내용 생성
+   */
+  generateContentFromKnowledge(actionKey) {
+    const action = EntryKnowledge.uiActions?.[actionKey];
+
+    if (!action) {
+      console.warn(`⚠️ ${actionKey}에 해당하는 Knowledge 없음`);
+      return "";
+    }
+
+    let content = `### ${action.icon} ${action.category}\n\n`;
+
+    // 단계별 설명
+    action.steps.forEach((step, idx) => {
+      content += `${idx + 1}. ${step}\n`;
+    });
+
+    // 위치 힌트
+    if (action.location) {
+      content += `\n💡 **위치**: ${action.location}`;
+    }
+
+    return content;
   }
-  
-  return content;
-}
   enhanceStepContent(content) {
     // Entry 전용 용어로 변환
     const entryTerms = {
@@ -767,6 +771,24 @@ generateContentFromKnowledge(actionKey) {
   }
 
   parseGPTResponse(gptResponse) {
+    // 영어 카테고리를 한글로 자동 변환
+    const categoryMap = {
+      start: "시작",
+      flow: "흐름",
+      moving: "움직임",
+      variable: "자료",
+      judgement: "판단",
+      calc: "계산",
+      sound: "소리",
+      looks: "생김새",
+    };
+
+    // <영어카테고리>를 (한글카테고리)로 변환
+    let fixed = gptResponse;
+    for (const [eng, kor] of Object.entries(categoryMap)) {
+      fixed = fixed.replace(new RegExp(`<${eng}>`, "gi"), `(${kor})`);
+    }
+
     const steps = [];
 
     // ### 패턴으로 분리
@@ -985,6 +1007,50 @@ generateContentFromKnowledge(actionKey) {
     });
 
     return steps.map((step) => ({ ...step, completed: false }));
+  }
+
+  // complexHandler.js에 추가
+
+  /**
+   * 영어 카테고리를 한글로 변환 (HTML 파싱 전에 실행)
+   */
+  convertCategoriesToKorean(text) {
+    const categoryMap = {
+      // 기본 카테고리
+      start: "시작",
+      flow: "흐름",
+      moving: "움직임",
+      variable: "자료",
+      judgement: "판단",
+      calc: "계산",
+      sound: "소리",
+      looks: "생김새",
+      brush: "붓",
+      func: "함수",
+
+      // 대소문자 혼용 대응
+      Start: "시작",
+      Flow: "흐름",
+      Moving: "움직임",
+      Variable: "자료",
+      Judgement: "판단",
+      Calc: "계산",
+      Sound: "소리",
+      Looks: "생김새",
+    };
+
+    let converted = text;
+
+    // <영어> 패턴을 (한글)로 변환
+    for (const [eng, kor] of Object.entries(categoryMap)) {
+      // <variable> → (자료)
+      converted = converted.replace(new RegExp(`<${eng}>`, "gi"), `(${kor})`);
+
+      // 혹시 **<variable>** 같은 케이스도 처리
+      converted = converted.replace(new RegExp(`\\*\\*<${eng}>\\*\\*`, "gi"), `**(${kor})**`);
+    }
+
+    return converted;
   }
 
   // EntryKnowledge 활용 함수
