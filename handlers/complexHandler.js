@@ -606,6 +606,11 @@ ${blockContext}
    - (시작), (흐름), (움직임), (자료), (판단), (계산), (소리), (생김새)
    - ❌ <start>, <variable> 같은 영어 태그 사용 금지
 
+**중요: 각 단계마다 제목 끝에 {오브젝트명} 표시**
+   - 예시: ### 점수 시스템 구현 {버튼}
+   - 예시: ### 이동 설정 {플레이어}
+   - 모든 단계 제목에 필수로 포함
+
 **좋은 예시:**
 ### 클릭 이벤트 설정
 * <시작>에서 [마우스를 클릭했을 때] 블록 가져오기
@@ -790,20 +795,33 @@ ${blockContext}
     }
 
     const steps = [];
-
-    // ### 패턴으로 분리
     const sections = gptResponse.split(/###\s*/);
 
     for (const section of sections) {
       if (!section.trim()) continue;
 
       const lines = section.split("\n");
-      const title = lines[0].trim();
+      let title = lines[0].trim();
+
+            // 제목에서 {오브젝트명} 추출 후 제거
+            let targetObject = "전체";
+            const titleObjectMatch = title.match(/\{([^}]+)\}/);
+            if (titleObjectMatch) {
+                targetObject = titleObjectMatch[1];
+                // 제목에서 {오브젝트명} 부분 제거
+                title = title.replace(/\s*\{[^}]+\}\s*/, '').trim();
+            }
+                // 내용 처리 - contentLines 변수 선언 추가
+                const contentLines = lines.slice(1);
+        let content = contentLines.join('\n').trim();
+
+                // 오브젝트 정보를 content 맨 앞에 추가
+                if (targetObject !== "전체") {
+                  content = `오브젝트: ${targetObject}**\n\n${content}`;
+              }
 
       // 제목이 너무 길면 스킵 (보통 설명문)
       if (title.length > 30) continue;
-
-      const content = lines.slice(1).join("\n").trim();
 
       // 내용이 있는 경우만 추가
       if (content.length > 10) {
@@ -1295,7 +1313,17 @@ ${blockContext}
     }
 
     const firstStep = steps[0];
+    const stepNumber = firstStep.stepNumber || 1;
+    const title = firstStep.title || "게임 제작 시작";
+    const targetObject = firstStep.targetObject || "전체";
+
+    let content = firstStep.content || "단계별 가이드를 준비하고 있습니다...";
     console.log("  - firstStep:", firstStep);
+
+        // 오브젝트 정보를 제목 바로 아래에 강조 표시
+        const objectBadge = targetObject !== "전체" 
+        ? `\n🎯대상 오브젝트: ${targetObject}\n`
+        : "";
 
     // firstStep 검증
     if (!firstStep) {
@@ -1304,9 +1332,7 @@ ${blockContext}
     }
 
     // 속성들에 기본값 제공
-    const stepNumber = firstStep.stepNumber || 1;
-    const title = firstStep.title || "게임 제작 시작";
-    let content = firstStep.content || "단계별 가이드를 준비하고 있습니다...";
+
 
     // 🔴 컨텍스트 정보 추가
     let contextSection = "";
@@ -1369,6 +1395,7 @@ ${blockContext}
       `📊 **전체 진행**: ${stepNumber} / ${totalSteps || steps.length} 단계${branchIndicator}\n\n` +
       `---\n\n` +
       `## Step ${stepNumber}: ${title}\n\n` +
+      `${objectBadge}\n` +  // 오브젝트 정보를 제목 바로 아래에
       `${content}` +
       `${contextSection}` +
       `\n\n---\n\n` +
