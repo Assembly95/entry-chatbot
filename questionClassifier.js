@@ -319,6 +319,32 @@ class EntryQuestionClassifier {
 
     let corrected = text;
 
+    // 🔥 0단계: Entry 동의어 변환 (제일 먼저!)
+    const entrySynonyms = {
+      "무한 반복": "계속 반복",
+      무한반복: "계속반복",
+      "무한 반복하기": "계속 반복하기",
+      스프라이트: "오브젝트",
+      브로드캐스트: "신호",
+      영원히: "계속",
+      forever: "계속 반복",
+    };
+
+    for (const [from, to] of Object.entries(entrySynonyms)) {
+      const regex = new RegExp(from, "gi");
+      corrected = corrected.replace(regex, to);
+    }
+
+    // 🔥 의미가 반대인 단어 쌍 (교정 금지)
+    const oppositeWords = [
+      ["x좌표", "y좌표"],
+      ["가로", "세로"],
+      ["위", "아래"],
+      ["왼쪽", "오른쪽"],
+      ["시작", "끝"],
+      ["열기", "닫기"],
+    ];
+
     // 1. BlockMappings의 오타 사전 활용 (null 체크 추가)
     if (this.blockMappings && this.blockMappings.commonTypos) {
       for (const [typo, correct] of Object.entries(this.blockMappings.commonTypos)) {
@@ -337,9 +363,16 @@ class EntryQuestionClassifier {
     }
 
     const correctedWords = words.map((word) => {
+      // 🔥 좌표 예외 처리 추가!
+      if (/[xy]좌표/i.test(word)) {
+        return word; // x좌표, y좌표는 교정하지 않음
+      }
       for (const keyword of allKeywords) {
+        if (/[xy]좌표/i.test(word) && /[xy]좌표/i.test(keyword) && word !== keyword) {
+          continue; // x좌표 ↔ y좌표 비교 건너뛰기
+        }
         const similarity = this.calculateJamoSimilarity(word, keyword);
-        if (similarity > 0.7 && similarity < 1) {
+        if (similarity > 0.85 && similarity < 1) {
           console.log(`오타 교정: ${word} → ${keyword} (유사도: ${(similarity * 100).toFixed(1)}%)`);
           return keyword;
         }

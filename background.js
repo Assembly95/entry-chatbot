@@ -46,6 +46,18 @@ chrome.runtime.onInstalled.addListener(() => {
   loadEntryBlockData();
 });
 
+// ===== 헬퍼 함수들 =====
+
+/**
+ * 블록 이름 복잡도 계산
+ * 파라미터가 많을수록, 이름이 길수록 복잡함
+ */
+function getBlockComplexity(blockName) {
+  const paramCount = (blockName.match(/\[/g) || []).length;
+  const length = blockName.length;
+  return paramCount * 10 + length;
+}
+
 function createReverseBlockMap() {
   // entryBlockMap이 로드되었는지 확인
   if (typeof entryBlockMap === "undefined") {
@@ -241,34 +253,25 @@ async function loadEntryBlockData() {
               const response = await fetch(url);
 
               if (!response.ok) {
-                console.error(`❌ 파일 로드 실패: ${category}/${fileName} - Status: ${response.status}`);
+                console.error(`❌ 파일 로드 실패: ${category}/${fileName}`);
                 continue;
               }
 
               const blockData = await response.json();
-
-              // id가 없으면 파일명에서 추출
               const blockId = blockData.id || fileName.replace(".json", "");
 
-              const imagePath = `data/block-images/${category}/${fileName.replace(".json", ".png")}`;
-              const imageUrl = chrome.runtime.getURL(imagePath);
-
-              let hasImage = false;
-              try {
-                const imgResponse = await fetch(imageUrl, { method: "HEAD" });
-                hasImage = imgResponse.ok;
-              } catch {
-                hasImage = false;
-              }
+              // 🔥 Entry 이름 매핑 적용!
+              const entryName = entryBlockMap && entryBlockMap[blockId] ? entryBlockMap[blockId] : blockData.name;
 
               allBlocks.push({
-                ...blockData, // 원본 데이터 먼저 (id가 있으면 사용)
-                id: blockData.id || fileName.replace(".json", ""), // id 없으면 파일명 사용
+                ...blockData,
+                id: blockId,
+                name: entryName, // 🔥 Entry 이름으로 교체!
                 category,
                 fileName: fileName.replace(".json", ""),
               });
 
-              console.log(`✅ 로드 성공: ${fileName} (ID: ${blockId})`);
+              console.log(`✅ 로드 성공: ${fileName} → "${entryName}"`);
             } catch (fileError) {
               console.error(`❌ 파일 처리 에러: ${category}/${fileName}`, fileError.message);
             }
@@ -280,6 +283,11 @@ async function loadEntryBlockData() {
 
       entryBlockData = allBlocks;
       console.log(`📚 Entry 블록 데이터 로드 완료: ${allBlocks.length}개`);
+
+      // 🔥 디버깅: repeat_inf 확인
+      const repeatBlock = allBlocks.find((b) => b.id === "repeat_inf");
+      console.log("🔍 repeat_inf 블록 이름:", repeatBlock?.name);
+
       return allBlocks;
     } catch (error) {
       console.error("Entry 데이터 로드 실패:", error);
@@ -588,62 +596,86 @@ async function searchEntryBlocks(userMessage, topK = 5, decomposed = null) {
       const lowerName = block.name.toLowerCase();
 
       const coreKeywords = {
-        키: 80,
-        누르: 70,
-        스페이스: 70,
-        반복: 80,
-        이동: 80,
-        시작: 80,
-        만약: 80,
-        변수: 80,
-        클릭: 70,
-        움직: 70,
-        // ⭐ 복제본 관련 추가 (낮은 점수)
-        복제본: 30, // 복제본만으로는 낮은 점수
-        만들: 40, // 만들기도 단독으로는 낮은 점수
-        삭제: 40, // 삭제도 단독으로는 낮은 점수
+        키: 100,
+        누르: 100,
+        스페이스: 100,
+        반복: 100,
+        이동: 100,
+        시작: 100,
+        만약: 100,
+        변수: 100,
+        클릭: 100,
+        움직: 100,
+        복제본: 80,
+        만들: 80,
+        삭제: 80,
+        소리: 100, // 🔥 추가
+        재생: 100, // 🔥 추가
+        멈춤: 100, // 🔥 추가
+        무한: 100,
+        계속: 100,
       };
 
+      // 🔥 Core 키워드 매칭 (부분 문자열도 OK)
       for (const [keyword, points] of Object.entries(coreKeywords)) {
-        if (tokens.includes(keyword) && lowerName.includes(keyword)) {
+        // tokens 중에 keyword를 포함하는 게 있나?
+        const matchedToken = tokens.find((token) => token.includes(keyword) || keyword.includes(token));
+
+        if (matchedToken && lowerName.includes(keyword)) {
           score += points;
           matchedBy.push(`name: ${keyword}`);
         }
       }
 
-      // 부분 매칭 (점수 낮춤)
+      // 부분 매칭 (Core에 없는 것만)
       for (const token of tokens) {
         if (token.length >= 2 && lowerName.includes(token)) {
-          score += 10; // 20에서 10으로 낮춤
+          // 이미 core로 매칭됐는지 확인
+          const alreadyCoreMatched = Object.keys(coreKeywords).some(
+            (key) => (token.includes(key) || key.includes(token)) && lowerName.includes(key)
+          );
+
+          if (alreadyCoreMatched) continue;
+
+          score += 5;
           matchedBy.push(`name-partial: ${token}`);
         }
       }
     }
 
-    // 3. description 매칭 (점수 낮춤)
+    // 3. description 매칭 (점수 더 낮춤)
     if (block.description && typeof block.description === "string") {
       const lowerDesc = block.description.toLowerCase();
       for (const token of tokens) {
         if (token && token.length >= 2 && lowerDesc.includes(token)) {
-          score += 5; // 10에서 5로 낮춤
+          score += 2; // 5 → 2로 감소
           matchedBy.push(`desc: ${token}`);
         }
       }
     }
 
-    // 4. usage_examples 매칭 (점수 낮춤)
+    // 4. usage_examples 매칭 (점수 더 낮춤)
     if (block.usage_examples && Array.isArray(block.usage_examples)) {
       for (const example of block.usage_examples) {
         if (example.description && typeof example.description === "string") {
           const lowerExample = example.description.toLowerCase();
           for (const token of tokens) {
             if (token && token.length >= 2 && lowerExample.includes(token)) {
-              score += 5; // 15에서 5로 낮춤
+              score += 1; // 5 → 1로 감소
               matchedBy.push(`example: ${token}`);
             }
           }
         }
       }
+    }
+    // 🔥 여기에 추가! ─────────────────────────
+    // 5. 단순성 보너스
+    const complexity = getBlockComplexity(block.name);
+    const simplicityBonus = (100 - complexity) * 0.05;
+    score += simplicityBonus;
+
+    if (simplicityBonus > 0) {
+      matchedBy.push(`simplicity: +${simplicityBonus.toFixed(1)}`);
     }
 
     // 디버깅: 점수가 있는 블록 로그
