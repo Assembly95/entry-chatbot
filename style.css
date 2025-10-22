@@ -583,6 +583,36 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* CoT 단계 내 섹션 스타일 */
+.step-section {
+  margin: 3px 0;
+  padding: 5px 14px;
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.step-section-location {
+  background: #e3f2fd;
+  border-left-color: #2196f3;
+}
+
+.step-section-purpose {
+  background: #fff3e0;
+  border-left-color: #ff9800;
+}
+
+.step-section-usage {
+  background: #f3e5f5;
+  border-left-color: #9c27b0;
+}
+
+.step-section strong {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
 /* style.css에 추가 */
 @keyframes pulse {
   0% {

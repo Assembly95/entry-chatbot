@@ -920,7 +920,7 @@ window.displayLearnerProgress = function (progress) {
             color: #555;
             line-height: 1.6;
             white-space: pre-wrap;
-          ">${firstStep.content}</div>
+">${formatStepContent(firstStep.content)}</div>
         </div>
       </div>
       
@@ -1000,6 +1000,55 @@ window.displayLearnerProgress = function (progress) {
 
   // setupSimplifiedCoTListeners 함수 뒤에 새로운 함수들 추가
   // (약 1160번째 줄 이후)
+
+  function formatStepContent(content) {
+    console.log("🔍 원본 content:", content);
+
+    const lines = content.split("\n");
+    let result = "";
+    let currentSection = null;
+    let sectionLines = [];
+
+    lines.forEach((line, index) => {
+      const trimmed = line.trim();
+
+      // 새로운 섹션 시작 감지
+      if (trimmed.includes("블록 위치:") || trimmed.includes("버튼 위치:")) {
+        // 이전 섹션 마무리
+        if (currentSection && sectionLines.length > 0) {
+          result += `<div class="step-section step-section-${currentSection}">${sectionLines.join("\n")}</div>\n`;
+        }
+        currentSection = "location";
+        sectionLines = [line];
+      } else if (trimmed.includes("왜 필요한지:")) {
+        if (currentSection && sectionLines.length > 0) {
+          result += `<div class="step-section step-section-${currentSection}">${sectionLines.join("\n")}</div>\n`;
+        }
+        currentSection = "purpose";
+        sectionLines = [line];
+      } else if (trimmed.includes("사용할 블록:") || trimmed.includes("사용 방법:")) {
+        if (currentSection && sectionLines.length > 0) {
+          result += `<div class="step-section step-section-${currentSection}">${sectionLines.join("\n")}</div>\n`;
+        }
+        currentSection = "usage";
+        sectionLines = [line];
+      } else if (currentSection) {
+        // 현재 섹션에 줄 추가
+        sectionLines.push(line);
+      } else {
+        // 섹션 밖의 내용
+        result += line + "\n";
+      }
+    });
+
+    // 마지막 섹션 처리
+    if (currentSection && sectionLines.length > 0) {
+      result += `<div class="step-section step-section-${currentSection}">${sectionLines.join("\n")}</div>\n`;
+    }
+
+    console.log("✅ 포맷된 result:", result);
+    return result;
+  }
 
   // 브랜치 그래프 버튼 이벤트 설정
   function setupBranchGraphButton(cotId) {
@@ -1484,7 +1533,7 @@ window.displayLearnerProgress = function (progress) {
       color: #555;
       line-height: 1.6;
       white-space: pre-wrap;
-    ">${step.content}</div>
+    ">${formatStepContent(step.content)}</div>
   `;
 
     // 진행 상황 업데이트
