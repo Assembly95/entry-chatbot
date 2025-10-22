@@ -2677,6 +2677,11 @@ window.displayLearnerProgress = function (progress) {
 
   // Chrome extension 메시지 리스너
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "ping") {
+      sendResponse({ status: "ready" });
+      return true;
+    }
+
     if (request.type === "TOGGLE_SIDEBAR") {
       toggleSidebarOpen();
     }

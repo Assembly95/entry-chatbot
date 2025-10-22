@@ -75,49 +75,63 @@ class ComplexHandler {
   /**
    * 단계 내용에서 언급된 블록들을 RAG에서 검색
    */
-  async searchBlocksInStep(stepContent) {
-    // 블록 이름 패턴 추출 ([], **[], () 등)
-    const blockPatterns = [
-      /\[([^\]]+)\]/g, // [블록명]
-      /\*\*\[([^\]]+)\]\*\*/g, // **[블록명]**
-      /「([^」]+)」/g, // 「블록명」
-    ];
+  async searchBlocksInStep(blockName) {
+    try {
+      // 현재 활성 탭 확인
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tabs || tabs.length === 0) {
+        console.warn("활성 탭을 찾을 수 없음");
+        return null;
+      }
 
-    const mentionedBlocks = new Set();
+      // 탭이 Entry 페이지인지 확인
+      if (!tabs[0].url.includes("playentry.org")) {
+        console.warn("Entry 페이지가 아님");
+        return null;
+      }
 
-    for (const pattern of blockPatterns) {
-      const matches = stepContent.matchAll(pattern);
-      for (const match of matches) {
-        const blockName = match[1].trim();
-        // 너무 짧거나 일반 단어는 제외
-        if (blockName.length > 2 && !["확인", "추가", "저장"].includes(blockName)) {
-          mentionedBlocks.add(blockName);
+      // 메시지 전송 시도
+      const response = await chrome.tabs.sendMessage(tabs[0].id, {
+        action: "searchBlock",
+        blockName: blockName,
+      });
+
+      return response;
+    } catch (error) {
+      // 연결 실패 시 재시도 로직
+      if (error.message.includes("Could not establish connection")) {
+        console.log(`연결 재시도: ${blockName}`);
+
+        // Content script 재주입 시도
+        await this.reinjectContentScript(tabs[0].id);
+
+        // 잠시 대기 후 재시도
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        try {
+          return await chrome.tabs.sendMessage(tabs[0].id, {
+            action: "searchBlock",
+            blockName: blockName,
+          });
+        } catch (retryError) {
+          console.warn(`블록 검색 실패: ${blockName}`);
+          return null;
         }
       }
+      throw error;
     }
+  }
 
-    if (mentionedBlocks.size === 0) return [];
-
-    // 각 블록에 대해 RAG 검색
-    const blockResults = [];
-
-    for (const blockName of mentionedBlocks) {
-      try {
-        const results = await chrome.runtime.sendMessage({
-          action: "searchBlocks",
-          query: blockName,
-          topK: 1, // 가장 관련성 높은 것만
-        });
-
-        if (results && results.blocks && results.blocks.length > 0) {
-          blockResults.push(results.blocks[0]);
-        }
-      } catch (error) {
-        console.warn(`블록 검색 실패 (${blockName}):`, error);
-      }
+  // Content Script 재주입 함수
+  async reinjectContentScript(tabId) {
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ["content.js"],
+      });
+    } catch (e) {
+      console.warn("Content script 재주입 실패:", e);
     }
-
-    return blockResults;
   }
 
   async searchRelevantBlocks(responses) {
@@ -564,6 +578,9 @@ true 또는 false만 답하세요.`,
 
   // complexHandler.js - createGameStepsWithAI 함수를 완전히 교체
 
+  // complexHandler.js의 createGameStepsWithAI 함수를 간단하게 수정
+  // 기존의 복잡한 코드를 모두 지우고 이것으로 교체
+
   async createGameStepsWithAI(responses) {
     try {
       const storageData = await chrome.storage.sync.get(["openai_api_key"]);
@@ -571,62 +588,41 @@ true 또는 false만 답하세요.`,
         return this.createDefaultSteps(responses);
       }
 
-      // ✅ 1단계: 게임 내용 기반으로 RAG 검색
-      const relevantBlocks = await this.searchRelevantBlocks(responses);
-      console.log("🔍 검색된 블록:", relevantBlocks);
+      console.log("📝 게임 정보:", responses);
 
-      // ✅ 2단계: RAG 결과를 GPT에게 제공
-      const blockContext = this.formatBlocksForAI(relevantBlocks);
+      // ===== 심플한 CoT 요청 =====
+      const accuratePrompt = `
+다음 게임을 Entry 블록코딩으로 만드는 방법을 Chain of Thought 방식으로 단계별로 설명해줘.
 
-      // 개선된 프롬프트
-      const improvedPrompt = `Entry 블록코딩으로 게임을 만드는 핵심 단계를 설명해주세요.
+게임 정보:
+- 오브젝트: ${responses.objects}
+- 규칙: ${responses.rules}  
+- 종료 조건: ${responses.endCondition}
 
-      **게임 정보:**
-      - 오브젝트: ${responses.objects}
-      - 규칙: ${responses.rules}
-      - 종료 조건: ${responses.endCondition}
-      
+형식 규칙:
+1. 각 단계는 "### 단계 3: 게임 종료 타이머 설정" 형식으로 작성 (단계 번호와 제목 함께 표시)
+2. 각 단계마다 반드시 이 순서로 설명:
+   a) **블록 작업인 경우**: "블록 위치: 자료 카테고리"
+   b) **UI 작업인 경우**: "버튼 위치: 무대 아래 시작하기 버튼 옆"
+   c) 왜 필요한지: 이 단계의 목적
+   d) **블록 작업**: "사용할 블록", **UI 작업**: "사용 방법"
 
-      **사용 가능한 Entry 블록 정보:**
-${blockContext}
+Entry 블록 사용법:
+- 변수 만들기: "자료 카테고리 → 변수 추가(+) 버튼 클릭 → 변수명 입력"
+- 그 후 [변수 ( )를 ( )로 정하기], [변수 ( )를 ( )만큼 바꾸기] 블록 사용
 
-**작성 규칙:**
-1. 위에 제공된 블록 정보를 **반드시 참조**하세요
-2. 각 단계는 아래 형식을 **엄격히** 따르세요:
-   * <카테고리명>에서 [블록명] 가져오기
-   * [블록A]와 [블록B] 조립하기
-   * [블록] 안의 값을 ~로 설정하기
+- 오브젝트 추가하기: "무대 아래 시작하기 버튼 옆 → +오브젝트 추가하기 버튼 클릭 → 오브젝트 선택"
+- 이것은 블록이 아닌 UI 작업입니다
 
-3. Entry 전용 용어를 사용하세요:
-   - "스프라이트" ❌ → "오브젝트" ✅
-   - "타이머" ❌ → "초시계" ✅
-   - "캔버스" ❌ → "무대" ✅
+Entry 카테고리: 시작, 흐름, 움직임, 자료, 판단, 계산, 생김새, 소리, 함수
 
-   4. **카테고리명은 반드시 괄호 안에 한글로 작성**:
-   - (시작), (흐름), (움직임), (자료), (판단), (계산), (소리), (생김새)
-   - ❌ <start>, <variable> 같은 영어 태그 사용 금지
-
-**중요: 각 단계마다 제목 끝에 {오브젝트명} 표시**
-   - 예시: ### 점수 시스템 구현 {버튼}
-   - 예시: ### 이동 설정 {플레이어}
-   - 모든 단계 제목에 필수로 포함
-
-**좋은 예시:**
-### 클릭 이벤트 설정
-* <시작>에서 [마우스를 클릭했을 때] 블록 가져오기
-* <자료>에서 [변수 ( )를 ( )만큼 바꾸기] 블록 가져오기
-* 두 블록을 조립하기
-* 변수를 "점수", 값을 "1"로 설정하기
-
-**나쁜 예시:**
-### 클릭 이벤트 설정
-- 마우스 클릭 블록을 추가합니다
-- 점수를 증가시키는 블록을 연결합니다
-
-**응답 형식:**
-### 단계제목
-* <카테고리>에서 [블록명] 가져오기
-* ...`;
+예시 출력:
+### 단계 1: 점수 변수 만들기
+**블록 위치**: 자료 카테고리
+**왜 필요한지**: 게임 점수를 저장하고 관리하기 위해 필요합니다.
+**사용할 블록**: 
+- 자료 카테고리에서 변수 추가(+) 버튼을 눌러 '점수' 변수 생성
+- [변수 (점수)를 (0)으로 정하기] 블록 사용`;
 
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
@@ -638,98 +634,153 @@ ${blockContext}
           model: "gpt-4o-mini",
           messages: [
             {
-              role: "system",
-              content: "Entry 블록코딩 전문가. 제공된 블록 정보를 정확히 참조하여 답변합니다.",
-            },
-            {
               role: "user",
-              content: improvedPrompt,
+              content: accuratePrompt,
             },
           ],
-          temperature: 0.3,
-          max_tokens: 2000,
+          temperature: 0.5,
+          max_tokens: 1000,
         }),
       });
 
       const data = await response.json();
-      let gptResponse = data.choices[0].message.content;
+      const cotResponse = data.choices[0].message.content;
 
-      console.log("📥 GPT 원본 응답:", gptResponse);
+      // ===== 콘솔에 원본 응답 출력 =====
+      console.log("\n" + "=".repeat(80));
+      console.log("🤖 GPT-4o-mini CoT 원본 응답:");
+      console.log("=".repeat(80));
+      console.log(cotResponse);
+      console.log("=".repeat(80) + "\n");
 
-      // ✅ HTML 파싱 전에 영어 카테고리를 한글로 변환
-      gptResponse = this.convertCategoriesToKorean(gptResponse);
-      // 파싱
-      const steps = this.parseGPTResponse(gptResponse);
+      // ===== 간단한 파싱 (일단 줄바꿈으로만 나누기) =====
+      const lines = cotResponse.split("\n").filter((line) => line.trim());
+      const steps = [];
 
-      const enhancedSteps = await this.enhanceStepsWithKnowledge(steps); // ✅
-      console.log("✨ Knowledge + RAG 적용 완료");
+      let currentStep = null;
+      let stepNumber = 1;
 
-      // 필터링 및 정제
-      const filteredSteps = this.filterUnnecessarySteps(enhancedSteps);
-      const refinedSteps = filteredSteps.map((step, idx) => ({
-        ...step,
-        stepNumber: idx + 1,
-        title: this.cleanStepTitle(step.title),
-        content: this.enhanceStepContent(step.content),
-      }));
+      // 660-680번 줄 부분을 이렇게 교체
+      for (const line of lines) {
+        // ### 단계 X: 제목 형식 파싱
+        const stepMatch = line.match(/^###\s*단계\s*(\d+)\s*:\s*(.+)/);
 
-      console.log(`✅ 최종 ${refinedSteps.length}개 단계 생성`);
-      return refinedSteps;
+        if (stepMatch) {
+          if (currentStep) {
+            steps.push(currentStep);
+          }
+          currentStep = {
+            title: stepMatch[2].trim(), // ✅ 실제 제목 추출 ("버튼 오브젝트 추가하기")
+            content: "", // content는 빈 문자열로 시작
+            stepNumber: parseInt(stepMatch[1]), // ✅ GPT가 준 번호 사용
+            completed: false,
+          };
+        } else if (currentStep && line.trim()) {
+          // 제목 줄이 아니면 content에 추가
+          currentStep.content += (currentStep.content ? "\n" : "") + line;
+        }
+      }
+
+      if (currentStep) {
+        steps.push(currentStep);
+      }
+
+      // 최소 4개 단계 보장
+      if (steps.length < 4) {
+        steps.push(
+          { title: "시작 설정", content: "시작 버튼 클릭 시 게임 시작", stepNumber: 1, completed: false },
+          { title: "변수 초기화", content: "점수, 시간 등 변수 설정", stepNumber: 2, completed: false },
+          { title: "메인 로직", content: "게임의 핵심 동작 구현", stepNumber: 3, completed: false },
+          { title: "종료 조건", content: "게임 종료 조건 체크", stepNumber: 4, completed: false }
+        );
+      }
+
+      console.log("📊 파싱된 단계 수:", steps.length);
+      console.log("📋 각 단계 제목:");
+      steps.forEach((step, idx) => {
+        console.log(`  ${idx + 1}. ${step.title}`);
+      });
+
+      return steps;
     } catch (error) {
-      console.error("AI 단계 생성 실패:", error);
+      console.error("❌ CoT 생성 실패:", error);
       return this.createDefaultSteps(responses);
     }
   }
+
+  // ===== 기본 단계 생성 (API 실패시 폴백) =====
+  createDefaultSteps(responses) {
+    return [
+      {
+        title: "게임 시작 설정",
+        content: `${responses.objects} 오브젝트를 준비하고 시작 이벤트를 설정합니다.`,
+        stepNumber: 1,
+        completed: false,
+      },
+      {
+        title: "변수 초기화",
+        content: "게임에 필요한 변수들을 만들고 초기값을 설정합니다.",
+        stepNumber: 2,
+        completed: false,
+      },
+      {
+        title: "메인 게임 로직",
+        content: `${responses.rules}를 구현합니다.`,
+        stepNumber: 3,
+        completed: false,
+      },
+      {
+        title: "종료 조건",
+        content: `${responses.endCondition}를 체크하고 게임을 종료합니다.`,
+        stepNumber: 4,
+        completed: false,
+      },
+    ];
+  }
+
   /**
    * ✨ 핵심 함수: EntryKnowledge로 단계 내용 교체/보강
    */
   /**
    * ✨ 핵심 함수: EntryKnowledge + RAG로 단계 내용 보강
    */
+  // complexHandler.js 수정
   async enhanceStepsWithKnowledge(steps) {
-    const enhancedSteps = [];
+    for (let step of steps) {
+      try {
+        // 블록 검색 시도
+        const blockInfo = await this.searchBlocksInStep(step.blockName);
 
-    for (const step of steps) {
-      const title = step.title.toLowerCase();
-      let enhanced = { ...step };
-
-      // 1. 오브젝트 추가는 EntryKnowledge 사용
-      if (title.match(/오브젝트.*추가|오브젝트.*생성|캐릭터.*추가/i)) {
-        const knowledgeContent = this.generateContentFromKnowledge("addObject");
-        enhanced.content = `${step.content}\n\n---\n\n### 📘 상세 가이드\n${knowledgeContent}`;
-        enhanced.category = "object";
-      }
-      // 2. 나머지는 RAG 블록 정보 추가
-      else {
-        const blocks = await this.searchBlocksInStep(step.content);
-
-        if (blocks.length > 0) {
-          let blockInfo = "\n\n---\n\n### 🧩 사용할 블록\n\n";
-
-          blocks.forEach((block) => {
-            const categoryKorean = this.getCategoryKorean(block.category);
-            blockInfo += `**[${block.name || block.fileName}]**\n`;
-            blockInfo += `- 📍 위치: **${categoryKorean}** 카테고리\n`;
-
-            if (block.description) {
-              blockInfo += `- 📝 설명: ${block.description}\n`;
-            }
-
-            if (block.usage_examples && block.usage_examples.length > 0) {
-              blockInfo += `- 💡 사용 예시: ${block.usage_examples[0]}\n`;
-            }
-
-            blockInfo += "\n";
-          });
-
-          enhanced.content += blockInfo;
+        if (blockInfo) {
+          step.blockDetails = blockInfo;
+        } else {
+          // Fallback: 로컬 블록 매핑 사용
+          step.blockDetails = this.getLocalBlockInfo(step.blockName);
         }
+      } catch (error) {
+        // 에러 시 로컬 데이터 사용
+        step.blockDetails = this.getLocalBlockInfo(step.blockName);
       }
-
-      enhancedSteps.push(enhanced);
     }
+    return steps;
+  }
 
-    return enhancedSteps;
+  // 로컬 블록 정보 제공
+  getLocalBlockInfo(blockName) {
+    // blockMappings.js 데이터 활용
+    const localMappings = {
+      "시작하기 버튼을 클릭했을 때": {
+        category: "start",
+        description: "프로그램 시작 시 실행",
+      },
+      "무한 반복하기": {
+        category: "flow",
+        description: "블록을 계속 반복 실행",
+      },
+      // ... 더 많은 매핑
+    };
+
+    return localMappings[blockName] || null;
   }
 
   /**
@@ -795,44 +846,78 @@ ${blockContext}
     }
 
     const steps = [];
-    const sections = gptResponse.split(/###\s*/);
+    const sections = gptResponse.split(/### 단계 \d+:/);
 
-    for (const section of sections) {
-      if (!section.trim()) continue;
+    // 첫 번째 빈 섹션 제거
+    if (sections[0].trim() === "") {
+      sections.shift();
+    }
+
+    // 제목들 추출 (### 단계 1: 제목, ### 단계 2: 제목 형식에서 제목만)
+    const titleMatches = gptResponse.match(/### 단계 \d+: ([^\n]+)/g) || [];
+    const titles = titleMatches.map((match) => {
+      return match.replace(/### 단계 \d+: /, "").trim();
+    });
+
+    sections.forEach((section, index) => {
+      if (!section.trim()) return;
 
       const lines = section.split("\n");
-      let title = lines[0].trim();
+      let content = "";
+      let blockLocation = "";
+      let reason = "";
+      let blocks = "";
 
-            // 제목에서 {오브젝트명} 추출 후 제거
-            let targetObject = "전체";
-            const titleObjectMatch = title.match(/\{([^}]+)\}/);
-            if (titleObjectMatch) {
-                targetObject = titleObjectMatch[1];
-                // 제목에서 {오브젝트명} 부분 제거
-                title = title.replace(/\s*\{[^}]+\}\s*/, '').trim();
+      // 각 줄 파싱
+      lines.forEach((line) => {
+        const trimmedLine = line.trim();
+
+        if (trimmedLine.includes("블록 위치:") || trimmedLine.includes("블록을 가져올 카테고리:")) {
+          blockLocation = trimmedLine.split(":")[1]?.trim() || "";
+        } else if (trimmedLine.includes("왜 필요한지:") || trimmedLine.includes("왜 이 단계가 필요한지:")) {
+          reason = trimmedLine.split(":")[1]?.trim() || "";
+        } else if (trimmedLine.includes("사용할 블록:") || trimmedLine.includes("어떤 블록을 사용해야 하는지:")) {
+          blocks = trimmedLine.split(":")[1]?.trim() || "";
+        }
+
+        // ** 로 감싸진 부분 처리
+        if (trimmedLine.startsWith("**") && trimmedLine.includes("**:")) {
+          const label = trimmedLine.match(/\*\*([^:]+):/)?.[1];
+          const value = trimmedLine.split("**:")[1]?.trim();
+
+          if (label && value) {
+            if (label.includes("블록") && label.includes("위치")) {
+              blockLocation = value;
+            } else if (label.includes("왜") || label.includes("필요")) {
+              reason = value;
+            } else if (label.includes("사용") && label.includes("블록")) {
+              blocks = value;
             }
-                // 내용 처리 - contentLines 변수 선언 추가
-                const contentLines = lines.slice(1);
-        let content = contentLines.join('\n').trim();
+          }
+        }
+      });
 
-                // 오브젝트 정보를 content 맨 앞에 추가
-                if (targetObject !== "전체") {
-                  content = `오브젝트: ${targetObject}**\n\n${content}`;
-              }
+      // content 조합
+      const contentParts = [];
+      if (blockLocation) contentParts.push(`**블록 위치**: ${blockLocation}`);
+      if (reason) contentParts.push(`**왜 필요한지**: ${reason}`);
+      if (blocks) contentParts.push(`**사용할 블록**: ${blocks}`);
 
-      // 제목이 너무 길면 스킵 (보통 설명문)
-      if (title.length > 30) continue;
-
-      // 내용이 있는 경우만 추가
-      if (content.length > 10) {
-        steps.push({
-          title: title.replace(":", "").trim(),
-          content: content,
-          category: this.getCategoryFromContent(content),
-          completed: false,
-        });
+      // 만약 구조화된 정보가 없으면 원본 텍스트 사용
+      if (contentParts.length === 0) {
+        content = section.trim();
+      } else {
+        content = contentParts.join("\n");
       }
-    }
+
+      steps.push({
+        title: titles[index] || `단계 ${index + 1}`, // 추출한 제목 사용
+        content: content,
+        stepNumber: index + 1,
+        completed: false,
+        category: "general",
+      });
+    });
 
     return steps;
   }
@@ -1077,6 +1162,17 @@ ${blockContext}
       const pattern = EntryKnowledge.commonPatterns[patternKey];
       let content = `### ${pattern.description}\\n\\n`;
 
+      // 🔴 UI 작업인 경우
+      if (pattern.isUIAction) {
+        content += `**버튼 위치**: ${pattern.uiLocation || "UI 영역"}\\n\\n`;
+        content += `**사용 방법**:\\n`;
+      }
+      // 블록 작업인 경우
+      else {
+        content += `**블록 위치**: ${this.getCategoryKorean(pattern.category || "unknown")} 카테고리\\n\\n`;
+        content += `**사용할 블록**:\\n`;
+      }
+
       pattern.steps.forEach((step, idx) => {
         content += `${idx + 1}. ${step}\\n`;
       });
@@ -1320,10 +1416,8 @@ ${blockContext}
     let content = firstStep.content || "단계별 가이드를 준비하고 있습니다...";
     console.log("  - firstStep:", firstStep);
 
-        // 오브젝트 정보를 제목 바로 아래에 강조 표시
-        const objectBadge = targetObject !== "전체" 
-        ? `\n🎯대상 오브젝트: ${targetObject}\n`
-        : "";
+    // 오브젝트 정보를 제목 바로 아래에 강조 표시
+    const objectBadge = targetObject !== "전체" ? `\n🎯대상 오브젝트: ${targetObject}\n` : "";
 
     // firstStep 검증
     if (!firstStep) {
@@ -1332,7 +1426,6 @@ ${blockContext}
     }
 
     // 속성들에 기본값 제공
-
 
     // 🔴 컨텍스트 정보 추가
     let contextSection = "";
@@ -1395,7 +1488,7 @@ ${blockContext}
       `📊 **전체 진행**: ${stepNumber} / ${totalSteps || steps.length} 단계${branchIndicator}\n\n` +
       `---\n\n` +
       `## Step ${stepNumber}: ${title}\n\n` +
-      `${objectBadge}\n` +  // 오브젝트 정보를 제목 바로 아래에
+      `${objectBadge}\n` + // 오브젝트 정보를 제목 바로 아래에
       `${content}` +
       `${contextSection}` +
       `\n\n---\n\n` +

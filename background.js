@@ -778,6 +778,28 @@ async function handleAIRequest(request) {
         result.rawBlocks = ragResults;
     }
 
+    // ============ 여기에 추가! ============
+    // 프롬프트 적용 전 원본 응답 로깅
+    console.log("\n" + "=".repeat(60));
+    console.log("🔤 프롬프트 적용 전 RAW 응답:");
+    console.log("=".repeat(60));
+
+    // 원본 응답 출력
+    if (result.response) {
+      console.log(result.response);
+    }
+
+    // RAG 검색 결과도 함께 표시
+    if (ragResults && ragResults.length > 0) {
+      console.log("\n📚 RAG 검색된 블록들:");
+      ragResults.forEach((block, idx) => {
+        console.log(`${idx + 1}. ${block.name} (${block.category})`);
+      });
+    }
+
+    console.log("=".repeat(60) + "\n");
+    // ========================================
+
     // 결과 확인
     if (!result) {
       console.error("핸들러가 null 반환");
@@ -1097,6 +1119,11 @@ async function callOpenAI(messages, apiKey = null) {
     }
 
     const data = await response.json();
+
+    // OpenAI 원본 응답 로깅
+    console.log("🤖 OpenAI 원본 응답:");
+    console.log(data.choices[0].message.content);
+
     return data.choices[0].message.content;
   } catch (error) {
     console.error("OpenAI API 호출 실패:", error);
@@ -1467,6 +1494,15 @@ function sendToggle(tabId) {
   chrome.tabs.sendMessage(tabId, { type: "TOGGLE_SIDEBAR" }, () => {
     void chrome.runtime.lastError;
   });
+}
+
+async function isContentScriptReady(tabId) {
+  try {
+    const response = await chrome.tabs.sendMessage(tabId, { action: "ping" });
+    return response && response.status === "ready";
+  } catch (e) {
+    return false;
+  }
 }
 
 async function openOrFocusEntryAndToggle(fromTab) {
