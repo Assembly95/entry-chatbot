@@ -318,6 +318,176 @@ true 또는 false만 답하세요.`,
     return validBlocks[category]?.some((valid) => blockName.includes(valid.replace(/\(.*?\)/g, "")));
   }
 
+  // 320번 줄 근처, startDesignMode 함수 앞에 추가
+
+  // ===== 블록 이름 보정 함수들 =====
+  extractBlockNames(stepContent) {
+    const blockPattern = /\[([^\]]+)\]/g;
+    const matches = [];
+    let match;
+
+    while ((match = blockPattern.exec(stepContent)) !== null) {
+      matches.push(match[1]);
+    }
+
+    return matches;
+  }
+
+  calculateSimilarity(str1, str2) {
+    // 특수문자 제거 후 키워드 추출
+    const normalize = (str) =>
+      str
+        .replace(/[\[\]\(\)]/g, "")
+        .trim()
+        .toLowerCase();
+    const keywords1 = normalize(str1).split(/\s+/);
+    const keywords2 = normalize(str2).split(/\s+/);
+
+    // 공통 키워드 찾기
+    const commonWords = keywords1.filter((word) => keywords2.some((w) => w.includes(word) || word.includes(w)));
+
+    return commonWords.length / Math.max(keywords1.length, keywords2.length);
+  }
+
+  findClosestBlockId(gptBlockName) {
+    let bestMatch = null;
+    let bestScore = 0;
+
+    for (const [id, correctName] of Object.entries(entryBlockMap)) {
+      const score = this.calculateSimilarity(gptBlockName, correctName);
+
+      if (score > bestScore && score > 0.5) {
+        bestScore = score;
+        bestMatch = { id, name: correctName };
+      }
+    }
+
+    return bestMatch;
+  }
+
+  calculateSimilarity(str1, str2) {
+    const keywords1 = str1.replace(/[\[\]\(\)]/g, "").split(/\s+/);
+    const keywords2 = str2.replace(/[\[\]\(\)]/g, "").split(/\s+/);
+
+    const commonWords = keywords1.filter((word) => keywords2.some((w) => w.includes(word) || word.includes(w)));
+
+    return commonWords.length / Math.max(keywords1.length, keywords2.length);
+  }
+
+  async enrichBlockWithRAG(blockId) {
+    // 블록 ID로 카테고리 추론
+    const categoryMap = {
+      move_: "moving",
+      locate_: "moving",
+      rotate_: "moving",
+      when_: "start",
+      message_: "start",
+      repeat_: "flow",
+      wait_: "flow",
+      stop_: "flow",
+      _if: "flow",
+      create_: "flow",
+      sound_: "sound",
+      play_: "sound",
+      set_variable: "variable",
+      change_variable: "variable",
+      get_variable: "variable",
+      is_: "judgement",
+      reach_: "judgement",
+      boolean_: "judgement",
+      calc_: "calc",
+      coordinate_: "calc",
+      show: "looks",
+      hide: "looks",
+      dialog_: "looks",
+      change_: "looks",
+      brush_: "brush",
+      text_: "text",
+      function_: "func",
+    };
+
+    let category = null;
+    for (const [prefix, cat] of Object.entries(categoryMap)) {
+      if (blockId.startsWith(prefix) || blockId.includes(prefix)) {
+        category = cat;
+        break;
+      }
+    }
+    if (!category) {
+      console.warn(`카테고리 추론 실패: ${blockId}`);
+      return null;
+    }
+
+    try {
+      const response = await fetch(chrome.runtime.getURL(`data/blocks/${category}/${blockId}.json`));
+      const blockData = await response.json();
+
+      return {
+        id: blockId,
+        name: blockData.name,
+        category: blockData.category,
+        description: blockData.description,
+        usage: blockData.usage_examples?.[0],
+      };
+    } catch (error) {
+      console.warn(`RAG 파일 로드 실패: ${blockId}`, error);
+      return null;
+    }
+  }
+
+  async correctStepWithRAG(step) {
+    // 🔴 타이머 감지 및 변환 (가장 먼저 실행)
+    if (step.content.match(/타이머|timer/gi)) {
+      console.log("  ⚠️ 타이머 감지 - 변수 기반 시간 측정으로 변환");
+
+      step.content = this.replaceTimerWithVariable(step.content);
+    }
+    const extractedBlocks = this.extractBlockNames(step.content);
+    console.log(`  🔍 추출된 블록: ${extractedBlocks.join(", ")}`);
+
+    for (const gptBlock of extractedBlocks) {
+      const match = this.findClosestBlockId(gptBlock);
+
+      if (match) {
+        console.log(`  ✓ 매칭: "${gptBlock}" → "${match.name}" (ID: ${match.id})`);
+
+        const ragData = await this.enrichBlockWithRAG(match.id);
+
+        if (ragData) {
+          step.content = step.content.replace(
+            new RegExp(`\\[${gptBlock.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\]`, "g"),
+            `[${ragData.name}]`
+          );
+
+          step.category = ragData.category;
+          console.log(`  ✅ 보정 완료: ${ragData.category} 카테고리`);
+        }
+      } else {
+        console.warn(`  ⚠️ 매칭 실패: "${gptBlock}"`);
+      }
+    }
+
+    return step;
+  }
+
+  replaceTimerWithVariable(content) {
+    // 타이머 관련 표현 모두 제거
+    let fixed = content.replace(/\[타이머[^\]]*\]/gi, "");
+    fixed = fixed.replace(/타이머를?\s*사용하여?/gi, "");
+
+    // 시간 측정 가이드 추가
+    fixed += "\n\n💡 **시간 측정 방법**\n";
+    fixed += '1. 자료 카테고리에서 "시간" 변수 생성\n';
+    fixed += "2. [변수 (시간)을 (0)으로 정하기]\n";
+    fixed += "3. [계속 반복하기] 안에:\n";
+    fixed += "   - [1초 기다리기]\n";
+    fixed += "   - [변수 (시간)을 (1)만큼 더하기]\n";
+    fixed += "   - [만약 (시간) > (제한시간) 라면]\n";
+    fixed += "     └─ [모든 코드 멈추기]";
+
+    return fixed;
+  }
+
   startDesignMode(message) {
     const designSessionId = `design-${Date.now()}`;
 
@@ -607,6 +777,13 @@ true 또는 false만 답하세요.`,
    c) 왜 필요한지: 이 단계의 목적
    d) **블록 작업**: "사용할 블록", **UI 작업**: "사용 방법"
 
+Entry 블록 사용 시 주의사항:
+❌ 절대 사용 금지: "타이머", "타이머 시작하기" (Entry에 없음)
+✅ 대신 사용: 변수 + [1초 기다리기] + [변수 바꾸기]
+
+예시:
+시간 측정이 필요하면 → "시간" 변수 생성 + 반복문에서 1초마다 1씩 증가
+
 Entry 블록 사용법:
 - 변수 만들기: "자료 카테고리 → 변수 추가(+) 버튼 클릭 → 변수명 입력"
 - 그 후 [변수 ( )를 ( )로 정하기], [변수 ( )를 ( )만큼 바꾸기] 블록 사용
@@ -655,7 +832,7 @@ Entry 카테고리: 시작, 흐름, 움직임, 자료, 판단, 계산, 생김새
 
       // ===== 간단한 파싱 (일단 줄바꿈으로만 나누기) =====
       const lines = cotResponse.split("\n").filter((line) => line.trim());
-      const steps = [];
+      let steps = [];
 
       let currentStep = null;
       let stepNumber = 1;
@@ -701,13 +878,76 @@ Entry 카테고리: 시작, 흐름, 움직임, 자료, 판단, 계산, 생김새
         console.log(`  ${idx + 1}. ${step.title}`);
       });
 
-      return steps;
+      // 🔴 여기에 추가!
+      // 시간 관련 중복 단계 병합
+      const mergedSteps = this.mergeTimeRelatedSteps(steps);
+      console.log("📊 병합 후 단계 수:", steps.length);
+
+      // 🔴 블록 이름 보정
+      console.log("\n🔧 블록 이름 보정 시작...");
+      for (let i = 0; i < steps.length; i++) {
+        console.log(`\n단계 ${i + 1}: ${steps[i].title}`);
+        await this.correctStepWithRAG(steps[i]);
+      }
+      console.log("\n✅ 모든 블록 이름 보정 완료\n");
+
+      return mergedSteps;
     } catch (error) {
       console.error("❌ CoT 생성 실패:", error);
       return this.createDefaultSteps(responses);
     }
   }
+  mergeTimeRelatedSteps(steps) {
+    const timeKeywords = ["시간", "타이머", "초", "종료"];
+    const timeSteps = [];
+    const otherSteps = [];
 
+    steps.forEach((step) => {
+      const hasTimeKeyword = timeKeywords.some((keyword) => step.title.includes(keyword) || step.content.includes(keyword));
+
+      if (hasTimeKeyword) {
+        timeSteps.push(step);
+      } else {
+        otherSteps.push(step);
+      }
+    });
+
+    // 시간 관련 단계가 2개 이상이면 병합
+    if (timeSteps.length >= 2) {
+      console.log(`  🔀 시간 관련 단계 ${timeSteps.length}개 병합`);
+
+      // 🔴 사용자가 입력한 시간 값 추출
+      let timeLimit = "10"; // 기본값
+      const timeMatch = timeSteps[0].content.match(/(\d+)\s*초/);
+      if (timeMatch) {
+        timeLimit = timeMatch[1];
+      }
+      const mergedStep = {
+        stepNumber: timeSteps[0].stepNumber,
+        title: "시간 제한 구현",
+        content: `
+
+￭ 블록 위치: 자료 + 흐름 + 판단 카테고리
+
+￭ 왜 필요한지: 게임이 ${timeLimit}초 후 자동으로 종료되도록 시간을 측정하고 제한하기 위해 필요합니다.
+
+￭ 사용할 블록:
+1. 자료 카테고리: 변수 "남은 시간" 생성
+2. [변수 (시간)을 (0)으로 정하기]
+3. [무한 반복하기] 안에:
+   - [1초 기다리기]
+   - [변수 (시간)을 (1)만큼 더하기]
+   - [만약 (시간) > (${timeLimit}) 이라면]
+     └─ [모든 스크립트 멈추기]`,
+        category: "flow",
+        completed: false,
+      };
+
+      return [...otherSteps, mergedStep].sort((a, b) => a.stepNumber - b.stepNumber);
+    }
+
+    return steps;
+  }
   // ===== 기본 단계 생성 (API 실패시 폴백) =====
   createDefaultSteps(responses) {
     return [
